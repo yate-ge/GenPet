@@ -99,7 +99,7 @@ export async function scanCodexContext(options: { codexHome?: string; nowMs?: nu
         if (!raw) continue;
         // Scheduler instructions and explicit pet-debug commands are controls,
         // not observations of the person's activity.
-        if (raw.includes('<heartbeat>') || /^\s*[/\$](?:genpet:)?genpet-(?:reset|grow|state)\b/.test(raw)) continue;
+        if (raw.includes('<heartbeat>') || /^\s*[/\$](?:genpet:)?genpet-(?:start|reset|grow|state)\b/.test(raw)) continue;
         const prompt = cleanText(raw);
         if (!prompt || prompt.startsWith('# AGENTS.md instructions') || prompt.startsWith('<permissions instructions>')) continue;
         const promptId = digest(prompt);
