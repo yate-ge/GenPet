@@ -25,50 +25,56 @@ Requires Node.js 22+ and Codex Desktop with custom Pet support.
 npm ci
 npm run build
 npm test
+npm run build:plugin   # regenerate plugins/genpet/ after changing anything it contains
 ```
 
 User state is stored outside the repository in `~/.genpet/`; `GENPET_DATA_DIR` overrides it for tests. `CODEX_HOME` controls the source Codex directory and native Pet destination.
 
-## Repository and release layout
+## Install
 
-| Location | Purpose | In installable ZIP? |
-|---|---|---|
-| `src/`, `tests/`, `.github/` | Runtime source, tests and CI | No; compiled `dist/` is included |
-| `scripts/` | Packaging, installation and verification tools | Only the two image QA helpers referenced by the skill |
-| `assets/` | Generated examples and isolated test fixtures | No |
-| `docs/` | Research, design, validation and user help | Only debug-command and native-refresh help |
-| `skills/`, `vendor/hatch-pet/`, `config/` | Codex workflows, official atlas tools and policy defaults | Yes |
-| `output/` | Ignored local builds, reports and release archives | No |
+Requires Codex Desktop with custom Pets and plugin support, and Node.js 22+ on `PATH` (the plugin's MCP server runs with `node`). No clone, `npm install` or build is needed: this repository is itself a Codex plugin marketplace, and `plugins/genpet/` is the prebuilt plugin.
 
-The installable `output/genpet-0.1.0.zip` contains `.agents/plugins/marketplace.json` and a minimal `genpet/` runtime. The editable `output/genpet-source-0.1.0.zip` contains the full source, tests, docs and example artwork. User life state and generated artwork live in `~/.genpet/`, never in either archive. See the [installed-plugin README](PLUGIN_README.md) for the portable install steps.
+### Ask a Codex Agent
 
-Keep the full project on `main` and develop on short-lived branches. Release a tested plugin ZIP from a version tag; do not maintain a reduced “release-only” branch. See [contributing and release workflow](CONTRIBUTING.md).
+In any Codex task, send:
 
-## Install the release ZIP
-
-### Ask a Codex Agent to install this checkout
-
-Open this repository as the Codex project, then send the following message to the Agent. This installs the **plugin**; adopting a new Pet or enabling scheduled growth is a separate request.
-
-> 请把当前目录的 GenPet 项目安装到我本机的 Codex 插件中。先阅读 README.md 和 PLUGIN_README.md，确认 Node.js 22+、Codex CLI 可用，再运行 `npm ci` 和 `npm run verify:release`。检查是否已安装 GenPet：如果是本仓库已有的 personal marketplace 安装，使用 `npm run install:codex` 更新它；如果尚未安装，从 `output/genpet-<package.json 中的版本号>.zip` 解压到持久目录，在解压后的 `genpet/` 运行 `npm ci --omit=dev --ignore-scripts`，执行 `codex plugin marketplace add <解压目录的绝对路径>` 和 `codex plugin add genpet@genpet-local`。如果现有安装属于别的 marketplace，先核对它的来源并沿用原有安装路径，不要创建第二个 GenPet 插件。完成后检查插件是否启用，以及 GenPet 技能和 MCP 工具能否在新 Codex 会话中加载；无法在当前会话确认的项目请明确说明。请报告安装路径、版本和验证结果。保留 `~/.genpet/`、`~/.codex/pets/genpet-companion/` 与现有领养时间；不要调用 reset/grow/state 调试命令，不要重新领养或创建第二个原生 Pet，也不要为安装测试生成图像。
-
-Codex may need a new task to load newly installed skills and MCP tools. The Agent should report that separately from successful file installation. [Official OpenAI plugin packaging guidance](https://developers.openai.com/plugins/build/plugins) documents local marketplaces and their path rules.
+> 请从 GitHub 仓库 yate-ge/GenPet 安装 GenPet Codex 插件，不需要 clone 仓库或运行 npm。先确认 `node --version` 为 22 或更高、`codex` CLI 可用。用 `codex plugin list` 检查是否已有 GenPet：已从 `genpet` marketplace 安装时，运行 `codex plugin marketplace upgrade genpet` 和 `codex plugin add genpet@genpet` 更新；来自其他 marketplace 时先告诉我它的来源，不要装第二个 GenPet；尚未安装时，运行 `codex plugin marketplace add yate-ge/GenPet` 和 `codex plugin add genpet@genpet`。完成后用 `codex plugin list` 确认 `genpet@genpet` 为 installed, enabled，并报告版本和安装路径。技能和 MCP 工具要在新的 Codex 任务中才会加载，当前任务无法确认时请直接说明。只安装插件：不要领养、重置或加龄宠物，不要生成图像，保留 `~/.genpet/` 和 `~/.codex/pets/genpet-companion/`。
 
 ### Install manually
 
 ```sh
-unzip genpet-0.1.0.zip -d /absolute/path/to/genpet-release
-cd /absolute/path/to/genpet-release/genpet
-npm ci --omit=dev --ignore-scripts
-codex plugin marketplace add /absolute/path/to/genpet-release
-codex plugin add genpet@genpet-local
+codex plugin marketplace add yate-ge/GenPet
+codex plugin add genpet@genpet
 ```
 
-Keep the extracted directory in place after installation; it is the local marketplace source. For development on this machine, `npm ci && npm run install:codex` builds and updates the existing personal-marketplace installation in `~/plugins/genpet`. This route assumes a GenPet entry is already registered in that marketplace. It preserves unrelated marketplace entries and never touches the current adoption state. It does not install a launcher, LaunchAgent, polling monitor or recurring background process. A manual CDP launcher remains an explicit optional diagnostic tool.
+Update to the latest `main`:
 
-Start a new Codex task and say **“领养、安装并启用我的 GenPet 自动成长”**. The skill reads local activity, adopts an egg, generates its shell and animation atlas, validates it, and exports it to `~/.codex/pets/genpet-companion/`. Choose it once in the native Pets settings. Later updates use the same custom Pet identity.
+```sh
+codex plugin marketplace upgrade genpet
+codex plugin add genpet@genpet
+```
 
-The release contains compiled JavaScript; building is unnecessary. The ZIP installation commands are also repeated in its own `genpet/README.md`.
+Pin a release with `codex plugin marketplace add yate-ge/GenPet --ref v0.1.0`. Remove with `codex plugin remove genpet@genpet`; your Pet state in `~/.genpet/` is kept.
+
+Then start a new Codex task and say **“领养、安装并启用我的 GenPet 自动成长”**. The skill reads local activity, adopts an egg, generates its shell and animation atlas, validates it, and exports it to `~/.codex/pets/genpet-companion/`. Choose it once in the native Pets settings. Later updates use the same custom Pet identity. Installing the plugin does not install a launcher, LaunchAgent, polling monitor or recurring background process.
+
+## Repository layout
+
+| Location | Purpose | In `plugins/genpet/`? |
+|---|---|---|
+| `.agents/plugins/marketplace.json` | Makes the repository a Codex marketplace named `genpet` | — |
+| `plugins/genpet/` | Generated, committed plugin that users install. Rebuild with `npm run build:plugin`; never edit by hand | — |
+| `src/` | Runtime source | Bundled into `dist/mcp.js` and `dist/cli.js` with all npm dependencies |
+| `tests/`, `.github/` | Tests and CI | No |
+| `scripts/` | Build, installation and verification tools | Only the two image QA helpers referenced by the skill |
+| `assets/` | Generated examples and isolated test fixtures | No |
+| `docs/` | Research, design, validation and user help | Only debug-command and native-refresh help |
+| `skills/`, `vendor/hatch-pet/`, `config/` | Codex workflows, official atlas tools and policy defaults | Yes |
+| `output/` | Ignored local builds and reports | No |
+
+User life state and generated artwork live in `~/.genpet/`, never in the repository. See the [installed-plugin README](PLUGIN_README.md) and [contributing and release workflow](CONTRIBUTING.md).
+
+For development on this machine, `npm ci && npm run install:codex` rebuilds `plugins/genpet/` and mirrors it into an existing personal-marketplace entry at `~/plugins/genpet`. Use it only for a checkout already registered that way; it preserves unrelated marketplace entries and never touches the adoption state.
 
 ## Tools and commands
 
@@ -119,11 +125,11 @@ A separate sibling project, `GenPet-Debugger`, can inspect state and accelerate 
 
 ## Testing and release
 
-Use `npm run verify:fast` for source changes. Use `npm run verify:release` before delivery: it builds the ZIP, unpacks it into a temporary directory, installs production dependencies there, and runs the full isolated MCP lifecycle smoke. Neither command resets or installs the real Pet. [Project map and validation gates](docs/PROJECT_STATUS.zh-CN.md) explain when image generation and actual native display must be checked separately.
+Use `npm run verify:fast` for source changes. Use `npm run verify:release` before delivery: it rebuilds `plugins/genpet/`, installs it through the repository marketplace into a temporary Codex home, confirms the installed copy has no `node_modules`, and runs the full isolated MCP lifecycle smoke from it. CI also fails if the committed `plugins/genpet/` differs from a fresh build. Neither command resets or installs the real Pet. [Project map and validation gates](docs/PROJECT_STATUS.zh-CN.md) explain when image generation and actual native display must be checked separately.
 
 `npm test` covers temporal boundaries, offline catch-up, idempotence, context filtering and deduplication, rollback semantics, file transactions and MCP round trips. The hatch-pet pipeline separately produces deterministic image validation, contact sheets, animation previews and visual QA. Passing unit tests is not a substitute for selecting and observing the pet inside Codex.
 
-`npm run package:plugin` creates the compiled plugin `output/genpet-0.1.0.zip` and editable source with tests `output/genpet-source-0.1.0.zip`. The plugin ZIP excludes example artwork and developer tools; both archives exclude user state, built-in style references, rejected iterations, generated debug sessions and private research files. The source and plugin are prepared for open-source distribution; no public repository or remote marketplace listing is created automatically.
+`npm run package:plugin` writes an optional offline archive, `output/genpet-<version>.zip`, with the same `.agents/` + `plugins/genpet/` layout; unzip it and pass the directory to `codex plugin marketplace add`. It excludes example artwork, developer tools and user state.
 
 See [customization defaults](docs/CUSTOMIZATION.zh-CN.md), [validation and remaining limits](docs/VALIDATION.zh-CN.md), [controlled personalization and growth checks](docs/PERSONALIZATION_GROWTH_VALIDATION.zh-CN.md), [the egg-first mechanism](docs/MECHANISM.zh-CN.md), [the Chinese design plan](docs/PLAN.zh-CN.md), [research boundaries](docs/RESEARCH.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
 
