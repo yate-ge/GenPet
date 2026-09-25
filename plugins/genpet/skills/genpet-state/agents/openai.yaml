@@ -1,0 +1,4 @@
+interface:
+  display_name: "genpet-state"
+  short_description: "切换道具情境或恢复自动状态；验证后原子更新同一个原生 Pet"
+  default_prompt: "使用 $genpet-state 切换当前宠物的道具状态并更新同一个原生 Pet。"
