@@ -53,7 +53,9 @@ Update to the latest `main` (new Codex tasks load the updated plugin):
 codex plugin marketplace upgrade genpet
 ```
 
-Pin a release with `codex plugin marketplace add yate-ge/GenPet --ref v0.1.0`. Remove with `codex plugin remove genpet@genpet`; your Pet state in `~/.genpet/` is kept.
+To pin a tagged release instead of following `main`, add the marketplace with `--ref <tag>`. Remove with `codex plugin remove genpet@genpet`; your Pet state in `~/.genpet/` is kept.
+
+If `codex` is not on `PATH`, the desktop app ships it at `/Applications/ChatGPT.app/Contents/Resources/codex` on macOS. `marketplace add` and `upgrade` run `git clone`/`fetch`, so a working `git` is required; on macOS, if `git` reports the Xcode license agreement, accept it with `sudo xcodebuild -license` or install the Command Line Tools.
 
 Then start a new Codex task and say **“领养、安装并启用我的 GenPet 自动成长”**. The skill reads local activity, adopts an egg, generates its shell and animation atlas, validates it, and exports it to `~/.codex/pets/genpet-companion/`. Choose it once in the native Pets settings. Later updates use the same custom Pet identity. Installing the plugin does not install a launcher, LaunchAgent, polling monitor or recurring background process.
 
