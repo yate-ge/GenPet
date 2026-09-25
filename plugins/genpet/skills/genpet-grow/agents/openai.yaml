@@ -1,0 +1,4 @@
+interface:
+  display_name: "genpet-grow"
+  short_description: "加速孵化或成长，保持同一角色身份；验证后原子更新同一个原生 Pet"
+  default_prompt: "使用 $genpet-grow 让当前宠物直接成长一次，并生成和安装当前阶段素材。"
