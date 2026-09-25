@@ -3,7 +3,6 @@ import { homedir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { retireLegacyDemo } from '../dist/native-migration.js';
-import { removeLegacyStartupMonitor } from '../dist/cdp-launcher.js';
 // Developer route: mirror the committed plugins/genpet bundle into this machine's personal marketplace.
 const source=path.resolve(import.meta.dirname,'..','plugins','genpet');
 const target=path.join(homedir(),'plugins','genpet');
@@ -24,5 +23,3 @@ execFileSync('codex',['plugin','add',`genpet@${marketplaceName}`,'--json'],{stdi
 const retired=await retireLegacyDemo(process.env.CODEX_HOME||path.join(homedir(),'.codex'),path.join(homedir(),'.genpet','backups'));
 if(retired)console.log(`Retired legacy GenPet Demo entry; recoverable backup: ${retired.backup}`);
 console.log(`Installed GenPet from ${target}. New Codex tasks will load its skill and MCP tools.`);
-await removeLegacyStartupMonitor();
-console.log('Removed any legacy GenPet CDP startup monitor.');
