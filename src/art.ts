@@ -1,7 +1,7 @@
 import { mkdir, readFile, copyFile, writeFile, rename } from 'node:fs/promises';
 import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
-import sharp from 'sharp';
+import { readImageInfo, decodeRgba } from './image.js';
 import type { State, Store } from './store.js';
 import { evolvePet, situations, growthMaturity } from './core.js';
 import { refreshNativePet, isLiveNativeDestination, type RefreshOutcome } from './native-refresh.js';
@@ -53,18 +53,17 @@ export function artRequest(s: State) {
     note:'Image synthesis runs in Codex through the GenPet skill. State hatching and completion of new artwork are separate. Preserve the last approved native atlas until its successor passes QA.'};
 }
 export async function validateImage(file: string, kind:'portrait'|'atlas') {
-  const meta=await sharp(file).metadata();
-  if(!['png','webp'].includes(meta.format||''))throw new Error('Use a PNG or WebP image');
+  const meta=await readImageInfo(file);
   if(!meta.hasAlpha)throw new Error('The image must have an alpha channel');
   if(kind==='atlas'&&(meta.width!==1536||![1872,2288].includes(meta.height||0)))throw new Error('Atlas must be 1536 × 1872 (v1) or 1536 × 2288 (v2)');
   if((meta.width||0)*(meta.height||0)>16_000_000)throw new Error('Image exceeds size limit');
   if(kind==='atlas') {
-    const {data,info}=await sharp(file).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+    const {data,width}=await decodeRgba(file);
     for(let row=0;row<(meta.height===2288?11:9);row++)for(let col=0;col<8;col++) {
       let visible=0; const count=row<9?actions[row].count:8;
       // The official v2 assembler reserves r0c6 as a neutral reference cell.
       const used=col<count||(meta.height===2288&&row===0&&col===6);
-      for(let y=row*208;y<(row+1)*208;y++)for(let x=col*192;x<(col+1)*192;x++)if(data[(y*info.width+x)*4+3]>0)visible++;
+      for(let y=row*208;y<(row+1)*208;y++)for(let x=col*192;x<(col+1)*192;x++)if(data[(y*width+x)*4+3]>0)visible++;
       if(used&&visible<30)throw new Error(`Empty animation cell ${row},${col}`);
       if(!used&&visible>0)throw new Error(`Unused cell ${row},${col} must be transparent`);
     }

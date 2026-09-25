@@ -1,0 +1,17 @@
+{
+  "name": "genpet",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "A bounded, personalized companion that grows with you. A GenFaceUI-inspired Codex plugin.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node dist/mcp.js",
+    "pet:status": "node dist/cli.js status",
+    "pet:adopt": "node dist/cli.js adopt",
+    "pet:install": "node dist/cli.js install-native"
+  }
+}
