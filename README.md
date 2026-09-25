@@ -93,7 +93,7 @@ For development on this machine, `npm ci && npm run install:codex` rebuilds `plu
 | `genpet_accept_art` | Accept a generated portrait or atlas after QA |
 | `genpet_install_native` | Atomically export the approved current-design atlas |
 | `genpet_install_cdp_launcher` | Enable stock-app startup with the local refresh channel |
-| `genpet_remove_cdp_launcher` | Remove the startup helper and fallback launcher |
+| `genpet_remove_cdp_launcher` | Remove the optional ChatGPT CDP launcher |
 | `genpet_configure` | Toggle ingestion, outfit freeze, auto-art, rename |
 | `genpet_clear_context` | Remove derived labels; preserve source chats |
 | `genpet_debug_reset` | Back up the old life and start a new egg, on explicit request |

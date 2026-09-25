@@ -26047,20 +26047,11 @@ async function installNative(store2, options) {
 import { chmod, mkdir as mkdir3, writeFile as writeFile3, rm as rm2, access } from "node:fs/promises";
 import { homedir as homedir4 } from "node:os";
 import path5 from "node:path";
-import { execFile as execFile2 } from "node:child_process";
-import { promisify as promisify2 } from "node:util";
-var execFileAsync2 = promisify2(execFile2);
 var CDP_PORT = 9222;
 var LAUNCHER_APP_NAME = "ChatGPT CDP.app";
 var CHATGPT_BINARY = "/Applications/ChatGPT.app/Contents/MacOS/ChatGPT";
 function launcherAppPath(homeDir = homedir4()) {
   return path5.join(homeDir, "Applications", LAUNCHER_APP_NAME);
-}
-function launchAgentPath(homeDir = homedir4()) {
-  return path5.join(homeDir, "Library", "LaunchAgents", "com.genpet.codex-cdp-bootstrap.plist");
-}
-function startupMonitorPath(homeDir = homedir4()) {
-  return path5.join(homeDir, ".genpet", "bin", "codex-cdp-bootstrap");
 }
 function launcherScript(port) {
   return `#!/bin/bash
@@ -26113,22 +26104,9 @@ async function isCdpAvailable(port = CDP_PORT) {
     return false;
   }
 }
-async function removeLegacyStartupMonitor(homeDir = homedir4()) {
-  const agentPath = launchAgentPath(homeDir);
-  if (homeDir === homedir4()) {
-    const domain = `gui/${process.getuid?.() ?? 0}`;
-    try {
-      await execFileAsync2("/bin/launchctl", ["bootout", domain, agentPath]);
-    } catch {
-    }
-  }
-  await rm2(agentPath, { force: true });
-  await rm2(startupMonitorPath(homeDir), { force: true });
-}
 async function installCdpLauncher(options = {}) {
   const port = options.port ?? CDP_PORT;
   const homeDir = options.homeDir ?? homedir4();
-  await removeLegacyStartupMonitor(homeDir);
   const appRoot = launcherAppPath(homeDir);
   const contents = path5.join(appRoot, "Contents");
   const macOS = path5.join(contents, "MacOS");
@@ -26141,7 +26119,6 @@ async function installCdpLauncher(options = {}) {
   return {
     launcherApp: appRoot,
     port,
-    launchAgent: { installed: false, path: launchAgentPath(homeDir) },
     howToUse: `Open ${LAUNCHER_APP_NAME} from ~/Applications only when a debugging channel is needed. No background monitor is installed.`,
     securityNote: "The debug port listens on localhost only. Any local process could control Codex while it runs with this flag. Prefer this launcher on a personal machine; do not expose the port over the network."
   };
@@ -26149,7 +26126,6 @@ async function installCdpLauncher(options = {}) {
 async function removeCdpLauncher(options = {}) {
   const homeDir = options.homeDir ?? homedir4();
   await rm2(launcherAppPath(homeDir), { recursive: true, force: true });
-  await removeLegacyStartupMonitor(homeDir);
   return { removed: true };
 }
 
@@ -26277,7 +26253,7 @@ server.registerTool("genpet_art_request", { description: "Get a bounded image-ge
 server.registerTool("genpet_accept_art", { description: "Commit an imagegen-generated local portrait or atlas after visual QA. Rejects stale requests, wrong dimensions, blank used cells and nontransparent unused cells. Requires an absolute PNG/WebP path and generation/QA provenance.", inputSchema: { requestId: external_exports.string(), file: external_exports.string(), kind: external_exports.enum(["portrait", "atlas"]), provenance: external_exports.string().min(12).max(2e3) }, annotations: localWrite }, safe((input) => acceptArt(store, input)));
 server.registerTool("genpet_install_native", { description: "Update the same genpet-companion native Pet entry with its latest approved atlas and automatically refresh the visible host Pet. Never create a second Pet for growth or context changes. Native running/waiting/review actions stay under Codex control. Requires a live Codex remote-debugging channel to invalidate cached sprites and confirm display; otherwise returns automaticRefresh=false. Does not modify Codex application code.", inputSchema: {}, annotations: localWrite }, safe(async () => installNative(store)));
 server.registerTool("genpet_install_cdp_launcher", { description: "Install an optional manual ChatGPT CDP launcher under ~/Applications. It does not install a background process or modify ChatGPT.app.", inputSchema: {}, annotations: localWrite }, safe(async () => installCdpLauncher()));
-server.registerTool("genpet_remove_cdp_launcher", { description: "Remove the optional GenPet ChatGPT CDP launcher and clean up any legacy startup monitor. Does not quit Codex or delete pet data.", inputSchema: {}, annotations: { ...localWrite, destructiveHint: true } }, safe(async () => removeCdpLauncher()));
+server.registerTool("genpet_remove_cdp_launcher", { description: "Remove the optional GenPet ChatGPT CDP launcher. Does not quit Codex or delete pet data.", inputSchema: {}, annotations: { ...localWrite, destructiveHint: true } }, safe(async () => removeCdpLauncher()));
 server.registerTool("genpet_configure", { description: "Change local context ingestion and outfit settings, or rename the pet. Turning ingestion off stops further local chat reading. No sensitive personality inference is made.", inputSchema: { autoContext: external_exports.boolean().optional(), freezeOutfit: external_exports.boolean().optional(), autoArt: external_exports.boolean().optional(), name: external_exports.string().min(1).max(60).optional() }, annotations: localWrite }, safe(async (input) => store.transaction((s) => {
   configureState(s, input);
   if (input.name && s.pet) s.pet = updateProfile(s.pet, { name: input.name });
