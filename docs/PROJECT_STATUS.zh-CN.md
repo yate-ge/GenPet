@@ -11,12 +11,12 @@
 | 图像请求与安装 | `src/art.ts`、`src/native-refresh.ts` | 为当前设计生成唯一请求 ID、验收图集、原子替换同一个原生 Pet 并确认可见刷新 |
 | 调试控制 | `src/debug.ts`、`skills/genpet-{reset,grow,state}/` | 显式重置、逻辑加龄、道具覆盖；定时任务不调用它们 |
 | 生成管线 | `skills/genpet/`、`vendor/hatch-pet/` | Codex 内置 imagegen 生成角色与动作；官方管线组装和检查 V2 图集 |
-| 安装版插件 | `output/genpet-0.1.0.zip` | 只含编译产物、技能、生成工具和必要说明；不含示例图、测试或开发脚本 |
-| 源码与研发素材 | `src/`、`tests/`、`scripts/`、`assets/`、`docs/`、`output/genpet-source-0.1.0.zip` | `assets` 是范例和测试夹具；`output/verification` 是忽略的本机证据，不属于插件 |
+| 安装版插件 | `plugins/genpet/`、`.agents/plugins/marketplace.json` | 由 `npm run build:plugin` 生成并提交；用户用 `codex plugin marketplace add yate-ge/GenPet` 安装。只含打包后的运行时、技能、生成工具和必要说明，无需 npm；不含示例图、测试或开发脚本 |
+| 源码与研发素材 | `src/`、`tests/`、`scripts/`、`assets/`、`docs/` | `assets` 是范例和测试夹具；`output/verification` 是忽略的本机证据，不属于插件 |
 
 ## 当前完成度
 
-- **工程链路已跑通：**一个 `genpet-companion`，真实领养时间不被调试测试重置；蛋、孵化、状态切换与无感刷新已有实机或隔离证据。三个调试技能及 12 个 MCP 工具在已安装插件中可发现。发布 ZIP 可生成。
+- **工程链路已跑通：**一个 `genpet-companion`，真实领养时间不被调试测试重置；蛋、孵化、状态切换与无感刷新已有实机或隔离证据。三个调试技能及 12 个 MCP 工具在已安装插件中可发现。仓库本身即 Codex marketplace，可直接从 GitHub 安装。
 - **个性化有初步证据：**五类合成活动 × 五个 seed 的映射回归、1000 seed 的参数碰撞检查、三只同活动／同道具角色的原生尺寸图像对照。少量图像中有相近轮廓，尚不能声称任意两位用户都可被辨认。
 - **成长有隔离候选：**当前角色第 1 日的完整 V2 图集已生成并通过结构检查，静息格有可见比例变化；两处注视方向的帧差待复核。真实第 1 日尚未到期，不能把候选称作已显示的成长。
 - **研究结论尚未成立：**没有不同真实用户的盲辨或长期使用数据。当前演示证明机制可运行，不证明映射被用户认可、角色易辨认或长期依恋。
@@ -26,7 +26,7 @@
 | 何时触发 | 运行什么 | 能证明什么；不能证明什么 |
 |---|---|---|
 | 生命周期、映射、MCP 等源码改变 | `npm run verify:fast` | 类型、46 项行为测试和 25 组合成映射；不重新生图、不安装插件 |
-| 改动发布内容、准备交付 | `npm run verify:release` | 先跑快速回归，再构建 ZIP；检查发布包无研发素材，在临时 Codex 环境注册市场与安装插件、安装生产依赖、跑完整 MCP 蛋→孵化→成长→状态→重置流程；不碰真实 Pet，也不证明悬浮窗显示 |
+| 改动发布内容、准备交付 | `npm run verify:release` | 先跑快速回归，再重建 `plugins/genpet/`；检查插件无研发素材，在临时 Codex 环境通过仓库 marketplace 安装插件、确认安装副本不含 `node_modules`，并在该副本上跑完整 MCP 蛋→孵化→成长→状态→重置流程；不碰真实 Pet，也不证明悬浮窗显示 |
 | **当前**图像请求变为 `pending` | GenPet skill + Codex imagegen + 官方 hatch-pet QA；成长另比较同姿态同道具的原生单格 | 只验收这个请求 ID 的身份、动作、透明和可见比例；已有 `ready` 图集不重复生成，`paused` 不生成 |
 | 到期或状态变化且新素材已验收 | `genpet_install_native`，检查 `displayStatus=confirmed` 与同一 Pet ID | 证明用户实际看到新素材；文件写入、逻辑年龄或离线候选都不能替代这一关 |
 

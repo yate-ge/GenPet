@@ -3,11 +3,15 @@ import assert from 'node:assert/strict';
 import { mkdtemp,readFile,rm,readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import sharp from 'sharp';
+import { writeFile } from 'node:fs/promises';
+import { PNG } from 'pngjs';
 import { Store } from '../src/store.js';
 import { actions,artRequest,acceptArt,validateImage,exportNative,installNative } from '../src/art.js';
 import { refreshNativePet } from '../src/native-refresh.js';
 
+async function png(file:string,width:number,height:number,rgba=Buffer.alloc(width*height*4)){
+ const image=new PNG({width,height});rgba.copy(image.data);await writeFile(file,PNG.sync.write(image));
+}
 // Synthetic opaque blocks are validation fixtures only, never pet artwork.
 async function fixture(file:string,badUnused=false,color=80){
  const width=1536,height=2288,rgba=Buffer.alloc(width*height*4);
@@ -15,14 +19,14 @@ async function fixture(file:string,badUnused=false,color=80){
   const p=((row*208+y)*width+col*192+x)*4;rgba[p]=color;rgba[p+1]=130;rgba[p+2]=60;rgba[p+3]=255;
  }
  if(badUnused)rgba[(50*width+7*192+50)*4+3]=255;
- await sharp(rgba,{raw:{width,height,channels:4}}).png().toFile(file);
+ await png(file,width,height,rgba);
 }
 test('atlas validation rejects bad geometry, blank used and nonempty unused cells',async()=>{
  const dir=await mkdtemp(path.join(tmpdir(),'genpet-art-'));
  try{const good=path.join(dir,'good.png');await fixture(good);assert.equal((await validateImage(good,'atlas')).height,2288);
   const bad=path.join(dir,'bad.png');await fixture(bad,true);await assert.rejects(()=>validateImage(bad,'atlas'),/Unused cell/);
-  const empty=path.join(dir,'empty.png');await sharp({create:{width:1536,height:2288,channels:4,background:'#00000000'}}).png().toFile(empty);await assert.rejects(()=>validateImage(empty,'atlas'),/Empty animation cell/);
-  const wrong=path.join(dir,'wrong.png');await sharp({create:{width:32,height:32,channels:4,background:'#00000000'}}).png().toFile(wrong);await assert.rejects(()=>validateImage(wrong,'atlas'),/Atlas must/);
+  const empty=path.join(dir,'empty.png');await png(empty,1536,2288);await assert.rejects(()=>validateImage(empty,'atlas'),/Empty animation cell/);
+  const wrong=path.join(dir,'wrong.png');await png(wrong,32,32);await assert.rejects(()=>validateImage(wrong,'atlas'),/Atlas must/);
  }finally{await rm(dir,{recursive:true,force:true});}
 });
 test('stale art is rejected and successful native install keeps an atomic manifest and rollback',async()=>{
@@ -44,7 +48,7 @@ test('image references progress from shell-only to a revealed identity, never a 
  try {
   await store.transaction(s=>store.adopt(s));
   const file=path.join(dir,'portrait.png');
-  await sharp({create:{width:32,height:32,channels:4,background:{r:230,g:230,b:220,alpha:0.8}}}).png().toFile(file);
+  await png(file,32,32,Buffer.alloc(32*32*4).map((_,i)=>[230,230,220,204][i%4]));
   let request=artRequest(await store.current())!;
   assert.equal(request.visual.hatchIdentity,null);assert.deepEqual(request.referenceFiles,[]);
   const shell=await acceptArt(store,{file,kind:'portrait',requestId:request.id,provenance:'Synthetic reference test only; never distributed.'});
