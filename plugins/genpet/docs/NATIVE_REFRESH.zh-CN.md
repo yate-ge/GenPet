@@ -14,11 +14,11 @@
 
 ## 调试通道边界
 
-GenPet 不会为原 Codex App 安装启动监控器。此前试验过的 `KeepAlive` LaunchAgent 每 0.5 秒运行一次完整进程扫描，造成持续 CPU 占用和大量 fork；该方案已删除，并在安装时清理其遗留文件。
+GenPet 不会为原 Codex App 安装启动监控器。此前试验过的 `KeepAlive` LaunchAgent 每 0.5 秒运行一次完整进程扫描，造成持续 CPU 占用和大量 fork；该方案已删除。
 
 可选的 `~/Applications/ChatGPT CDP.app` 只是按需手动入口，不包含常驻进程。普通方式打开原 `/Applications/ChatGPT.app` 时，GenPet 不会强制重启或注入启动参数。
 
-可用 `genpet_remove_cdp_launcher` 或 `node dist/cli.js remove-cdp-launcher` 移除手动入口，并清理旧版本可能留下的监控脚本和 LaunchAgent。
+可用 `genpet_remove_cdp_launcher` 或 `node dist/cli.js remove-cdp-launcher` 移除手动入口。
 
 ## 2026-09-25 实机验收
 

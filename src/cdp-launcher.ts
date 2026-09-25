@@ -1,10 +1,6 @@
 import { chmod, mkdir, writeFile, rm, access } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
-
-const execFileAsync = promisify(execFile);
 
 export const CDP_PORT = 9222;
 export const LAUNCHER_APP_NAME = 'ChatGPT CDP.app';
@@ -12,14 +8,6 @@ export const CHATGPT_BINARY = '/Applications/ChatGPT.app/Contents/MacOS/ChatGPT'
 
 export function launcherAppPath(homeDir = homedir()) {
   return path.join(homeDir, 'Applications', LAUNCHER_APP_NAME);
-}
-
-export function launchAgentPath(homeDir = homedir()) {
-  return path.join(homeDir, 'Library', 'LaunchAgents', 'com.genpet.codex-cdp-bootstrap.plist');
-}
-
-export function startupMonitorPath(homeDir = homedir()) {
-  return path.join(homeDir, '.genpet', 'bin', 'codex-cdp-bootstrap');
 }
 
 function launcherScript(port: number) {
@@ -76,22 +64,9 @@ export async function isCdpAvailable(port = CDP_PORT) {
   }
 }
 
-export async function removeLegacyStartupMonitor(homeDir = homedir()) {
-  const agentPath = launchAgentPath(homeDir);
-  if (homeDir === homedir()) {
-    const domain = `gui/${process.getuid?.() ?? 0}`;
-    try {
-      await execFileAsync('/bin/launchctl', ['bootout', domain, agentPath]);
-    } catch { /* not loaded */ }
-  }
-  await rm(agentPath, { force: true });
-  await rm(startupMonitorPath(homeDir), { force: true });
-}
-
 export async function installCdpLauncher(options: { port?: number; homeDir?: string } = {}) {
   const port = options.port ?? CDP_PORT;
   const homeDir = options.homeDir ?? homedir();
-  await removeLegacyStartupMonitor(homeDir);
   const appRoot = launcherAppPath(homeDir);
   const contents = path.join(appRoot, 'Contents');
   const macOS = path.join(contents, 'MacOS');
@@ -106,7 +81,6 @@ export async function installCdpLauncher(options: { port?: number; homeDir?: str
   return {
     launcherApp: appRoot,
     port,
-    launchAgent: { installed: false, path: launchAgentPath(homeDir) },
     howToUse: `Open ${LAUNCHER_APP_NAME} from ~/Applications only when a debugging channel is needed. No background monitor is installed.`,
     securityNote: 'The debug port listens on localhost only. Any local process could control Codex while it runs with this flag. Prefer this launcher on a personal machine; do not expose the port over the network.',
   };
@@ -115,7 +89,6 @@ export async function installCdpLauncher(options: { port?: number; homeDir?: str
 export async function removeCdpLauncher(options: { homeDir?: string } = {}) {
   const homeDir = options.homeDir ?? homedir();
   await rm(launcherAppPath(homeDir), { recursive: true, force: true });
-  await removeLegacyStartupMonitor(homeDir);
   return { removed: true };
 }
 
