@@ -32,6 +32,6 @@ GENPET_DATA_DIR=/absolute/temporary/test-data node dist/cli.js --demo art-reques
 
 `--demo install-native` 被明确拒绝。开发测试可把图集和清单导出到临时目录，不能向用户的原生 Pets 列表增加验证样本。真实领养时间不受模拟影响。
 
-日常代码改动运行 `npm run verify:fast`。准备发布时运行 `npm run verify:release`：它会检查源码、重新构建并打包，在临时目录解压发布 ZIP、安装生产依赖，然后运行隔离 MCP 全流程；不会重置真实宠物或安装到用户的 Pets 目录。真实显示另按当前设计请求验收，详见[验证工作流](PROJECT_STATUS.zh-CN.md)。
+日常代码改动运行 `npm run verify:fast`。准备发布时运行 `npm run verify:release`：它会检查源码、重建 `plugins/genpet/`，在临时 Codex 环境通过仓库 marketplace 安装插件，然后在安装副本上运行隔离 MCP 全流程；不会重置真实宠物或安装到用户的 Pets 目录。真实显示另按当前设计请求验收，详见[验证工作流](PROJECT_STATUS.zh-CN.md)。
 
 `assets/examples/lifecycle/` 保留离线正向孵化、成长与道具变化样本及其来源记录。这些是开发证据，不是用户宠物的候选形象，也不能替代真实宠物的视觉验收。网页调试器独立于本插件。
