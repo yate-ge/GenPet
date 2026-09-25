@@ -13,7 +13,7 @@ codex plugin add genpet@genpet
 
 In Codex Desktop you can instead use **Plugins** → **Add plugin marketplace** with source `yate-ge/GenPet`. Update with `codex plugin marketplace upgrade genpet`. Installing the plugin does not adopt a Pet or create a scheduled growth task; see the [project README](https://github.com/yate-ge/GenPet#install) for an Agent prompt that installs it for you.
 
-Start a new Codex task and ask: **领养、安装并启用我的 GenPet 自动成长**. The skill generates your own egg and installs one `genpet-companion` entry. Select it once in Codex Pets.
+Start a new Codex task and run **`/genpet-start`**. It adopts an egg if you have none, generates your own artwork, installs one `genpet-companion` entry and sets up hourly growth; select it once in Codex Pets. With an existing pet it only completes what is missing and never re-adopts. `/genpet-start manual` skips the schedule.
 
 The `/` menu exposes `genpet-reset`, `genpet-grow`, and `genpet-state` skills for explicit debugging; their parameters are in [debug commands](docs/DEBUG_COMMANDS.zh-CN.md). Reset starts a new adoption clock, while grow keeps the existing identity and changes only logical debug age. The scheduled growth task never calls these debug commands.
 

@@ -63,7 +63,47 @@ To pin a tagged release instead of following `main`, add the marketplace with `-
 
 If `codex` is not on `PATH`, the desktop app ships it at `/Applications/ChatGPT.app/Contents/Resources/codex` on macOS. `marketplace add` and `upgrade` run `git clone`/`fetch`, so a working `git` is required; on macOS, if `git` reports the Xcode license agreement, accept it with `sudo xcodebuild -license` or install the Command Line Tools.
 
-Then start a new Codex task and say **“领养、安装并启用我的 GenPet 自动成长”**. The skill reads local activity, adopts an egg, generates its shell and animation atlas, validates it, and exports it to `~/.codex/pets/genpet-companion/`. Choose it once in the native Pets settings. Later updates use the same custom Pet identity. Installing the plugin does not install a launcher, LaunchAgent, polling monitor or recurring background process.
+Then start a new Codex task and run **`/genpet-start`** (or `$genpet-start`). With no pet it reads local activity, adopts an egg, generates its shell and animation atlas, validates it, exports it to `~/.codex/pets/genpet-companion/`, and creates one hourly growth check; choose GenPet once in the native Pets settings. With an existing pet it never re-adopts: it only completes missing artwork, the native install and the schedule, so it is also the recovery command after reinstalling. `/genpet-start manual` skips the schedule. Later updates use the same custom Pet identity; `/genpet-reset` is the only way to start over. Installing the plugin does not install a launcher, LaunchAgent, polling monitor or recurring background process.
+
+## Architecture
+
+GenPet has three layers: **the Codex agent draws, the local MCP server remembers, and the native Codex Pet displays.** The plugin has no resident process; the MCP server only runs while a task or scheduled task calls its tools.
+
+```mermaid
+flowchart LR
+  U["Your task / slash command<br>/genpet-start etc."] --> S
+  H["Codex scheduled task<br>hourly heartbeat"] --> S
+  subgraph CX["Codex Desktop"]
+    S["GenPet skills<br>skills/"]
+    IG["Built-in imagegen"]
+    HP["hatch-pet pipeline<br>vendor/hatch-pet (Python)"]
+    PW["Native Pet overlay"]
+  end
+  S -- "generate on request" --> IG --> HP
+  HP -- "validated atlas" --> M
+  S -- "MCP tool calls" --> M["GenPet MCP server<br>dist/mcp.js (Node)"]
+  M --> ST[("~/.genpet/<br>state.json · art/ · backups/")]
+  M -. "reads user messages only" .-> SE[("~/.codex/sessions")]
+  M -- "atomic write" --> PET[("~/.codex/pets/<br>genpet-companion")]
+  PET --> PW
+  M -. "localhost debug channel: refresh + confirm" .-> PW
+```
+
+| Module | Source | Responsibility |
+|---|---|---|
+| Skills | `skills/genpet*/` | Tell the agent when to read state, generate art, run QA and install; `/genpet-start` starts or resumes, the other three are debug commands |
+| MCP server | `src/mcp.ts` | Exposes the modules below as 12 `genpet_*` tools |
+| Life-cycle engine | `src/core.ts` | Hatching, five-hour context windows, daily growth and offline catch-up, anchored to the adoption time; resolves birth identity once |
+| Activity context | `src/context.ts` | Reads recent Codex user messages locally into build/research/create/learn/rest labels; stores no text |
+| Store | `src/store.ts` | Transactions, backups and idempotency records in `~/.genpet/state.json` |
+| Art and install | `src/art.ts`, `src/image.ts` | One request ID per design; PNG/WebP atlas validation; atomic sprite replacement in the native Pet |
+| Native refresh | `src/native-refresh.ts`, `src/cdp-launcher.ts` | Makes Codex reload the Pet over a localhost-only debug port and checks the displayed sprite hash |
+| Debug | `src/debug.ts` | reset/grow/state with backups and operationId idempotency |
+| Generation pipeline | `vendor/hatch-pet/` | Official Hatch Pet tools: per-row generation, frame extraction, 8×11 V2 atlas assembly and QA |
+
+**One growth update:** the heartbeat runs the GenPet skill → `genpet_status` catches up time and yields the current stage and prop → `genpet_art_request` returns the request for that design (`ready` if art already exists, so nothing is regenerated) → the agent generates and checks it with imagegen and hatch-pet → `genpet_accept_art` stores it in `~/.genpet/art/` → `genpet_install_native` atomically writes `genpet-companion` and tries to refresh the overlay. A failure at any step keeps the last approved art.
+
+**Distribution:** `.agents/plugins/marketplace.json` at the root makes the repository a Codex marketplace. `npm run build:plugin` bundles `src/` and all npm dependencies into `plugins/genpet/dist/` with esbuild; image decoding uses WebAssembly, so there are no native modules. Codex runs it straight from the GitHub checkout without npm.
 
 ## Repository layout
 
@@ -104,7 +144,7 @@ The CLI provides equivalent diagnostic operations: `node dist/cli.js status`, `a
 
 ## Debug slash commands
 
-The plugin includes `genpet-reset`, `genpet-grow`, and `genpet-state` skills. Find them in the `/` menu or invoke with `$genpet-reset`, `$genpet-grow`, `$genpet-state`. Reset creates a backed-up new life; grow accelerates the same identity; state changes props or restores automatic mapping. Every workflow generates/validates missing artwork and installs to the same native Pet. [Parameters and debug semantics](docs/DEBUG_COMMANDS.zh-CN.md).
+Besides `/genpet-start`, the plugin includes the `genpet-reset`, `genpet-grow`, and `genpet-state` debug skills. Find them in the `/` menu or invoke with `$genpet-reset`, `$genpet-grow`, `$genpet-state`. Reset creates a backed-up new life; grow accelerates the same identity; state changes props or restores automatic mapping. Every workflow generates/validates missing artwork and installs to the same native Pet. [Parameters and debug semantics](docs/DEBUG_COMMANDS.zh-CN.md).
 
 Developer tests never reset the real companion. Debug age uses an explicit persistent time offset; native scheduled maintenance never calls debug mutation tools.
 

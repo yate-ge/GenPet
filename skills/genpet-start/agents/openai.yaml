@@ -1,0 +1,4 @@
+interface:
+  display_name: "genpet-start"
+  short_description: "开始或恢复 GenPet：没有宠物时领养一颗蛋；已有宠物时只检查并补全图像、原生 Pet 和定时成长"
+  default_prompt: "使用 $genpet-start 开始或恢复我的 GenPet，并启用自动成长。"

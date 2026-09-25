@@ -1,6 +1,6 @@
 # GenPet 调试命令
 
-三个插件技能随 GenPet 一起安装，在 Codex 输入 `/` 搜索 `genpet-`，选择命令后补参数；也可用 `$genpet-reset`、`$genpet-grow`、`$genpet-state` 显式调用。插件技能的菜单显示可能带 `genpet:` 前缀，以菜单实际候选为准。[官方命令说明](https://learn.chatgpt.com/docs/reference/slash-commands)确认启用的技能会出现在斜杠菜单。
+三个调试技能随 GenPet 一起安装（开始或恢复宠物用的 `/genpet-start` 不是调试命令，不在此列），在 Codex 输入 `/` 搜索 `genpet-`，选择命令后补参数；也可用 `$genpet-reset`、`$genpet-grow`、`$genpet-state` 显式调用。插件技能的菜单显示可能带 `genpet:` 前缀，以菜单实际候选为准。[官方命令说明](https://learn.chatgpt.com/docs/reference/slash-commands)确认启用的技能会出现在斜杠菜单。
 
 | 命令 | 示例 | 行为 |
 |---|---|---|
