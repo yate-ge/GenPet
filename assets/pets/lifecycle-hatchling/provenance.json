@@ -1,0 +1,17 @@
+{
+  "generator": "Codex built-in imagegen",
+  "createdOn": "2026-09-24",
+  "workflow": "Official hatch-pet state-specific rows, stable-slot extraction, registered look rows, one final edge despill pass",
+  "atlasSha256": "87765130447aa13372ce18d469498c231f750a3401ee720ecfaf6855a9517720",
+  "dimensions": [
+    1536,
+    2288
+  ],
+  "regularFrames": 57,
+  "pointerPoses": 16,
+  "utilityNeutralCells": 1,
+  "sourceRun": "lifecycle-child",
+  "futureIdentityPredetermined": false,
+  "realUserPet": false,
+  "visualReview": "visual-review.json"
+}

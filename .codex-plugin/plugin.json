@@ -1,0 +1,34 @@
+{
+  "name": "genpet",
+  "version": "0.1.0",
+  "description": "An image-generated native Codex Pet that begins as an egg and grows with local activity.",
+  "author": {
+    "name": "GenPet contributors"
+  },
+  "license": "MIT",
+  "keywords": [
+    "pet",
+    "personalization",
+    "imagegen",
+    "growth"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "GenPet",
+    "shortDescription": "A native pixel companion, growing with you.",
+    "longDescription": "Adopt an image-generated egg and grow with local activity. Includes reset, growth and state debugging skills. Updates the same native Pet through background cache invalidation when the local debugging channel is available; reports display confirmation separately.",
+    "developerName": "GenPet contributors",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "领养、安装并启用我的 GenPet 自动成长",
+      "更新我的 GenPet 成长与形象",
+      "查看我的 GenPet 状态"
+    ],
+    "brandColor": "#78934E"
+  }
+}

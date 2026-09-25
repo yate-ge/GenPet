@@ -1,0 +1,16 @@
+{
+  "generator": "Codex built-in imagegen",
+  "createdOn": "2026-09-24",
+  "sourceRun": "lifecycle-growth",
+  "workflow": "Approved growth portrait plus prior-day row edits; official extraction/assembly and one final despill",
+  "atlasSha256": "994aa12f8a41fd82c7cbc9b36754ea65bf823e01956cde002b3c6e34ee821690",
+  "dimensions": [
+    1536,
+    2288
+  ],
+  "regularFrames": 57,
+  "pointerPoses": 16,
+  "utilityNeutralCells": 1,
+  "growthDay": 1,
+  "realUserPet": false
+}

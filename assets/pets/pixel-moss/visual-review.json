@@ -1,0 +1,16 @@
+{
+  "reviewer": "primary-agent",
+  "independentBlindReview": false,
+  "decision": "accepted-for-native-demo",
+  "identity": "Independent historical pixel creature example; not the offspring of the egg",
+  "method": "Direct review of all atlas cells, ordered action frames and direction continuity warnings",
+  "warningsAccepted": [
+    "000->022.5 diff is a local outlier (3668 pixels vs neighbor average 2364)",
+    "247.5->270 diff is a local outlier (3528 pixels vs neighbor average 2370)"
+  ],
+  "limitations": [
+    "Some intermediate diagonal directions are subtle",
+    "Small frame-to-frame pixel shifts"
+  ],
+  "delegation": "User requested primary-agent decisions and no further delegated work; no independent blind-pass claim"
+}

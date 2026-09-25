@@ -1,0 +1,116 @@
+{
+  "ok": true,
+  "frames_root": "assets/examples/lifecycle/growth-day21-idle",
+  "states": [
+    "idle"
+  ],
+  "errors": [],
+  "warnings": [
+    "idle used extraction method stable-slots; component extraction is preferred"
+  ],
+  "rows": [
+    {
+      "state": "idle",
+      "expected_frames": 6,
+      "actual_frames": 6,
+      "extraction_method": "stable-slots",
+      "ok": true,
+      "errors": [],
+      "warnings": [
+        "idle used extraction method stable-slots; component extraction is preferred"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "file": "assets/examples/lifecycle/growth-day21-idle/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 16982,
+          "bbox": [
+            39,
+            6,
+            153,
+            202
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 0
+        },
+        {
+          "index": 1,
+          "file": "assets/examples/lifecycle/growth-day21-idle/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 16938,
+          "bbox": [
+            39,
+            6,
+            153,
+            202
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 0
+        },
+        {
+          "index": 2,
+          "file": "assets/examples/lifecycle/growth-day21-idle/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 17003,
+          "bbox": [
+            39,
+            6,
+            153,
+            202
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 0
+        },
+        {
+          "index": 3,
+          "file": "assets/examples/lifecycle/growth-day21-idle/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 16960,
+          "bbox": [
+            39,
+            6,
+            153,
+            202
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 0
+        },
+        {
+          "index": 4,
+          "file": "assets/examples/lifecycle/growth-day21-idle/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 16919,
+          "bbox": [
+            39,
+            6,
+            153,
+            202
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 0
+        },
+        {
+          "index": 5,
+          "file": "assets/examples/lifecycle/growth-day21-idle/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 16995,
+          "bbox": [
+            39,
+            6,
+            153,
+            202
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 0
+        }
+      ]
+    }
+  ]
+}

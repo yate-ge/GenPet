@@ -1,0 +1,77 @@
+{
+  "neutral": {
+    "full_bbox": [
+      39,
+      6,
+      153,
+      202
+    ],
+    "lower_body_bbox": [
+      40,
+      0,
+      152,
+      102
+    ],
+    "lower_body_pixels": 8542
+  },
+  "up": {
+    "full_bbox": [
+      43,
+      11,
+      149,
+      202
+    ],
+    "lower_body_bbox": [
+      44,
+      0,
+      149,
+      102
+    ],
+    "lower_body_pixels": 8589
+  },
+  "down": {
+    "full_bbox": [
+      46,
+      23,
+      148,
+      202
+    ],
+    "lower_body_bbox": [
+      46,
+      0,
+      147,
+      102
+    ],
+    "lower_body_pixels": 8243
+  },
+  "left": {
+    "full_bbox": [
+      42,
+      21,
+      144,
+      202
+    ],
+    "lower_body_bbox": [
+      45,
+      0,
+      143,
+      102
+    ],
+    "lower_body_pixels": 8141
+  },
+  "up-left": {
+    "full_bbox": [
+      48,
+      15,
+      146,
+      202
+    ],
+    "lower_body_bbox": [
+      48,
+      0,
+      146,
+      102
+    ],
+    "lower_body_pixels": 8082
+  }
+}

@@ -1,0 +1,229 @@
+{
+  "method": "Three synthetic activity profiles, imagegen egg first then offspring. Primary agent direct visual review, not independent assessment or human study.",
+  "createdAt": "2026-09-24T16:50:14.924Z",
+  "passScope": [
+    "faint abstract eggs",
+    "shared rounded pixel family",
+    "different visible palettes and accessories",
+    "egg-first generation provenance"
+  ],
+  "unverified": [
+    "repeatability of generated pixels",
+    "exact numerical roundness compliance",
+    "multi-user field data",
+    "complete native atlases for these cases",
+    "native live refresh"
+  ],
+  "generationFailures": [
+    {
+      "case": "all initial hatch portraits",
+      "reason": "egg-shaped head over-transfer",
+      "accepted": false
+    },
+    {
+      "case": "create second attempt",
+      "reason": "imagegen output moderation error",
+      "retrySucceeded": true
+    }
+  ],
+  "results": [
+    {
+      "case": "build",
+      "synthetic": true,
+      "seed": "verification-person-01",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sage",
+        "interest": "build",
+        "temperament": "calm"
+      },
+      "shell": {
+        "hue": 137,
+        "pattern": "patches",
+        "patternSeed": 853298408
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "buds",
+        "roundness": 0.915,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "build",
+        "identitySeed": 244424115,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "tool",
+      "records": {
+        "egg": {
+          "file": "assets/examples/personalization/build-egg.png",
+          "sha256": "1cfd1970fa38d17b4088b6f2356bf28985a51ee5d2d113a6577ef3577ddf5029",
+          "prompt": "Create one canonical egg portrait for a native Codex Pet, synthetic verification case build/person-01. Crisp low-resolution pixel art, stepped dark brown outlines, warm ivory shell, 2–3 discrete shade levels, no texture rendering. A plain intact ovate egg, centered, single object, transparent background, no shadow, no text. At most 5% of shell surface has extremely faint sage-green abstract patches, asymmetrical lower-shell variant 853298408, hue hint137. Restrained and opaque: no face, eyes, mouth, ears, limbs, leaves, icons, species motif, cracking, creature inside, or surrounding scene. No future creature has been designed: this egg must not hint at a recognizable species. Full egg with 15% margin, 1024x1024. This is a single static canonical portrait, not a sprite sheet.",
+          "tool": "built-in imagegen",
+          "dimensions": [
+            1254,
+            1254
+          ],
+          "hasAlpha": true,
+          "review": {
+            "ordinaryEgg": true,
+            "noSpeciesClues": true,
+            "abstractHints": true,
+            "reviewer": "primary agent direct visual inspection"
+          }
+        },
+        "hatch": {
+          "file": "assets/examples/personalization/build-hatchling.png",
+          "sha256": "1d3c0ada3e119fb0e3dcc35d8fcdb5369f608064686adf680228e00f8442ac5d",
+          "prompt": "Create the FIRST newborn of a native Codex Pet for verification build, variant244424115. Attached egg is a COLOR/TEXTURE reference ONLY; DISCARD ITS OUTLINE, POINTED TOP, SHELL MATERIAL, IVORY BODY and highlight shape. Creature design: a BROAD HORIZONTAL OVAL HEAD (width roughly1.6x head height), flat/blunt upper contour, separate compact torso below it, TWO TINY SOLID SQUARE EYES WITHOUT SHINE, tiny single-pixel mouth, two stubby arms, two short feet. Sage-green skin. A pear-shaped torso, one pair of tiny rounded bud nubs at head sides, each no taller than 10% head width. One small abstract patch low on the belly. Hold one small blunt hand wrench. Anatomy is newly resolved after incubation. Native Codex pixel style, 3–4 pixel-thick stepped dark-brown outline at logical96px scale, matte flat pixel colors and at most two hard shade bands. No smooth gradient, large glossy eyes, long ears, head-top sprout, pointed egg-shaped head, eggshell, extra appendages, shell hatching scene, text, labels, shadow or detached effects. Infant proportions, full body front neutral pose, centered with15% clear margin. 1024x1024 truly transparent single canonical portrait, not a sheet.",
+          "tool": "built-in imagegen",
+          "dimensions": [
+            1254,
+            1254
+          ],
+          "hasAlpha": true,
+          "review": {
+            "sharedFamily": true,
+            "paletteMatches": true,
+            "propMatches": true,
+            "torsoQualitativelyMatches": true,
+            "reviewer": "primary agent direct visual inspection",
+            "limits": "Not an independent rating; numeric roundness and seed reproducibility are not established by these portraits. No native atlas or UI update tested."
+          }
+        }
+      }
+    },
+    {
+      "case": "research",
+      "synthetic": true,
+      "seed": "verification-person-03",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sky",
+        "interest": "research",
+        "temperament": "curious"
+      },
+      "shell": {
+        "hue": 205,
+        "pattern": "speckles",
+        "patternSeed": 886853646
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "round",
+        "appendage": "leaflets",
+        "roundness": 0.895,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "research",
+        "identitySeed": 591934237,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "book",
+      "records": {
+        "egg": {
+          "file": "assets/examples/personalization/research-egg.png",
+          "sha256": "68772f6976eb7acddcfe5dff1ddec77a712131a99db01bdd939a7394ae83959e",
+          "prompt": "Create one canonical egg portrait for a native Codex Pet, synthetic verification case research. Crisp low-resolution pixel art, stepped dark brown outlines, warm ivory shell, 2–3 discrete shade levels. Plain intact ovate egg, centered, single object, transparent background, no shadow or text. At most 5% of shell surface has extremely faint sky-blue sparse small abstract speckles, asymmetrical lower-shell variant 886853646, hue hint205. Restrained opaque shell: no face, eyes, mouth, ears, limbs, leaves, icons, species motif, cracking or creature inside. No future creature has been designed; do not imply a recognizable species. Full egg, 15% margin, 1024x1024. Single static portrait, not a sprite sheet.",
+          "tool": "built-in imagegen",
+          "dimensions": [
+            1254,
+            1254
+          ],
+          "hasAlpha": true,
+          "review": {
+            "ordinaryEgg": true,
+            "noSpeciesClues": true,
+            "abstractHints": true,
+            "reviewer": "primary agent direct visual inspection"
+          }
+        },
+        "hatch": {
+          "file": "assets/examples/personalization/research-hatchling.png",
+          "sha256": "5ce6c2673380d4c69cd0052677f452d8e756c34a83502d4d5cb6f6c672d3d3ce",
+          "prompt": "Create the FIRST newborn of a native Codex Pet for verification research, variant591934237. Attached egg is a COLOR/TEXTURE reference ONLY; DISCARD ITS OUTLINE, POINTED TOP, SHELL MATERIAL, IVORY BODY and highlight shape. Creature design: a BROAD HORIZONTAL OVAL HEAD (width roughly1.6x head height), flat/blunt upper contour, separate compact torso below it, TWO TINY SOLID SQUARE EYES WITHOUT SHINE, tiny single-pixel mouth, two stubby arms, two short feet. Sky-blue skin. A round torso, one pair of short soft leaflet appendages at head sides, each no taller than 15% head width. A few small abstract speckles low on belly. Hold one small plain closed brown book. Anatomy is newly resolved after incubation. Native Codex pixel style, 3–4 pixel-thick stepped dark-brown outline at logical96px scale, matte flat pixel colors and at most two hard shade bands. No smooth gradient, large glossy eyes, long ears, head-top sprout, pointed egg-shaped head, eggshell, extra appendages, shell hatching scene, text, labels, shadow or detached effects. Infant proportions, full body front neutral pose, centered with15% clear margin. 1024x1024 truly transparent single canonical portrait, not a sheet.",
+          "tool": "built-in imagegen",
+          "dimensions": [
+            1254,
+            1254
+          ],
+          "hasAlpha": true,
+          "review": {
+            "sharedFamily": true,
+            "paletteMatches": true,
+            "propMatches": true,
+            "torsoQualitativelyMatches": true,
+            "reviewer": "primary agent direct visual inspection",
+            "limits": "Not an independent rating; numeric roundness and seed reproducibility are not established by these portraits. No native atlas or UI update tested."
+          }
+        }
+      }
+    },
+    {
+      "case": "create",
+      "synthetic": true,
+      "seed": "verification-person-05",
+      "profile": {
+        "name": "GenPet",
+        "palette": "peach",
+        "interest": "create",
+        "temperament": "playful"
+      },
+      "shell": {
+        "hue": 17,
+        "pattern": "stripes",
+        "patternSeed": 920408884
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "buds",
+        "roundness": 0.888,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "create",
+        "identitySeed": 2685423335,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "brush",
+      "records": {
+        "egg": {
+          "file": "assets/examples/personalization/create-egg.png",
+          "sha256": "4cb43cc1a114a53533ac2c3a7d8580cc9b124b3b09be5bbe90c44576371f98a7",
+          "prompt": "Create one canonical egg portrait for a native Codex Pet, synthetic verification case create. Crisp low-resolution pixel art, stepped dark brown outlines, warm ivory shell, 2–3 discrete shade levels. Plain intact ovate egg, centered, single object, transparent background, no shadow or text. At most 5% of shell surface has extremely faint peach short broken abstract stripes, asymmetrical lower-shell variant 920408884, hue hint17. Restrained opaque shell: no face, eyes, mouth, ears, limbs, leaves, icons, species motif, cracking or creature inside. No future creature has been designed; do not imply a recognizable species. Full egg, 15% margin, 1024x1024. Single static portrait, not a sprite sheet.",
+          "tool": "built-in imagegen",
+          "dimensions": [
+            1254,
+            1254
+          ],
+          "hasAlpha": true,
+          "review": {
+            "ordinaryEgg": true,
+            "noSpeciesClues": true,
+            "abstractHints": true,
+            "reviewer": "primary agent direct visual inspection"
+          }
+        },
+        "hatch": {
+          "file": "assets/examples/personalization/create-hatchling.png",
+          "sha256": "bfee312c2fd4c7227573db61bfd724d268cec79a63ce68a74825778b109639c8",
+          "prompt": "Create the FIRST newborn of a native Codex Pet for verification create, variant2685423335. Attached egg is a COLOR/TEXTURE reference ONLY; DISCARD ITS OUTLINE, POINTED TOP, SHELL MATERIAL, IVORY BODY and highlight shape. Creature design: a BROAD HORIZONTAL OVAL HEAD (width roughly1.6x head height), flat/blunt upper contour, separate compact torso below it, TWO TINY SOLID SQUARE EYES WITHOUT SHINE, tiny single-pixel mouth, two stubby arms, two short feet. Peach skin. A pear-shaped torso, one pair of tiny rounded bud nubs at head sides, each no taller than10% head width. One short broken abstract stripe low on belly. Hold one small paintbrush. Anatomy is newly resolved after incubation. Native Codex pixel style, stepped dark-brown outline, matte flat pixel colors and at most two hard shade bands. No large glossy eyes, long ears, head-top sprout, pointed egg-shaped head, eggshell, extra appendages, text, labels, shadow or detached effects. Infant proportions, full body front neutral pose, centered with15% clear margin. 1024x1024 truly transparent single canonical portrait, not a sheet.",
+          "tool": "built-in imagegen",
+          "dimensions": [
+            1254,
+            1254
+          ],
+          "hasAlpha": true,
+          "review": {
+            "sharedFamily": true,
+            "paletteMatches": true,
+            "propMatches": true,
+            "torsoQualitativelyMatches": true,
+            "reviewer": "primary agent direct visual inspection",
+            "limits": "Not an independent rating; numeric roundness and seed reproducibility are not established by these portraits. No native atlas or UI update tested."
+          }
+        }
+      }
+    }
+  ]
+}

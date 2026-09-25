@@ -1,0 +1,43 @@
+{
+  "method": "Actual official-extracted idle0 cells. Foreground alpha >=128. Neck landmark selected by primary visual review and checked against row silhouette width minimum; not an automatic anatomical segmentation benchmark.",
+  "measurements": [
+    {
+      "stage": "day0",
+      "file": "assets/examples/lifecycle/growth-day21-idle/comparison-day0.png",
+      "neckY": 93,
+      "top": 10,
+      "bottom": 199,
+      "width": 150,
+      "height": 190,
+      "headHeightFraction": 0.437
+    },
+    {
+      "stage": "day21",
+      "file": "assets/examples/lifecycle/growth-day21-idle/00.png",
+      "neckY": 70,
+      "top": 7,
+      "bottom": 200,
+      "width": 113,
+      "height": 194,
+      "headHeightFraction": 0.325
+    }
+  ],
+  "review": {
+    "sameIdentityRecognizable": true,
+    "sameBookContext": true,
+    "longerBodyRelativeToHead": true,
+    "nativeCellReadability": true,
+    "allSixIdleFramesInspected": true
+  },
+  "limitations": [
+    "Only idle row generated for day21, not a complete native atlas.",
+    "Age was simulated; no elapsed21-day observation.",
+    "No automatic host refresh or live native UI proof.",
+    "Scale-normalized proportions changed; absolute on-screen height did not grow."
+  ],
+  "sourceGeneration": {
+    "prompt": "Create ONE HORIZONTAL animation strip for native Codex Pet growth verification, state idle. Image1 is maturity/identity reference but contains an unwanted halo; image2 is spacing guide ONLY; image3 is APPROVED canonical base, takes priority for clean outline and all visual details. Output EXACTLY SIX full-body mature creatures in one left-to-right row, one centered in each invisible equal-width slot, flat pure #FF00FF background, no drawn guide. Preserve the long torso proportions: head height about1/3 full figure, torso and feet2/3. Same sage-gray creature, broad oval head, tiny eyes and mouth, cream belly and three square marks, brown book, exact same size and floor baseline across six frames. Pixel style. Idle: only tiny breath and a single slow blink, feet planted, book remains held still; frames1 and6 near identical, no locomotion or waving. Hard opaque outline, generous spacing, no overlap or clipping. No shadow, glow, halo, vignette, text, borders, blur or detached effects; pure magenta directly touches silhouette edges. Landscape strip, 1536x512 or equivalent wide3:1 canvas, do not stack frames.",
+    "tool": "built-in imagegen",
+    "qa": "Six frames, blink only, mature proportions retained, raw output appears transparent rather than requested magenta. Deterministic inspection pending."
+  }
+}

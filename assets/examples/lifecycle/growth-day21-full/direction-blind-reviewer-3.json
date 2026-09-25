@@ -1,0 +1,88 @@
+{
+  "pairs": [
+    {
+      "pair": "horizontal-1",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's eye and mouth occupy the left side of its head; B's face and snout occupy the right side."
+    },
+    {
+      "pair": "horizontal-2",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's mouth touches the left head outline, while B's mouth and snout point toward the upper-right outline."
+    },
+    {
+      "pair": "horizontal-3",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A has an eye and muzzle on the left edge; B has an elevated muzzle on the right edge."
+    },
+    {
+      "pair": "horizontal-4",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's muzzle protrudes toward the left, while B's visible eye and muzzle are near the right tip."
+    },
+    {
+      "pair": "horizontal-5",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "A's low eye and mouth sit toward the right head edge; B's low face sits toward the left head edge."
+    },
+    {
+      "pair": "horizontal-6",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's facial features cluster on the lower-left head side, while B's eye and mouth cluster on the lower-right side."
+    },
+    {
+      "pair": "horizontal-7",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "Both heads are lowered; A's facial features are displaced right of the head center, and B's are displaced left."
+    },
+    {
+      "pair": "vertical-1",
+      "A": "up",
+      "B": "down",
+      "reason": "A's eyes and mouth lie along the upper head edge above an exposed neck; B's features lie along the bottom edge close to the object."
+    },
+    {
+      "pair": "vertical-2",
+      "A": "up",
+      "B": "down",
+      "reason": "A's snout is raised with the mouth high on the right side; B's face points toward the object with features at the bottom edge."
+    },
+    {
+      "pair": "vertical-3",
+      "A": "down",
+      "B": "up",
+      "reason": "A's mouth and eye sit low on the right side; B's muzzle angles upward with its mouth near the top-right edge."
+    },
+    {
+      "pair": "vertical-4",
+      "A": "up",
+      "B": "down",
+      "reason": "A's neck extends into an upward-tilted snout; B's muzzle and mouth are lowered toward the held object."
+    },
+    {
+      "pair": "vertical-5",
+      "A": "down",
+      "B": "up",
+      "reason": "A's face sits along the bottom head edge near the object; B's eye and mouth sit high on the left side of its lifted head."
+    },
+    {
+      "pair": "vertical-6",
+      "A": "down",
+      "B": "up",
+      "reason": "A's eyes and muzzle sit along the lower-left head edge; B's mouth and eye sit along the upper-left side with the head lifted."
+    },
+    {
+      "pair": "vertical-7",
+      "A": "down",
+      "B": "up",
+      "reason": "A's eye and muzzle are low on the left side close to the neck, whereas B's eye and mouth sit higher on the left-facing snout."
+    }
+  ]
+}

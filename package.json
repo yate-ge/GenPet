@@ -1,0 +1,39 @@
+{
+  "name": "genpet",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A bounded, personalized companion that grows with you. A GenFaceUI-inspired Codex plugin.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node dist/mcp.js",
+    "build": "node scripts/clean-build.mjs && tsc",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "tsc --noEmit",
+    "mcp": "tsx src/mcp.ts",
+    "install:codex": "npm run build && tsx scripts/install.ts",
+    "export:pet": "tsx src/cli.ts install-native",
+    "refresh:native": "tsx src/cli.ts refresh-native",
+    "install:cdp-launcher": "tsx src/cli.ts install-cdp-launcher",
+    "cdp:status": "tsx src/cli.ts cdp-status",
+    "package:plugin": "npm run build && tsx scripts/package.ts",
+    "verify:fast": "npm run check && npm test && npm run verify:personalization",
+    "verify:release": "node scripts/verify-release.mjs",
+    "verify:native": "tsx scripts/verify-native-contract.ts",
+    "verify:refresh": "tsx scripts/audit-native-refresh.ts",
+    "verify:personalization": "tsx scripts/verify-personalization.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "sharp": "^0.34.5",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

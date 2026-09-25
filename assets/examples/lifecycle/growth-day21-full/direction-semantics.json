@@ -1,0 +1,108 @@
+{
+  "reviewedBy": "primary-agent",
+  "scope": "offline normal-cell-size ordered visual review",
+  "nativePlaybackVerified": false,
+  "directions": [
+    {
+      "degree": "000",
+      "status": "pass",
+      "horizontal": "centered",
+      "vertical": "face raised toward top of head, chin raised"
+    },
+    {
+      "degree": "022.5",
+      "status": "warning",
+      "horizontal": "face shifted slightly right",
+      "vertical": "chin and facial features raised"
+    },
+    {
+      "degree": "045",
+      "status": "pass",
+      "horizontal": "head and face turn right",
+      "vertical": "head raised with visible underside"
+    },
+    {
+      "degree": "067.5",
+      "status": "warning",
+      "horizontal": "strong rightward face displacement",
+      "vertical": "upward chin remains, similar to previous pose"
+    },
+    {
+      "degree": "090",
+      "status": "pass",
+      "horizontal": "face points to screen-right edge",
+      "vertical": "level"
+    },
+    {
+      "degree": "112.5",
+      "status": "pass",
+      "horizontal": "face stays rightward",
+      "vertical": "chin starts dipping"
+    },
+    {
+      "degree": "135",
+      "status": "pass",
+      "horizontal": "face remains right of center",
+      "vertical": "lowered eyes and chin toward book"
+    },
+    {
+      "degree": "157.5",
+      "status": "warning",
+      "horizontal": "subtle rightward cue near vertical",
+      "vertical": "face low on head, directed down"
+    },
+    {
+      "degree": "180",
+      "status": "pass",
+      "horizontal": "centered",
+      "vertical": "face at bottom edge of head directed into book"
+    },
+    {
+      "degree": "202.5",
+      "status": "warning",
+      "horizontal": "subtle leftward face displacement",
+      "vertical": "face remains low on head"
+    },
+    {
+      "degree": "225",
+      "status": "pass",
+      "horizontal": "face shifted left",
+      "vertical": "chin and eye lower-left"
+    },
+    {
+      "degree": "247.5",
+      "status": "warning",
+      "horizontal": "head aims left",
+      "vertical": "subtle downward cue approaching level"
+    },
+    {
+      "degree": "270",
+      "status": "pass",
+      "horizontal": "face at left edge of head",
+      "vertical": "approximately level"
+    },
+    {
+      "degree": "292.5",
+      "status": "pass",
+      "horizontal": "face points left",
+      "vertical": "raised face and chin"
+    },
+    {
+      "degree": "315",
+      "status": "pass",
+      "horizontal": "head and face point upper-left",
+      "vertical": "head raised"
+    },
+    {
+      "degree": "337.5",
+      "status": "warning",
+      "horizontal": "left cue remains stronger than ideal near-vertical",
+      "vertical": "face and chin raised; boundary rotation is uneven"
+    }
+  ],
+  "continuityResolution": {
+    "decision": "accept-with-warning",
+    "evidence": "Whole-row scale repair reduced seam area ratio from 1.22 to 1.11. At y>=100, seam lower-body areas are 8082 and 8589 pixels, all foot baselines y=202. No clipping or detached book. Remaining difference is mainly head pose plus modest body-width variation; ordered visual review finds no gross quadrant reversal or conspicuous whole-body scale pop.",
+    "limits": "Not an exact-angle gaze measurement or actual host playback test. Stable-slots extraction and uneven final gaze transition remain disclosed warnings."
+  }
+}

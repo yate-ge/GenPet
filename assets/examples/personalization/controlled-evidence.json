@@ -1,0 +1,63 @@
+{
+  "synthetic": true,
+  "date": "2026-09-25",
+  "cases": {
+    "neutral-build": {
+      "file": "assets/examples/personalization/neutral/build.png",
+      "sha256": "d73a5e98482423054854143ebca6a2281d6aa4d58af4c5377fe7a3d5de403da9",
+      "method": "Codex built-in imagegen",
+      "sourceReference": "assets/examples/personalization/build-hatchling.png",
+      "promptSummary": "Edit previously approved build hatchling: remove tool only, keep moss body, side buds and lower-left belly mark.",
+      "qa": "Primary agent visual inspection; portrait only, not native atlas"
+    },
+    "neutral-research": {
+      "file": "assets/examples/personalization/neutral/research.png",
+      "sha256": "f9dfca254d14b21326ce1f76f48c8b72d7d6b7f331686d7183576418b93cd0ed",
+      "method": "Codex built-in imagegen",
+      "sourceReference": "assets/examples/personalization/research-hatchling.png",
+      "promptSummary": "Edit previously approved research hatchling: remove book only, keep sky body, side leaflets and belly speckles.",
+      "qa": "Primary agent visual inspection; portrait only, not native atlas"
+    },
+    "neutral-create": {
+      "file": "assets/examples/personalization/neutral/create.png",
+      "sha256": "f6134b2042cade17e5d536e8222ba0d22d6117ebda6f8f4464a3150283d17b0f",
+      "method": "Codex built-in imagegen",
+      "sourceReference": "assets/examples/personalization/create-hatchling.png",
+      "promptSummary": "Edit previously approved create hatchling: remove brush only, keep peach body, side buds and short broken belly mark.",
+      "qa": "Primary agent visual inspection; portrait only, not native atlas"
+    },
+    "research-01-egg": {
+      "file": "assets/examples/personalization/seed-control/research-01-egg.png",
+      "sha256": "06e6611c89fc3eb3e8520a32f27235bdca73efe7672c1ddabc5e63cb9314563c",
+      "method": "Codex built-in imagegen",
+      "sourceReference": null,
+      "promptSummary": "Egg-first plain ivory shell, faint sky-blue lower-left abstract patches from patternSeed 853298408; no creature traits.",
+      "qa": "Primary agent visual inspection; portrait only, not native atlas"
+    },
+    "research-01-hatchling": {
+      "file": "assets/examples/personalization/seed-control/research-01-hatchling.png",
+      "sha256": "cd2ac1a57c3ead5e5d486039722d5280a07c7b96e834dedf91db989885fd068d",
+      "method": "Codex built-in imagegen",
+      "sourceReference": "assets/examples/personalization/seed-control/research-01-egg.png",
+      "promptSummary": "Forward birth from 01 egg, research book, pear torso, head-side buds, lower-left belly patch. First image incorrectly placed buds on torso; one imagegen repair moved them to head sides.",
+      "qa": "Primary agent visual inspection; portrait only, not native atlas"
+    },
+    "research-04-egg": {
+      "file": "assets/examples/personalization/seed-control/research-04-egg.png",
+      "sha256": "b743d770496a738b8dc902b8d710ce0bafaa6ebf6bfca8da7319d518063bd4ce",
+      "method": "Codex built-in imagegen",
+      "sourceReference": null,
+      "promptSummary": "Egg-first plain ivory shell, faint sky-blue lower-right abstract speckles from patternSeed 937186503; no creature traits.",
+      "qa": "Primary agent visual inspection; portrait only, not native atlas"
+    },
+    "research-04-hatchling": {
+      "file": "assets/examples/personalization/seed-control/research-04-hatchling.png",
+      "sha256": "0644e9bb6516fa5c4acb6d9afd93f46506e19a4a9c892c0e7a5ce4c0964fb1af",
+      "method": "Codex built-in imagegen",
+      "sourceReference": "assets/examples/personalization/seed-control/research-04-egg.png",
+      "promptSummary": "Forward birth from 04 egg, research book, pear torso, head-side soft fins, three lower-right belly speckles.",
+      "qa": "Primary agent visual inspection; portrait only, not native atlas"
+    }
+  },
+  "limitations": "Single generated samples; no blind human study, no atlas or host display test."
+}

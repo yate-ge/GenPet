@@ -1,0 +1,88 @@
+{
+  "pairs": [
+    {
+      "pair": "horizontal-1",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's eye and mouth occupy the upper left tip; B's face occupies the upper right tip."
+    },
+    {
+      "pair": "horizontal-2",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's small mouth projects at the left edge; B's mouth and eye face the raised right edge."
+    },
+    {
+      "pair": "horizontal-3",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's eye and projecting mouth are on the left; B's eye and smile point right."
+    },
+    {
+      "pair": "horizontal-4",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's muzzle projects left beside its eye; B's eye and muzzle are on the far right."
+    },
+    {
+      "pair": "horizontal-5",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "A's lowered eye and mouth cluster on the right; B's lowered face clusters on the left."
+    },
+    {
+      "pair": "horizontal-6",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's downward face is displaced left with its muzzle on the left outline; B's downward muzzle projects right."
+    },
+    {
+      "pair": "horizontal-7",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "A's eyes and mouth are displaced toward the lower right; B's eyes and mouth are displaced toward the lower left."
+    },
+    {
+      "pair": "vertical-1",
+      "A": "up",
+      "B": "down",
+      "reason": "A's face lies along the head's top edge with an extended neck; B's face is tucked along the bottom edge near the object."
+    },
+    {
+      "pair": "vertical-2",
+      "A": "up",
+      "B": "down",
+      "reason": "A raises the right muzzle and face; B lowers its face underneath the head toward the held object."
+    },
+    {
+      "pair": "vertical-3",
+      "A": "down",
+      "B": "up",
+      "reason": "A's right muzzle and eye sit low and point downward; B's right muzzle and eye are raised."
+    },
+    {
+      "pair": "vertical-4",
+      "A": "up",
+      "B": "down",
+      "reason": "A's right muzzle tilts upward; B's eye and mouth sit along the lowered right edge."
+    },
+    {
+      "pair": "vertical-5",
+      "A": "down",
+      "B": "up",
+      "reason": "A's face is tucked along the bottom of the head; B lifts its left-facing muzzle with the eye high on the head."
+    },
+    {
+      "pair": "vertical-6",
+      "A": "down",
+      "B": "up",
+      "reason": "A's left-facing mouth lies at the head's underside near the object; B's eye and muzzle rise toward the upper left."
+    },
+    {
+      "pair": "vertical-7",
+      "A": "down",
+      "B": "up",
+      "reason": "A's eye and left muzzle lie low on the head; B's eye and left muzzle sit higher with the snout raised."
+    }
+  ]
+}

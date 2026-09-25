@@ -1,0 +1,51 @@
+{
+  "scope": "offline simulated day21 full native-contract atlas; no real Pet installation",
+  "generator": "Codex built-in imagegen",
+  "pipeline": "unmodified vendor/hatch-pet scripts",
+  "spriteVersionNumber": 2,
+  "dimensions": [
+    1536,
+    2288
+  ],
+  "animationFrameCounts": [
+    6,
+    8,
+    8,
+    4,
+    5,
+    8,
+    6,
+    6,
+    6
+  ],
+  "lookDirections": 16,
+  "neutralCells": 1,
+  "sha256": "60846d598dcab58c0214769eb9e5bf19c4219d82ad4939f670409151f672bf85",
+  "checks": {
+    "nativeAtlasStructure": true,
+    "transparentEdges": true,
+    "standardFrameInspection": true,
+    "primaryOrderedCellReview": true,
+    "threeIndependentDirectionClassifications": true,
+    "blindDirectionPairsPassed": 14,
+    "actualNativePlayback": false,
+    "automaticRefresh": false
+  },
+  "reviewMethod": "Primary agent inspected ordered contact and direction sheets. Three independent agents reclassified revised unlabeled pairs without seeing expected directions; they had also reviewed the earlier candidate. This is agent visual QA, not a human study.",
+  "repairs": [
+    "Rejected unrequested tail in rightward row; regenerated.",
+    "Rejected detached symbols and a floating book in waiting row; regenerated twice.",
+    "Official stable-slots extraction preserved a 32px jumping foot lift erased by auto component fitting.",
+    "Rejected two undersized left-gaze rows; imagegen whole-row edit reduced seam full-area ratio from 1.22 to 1.11."
+  ],
+  "warnings": [
+    "Stable-slots warnings retained for all nine standard rows.",
+    "Final 337.5-to-000 gaze transition remains uneven; lower-body area changes about6.3 percent with equal y202 foot baseline. Primary review accepts residual variation for this offline demo fixture."
+  ],
+  "limitations": [
+    "Simulated age; no real21-day growth observation.",
+    "Intermediate daily appearance stability unverified.",
+    "No live native host screenshot or automatic refresh verification.",
+    "This fixture must not be automatically installed over the real user Pet."
+  ]
+}

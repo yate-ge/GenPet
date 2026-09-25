@@ -1,0 +1,4 @@
+interface:
+  display_name: "genpet-reset"
+  short_description: "重置宠物，重新生成蛋并开始成长；验证后原子更新同一个原生 Pet"
+  default_prompt: "使用 $genpet-reset 备份我的旧宠物，重新生成一个蛋并重新开始成长。"

@@ -1,0 +1,76 @@
+{
+  "method": "Isolated accelerated demo; synthetic research/create labels. Images generated sequentially, not a real elapsed-time observation.",
+  "egg": {
+    "hatchIdentity": null
+  },
+  "hatch": {
+    "stage": "hatchling",
+    "day": 0,
+    "size": 0.74,
+    "prop": "book",
+    "hatchIdentity": {
+      "family": "roundling",
+      "bodyShape": "pear",
+      "appendage": "soft-fins",
+      "roundness": 0.884,
+      "resolvedAt": 1790279780993,
+      "evidenceCount": 1,
+      "influence": "research",
+      "identitySeed": 2768996613,
+      "algorithmVersion": "egg-first-v1"
+    }
+  },
+  "context": {
+    "stage": "hatchling",
+    "day": 0,
+    "size": 0.74,
+    "prop": "brush",
+    "hatchIdentity": {
+      "family": "roundling",
+      "bodyShape": "pear",
+      "appendage": "soft-fins",
+      "roundness": 0.884,
+      "resolvedAt": 1790279780993,
+      "evidenceCount": 1,
+      "influence": "research",
+      "identitySeed": 2768996613,
+      "algorithmVersion": "egg-first-v1"
+    }
+  },
+  "growth": {
+    "stage": "hatchling",
+    "day": 1,
+    "size": 0.7642857142857142,
+    "prop": "book",
+    "hatchIdentity": {
+      "family": "roundling",
+      "bodyShape": "pear",
+      "appendage": "soft-fins",
+      "roundness": 0.884,
+      "resolvedAt": 1790279780993,
+      "evidenceCount": 1,
+      "influence": "research",
+      "identitySeed": 2768996613,
+      "algorithmVersion": "egg-first-v1"
+    }
+  },
+  "canonicalIdentityPreserved": true,
+  "identityDecisionPreserved": true,
+  "nativeAtlasAvailable": [
+    "hatchling",
+    "growth-day1",
+    "context-brush"
+  ],
+  "portraitOnly": [],
+  "nativeGrowthReplacement": {
+    "samePetId": true,
+    "differentAtlas": true,
+    "previousHatchlingRetained": true,
+    "visibleUIObserved": false
+  },
+  "nativeContextReplacement": {
+    "samePetId": true,
+    "atlasReplaced": true,
+    "visibleUIObserved": false
+  }
+}

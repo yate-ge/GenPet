@@ -1,0 +1,25 @@
+{
+  "portraits": {
+    "egg": "/assets/portraits/egg.png"
+  },
+  "atlases": {
+    "egg": "/assets/pets/mystery-egg/spritesheet.webp"
+  },
+  "examples": {
+    "moss": {
+      "portrait": "/assets/portraits/moss-demo.png",
+      "atlas": "/assets/pets/pixel-moss/spritesheet.webp",
+      "relationship": "Independent character example; not the egg’s predetermined child"
+    },
+    "lifecycle": {
+      "portrait": "/assets/examples/lifecycle/hatchling.png",
+      "atlas": "/assets/pets/lifecycle-hatchling/spritesheet.webp",
+      "eggPortrait": "/assets/examples/lifecycle/egg.png",
+      "evidence": "/assets/examples/lifecycle/evidence.json",
+      "relationship": "Recorded forward-hatching demo from a separately generated egg. Not the user pet and not paired with the bundled mystery-egg atlas.",
+      "growthAtlas": "/assets/pets/lifecycle-growth/spritesheet.webp",
+      "contextAtlas": "/assets/pets/lifecycle-context/spritesheet.webp"
+    }
+  },
+  "provenance": "Codex imagegen; official native v2 assembly and validation. See per-asset provenance and visual-review records."
+}

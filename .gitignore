@@ -1,0 +1,12 @@
+node_modules/
+dist/
+output/
+.genpet/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+__pycache__/
+*.pyc
+.playwright-mcp/

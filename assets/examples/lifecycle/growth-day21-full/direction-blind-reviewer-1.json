@@ -1,0 +1,88 @@
+{
+  "pairs": [
+    {
+      "pair": "horizontal-1",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's facial tip and mouth are left of its eye; B's mouth and facial tip extend right."
+    },
+    {
+      "pair": "horizontal-2",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's mouth meets the left edge of the head; B's face points toward the upper right."
+    },
+    {
+      "pair": "horizontal-3",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's mouth is at the left rim; B's mouth and facial tip sit to the right of the visible eye."
+    },
+    {
+      "pair": "horizontal-4",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's eye and snout are toward the left edge; B's eye and snout are toward the right edge."
+    },
+    {
+      "pair": "horizontal-5",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "A's mouth is low on the right cheek; B's mouth is low on the left cheek."
+    },
+    {
+      "pair": "horizontal-6",
+      "A": "screen-left",
+      "B": "screen-right",
+      "reason": "A's lowered face is displaced left, with the mouth toward the left rim; B's lowered face extends toward the right rim."
+    },
+    {
+      "pair": "horizontal-7",
+      "A": "screen-right",
+      "B": "screen-left",
+      "reason": "A's eyes and mouth are displaced to the lower right of the head; B's eyes and mouth are displaced to the lower left."
+    },
+    {
+      "pair": "vertical-1",
+      "A": "up",
+      "B": "down",
+      "reason": "A's eyes and mouth are near the top edge of the head; B's eyes and mouth are near the bottom edge."
+    },
+    {
+      "pair": "vertical-2",
+      "A": "up",
+      "B": "down",
+      "reason": "A's face is raised on an upward-sloping head; B's face is compressed along the lower rim."
+    },
+    {
+      "pair": "vertical-3",
+      "A": "down",
+      "B": "up",
+      "reason": "A's mouth and eye sit at the lower right edge; B's facial tip rises toward the upper right."
+    },
+    {
+      "pair": "vertical-4",
+      "A": "up",
+      "B": "down",
+      "reason": "A's snout and mouth are raised; B's eye and mouth sit below the head center near its lower rim."
+    },
+    {
+      "pair": "vertical-5",
+      "A": "down",
+      "B": "up",
+      "reason": "A's eyes and mouth sit near the bottom edge; B's mouth and visible eye sit high toward the upper left."
+    },
+    {
+      "pair": "vertical-6",
+      "A": "down",
+      "B": "up",
+      "reason": "A's face lies along the lower left edge; B's facial tip and eye rise toward the upper left."
+    },
+    {
+      "pair": "vertical-7",
+      "A": "down",
+      "B": "up",
+      "reason": "A's facial features are low near the underside of the head; B's eye and mouth are above the head center."
+    }
+  ]
+}

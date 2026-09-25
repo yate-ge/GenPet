@@ -1,0 +1,22 @@
+{
+  "method": "Controlled day0 book versus brush using previously generated complete native atlases. File and direct visual verification, not live host verification.",
+  "createdAt": "2026-09-24T16:50:50.461Z",
+  "frames": [
+    {
+      "label": "book",
+      "frame": "assets/examples/lifecycle/context-book-idle.png",
+      "completeAtlas": "assets/pets/lifecycle-hatchling/spritesheet.webp",
+      "sha256": "87765130447aa13372ce18d469498c231f750a3401ee720ecfaf6855a9517720"
+    },
+    {
+      "label": "brush",
+      "frame": "assets/examples/lifecycle/context-brush-idle.png",
+      "completeAtlas": "assets/pets/lifecycle-context/spritesheet.webp",
+      "sha256": "b07204337f53809acda1733cc6d0d5583657da094deab6576388da331e68ab86"
+    }
+  ],
+  "sameSimulatedAge": true,
+  "birthIdentityPreserved": true,
+  "canonicalReferencePreserved": true,
+  "displayedInNativeUI": false
+}

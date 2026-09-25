@@ -1,0 +1,870 @@
+{
+  "method": "Synthetic JSONL -> real context scanner -> profile -> seed-controlled egg -> incubation -> birth -> growth. No real participants; does not prove visual differences.",
+  "cells": 25,
+  "categories": [
+    {
+      "kind": "build",
+      "distinctBodies": 2,
+      "distinctShells": 5
+    },
+    {
+      "kind": "research",
+      "distinctBodies": 2,
+      "distinctShells": 5
+    },
+    {
+      "kind": "create",
+      "distinctBodies": 2,
+      "distinctShells": 5
+    },
+    {
+      "kind": "learn",
+      "distinctBodies": 2,
+      "distinctShells": 5
+    },
+    {
+      "kind": "rest",
+      "distinctBodies": 2,
+      "distinctShells": 5
+    }
+  ],
+  "counterfactual": [
+    {
+      "label": "build",
+      "body": "pear",
+      "appendage": "buds",
+      "roundness": 0.915,
+      "prop": "tool"
+    },
+    {
+      "label": "research",
+      "body": "pear",
+      "appendage": "buds",
+      "roundness": 0.901,
+      "prop": "book"
+    },
+    {
+      "label": "create",
+      "body": "pear",
+      "appendage": "buds",
+      "roundness": 0.9,
+      "prop": "brush"
+    },
+    {
+      "label": "learn",
+      "body": "pear",
+      "appendage": "buds",
+      "roundness": 0.891,
+      "prop": "star"
+    },
+    {
+      "label": "rest",
+      "body": "pear",
+      "appendage": "buds",
+      "roundness": 0.89,
+      "prop": "pillow"
+    }
+  ],
+  "results": [
+    {
+      "seed": "verification-person-01",
+      "syntheticInput": "请修复编译错误并部署代码。",
+      "label": "build",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sage",
+        "interest": "build",
+        "temperament": "calm"
+      },
+      "shell": {
+        "hue": 137,
+        "pattern": "patches",
+        "patternSeed": 853298408
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "buds",
+        "roundness": 0.915,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "build",
+        "identitySeed": 244424115,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "tool",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-02",
+      "syntheticInput": "请修复编译错误并部署代码。",
+      "label": "build",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sage",
+        "interest": "build",
+        "temperament": "calm"
+      },
+      "shell": {
+        "hue": 142,
+        "pattern": "patches",
+        "patternSeed": 903631265
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "round",
+        "appendage": "leaflets",
+        "roundness": 0.935,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "build",
+        "identitySeed": 1524257532,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "tool",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-03",
+      "syntheticInput": "请修复编译错误并部署代码。",
+      "label": "build",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sage",
+        "interest": "build",
+        "temperament": "calm"
+      },
+      "shell": {
+        "hue": 146,
+        "pattern": "speckles",
+        "patternSeed": 886853646
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "round",
+        "appendage": "buds",
+        "roundness": 0.881,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "build",
+        "identitySeed": 183470157,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "tool",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-04",
+      "syntheticInput": "请修复编译错误并部署代码。",
+      "label": "build",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sage",
+        "interest": "build",
+        "temperament": "calm"
+      },
+      "shell": {
+        "hue": 151,
+        "pattern": "speckles",
+        "patternSeed": 937186503
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "soft-fins",
+        "roundness": 0.891,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "build",
+        "identitySeed": 2662669126,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "tool",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-05",
+      "syntheticInput": "请修复编译错误并部署代码。",
+      "label": "build",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sage",
+        "interest": "build",
+        "temperament": "calm"
+      },
+      "shell": {
+        "hue": 138,
+        "pattern": "stripes",
+        "patternSeed": 920408884
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "buds",
+        "roundness": 0.892,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "build",
+        "identitySeed": 3524335687,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "tool",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-01",
+      "syntheticInput": "请梳理这些论文的实验方法和研究局限。",
+      "label": "research",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sky",
+        "interest": "research",
+        "temperament": "curious"
+      },
+      "shell": {
+        "hue": 196,
+        "pattern": "patches",
+        "patternSeed": 853298408
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "buds",
+        "roundness": 0.901,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "research",
+        "identitySeed": 241987275,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "book",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-02",
+      "syntheticInput": "请梳理这些论文的实验方法和研究局限。",
+      "label": "research",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sky",
+        "interest": "research",
+        "temperament": "curious"
+      },
+      "shell": {
+        "hue": 201,
+        "pattern": "patches",
+        "patternSeed": 903631265
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "round",
+        "appendage": "leaflets",
+        "roundness": 0.929,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "research",
+        "identitySeed": 3547376356,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "book",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-03",
+      "syntheticInput": "请梳理这些论文的实验方法和研究局限。",
+      "label": "research",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sky",
+        "interest": "research",
+        "temperament": "curious"
+      },
+      "shell": {
+        "hue": 205,
+        "pattern": "speckles",
+        "patternSeed": 886853646
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "round",
+        "appendage": "leaflets",
+        "roundness": 0.895,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "research",
+        "identitySeed": 591934237,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "book",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-04",
+      "syntheticInput": "请梳理这些论文的实验方法和研究局限。",
+      "label": "research",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sky",
+        "interest": "research",
+        "temperament": "curious"
+      },
+      "shell": {
+        "hue": 210,
+        "pattern": "speckles",
+        "patternSeed": 937186503
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "soft-fins",
+        "roundness": 0.892,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "research",
+        "identitySeed": 2892894710,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "book",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-05",
+      "syntheticInput": "请梳理这些论文的实验方法和研究局限。",
+      "label": "research",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sky",
+        "interest": "research",
+        "temperament": "curious"
+      },
+      "shell": {
+        "hue": 197,
+        "pattern": "stripes",
+        "patternSeed": 920408884
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "buds",
+        "roundness": 0.884,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "research",
+        "identitySeed": 2717668063,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "book",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-01",
+      "syntheticInput": "请创作一幅海报插画。",
+      "label": "create",
+      "profile": {
+        "name": "GenPet",
+        "palette": "peach",
+        "interest": "create",
+        "temperament": "playful"
+      },
+      "shell": {
+        "hue": 16,
+        "pattern": "patches",
+        "patternSeed": 853298408
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "buds",
+        "roundness": 0.9,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "create",
+        "identitySeed": 1136355315,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "brush",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-02",
+      "syntheticInput": "请创作一幅海报插画。",
+      "label": "create",
+      "profile": {
+        "name": "GenPet",
+        "palette": "peach",
+        "interest": "create",
+        "temperament": "playful"
+      },
+      "shell": {
+        "hue": 21,
+        "pattern": "patches",
+        "patternSeed": 903631265
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "round",
+        "appendage": "leaflets",
+        "roundness": 0.915,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "create",
+        "identitySeed": 802933468,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "brush",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-03",
+      "syntheticInput": "请创作一幅海报插画。",
+      "label": "create",
+      "profile": {
+        "name": "GenPet",
+        "palette": "peach",
+        "interest": "create",
+        "temperament": "playful"
+      },
+      "shell": {
+        "hue": 25,
+        "pattern": "speckles",
+        "patternSeed": 886853646
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "round",
+        "appendage": "leaflets",
+        "roundness": 0.906,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "create",
+        "identitySeed": 1171955021,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "brush",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-04",
+      "syntheticInput": "请创作一幅海报插画。",
+      "label": "create",
+      "profile": {
+        "name": "GenPet",
+        "palette": "peach",
+        "interest": "create",
+        "temperament": "playful"
+      },
+      "shell": {
+        "hue": 30,
+        "pattern": "speckles",
+        "patternSeed": 937186503
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "leaflets",
+        "roundness": 0.87,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "create",
+        "identitySeed": 913193606,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "brush",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-05",
+      "syntheticInput": "请创作一幅海报插画。",
+      "label": "create",
+      "profile": {
+        "name": "GenPet",
+        "palette": "peach",
+        "interest": "create",
+        "temperament": "playful"
+      },
+      "shell": {
+        "hue": 17,
+        "pattern": "stripes",
+        "patternSeed": 920408884
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "buds",
+        "roundness": 0.888,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "create",
+        "identitySeed": 2685423335,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "brush",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-01",
+      "syntheticInput": "请用教程讲解这个概念，给我练习。",
+      "label": "learn",
+      "profile": {
+        "name": "GenPet",
+        "palette": "lilac",
+        "interest": "learn",
+        "temperament": "curious"
+      },
+      "shell": {
+        "hue": 265,
+        "pattern": "patches",
+        "patternSeed": 853298408
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "buds",
+        "roundness": 0.891,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "learn",
+        "identitySeed": 1434426091,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "star",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-02",
+      "syntheticInput": "请用教程讲解这个概念，给我练习。",
+      "label": "learn",
+      "profile": {
+        "name": "GenPet",
+        "palette": "lilac",
+        "interest": "learn",
+        "temperament": "curious"
+      },
+      "shell": {
+        "hue": 270,
+        "pattern": "patches",
+        "patternSeed": 903631265
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "round",
+        "appendage": "leaflets",
+        "roundness": 0.935,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "learn",
+        "identitySeed": 3146915428,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "star",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-03",
+      "syntheticInput": "请用教程讲解这个概念，给我练习。",
+      "label": "learn",
+      "profile": {
+        "name": "GenPet",
+        "palette": "lilac",
+        "interest": "learn",
+        "temperament": "curious"
+      },
+      "shell": {
+        "hue": 274,
+        "pattern": "speckles",
+        "patternSeed": 886853646
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "round",
+        "appendage": "leaflets",
+        "roundness": 0.889,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "learn",
+        "identitySeed": 2271345821,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "star",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-04",
+      "syntheticInput": "请用教程讲解这个概念，给我练习。",
+      "label": "learn",
+      "profile": {
+        "name": "GenPet",
+        "palette": "lilac",
+        "interest": "learn",
+        "temperament": "curious"
+      },
+      "shell": {
+        "hue": 279,
+        "pattern": "speckles",
+        "patternSeed": 937186503
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "leaflets",
+        "roundness": 0.883,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "learn",
+        "identitySeed": 1934640374,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "star",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-05",
+      "syntheticInput": "请用教程讲解这个概念，给我练习。",
+      "label": "learn",
+      "profile": {
+        "name": "GenPet",
+        "palette": "lilac",
+        "interest": "learn",
+        "temperament": "curious"
+      },
+      "shell": {
+        "hue": 266,
+        "pattern": "stripes",
+        "patternSeed": 920408884
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "buds",
+        "roundness": 0.869,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "learn",
+        "identitySeed": 586989343,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "star",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-01",
+      "syntheticInput": "我要暂停工作，休息放松一下。",
+      "label": "rest",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sage",
+        "interest": "build",
+        "temperament": "calm"
+      },
+      "shell": {
+        "hue": 137,
+        "pattern": "patches",
+        "patternSeed": 853298408
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "buds",
+        "roundness": 0.89,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "rest",
+        "identitySeed": 3627542579,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "pillow",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-02",
+      "syntheticInput": "我要暂停工作，休息放松一下。",
+      "label": "rest",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sage",
+        "interest": "build",
+        "temperament": "calm"
+      },
+      "shell": {
+        "hue": 142,
+        "pattern": "patches",
+        "patternSeed": 903631265
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "round",
+        "appendage": "leaflets",
+        "roundness": 0.919,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "rest",
+        "identitySeed": 2585238716,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "pillow",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-03",
+      "syntheticInput": "我要暂停工作，休息放松一下。",
+      "label": "rest",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sage",
+        "interest": "build",
+        "temperament": "calm"
+      },
+      "shell": {
+        "hue": 146,
+        "pattern": "speckles",
+        "patternSeed": 886853646
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "round",
+        "appendage": "leaflets",
+        "roundness": 0.897,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "rest",
+        "identitySeed": 418428493,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "pillow",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-04",
+      "syntheticInput": "我要暂停工作，休息放松一下。",
+      "label": "rest",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sage",
+        "interest": "build",
+        "temperament": "calm"
+      },
+      "shell": {
+        "hue": 151,
+        "pattern": "speckles",
+        "patternSeed": 937186503
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "leaflets",
+        "roundness": 0.87,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "rest",
+        "identitySeed": 3766769350,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "pillow",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    },
+    {
+      "seed": "verification-person-05",
+      "syntheticInput": "我要暂停工作，休息放松一下。",
+      "label": "rest",
+      "profile": {
+        "name": "GenPet",
+        "palette": "sage",
+        "interest": "build",
+        "temperament": "calm"
+      },
+      "shell": {
+        "hue": 138,
+        "pattern": "stripes",
+        "patternSeed": 920408884
+      },
+      "birth": {
+        "family": "roundling",
+        "bodyShape": "pear",
+        "appendage": "buds",
+        "roundness": 0.894,
+        "resolvedAt": 1788238800000,
+        "evidenceCount": 1,
+        "influence": "rest",
+        "identitySeed": 1159111815,
+        "algorithmVersion": "egg-first-v1"
+      },
+      "prop": "pillow",
+      "growthDay7": {
+        "size": 0.9099999999999999,
+        "stage": "juvenile"
+      }
+    }
+  ]
+}

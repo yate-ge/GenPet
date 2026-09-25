@@ -1,0 +1,11 @@
+{
+  "accepted": true,
+  "reviewer": "Primary agent direct review, not independent blind reviews",
+  "scope": "57 standard frames and 16 pointer poses, final contact sheet; no claim of native UI playback observation",
+  "notes": [
+    "Same revealed identity and day0 proportions; brush replaces book in every frame.",
+    "Waving repaired twice to maintain grip and two-arm anatomy.",
+    "Working loop uses small held-brush gestures; hand transition is stylized, not physically interpolated motion.",
+    "Direction pixel-diff advisories retained and reviewed: broad directions and body/prop identity consistent, no missing or wrong-side cardinal poses."
+  ]
+}

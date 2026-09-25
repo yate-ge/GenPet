@@ -1,0 +1,20 @@
+{
+  "generator": "Codex built-in imagegen",
+  "createdOn": "2026-09-24",
+  "workflow": "Official hatch-pet state-specific rows, deterministic extraction/assembly, one final official chroma despill pass",
+  "runtime": "Codex native custom Pet v2",
+  "atlasSha256": "61aa755a72b7f657bf1264417736e154f05fa8f12b5c9a376cbab70889f59215",
+  "dimensions": [
+    1536,
+    2288
+  ],
+  "regularFrames": 57,
+  "pointerPoses": 16,
+  "utilityNeutralCells": 1,
+  "sourceRun": "pixel-moss",
+  "visualReview": "visual-review.json",
+  "structureValidation": "final-validation.json",
+  "continuityReview": "direction-continuity.json",
+  "builtinArtworkIncluded": false,
+  "futureIdentityPredetermined": null
+}
