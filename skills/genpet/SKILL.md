@@ -47,7 +47,7 @@ Allow at most two repair attempts for any one generated row per run. If it still
 
 ## User control and tests
 
-`genpet_configure` controls ingestion, outfit freeze, auto-art and name. `genpet_clear_context` removes derived labels, preserving source conversations and chronological growth. Explain what was cleared. Use isolated test data for developer tests. Explicit user debug commands are available as [genpet-reset](../genpet-reset/SKILL.md), [genpet-grow](../genpet-grow/SKILL.md), and [genpet-state](../genpet-state/SKILL.md). Reset is the only explicit action that starts a new adoption; grow records a separate logical-time offset and never rewrites the real adoption date. Scheduled maintenance must never call debug tools. If debug.stateOverride is set, preserve it until the user requests state auto.
+`genpet_configure` controls ingestion, outfit freeze, auto-art and name. `genpet_clear_context` removes derived labels, preserving source conversations and chronological growth. Explain what was cleared. Use isolated test data for developer tests. `/genpet-start` ([genpet-start](../genpet-start/SKILL.md)) is the user-facing start/resume command: it adopts only when no pet exists and otherwise completes artwork, native install and the schedule. Explicit user debug commands are available as [genpet-reset](../genpet-reset/SKILL.md), [genpet-grow](../genpet-grow/SKILL.md), and [genpet-state](../genpet-state/SKILL.md). Reset is the only action that replaces an existing pet with a new adoption; grow records a separate logical-time offset and never rewrites the real adoption date. Scheduled maintenance must never call debug tools. If debug.stateOverride is set, preserve it until the user requests state auto.
 
 ## One persistent native companion
 
