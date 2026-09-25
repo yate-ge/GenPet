@@ -1,5 +1,7 @@
 # GenPet
 
+English | [简体中文](README.zh-CN.md)
+
 **Delivery status:** Automatic refresh of the same visible native Pet is implemented in `genpet_install_native` / `npm run export:pet`. After an atomic file commit the adapter drives the host refresh and confirms that the floating Pet's displayed sprite hash matches the new atlas. Display confirmation requires a live local debugging channel. GenPet does not run a background process to force that channel. See [native refresh findings](docs/NATIVE_REFRESH.zh-CN.md).
 
 An image-generated **native Codex Pet** that starts as an unknown egg, resolves its identity only after five hours of incubation, and grows with your day-to-day activity.
@@ -33,6 +35,10 @@ User state is stored outside the repository in `~/.genpet/`; `GENPET_DATA_DIR` o
 ## Install
 
 Requires Codex Desktop with custom Pets and plugin support, and Node.js 22+ on `PATH` (the plugin's MCP server runs with `node`). No clone, `npm install` or build is needed: this repository is itself a Codex plugin marketplace, and `plugins/genpet/` is the prebuilt plugin.
+
+### In Codex Desktop
+
+Sidebar **Plugins** → **Add plugin marketplace** → source `yate-ge/GenPet` (leave Git ref empty to follow `main`) → install **GenPet** from the list and make sure it is enabled. Step-by-step Chinese instructions are in [README.zh-CN.md](README.zh-CN.md#安装).
 
 ### Ask a Codex Agent
 
