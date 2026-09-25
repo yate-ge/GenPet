@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { access, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { installCdpLauncher, removeCdpLauncher, launcherAppPath, launchAgentPath, startupMonitorPath, CDP_PORT } from '../src/cdp-launcher.js';
+import { installCdpLauncher, removeCdpLauncher, launcherAppPath, CDP_PORT } from '../src/cdp-launcher.js';
 
 test('cdp launcher writes a user-home app bundle and removes it cleanly', async () => {
   const homeDir = await mkdtemp(path.join(tmpdir(), 'genpet-launcher-'));
@@ -17,8 +17,8 @@ test('cdp launcher writes a user-home app bundle and removes it cleanly', async 
     assert.match(script, /ChatGPT\.app\/Contents\/MacOS\/ChatGPT/);
     const plist = await readFile(path.join(result.launcherApp, 'Contents', 'Info.plist'), 'utf8');
     assert.match(plist, /com\.genpet\.chatgpt-cdp/);
-    await assert.rejects(() => access(launchAgentPath(homeDir)));
-    await assert.rejects(() => access(startupMonitorPath(homeDir)));
+    await assert.rejects(() => access(path.join(homeDir, 'Library', 'LaunchAgents')));
+    await assert.rejects(() => access(path.join(homeDir, '.genpet', 'bin')));
     await removeCdpLauncher({ homeDir });
     await assert.rejects(() => access(path.join(launcherAppPath(homeDir), 'Contents', 'Info.plist')));
   } finally {
