@@ -14,7 +14,7 @@ const call=async(name,args={})=>{const r=await client.callTool({name,arguments:a
 try {
  await client.connect(transport);
  const {tools}=await client.listTools();
- for(const name of ['genpet-reset','genpet-grow','genpet-state'])await access(path.join(root,'skills',name,'SKILL.md'));
+ for(const name of ['genpet-start','genpet-reset','genpet-grow','genpet-state'])await access(path.join(root,'skills',name,'SKILL.md'));
  await access(path.join(root,'docs','DEBUG_COMMANDS.zh-CN.md'));
  for(const name of ['genpet_debug_reset','genpet_debug_grow','genpet_debug_state'])assert.ok(tools.some(t=>t.name===name));assert.equal(tools.length,12);assert.ok(!tools.some(t=>t.name==='genpet_open_lab'||t.name==='genpet_demo_native'));
  for(const removed of ['web','dist/server.js'])assert.equal(await access(path.join(root,removed)).then(()=>true,()=>false),false,`${removed} leaked into native plugin`);

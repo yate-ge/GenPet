@@ -17,7 +17,7 @@
   "interface": {
     "displayName": "GenPet",
     "shortDescription": "A native pixel companion, growing with you.",
-    "longDescription": "Adopt an image-generated egg and grow with local activity. Includes reset, growth and state debugging skills. Updates the same native Pet through background cache invalidation when the local debugging channel is available; reports display confirmation separately.",
+    "longDescription": "Adopt an image-generated egg with /genpet-start and grow with local activity. Includes reset, growth and state debugging skills. Updates the same native Pet through background cache invalidation when the local debugging channel is available; reports display confirmation separately.",
     "developerName": "GenPet contributors",
     "category": "Productivity",
     "capabilities": [
@@ -25,7 +25,7 @@
       "Write"
     ],
     "defaultPrompt": [
-      "领养、安装并启用我的 GenPet 自动成长",
+      "使用 $genpet-start 开始或恢复我的 GenPet，并启用自动成长",
       "更新我的 GenPet 成长与形象",
       "查看我的 GenPet 状态"
     ],
