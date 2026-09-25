@@ -1,13 +1,14 @@
-/** Verify the archive people will install without modifying the real Codex Pet. */
+/** Verify the plugin people install from GitHub without modifying the real Codex Pet. */
 import { execFileSync } from 'node:child_process';
-import { access, mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const { version } = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
+const plugin = path.join(root, 'plugins', 'genpet');
+const codex = process.env.CODEX_BIN || 'codex';
 function run(label, command, args, cwd = root, env = process.env) {
   const started = Date.now();
   try {
@@ -21,27 +22,35 @@ function run(label, command, args, cwd = root, env = process.env) {
     throw error;
   }
 }
+const exists = file => access(file).then(() => true, () => false);
 
 run('Source checks', 'npm', ['run', 'verify:fast']);
-run('Fresh release archives', 'npm', ['run', 'package:plugin']);
+run('Compile smoke helpers', 'npm', ['run', 'build']);
+run('Build committed plugin', 'npm', ['run', 'build:plugin']);
+
+for (const relative of ['.mcp.json', 'README.md', 'dist/mcp.js', 'dist/cli.js', 'dist/webp_dec.wasm', 'skills/genpet/SKILL.md', 'vendor/hatch-pet/SKILL.md', 'scripts/audit_atlas_growth.py']) {
+  assert.ok(await exists(path.join(plugin, relative)), `Missing from plugin: ${relative}`);
+}
+for (const relative of ['assets', 'src', 'tests', 'node_modules', 'scripts/package.ts', 'docs/RESEARCH.md']) {
+  assert.equal(await exists(path.join(plugin, relative)), false, `Developer-only path leaked into plugin: ${relative}`);
+}
 
 const temporary = await mkdtemp(path.join(tmpdir(), 'genpet-release-check-'));
 try {
-  run('Unpack release ZIP', 'unzip', ['-q', path.join(root, 'output', `genpet-${version}.zip`), '-d', temporary]);
-  const unpacked = path.join(temporary, 'genpet');
-  for (const relative of ['.agents/plugins/marketplace.json', 'genpet/.mcp.json', 'genpet/README.md', 'genpet/skills/genpet/SKILL.md', 'genpet/vendor/hatch-pet/SKILL.md', 'genpet/scripts/audit_atlas_growth.py']) {
-    await access(path.join(temporary, relative));
-  }
-  for (const relative of ['genpet/assets', 'genpet/src', 'genpet/tests', 'genpet/scripts/package.ts', 'genpet/docs/RESEARCH.md']) {
-    assert.equal(await access(path.join(temporary, relative)).then(() => true, () => false), false, `Developer-only path leaked into release: ${relative}`);
-  }
-  run('Install archive dependencies', 'npm', ['ci', '--omit=dev', '--ignore-scripts', '--no-audit', '--no-fund'], unpacked);
+  // The repository root is the marketplace; a local path exercises the same layout as `owner/repo`.
   const isolatedEnv = { ...process.env, CODEX_HOME: path.join(temporary, 'codex-home') };
   await mkdir(isolatedEnv.CODEX_HOME, { recursive: true });
-  run('Register archive marketplace', 'codex', ['plugin', 'marketplace', 'add', temporary, '--json'], root, isolatedEnv);
-  run('Install archive plugin', 'codex', ['plugin', 'add', 'genpet@genpet-local', '--json'], root, isolatedEnv);
-  run('Isolated plugin lifecycle', process.execPath, [path.join(root, 'scripts', 'smoke-installed.mjs'), unpacked, root]);
-  console.log('Release archive verified in an isolated Codex home. The installed user Pet was not changed.');
+  run('Register repository marketplace', codex, ['plugin', 'marketplace', 'add', root, '--json'], root, isolatedEnv);
+  run('Install plugin', codex, ['plugin', 'add', 'genpet@genpet', '--json'], root, isolatedEnv);
+  const cache = path.join(isolatedEnv.CODEX_HOME, 'plugins', 'cache', 'genpet', 'genpet');
+  const [version] = await readdir(cache);
+  const installed = path.join(cache, version);
+  assert.equal(await exists(path.join(installed, 'node_modules')), false, 'Installed plugin must not depend on node_modules');
+  const { version: expected } = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
+  assert.ok(version.startsWith(expected), `Installed ${version}, expected ${expected}`);
+  // The installed copy lives outside the repository, so no dependency can resolve from its node_modules.
+  run('Isolated plugin lifecycle', process.execPath, [path.join(root, 'scripts', 'smoke-installed.mjs'), installed, root]);
+  console.log(`Plugin ${version} verified in an isolated Codex home. The installed user Pet was not changed.`);
 } finally {
   await rm(temporary, { recursive: true, force: true });
 }

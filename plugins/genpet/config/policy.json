@@ -1,0 +1,15 @@
+{
+  "defaultProfile": {
+    "name": "GenPet",
+    "palette": "sage",
+    "interest": "build",
+    "temperament": "curious"
+  },
+  "timing": {
+    "hatchHours": 5,
+    "growthHours": 24,
+    "contextHours": 5,
+    "juvenileDays": 7,
+    "adultDays": 21
+  }
+}

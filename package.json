@@ -11,15 +11,16 @@
   "scripts": {
     "start": "node dist/mcp.js",
     "build": "node scripts/clean-build.mjs && tsc",
+    "build:plugin": "tsx scripts/build-plugin.ts",
     "test": "tsx --test tests/*.test.ts",
     "check": "tsc --noEmit",
     "mcp": "tsx src/mcp.ts",
-    "install:codex": "npm run build && tsx scripts/install.ts",
+    "install:codex": "npm run build:plugin && npm run build && tsx scripts/install.ts",
     "export:pet": "tsx src/cli.ts install-native",
     "refresh:native": "tsx src/cli.ts refresh-native",
     "install:cdp-launcher": "tsx src/cli.ts install-cdp-launcher",
     "cdp:status": "tsx src/cli.ts cdp-status",
-    "package:plugin": "npm run build && tsx scripts/package.ts",
+    "package:plugin": "npm run build:plugin && tsx scripts/package.ts",
     "verify:fast": "npm run check && npm test && npm run verify:personalization",
     "verify:release": "node scripts/verify-release.mjs",
     "verify:native": "tsx scripts/verify-native-contract.ts",
@@ -27,12 +28,15 @@
     "verify:personalization": "tsx scripts/verify-personalization.ts"
   },
   "dependencies": {
+    "@jsquash/webp": "^1.5.0",
     "@modelcontextprotocol/sdk": "^1.27.1",
-    "sharp": "^0.34.5",
+    "pngjs": "^7.0.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^22.19.0",
+    "@types/pngjs": "^6.0.5",
+    "esbuild": "^0.28.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
