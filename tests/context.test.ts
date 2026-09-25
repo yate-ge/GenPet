@@ -63,9 +63,10 @@ test('recent messages in older tasks are read; delegated agent prompts are exclu
  const scan=await scanCodexContext({codexHome:root,nowMs:NOW});
  assert.equal(scan.stats.messages,1);assert.equal(scan.entries[0].kind,'research');
 });
-test('pet debug commands and heartbeat maintenance do not become adoption evidence',async t=>{
+test('pet commands and heartbeat maintenance do not become adoption evidence',async t=>{
  const root=await fixture(t,{
   '2026/09/24/controls.jsonl':[
+   user('/genpet-start'),
    user('/genpet-reset 调试重新生成蛋'),
    user('/genpet-grow 7 开发测试'),
    user('$genpet:genpet-state build 调试道具'),
