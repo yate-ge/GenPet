@@ -22,7 +22,7 @@ GenPet 直接使用 Codex 自带的 Pet 窗口和动画状态，在此之上加�
 2. 点「添加插件市场」（在插件页面的「添加」或右上角「页面操作」菜单中）。
 3. 「来源」填 `yate-ge/GenPet`，「Git 引用」留空（跟随 main），点「添加插件市场」。
 4. 在插件列表中找到 GenPet，点安装，并确认它已启用。
-5. 新建一个 Codex 任务（新任务才会加载插件的技能和工具），发送：**领养、安装并启用我的 GenPet 自动成长**。
+5. 新建一个 Codex 任务（新任务才会加载插件的技能和工具），输入 **`/genpet-start`**。
 
 ### 方式二：让 Codex Agent 帮你装
 
@@ -30,7 +30,7 @@ GenPet 直接使用 Codex 自带的 Pet 窗口和动画状态，在此之上加�
 
 > 请从 GitHub 仓库 yate-ge/GenPet 安装 GenPet Codex 插件，不需要 clone 仓库或运行 npm。先确认 `node --version` 为 22 或更高、`codex` CLI 可用。用 `codex plugin list` 检查是否已有 GenPet：已从 `genpet` marketplace 安装时，运行 `codex plugin marketplace upgrade genpet` 更新；来自其他 marketplace 时先告诉我它的来源，不要装第二个 GenPet；尚未安装时，运行 `codex plugin marketplace add yate-ge/GenPet` 和 `codex plugin add genpet@genpet`。完成后用 `codex plugin list` 确认 `genpet@genpet` 为 installed, enabled，并报告版本和安装路径。技能和 MCP 工具要在新的 Codex 任务中才会加载，当前任务无法确认时请直接说明。只安装插件：不要领养、重置或加龄宠物，不要生成图像，保留 `~/.genpet/` 和 `~/.codex/pets/genpet-companion/`。
 
-装好后新建任务，发送 **领养、安装并启用我的 GenPet 自动成长**。
+装好后新建任务，输入 **`/genpet-start`**。
 
 ### 方式三：命令行
 
@@ -54,14 +54,55 @@ codex plugin remove genpet@genpet         # 卸载插件；~/.genpet/ 里的宠�
 
 ## 开始使用
 
-发送 **领养、安装并启用我的 GenPet 自动成长** 后，技能会读取本地活动、领养一颗蛋、生成蛋壳形象和动画图集、校验后导出到 `~/.codex/pets/genpet-companion/`。在 Codex 的 Pets 设置里选中它一次即可；之后的孵化和成长都更新这同一个 Pet。
+在新任务中输入 **`/genpet-start`**（也可以用 `$genpet-start`，或直接说"开始我的 GenPet"）。它可以重复运行，不会重置已有宠物：
 
-其他常用说法：
+- **还没有宠物：** 读取本地活动、领养一颗蛋、生成蛋壳形象和动画图集、校验后安装到 `~/.codex/pets/genpet-companion/`，并创建一个每小时检查的定时成长任务。在 Codex 的 Pets 设置里选中 GenPet 一次即可。
+- **已经有宠物：** 不重新领养，只检查并补全缺失的图像、原生 Pet 和定时任务，然后报告现状。重装插件或换电脑后运行一次即可恢复。
+- **`/genpet-start manual`：** 同上，但不创建定时任务。
 
-- **查看我的 GenPet 状态**
-- **更新我的 GenPet 成长与形象**
+之后的孵化和成长都更新同一个 Pet。其他常用说法：**查看我的 GenPet 状态**、**更新我的 GenPet 成长与形象**。想重新开始一只新宠物，用 `/genpet-reset`。
 
 安装插件本身不会领养宠物，也不会创建定时任务、启动器、LaunchAgent、轮询监控或任何常驻后台进程。
+
+## 架构
+
+GenPet 分成三层：**Codex 里的 Agent 负责"画"，本地 MCP 服务负责"记"，Codex 原生 Pet 负责"显示"。** 插件本身没有任何常驻进程：只有在任务或定时任务调用工具时，MCP 服务才运行。
+
+```mermaid
+flowchart LR
+  U["你的任务 / 斜杠命令<br>/genpet-start 等"] --> S
+  H["Codex 定时任务<br>每小时心跳"] --> S
+  subgraph CX["Codex 桌面端"]
+    S["GenPet 技能<br>skills/"]
+    IG["内置 imagegen"]
+    HP["hatch-pet 管线<br>vendor/hatch-pet（Python）"]
+    PW["原生 Pet 悬浮窗"]
+  end
+  S -- "按请求生成" --> IG --> HP
+  HP -- "校验通过的图集" --> M
+  S -- "调用 MCP 工具" --> M["GenPet MCP 服务<br>dist/mcp.js（Node）"]
+  M --> ST[("~/.genpet/<br>state.json · art/ · backups/")]
+  M -. "只读用户消息" .-> SE[("~/.codex/sessions")]
+  M -- "原子写入" --> PET[("~/.codex/pets/<br>genpet-companion")]
+  PET --> PW
+  M -. "本机调试通道：刷新并确认" .-> PW
+```
+
+| 模块 | 源码 | 职责 |
+|---|---|---|
+| 技能 | `skills/genpet*/` | 告诉 Agent 何时读状态、何时生成图像、如何质检和安装；`/genpet-start` 负责开始或恢复，另外三个是调试命令 |
+| MCP 服务 | `src/mcp.ts` | 把下面各模块暴露为 12 个 `genpet_*` 工具 |
+| 生命周期引擎 | `src/core.ts` | 以领养时间为锚点计算孵化、五小时情境窗口、每日成长和离线补算；孵化时一次性确定出生身份 |
+| 活动情境 | `src/context.ts` | 只读近期 Codex 用户消息，归类为 构建/研究/创作/学习/休息 标签，不保存原文 |
+| 存储 | `src/store.ts` | `~/.genpet/state.json` 的事务读写、备份和幂等记录 |
+| 图像与安装 | `src/art.ts`、`src/image.ts` | 为当前设计生成唯一的图像请求 ID；校验 PNG/WebP 图集；原子替换原生 Pet 的精灵图 |
+| 原生刷新 | `src/native-refresh.ts`、`src/cdp-launcher.ts` | 通过仅限本机的调试端口让 Codex 重新读取 Pet，并核对悬浮窗实际显示的图像哈希 |
+| 调试 | `src/debug.ts` | reset/grow/state 的实现，带备份和 operationId 幂等 |
+| 生成管线 | `vendor/hatch-pet/` | 官方 Hatch Pet 工具：逐行生成动作、提取帧、组装 8×11 V2 图集并质检 |
+
+**一次成长更新的流程：** 定时心跳触发 GenPet 技能 → `genpet_status` 让引擎补算时间，得出当前阶段和道具 → `genpet_art_request` 给出这个设计的请求（已有图像就是 `ready`，不重复生成）→ Agent 用 imagegen 和 hatch-pet 生成并质检 → `genpet_accept_art` 保存到 `~/.genpet/art/` → `genpet_install_native` 原子写入 `genpet-companion` 并尝试刷新悬浮窗。任何一步失败都保留上一张通过质检的图像。
+
+**分发：** 仓库根目录的 `.agents/plugins/marketplace.json` 让整个仓库成为一个 Codex 插件市场。`npm run build:plugin` 用 esbuild 把 `src/` 和全部 npm 依赖打包进 `plugins/genpet/dist/`，图像解码使用 WebAssembly，没有原生模块。Codex 从 GitHub 拉取后直接运行，不需要 npm。
 
 ## 功能与范围
 
@@ -115,7 +156,7 @@ codex plugin remove genpet@genpet         # 卸载插件；~/.genpet/ 里的宠�
 
 ## 调试斜杠命令
 
-插件包含 `genpet-reset`、`genpet-grow`、`genpet-state` 三个技能，可在 `/` 菜单中找到，或用 `$genpet-reset`、`$genpet-grow`、`$genpet-state` 调用。reset 备份后开始新的生命；grow 加速同一个身份的成长；state 修改道具或恢复自动映射。每个流程都会生成并校验缺失的图像，然后安装到同一个原生 Pet。参数见[调试命令说明](docs/DEBUG_COMMANDS.zh-CN.md)。定时维护任务从不调用这些调试命令。
+除了 `/genpet-start`，插件还包含 `genpet-reset`、`genpet-grow`、`genpet-state` 三个调试技能，可在 `/` 菜单中找到，或用 `$genpet-reset`、`$genpet-grow`、`$genpet-state` 调用。reset 备份后开始新的生命；grow 加速同一个身份的成长；state 修改道具或恢复自动映射。每个流程都会生成并校验缺失的图像，然后安装到同一个原生 Pet。参数见[调试命令说明](docs/DEBUG_COMMANDS.zh-CN.md)。定时维护任务从不调用这些调试命令。
 
 ## 开发
 

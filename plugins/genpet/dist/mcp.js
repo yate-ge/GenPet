@@ -23913,7 +23913,7 @@ async function scanCodexContext(options = {}) {
       if (!Number.isFinite(at) || at < startMs || at > nowMs) continue;
       const raw = userText(record3);
       if (!raw) continue;
-      if (raw.includes("<heartbeat>") || /^\s*[/\$](?:genpet:)?genpet-(?:reset|grow|state)\b/.test(raw)) continue;
+      if (raw.includes("<heartbeat>") || /^\s*[/\$](?:genpet:)?genpet-(?:start|reset|grow|state)\b/.test(raw)) continue;
       const prompt = cleanText(raw);
       if (!prompt || prompt.startsWith("# AGENTS.md instructions") || prompt.startsWith("<permissions instructions>")) continue;
       const promptId = digest(prompt);
