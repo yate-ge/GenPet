@@ -33,7 +33,7 @@ If MCP is not loaded, use the bundled CLI from the plugin root: `node dist/cli.j
 
 Automatic refresh of the same visible native Pet is a required acceptance gate. `genpet_install_native` commits files and then runs the host refresh adapter. With a live Codex remote-debugging channel it invalidates the host `custom-avatars` query cache, which is the same data update the Pets Refresh control performs, and confirms the displayed sprite hash matches the new file (`automaticRefresh: true`, `displayStatus: 'confirmed'`). It does not click Settings or any other control. Without that channel it returns `automaticRefresh: false` and `displayStatus: 'unconfirmed'`. Do not report visible growth complete unless display is confirmed. Do not inject into or patch the app, create a replacement overlay, restart an established user session merely to disguise a missing refresh, or create another Pet. Do not set `GENPET_SKIP_NATIVE_REFRESH`. Launch Codex with `--remote-debugging-port=9222` (or 9341) when automatic refresh must run.
 
-`genpet_install_cdp_launcher` installs only an optional manual launcher under `~/Applications`. It must not install a LaunchAgent, polling monitor or other recurring background process. `genpet_remove_cdp_launcher` removes the launcher and cleans up any legacy startup monitor.
+`genpet_install_cdp_launcher` installs only an optional manual launcher under `~/Applications`. It must not install a LaunchAgent, polling monitor or other recurring background process. `genpet_remove_cdp_launcher` removes that launcher.
 
 ## Periodic growth
 
