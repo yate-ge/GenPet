@@ -1,0 +1,20 @@
+{
+  "name": "genpet",
+  "interface": {
+    "displayName": "GenPet"
+  },
+  "plugins": [
+    {
+      "name": "genpet",
+      "source": {
+        "source": "local",
+        "path": "./plugins/genpet"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

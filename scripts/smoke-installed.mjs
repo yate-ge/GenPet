@@ -4,8 +4,8 @@ import { mkdtemp,rm,readFile,access,readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-import sharp from 'sharp';
 const root=path.resolve(process.argv[2]||'.');
+const { readImageInfo }=await import(path.resolve(process.argv[3]||root,'dist','image.js'));
 const fixtureRoot=path.resolve(process.argv[3]||root);
 const temp=await mkdtemp(path.join(tmpdir(),'genpet-installed-'));
 const client=new Client({name:'genpet-installed-smoke',version:'0.1.0'});
@@ -27,7 +27,7 @@ try {
  for(let repeat=0;repeat<2;repeat++){
   const installed=await call('genpet_install_native');
   const manifest=JSON.parse(await readFile(path.join(installed.destination,'pet.json'),'utf8'));assert.equal(manifest.spriteVersionNumber,2);assert.equal(manifest.id,'genpet-companion');
-  const meta=await sharp(path.join(installed.destination,manifest.spritesheetPath)).metadata();assert.equal(meta.width,1536);assert.equal(meta.height,2288);assert.ok(meta.hasAlpha);
+  const meta=await readImageInfo(path.join(installed.destination,manifest.spritesheetPath));assert.equal(meta.width,1536);assert.equal(meta.height,2288);assert.ok(meta.hasAlpha);
   results.push({id:manifest.id,destination:installed.destination,sprite:manifest.spritesheetPath});
  }
  assert.deepEqual(results[0],results[1]);
