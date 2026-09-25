@@ -38,7 +38,7 @@ Requires Codex Desktop with custom Pets and plugin support, and Node.js 22+ on `
 
 In any Codex task, send:
 
-> 请从 GitHub 仓库 yate-ge/GenPet 安装 GenPet Codex 插件，不需要 clone 仓库或运行 npm。先确认 `node --version` 为 22 或更高、`codex` CLI 可用。用 `codex plugin list` 检查是否已有 GenPet：已从 `genpet` marketplace 安装时，运行 `codex plugin marketplace upgrade genpet` 和 `codex plugin add genpet@genpet` 更新；来自其他 marketplace 时先告诉我它的来源，不要装第二个 GenPet；尚未安装时，运行 `codex plugin marketplace add yate-ge/GenPet` 和 `codex plugin add genpet@genpet`。完成后用 `codex plugin list` 确认 `genpet@genpet` 为 installed, enabled，并报告版本和安装路径。技能和 MCP 工具要在新的 Codex 任务中才会加载，当前任务无法确认时请直接说明。只安装插件：不要领养、重置或加龄宠物，不要生成图像，保留 `~/.genpet/` 和 `~/.codex/pets/genpet-companion/`。
+> 请从 GitHub 仓库 yate-ge/GenPet 安装 GenPet Codex 插件，不需要 clone 仓库或运行 npm。先确认 `node --version` 为 22 或更高、`codex` CLI 可用。用 `codex plugin list` 检查是否已有 GenPet：已从 `genpet` marketplace 安装时，运行 `codex plugin marketplace upgrade genpet` 更新；来自其他 marketplace 时先告诉我它的来源，不要装第二个 GenPet；尚未安装时，运行 `codex plugin marketplace add yate-ge/GenPet` 和 `codex plugin add genpet@genpet`。完成后用 `codex plugin list` 确认 `genpet@genpet` 为 installed, enabled，并报告版本和安装路径。技能和 MCP 工具要在新的 Codex 任务中才会加载，当前任务无法确认时请直接说明。只安装插件：不要领养、重置或加龄宠物，不要生成图像，保留 `~/.genpet/` 和 `~/.codex/pets/genpet-companion/`。
 
 ### Install manually
 
@@ -47,11 +47,10 @@ codex plugin marketplace add yate-ge/GenPet
 codex plugin add genpet@genpet
 ```
 
-Update to the latest `main`:
+Update to the latest `main` (new Codex tasks load the updated plugin):
 
 ```sh
 codex plugin marketplace upgrade genpet
-codex plugin add genpet@genpet
 ```
 
 Pin a release with `codex plugin marketplace add yate-ge/GenPet --ref v0.1.0`. Remove with `codex plugin remove genpet@genpet`; your Pet state in `~/.genpet/` is kept.
