@@ -5,7 +5,7 @@
 2026-09-27，用户在调试网页确认普通启动下 IPC 刷新可行。`genpet_install_native` 已接入同一消息路径：
 
 1. 验证当前设计的已验收图集，原子写入同一个 `genpet-companion`。
-2. 连接当前用户的 `$CODEX_HOME/ipc/ipc.sock`（默认 `~/.codex/ipc/ipc.sock`）。
+2. macOS 连接 `$CODEX_HOME/ipc/ipc.sock`（默认 `~/.codex/ipc/ipc.sock`）；Windows 连接本机命名管道 `\\.\pipe\codex-ipc`。
 3. 握手后广播 `query-cache-invalidate`，查询键为 `['custom-avatars']`，覆盖列表与按 ID 的查询。
 4. 用第二个临时客户端确认路由器转发，然后关闭连接。没有新服务器或常驻任务。
 5. IPC 不可用时报告错误并保留 `refreshRequired=true`，供后续重试。
@@ -23,7 +23,7 @@ IPC 的 `automaticRefresh=true` 表示已自动触发刷新请求，**不表示�
 
 ## 兼容性与边界
 
-这是经过实机测试的宿主内部协议，不是公开稳定 API。已验证宿主 `26.924.22138` / build `11645`。消息版本为 0，四字节小端长度加 JSON；连接验证当前用户所有权和目录权限，限制消息大小与总等待时间。宿主升级后需复验。
+这是经过实机测试的宿主内部协议，不是公开稳定 API。macOS 已验证宿主 `26.924.22138` / build `11645`；Windows 已在 `26.924.2738.0` 验证握手和路由器转发，尚未逐次核验屏幕显示。消息版本为 0，四字节小端长度加 JSON；Unix socket 连接前验证当前用户所有权和目录权限，Windows 使用桌面端的本机命名管道；客户端限制消息大小与总等待时间。宿主升级后需复验。
 
 调试/隔离数据不触发真实宿主刷新。生产失败不伪造显示确认，不修改应用包，不安装 LaunchAgent，不重新领养或建立第二个 Pet。
 

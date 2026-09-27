@@ -12,7 +12,10 @@ const codex = process.env.CODEX_BIN || 'codex';
 function run(label, command, args, cwd = root, env = process.env) {
   const started = Date.now();
   try {
-    const output = execFileSync(command, args, { cwd, env, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+    // Windows exposes npm as a .cmd shim, which execFileSync cannot spawn directly.
+    const executable = process.platform === 'win32' && command === 'npm' ? process.execPath : command;
+    const arguments_ = executable !== command ? [process.env.npm_execpath, ...args] : args;
+    const output = execFileSync(executable, arguments_, { cwd, env, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
     console.log(`${label}: passed (${((Date.now() - started) / 1000).toFixed(1)}s)`);
     return output;
   } catch (error) {
