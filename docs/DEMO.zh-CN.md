@@ -1,6 +1,6 @@
 # 同一个原生 Pet 的演示与验收
 
-**当前状态：**在 Codex 的本机调试通道可用时，安装素材后会触发同一原生 Pet 的缓存失效，并核对悬浮宠物实际显示的图集摘要。只有 `displayStatus=confirmed` 才算可见更新；通道不可用时明确报告未确认。真实每日成长仍须在到期后单独验收。
+**当前状态：**首次初始化与后续换图优先通过现有本地 IPC 请求同一原生 Pet 刷新，普通启动无需调试端口。IPC 可见切换已由用户验证；每次调用仍分别报告请求转发和显示哈希核验。
 
 ## 日常使用
 
@@ -16,7 +16,7 @@
 
 记录更新前的 Pet ID、领养时间、设计请求与素材文件。新素材完成生成和检查后，接受它并调用 `genpet_install_native`。确认仍只有一个 GenPet 条目，清单引用新素材且保留前一版清单，再观察同一原生宠物是否显示新形象。
 
-当前没有已验证的公开热刷新接口；本版本通过本机调试通道作废宿主的 `custom-avatars` 查询，再检查悬浮窗实际图集摘要。若未返回 `displayStatus=confirmed`，应报告显示未确认并检查通道，而不能把手动 Refresh 当作自动成长交付。详见[原生刷新记录](NATIVE_REFRESH.zh-CN.md)。
+IPC 使用宿主内部的 `query-cache-invalidate` 消息。`automaticRefresh=true` 表示自动请求已转发，`displayStatus=unconfirmed` 表示未测量本次显示哈希；不应要求用户为此开启调试端口。IPC 失败时尝试已有 CDP。详见[原生刷新说明](NATIVE_REFRESH.zh-CN.md)。
 
 ## 开发验证
 

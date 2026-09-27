@@ -2,7 +2,7 @@
 
 English | [简体中文](README.zh-CN.md)
 
-**Delivery status:** Automatic refresh of the same visible native Pet is implemented in `genpet_install_native` / `npm run export:pet`. After an atomic file commit the adapter drives the host refresh and confirms that the floating Pet's displayed sprite hash matches the new atlas. Display confirmation requires a live local debugging channel. GenPet does not run a background process to force that channel. See [native refresh findings](docs/NATIVE_REFRESH.zh-CN.md).
+**Delivery status:** Native installation requests automatic refresh through the existing desktop IPC channel, including first initialization and later growth. Ordinary startup needs no debug flags or restart. IPC delivery and displayed-image verification are reported separately. See [native refresh findings](docs/NATIVE_REFRESH.zh-CN.md).
 
 An image-generated **native Codex Pet** that starts as an unknown egg, resolves its identity only after five hours of incubation, and grows with your day-to-day activity.
 
@@ -17,7 +17,7 @@ GenPet uses Codex's own Pet window and animation states. It adds a local life-cy
 - Local MCP tools and a distributable Codex plugin.
 - No website, HTTP server, browser page or separate floating-window runtime in this plugin.
 
-**Native refresh behavior:** this Codex version has no verified public hot-reload API. GenPet invalidates the host custom-avatars query through a localhost-only debugging channel, then checks the floating Pet's actual sprite hash. It does not open Settings or simulate clicks. Image synthesis still requires a Codex run; the Node process cannot invoke the desktop imagegen tool autonomously.
+Generation requires a Codex run. After installation, GenPet uses existing local IPC to invalidate the custom-avatar cache; no debug port is required. `automaticRefresh=true` with IPC means the refresh request was relayed, while `displayStatus=unconfirmed` means no displayed-image hash was measured. Existing CDP remains a fallback. See [native refresh behavior](docs/NATIVE_REFRESH.zh-CN.md).
 
 ## Develop
 
@@ -86,7 +86,7 @@ flowchart LR
   M -. "reads user messages only" .-> SE[("~/.codex/sessions")]
   M -- "atomic write" --> PET[("~/.codex/pets/<br>genpet-companion")]
   PET --> PW
-  M -. "localhost debug channel: refresh + confirm" .-> PW
+  M -. "existing IPC: request refresh" .-> PW
 ```
 
 | Module | Source | Responsibility |
@@ -97,7 +97,7 @@ flowchart LR
 | Activity context | `src/context.ts` | Reads recent Codex user messages locally into build/research/create/learn/rest labels; stores no text |
 | Store | `src/store.ts` | Transactions, backups and idempotency records in `~/.genpet/state.json` |
 | Art and install | `src/art.ts`, `src/image.ts` | One request ID per design; PNG/WebP atlas validation; atomic sprite replacement in the native Pet |
-| Native refresh | `src/native-refresh.ts`, `src/cdp-launcher.ts` | Makes Codex reload the Pet over a localhost-only debug port and checks the displayed sprite hash |
+| Native refresh | `src/native-refresh.ts`, `src/cdp-launcher.ts` | Requests a Pet reload over existing IPC; CDP fallback can check the displayed sprite hash |
 | Debug | `src/debug.ts` | reset/grow/state with backups and operationId idempotency |
 | Generation pipeline | `vendor/hatch-pet/` | Official Hatch Pet tools: per-row generation, frame extraction, 8×11 V2 atlas assembly and QA |
 

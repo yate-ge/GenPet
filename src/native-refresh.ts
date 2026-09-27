@@ -1,3 +1,4 @@
+import { refreshViaIpc, type IpcRefreshEvidence } from './native-ipc.js';
 import { createHash } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 import { homedir } from 'node:os';
@@ -7,7 +8,7 @@ import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 
-export type RefreshStrategy = 'cdp-query-invalidate' | 'cdp-remount' | 'cdp-settings-refresh' | 'osascript-settings-refresh' | 'none';
+export type RefreshStrategy = 'ipc-query-invalidate' | 'cdp-query-invalidate' | 'cdp-remount' | 'cdp-settings-refresh' | 'osascript-settings-refresh' | 'none';
 
 export interface DisplayEvidence {
   petId: string;
@@ -17,6 +18,8 @@ export interface DisplayEvidence {
 
 export interface RefreshOutcome {
   automaticRefresh: boolean;
+  ipc?: IpcRefreshEvidence;
+  refreshRequested?: boolean;
   displayStatus: 'confirmed' | 'unconfirmed';
   strategy: RefreshStrategy;
   before?: DisplayEvidence;
@@ -30,6 +33,8 @@ export interface RefreshOptions {
   petId?: string;
   expectedSpritePath: string;
   debugPorts?: number[];
+  /** Override for isolated tests; null disables IPC. Live native destinations default to the existing host socket. */
+  ipcSocketPath?: string | null;
   timeoutMs?: number;
   /** Drive Settings → Refresh via OS scripting when CDP is absent. Off in tests. */
   allowUiRefresh?: boolean;
@@ -162,7 +167,7 @@ const READ_DISPLAY_EXPRESSION = `(() => {
 })()`;
 
 /** Same host action as Settings → Pets → Refresh: invalidate the custom-avatar queries. No UI click. */
-export const LIVE_REFRESH_ATTEMPTS = ['cdp-query-invalidate'] as const;
+export const LIVE_REFRESH_ATTEMPTS = ['ipc-query-invalidate', 'cdp-query-invalidate'] as const;
 
 function invalidateCustomAvatarsExpression(petId: string) {
   const keys = JSON.stringify([['custom-avatars'], ['custom-avatars', 'by-id', petId]]);
@@ -311,14 +316,22 @@ async function pollDisplayedHash(
  * running host show that atlas without user input. Never patches app code,
  * never restarts the host, and never creates another Pet entry.
  *
- * With a debug channel it invalidates the host custom-avatar query cache, the
- * same action as the Pets Refresh control, without clicking that control.
+ * Prefer existing desktop IPC to request cache invalidation. CDP is a fallback
+ * that can additionally verify the displayed hash. Neither path clicks Settings.
  */
 export async function refreshNativePet(options: RefreshOptions): Promise<RefreshOutcome> {
   const petId = options.petId ?? 'custom:genpet-companion';
   const expectedSpriteSha256 = await sha256File(options.expectedSpritePath);
   const timeoutMs = options.timeoutMs ?? 4000;
   const errors: string[] = [];
+  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === 'string' || isLiveNativeDestination(path.dirname(options.expectedSpritePath)));
+  if (useIpc) {
+    try {
+      const ipc = await refreshViaIpc(options.ipcSocketPath ?? undefined, options.timeoutMs ?? 2000);
+      return {automaticRefresh:true,refreshRequested:true,displayStatus:'unconfirmed',strategy:'ipc-query-invalidate',ipc,expectedSpriteSha256,
+        notice:'Automatic refresh requested through the existing desktop IPC channel. No debug port or restart is needed. Router relay confirmed; the displayed sprite hash was not measured.'};
+    } catch (error) { errors.push(`ipc: ${(error as Error).message}`); }
+  }
   const discoveryErrors: string[] = [];
   const ports = await discoverPorts(options.debugPorts);
   let strategy: RefreshStrategy = 'none';
@@ -347,7 +360,7 @@ export async function refreshNativePet(options: RefreshOptions): Promise<Refresh
     errors.push(...discoveryErrors);
     return unconfirmed(
       strategy,
-      'Files committed to the same GenPet entry. No remote-debugging channel was available, so the custom-avatar query cache was not invalidated and the floating Pet hash could not be checked. Visible update remains unconfirmed until Codex runs with --remote-debugging-port (9222 or 9341).',
+      'Files committed to the same GenPet entry. Neither the existing IPC channel nor a remote-debugging channel was available. Automatic refresh was not requested; retry when the desktop is running and ready. Visible update remains unconfirmed.',
     );
   }
 
