@@ -1,6 +1,6 @@
 {
   "name": "genpet",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "A bounded, personalized companion that grows with you. A GenFaceUI-inspired Codex plugin.",
@@ -18,12 +18,13 @@
     "install:codex": "npm run build:plugin && npm run build && tsx scripts/install.ts",
     "export:pet": "tsx src/cli.ts install-native",
     "refresh:native": "tsx src/cli.ts refresh-native",
-    "package:plugin": "npm run build:plugin && tsx scripts/package.ts",
+    "package:plugin": "npm run build:plugin && npm run verify:version && tsx scripts/package.ts",
     "verify:fast": "npm run check && npm test && npm run verify:personalization",
     "verify:release": "node scripts/verify-release.mjs",
     "verify:native": "tsx scripts/verify-native-contract.ts",
     "verify:refresh": "tsx scripts/audit-native-refresh.ts",
-    "verify:personalization": "tsx scripts/verify-personalization.ts"
+    "verify:personalization": "tsx scripts/verify-personalization.ts",
+    "verify:version": "node scripts/verify-release-version.mjs"
   },
   "dependencies": {
     "@jsquash/webp": "^1.5.0",

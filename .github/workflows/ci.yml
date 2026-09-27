@@ -5,6 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -13,6 +15,8 @@ jobs:
       # The release gate exercises the official marketplace/install CLI.
       - run: npm install -g @openai/codex@0.157.0
       - run: npm run verify:release
+        env:
+          GENPET_RELEASE_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
       # plugins/genpet is what users install from GitHub; it must match the source.
       - name: Committed plugin is up to date
         run: |
