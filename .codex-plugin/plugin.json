@@ -17,7 +17,7 @@
   "interface": {
     "displayName": "GenPet",
     "shortDescription": "A native pixel companion, growing with you.",
-    "longDescription": "Adopt an image-generated egg with /genpet-start and grow with local activity. Includes reset, growth and state debugging skills. Updates the same native Pet through background cache invalidation when the local debugging channel is available; reports display confirmation separately.",
+    "longDescription": "Adopt an image-generated egg with /genpet-start and grow with local activity. Includes reset, growth and state debugging skills. Updates the same native Pet through background cache invalidation through the existing desktop IPC channel, including first initialization; reports display confirmation separately.",
     "developerName": "GenPet contributors",
     "category": "Productivity",
     "capabilities": [
