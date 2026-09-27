@@ -8,6 +8,7 @@ Requires Node.js 22+ on `PATH` and a Codex Desktop build with custom Pets and pl
 
 ```sh
 codex plugin marketplace add yate-ge/GenPet
+codex plugin marketplace upgrade genpet
 codex plugin add genpet@genpet
 ```
 
@@ -20,3 +21,15 @@ The `/` menu exposes `genpet-reset`, `genpet-grow`, and `genpet-state` skills fo
 Generation requires a Codex run. After installation, GenPet uses existing local IPC to invalidate the custom-avatar cache; no debug port is required. `automaticRefresh=true` with IPC means the refresh request was relayed, while `displayStatus=unconfirmed` means no displayed-image hash was measured. See [native refresh behavior](docs/NATIVE_REFRESH.zh-CN.md).
 
 Local Pet state and generated artwork live in `~/.genpet/`; the native entry lives at `~/.codex/pets/genpet-companion/`. They are not stored inside this plugin directory. The original GenPet code is MIT licensed; the bundled Hatch Pet utilities are Apache-2.0 licensed. See `THIRD_PARTY_NOTICES.md`.
+
+### Release verification
+
+Every published upgrade, including skill-only changes, requires a new semantic version. Keep source and generated manifests in sync, rebuild, and run `npm run verify:release` against a freshly fetched `origin/main`. See [release rules](https://github.com/yate-ge/GenPet/blob/main/AGENTS.md).
+
+After installation, compare the actual installed directory with the refreshed marketplace package:
+
+```sh
+node <marketplace>/plugins/genpet/scripts/verify-install.mjs <installed-plugin> <marketplace>/plugins/genpet
+```
+
+This checks manifest versions and file hashes, including the delegation policy. Report the marketplace commit as well as the installed version and path. A successful check does not prove that an already-running chat reloaded its skills or that delegated image generation has been tested.

@@ -44,12 +44,13 @@ Sidebar **Plugins** → **Add plugin marketplace** → source `yate-ge/GenPet` (
 
 In any Codex task, send:
 
-> 请从 GitHub 仓库 yate-ge/GenPet 安装 GenPet Codex 插件，不需要 clone 仓库或运行 npm。先确认 `node --version` 为 22 或更高、`codex` CLI 可用。用 `codex plugin list` 检查是否已有 GenPet：已从 `genpet` marketplace 安装时，运行 `codex plugin marketplace upgrade genpet` 更新；来自其他 marketplace 时先告诉我它的来源，不要装第二个 GenPet；尚未安装时，运行 `codex plugin marketplace add yate-ge/GenPet` 和 `codex plugin add genpet@genpet`。完成后用 `codex plugin list` 确认 `genpet@genpet` 为 installed, enabled，并报告版本和安装路径。技能和 MCP 工具要在新的 Codex 任务中才会加载，当前任务无法确认时请直接说明。只安装插件：不要领养、重置或加龄宠物，不要生成图像，保留 `~/.genpet/` 和 `~/.codex/pets/genpet-companion/`。
+> 请从 GitHub 仓库 yate-ge/GenPet 安装 GenPet Codex 插件，不需要 clone 仓库或运行 npm。先确认 `node --version` 为 22 或更高、`codex` CLI 可用。用 `codex plugin list` 检查是否已有 GenPet：已从 `genpet` marketplace 安装时，运行 `codex plugin marketplace upgrade genpet` 更新；来自其他 marketplace 时先告诉我它的来源，不要装第二个 GenPet；尚未安装时，依次运行 `codex plugin marketplace add yate-ge/GenPet`、`codex plugin marketplace upgrade genpet` 和 `codex plugin add genpet@genpet`；marketplace 已存在也必须 upgrade，不能把 already added 当作更新成功。完成后用 `codex plugin list` 确认 `genpet@genpet` 为 installed, enabled，并报告 marketplace 提交、版本和安装路径。使用新版插件自带的 `scripts/verify-install.mjs`，传入实际安装目录和已刷新的 marketplace 中 plugins/genpet 目录，核对清单版本和所有发布文件哈希；缺少核验脚本或内容不一致时不能宣称升级成功。技能和 MCP 工具要在新的 Codex 任务中才会加载，当前任务无法确认时请直接说明。只安装插件：不要领养、重置或加龄宠物，不要生成图像，保留 `~/.genpet/` 和 `~/.codex/pets/genpet-companion/`。
 
 ### Install manually
 
 ```sh
 codex plugin marketplace add yate-ge/GenPet
+codex plugin marketplace upgrade genpet
 codex plugin add genpet@genpet
 ```
 
@@ -181,3 +182,15 @@ See [customization defaults](docs/CUSTOMIZATION.zh-CN.md), [validation and remai
 MIT for original source. Vendored Hatch Pet utilities are Apache-2.0. Generated assets have their generation provenance recorded separately.
 
 GenPet maintains one native entry, `genpet-companion`, throughout incubation, hatching, growth and context updates. Developer demo data cannot be installed into native Pets.
+
+### Release verification
+
+Every published upgrade, including skill-only changes, requires a new semantic version. Keep source and generated manifests in sync, rebuild, and run `npm run verify:release` against a freshly fetched `origin/main`. See [release rules](https://github.com/yate-ge/GenPet/blob/main/AGENTS.md).
+
+After installation, compare the actual installed directory with the refreshed marketplace package:
+
+```sh
+node <marketplace>/plugins/genpet/scripts/verify-install.mjs <installed-plugin> <marketplace>/plugins/genpet
+```
+
+This checks manifest versions and file hashes, including the delegation policy. Report the marketplace commit as well as the installed version and path. A successful check does not prove that an already-running chat reloaded its skills or that delegated image generation has been tested.
