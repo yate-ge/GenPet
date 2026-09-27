@@ -12,6 +12,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install Pillow
+      - run: python tests/artwork_pipeline_test.py
       # The release gate exercises the official marketplace/install CLI.
       - run: npm install -g @openai/codex@0.157.0
       - run: npm run verify:release

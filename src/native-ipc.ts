@@ -11,12 +11,22 @@ export interface IpcRefreshEvidence {
   hostRefreshRequested: true;
 }
 
+export function desktopIpcPath(): string {
+  return process.platform === 'win32'
+    ? '\\\\.\\pipe\\codex-ipc'
+    : path.join(process.env.CODEX_HOME || path.join(homedir(), '.codex'), 'ipc', 'ipc.sock');
+}
+
 /** Existing desktop router; no new server, host imports, or background process. */
-export async function refreshViaIpc(socketPath = path.join(process.env.CODEX_HOME || path.join(homedir(), '.codex'), 'ipc', 'ipc.sock'), timeoutMs = 2000): Promise<IpcRefreshEvidence> {
-  const [file, directory] = await Promise.all([lstat(socketPath), lstat(path.dirname(socketPath))]);
-  const uid = process.getuid?.();
-  if (uid == null || file.uid !== uid || directory.uid !== uid || !file.isSocket() || !directory.isDirectory() || (directory.mode & 0o022)) {
-    throw Error('IPC socket must belong to the current user in a protected directory');
+export async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2000): Promise<IpcRefreshEvidence> {
+  if (process.platform === 'win32') {
+    if (!socketPath.startsWith('\\\\.\\pipe\\')) throw Error('Expected a local Windows named pipe');
+  } else {
+    const [file, directory] = await Promise.all([lstat(socketPath), lstat(path.dirname(socketPath))]);
+    const uid = process.getuid?.();
+    if (uid == null || file.uid !== uid || directory.uid !== uid || !file.isSocket() || !directory.isDirectory() || (directory.mode & 0o022)) {
+      throw Error('IPC socket must belong to the current user in a protected directory');
+    }
   }
   const sockets = new Set<net.Socket>();
   const pending = new Set<(error: Error) => void>();

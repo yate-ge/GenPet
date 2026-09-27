@@ -2132,11 +2132,18 @@ import { lstat } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { homedir } from "node:os";
-async function refreshViaIpc(socketPath = path.join(process.env.CODEX_HOME || path.join(homedir(), ".codex"), "ipc", "ipc.sock"), timeoutMs = 2e3) {
-  const [file, directory] = await Promise.all([lstat(socketPath), lstat(path.dirname(socketPath))]);
-  const uid = process.getuid?.();
-  if (uid == null || file.uid !== uid || directory.uid !== uid || !file.isSocket() || !directory.isDirectory() || directory.mode & 18) {
-    throw Error("IPC socket must belong to the current user in a protected directory");
+function desktopIpcPath() {
+  return process.platform === "win32" ? "\\\\.\\pipe\\codex-ipc" : path.join(process.env.CODEX_HOME || path.join(homedir(), ".codex"), "ipc", "ipc.sock");
+}
+async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
+  if (process.platform === "win32") {
+    if (!socketPath.startsWith("\\\\.\\pipe\\")) throw Error("Expected a local Windows named pipe");
+  } else {
+    const [file, directory] = await Promise.all([lstat(socketPath), lstat(path.dirname(socketPath))]);
+    const uid = process.getuid?.();
+    if (uid == null || file.uid !== uid || directory.uid !== uid || !file.isSocket() || !directory.isDirectory() || directory.mode & 18) {
+      throw Error("IPC socket must belong to the current user in a protected directory");
+    }
   }
   const sockets = /* @__PURE__ */ new Set();
   const pending = /* @__PURE__ */ new Set();
@@ -4272,7 +4279,7 @@ async function decodeRgba(file) {
 // src/native-refresh.ts
 import { createHash as createHash2 } from "node:crypto";
 import { readFile as readFile4, readdir as readdir2 } from "node:fs/promises";
-import { homedir as homedir4 } from "node:os";
+import { homedir as homedir4, tmpdir } from "node:os";
 import path4 from "node:path";
 async function refreshNativePet(options) {
   const expectedSpriteSha256 = createHash2("sha256").update(await readFile4(options.expectedSpritePath)).digest("hex");
@@ -4311,7 +4318,9 @@ function isLiveNativeDestination(destination) {
   const configured = process.env.CODEX_HOME;
   if (!configured) return false;
   const resolved = path4.resolve(configured);
-  if (resolved.startsWith("/var/folders/") || resolved.includes("/tmp/") || resolved.includes("/Temp/")) return false;
+  const temp = path4.resolve(tmpdir());
+  const relativeToTemp = path4.relative(temp, resolved);
+  if (configured.startsWith("/var/folders/") || configured.includes("/tmp/") || relativeToTemp === "" || relativeToTemp !== ".." && !relativeToTemp.startsWith(`..${path4.sep}`) && !path4.isAbsolute(relativeToTemp)) return false;
   return path4.resolve(destination) === path4.resolve(path4.join(resolved, "pets", "genpet-companion"));
 }
 async function listInstalledSprites(destination) {
@@ -4368,8 +4377,9 @@ function artRequest(s) {
     "soft-fins": "one pair of small fleshy lateral fins attached to the sides of the HEAD"
   }[p.hatchIdentity?.appendage || "buds"];
   const birthGeometry = `The selected seed-derived morphology for THIS newborn is ${bodyInstruction} and ${appendageInstruction}. Render these exact targets visibly at 192x208 size; do not substitute another torso shape or appendage type. The two normal arms are separate from the head appendages.`;
-  const common = "Use the hatch-pet image-generation pipeline and native Codex Pet visual language: crisp low-resolution pixel art, stepped dark outlines, a limited palette with two or three shade levels. NOT plush, felt, fur, clay, painterly or 3D rendering. Private task text must never appear in the image or prompt. Generate state-specific rows with imagegen, then assemble and validate a transparent 8x11 v2 atlas. Never synthesize missing animation in code. Artistic and animation descriptions are generation goals, not exact acceptance thresholds: accept usable results with minor deviations under the GenPet artwork policy.";
-  const concept = isEgg ? `EGG FIRST: create an ordinary intact egg, not a disguised animal. No future creature has been selected or generated. The egg's silhouette is a simple ovate shell in warm ivory/gray. At most 5\u201310% of its surface carries extremely faint ${p.profile.palette} tint and sparse abstract ${p.dna.pattern} hints, variant ${p.dna.patternSeed}. No eyes, mouth, face, ears, limbs, leaves, recognizable creature pattern, or heraldic symbol. The hints must not reveal a species. Do not reference any hatchling or reverse-engineer an egg from one. Motion is limited to small shell wobbles, restrained hops and subtle attached shell-light changes; no blinking, exposed creature or detached effects. Look directions use restrained whole-shell leaning, with no invented eyes.` : `${s.identityReference ? "CONTINUE THE SAME REVEALED INDIVIDUAL. Preserve its approved face, palette, anatomy and identity marks exactly; change proportions and small accessories within the existing character." : `FORWARD HATCHING: this is the first time the creature is designed. The egg reference supplies only a subtle color echo and one abstract pattern echo; do not turn the egg silhouette or markings into a face. Design a distinct organism silhouette and head construction; the shell outline is not a head template. There is no predetermined adult to reverse-engineer. Create an organic fantasy creature within the shared rounded pixel family: a broad horizontal oval head with a blunt top, separate compact torso, tiny square eyes without bright highlights, a tiny mouth, two short arms and two short feet. Do not use a pointed egg-shaped head or shell-like ivory surface. ${birthGeometry} Keep buds under 10% of head width, leaflets under 15%, and fins similarly small. ${birthMark} Use the newly resolved birth identity below.`} Birth identity: ${JSON.stringify(p.hatchIdentity)}. Stage ${p.stage}, growth day ${p.growth.days}, normalized size ${p.growth.size.toFixed(2)} (adult maximum 1.25; keep native cell margins), expression weights ${JSON.stringify(p.growth.temperament)}, keepsake level ${p.growth.decorationLevel}/3. Aim for gradual growth within native cell fitting; subtle differences in a single update are acceptable. Relative to the first approved hatchling, target torso length multiplier ${proportions.torsoLengthRelativeToBirth} and limb length multiplier ${proportions.limbLengthRelativeToBirth}; keep canonical head outline, facial features, palette and marks. Show maturity through torso-to-head and limb proportions, not merely enlarging the whole sprite. Do not shrink or recolor a prop to fake body growth. These are character design parameters, not a diagnosis of the user. Current prop: ${visual.prop}. Scene cue ${visual.scene} belongs in the habitat, not the transparent sprite. The approved realized character takes precedence over approximate initial targets; record deviations in provenance and never redraw identity to repair an old target.`;
+  const coverage = isEgg ? "Use the GenPet egg-three profile: one canonical shell and three AI-generated eight-frame loops (egg-calm, egg-stir, egg-settle). Reuse these generated frames across native state rows and one neutral calm frame across all sixteen look slots. No separate character actions or directional gaze exist before birth. Record frame selection and reuse honestly; never synthesize motion in code." : "Generate state-specific rows and sixteen look poses with imagegen. Never synthesize missing animation in code.";
+  const common = "Use the GenPet artwork execution path and native Codex Pet visual language: crisp low-resolution pixel art, stepped dark outlines, a limited palette with two or three shade levels. NOT plush, felt, fur, clay, painterly or 3D rendering. Private task text must never appear in the image or prompt. " + coverage + " Assemble and validate a transparent 8x11 v2 atlas. Artistic and animation descriptions are generation goals, not exact acceptance thresholds: accept usable results with minor deviations under the GenPet artwork policy.";
+  const concept = isEgg ? `EGG FIRST: create an ordinary intact egg, not a disguised animal. No future creature has been selected or generated. The egg's silhouette is a simple ovate shell in warm ivory/gray. At most 5\u201310% of its surface carries extremely faint ${p.profile.palette} tint and sparse abstract ${p.dna.pattern} hints, variant ${p.dna.patternSeed}. No eyes, mouth, face, ears, limbs, leaves, recognizable creature pattern, or heraldic symbol. The hints must not reveal a species. Do not reference any hatchling or reverse-engineer an egg from one. The Pet is not born yet. Motion is limited to calm shell wobble, stronger stirring and a brief disturbed tilt that settles. No jumping, cracking, blinking, exposed creature, gaze following, working, reviewing or detached effects.` : `${s.identityReference ? "CONTINUE THE SAME REVEALED INDIVIDUAL. Preserve its approved face, palette, anatomy and identity marks exactly; change proportions and small accessories within the existing character." : `FORWARD HATCHING: this is the first time the creature is designed. The egg reference supplies only a subtle color echo and one abstract pattern echo; do not turn the egg silhouette or markings into a face. Design a distinct organism silhouette and head construction; the shell outline is not a head template. There is no predetermined adult to reverse-engineer. Create an organic fantasy creature within the shared rounded pixel family: a broad horizontal oval head with a blunt top, separate compact torso, tiny square eyes without bright highlights, a tiny mouth, two short arms and two short feet. Do not use a pointed egg-shaped head or shell-like ivory surface. ${birthGeometry} Keep buds under 10% of head width, leaflets under 15%, and fins similarly small. ${birthMark} Use the newly resolved birth identity below.`} Birth identity: ${JSON.stringify(p.hatchIdentity)}. Stage ${p.stage}, growth day ${p.growth.days}, normalized size ${p.growth.size.toFixed(2)} (adult maximum 1.25; keep native cell margins), expression weights ${JSON.stringify(p.growth.temperament)}, keepsake level ${p.growth.decorationLevel}/3. Aim for gradual growth within native cell fitting; subtle differences in a single update are acceptable. Relative to the first approved hatchling, target torso length multiplier ${proportions.torsoLengthRelativeToBirth} and limb length multiplier ${proportions.limbLengthRelativeToBirth}; keep canonical head outline, facial features, palette and marks. Show maturity through torso-to-head and limb proportions, not merely enlarging the whole sprite. Do not shrink or recolor a prop to fake body growth. These are character design parameters, not a diagnosis of the user. Current prop: ${visual.prop}. Scene cue ${visual.scene} belongs in the habitat, not the transparent sprite. The approved realized character takes precedence over approximate initial targets; record deviations in provenance and never redraw identity to repair an old target.`;
   return {
     id,
     status: current ? "ready" : s.settings.autoArt ? "pending" : "paused",
@@ -4464,6 +4474,17 @@ var SPRITE_NAME = /^spritesheet-[a-f0-9]{8,64}\.(webp|png)$/;
 function nativePetDirectory() {
   return path6.join(process.env.CODEX_HOME || path6.join(homedir5(), ".codex"), "pets", "genpet-companion");
 }
+async function nativePetSelection() {
+  try {
+    const home = process.env.CODEX_HOME || path6.join(homedir5(), ".codex");
+    const state = JSON.parse(await readFile6(path6.join(home, ".codex-global-state.json"), "utf8"));
+    const value = state["electron-persisted-atom-state"]?.["selected-avatar-id"];
+    const selectedPetId = typeof value === "string" ? value : null;
+    return { selectedPetId, genpetSelected: selectedPetId === "custom:genpet-companion" };
+  } catch {
+    return { selectedPetId: null, genpetSelected: null };
+  }
+}
 async function listNativeSprites() {
   const destination = nativePetDirectory();
   let current = null;
@@ -4477,7 +4498,7 @@ async function listNativeSprites() {
 async function runNativeIpc(mode) {
   if (mode === "probe") throw new Error("Use explicit refresh to request IPC refresh");
   if (!isLiveNativeDestination(nativePetDirectory())) throw new Error("Isolated destinations cannot refresh the host");
-  return refreshViaIpc();
+  return { ...await refreshViaIpc(), selection: await nativePetSelection() };
 }
 async function switchNativeSprite(name, method = "ipc", ipcRunner = runNativeIpc) {
   if (!["ipc", "file"].includes(method)) throw new Error("\u672A\u77E5\u5237\u65B0\u65B9\u5F0F");
@@ -4522,7 +4543,7 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
       }
       if (req.method === "GET" && url.pathname === "/api/state") {
         const state = await store.peek();
-        return json({ state, now: store.now(state), demo: store.demo, token, artRequest: artRequest(state), assets: await bundledAssets(), actions, nativeSprites: store.demo ? null : await listNativeSprites() });
+        return json({ state, now: store.now(state), demo: store.demo, token, artRequest: artRequest(state), assets: await bundledAssets(), actions, nativeSprites: store.demo ? null : await listNativeSprites(), nativeSelection: store.demo ? null : await nativePetSelection() });
       }
       if (req.method === "GET" && url.pathname === "/api/art-request") return json(artRequest(await store.peek()));
       if (req.method === "POST" && url.pathname === "/api/action") {
@@ -4627,6 +4648,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
 }
 export {
   listNativeSprites,
+  nativePetSelection,
   runNativeIpc,
   startServer,
   switchNativeSprite

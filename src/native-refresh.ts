@@ -1,7 +1,7 @@
 import { refreshViaIpc, type IpcRefreshEvidence } from './native-ipc.js';
 import { createHash } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
-import { homedir } from 'node:os';
+import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 
 export type RefreshStrategy = 'ipc-query-invalidate' | 'none';
@@ -55,7 +55,10 @@ export function isLiveNativeDestination(destination: string) {
   if (!configured) return false;
   const resolved = path.resolve(configured);
   // Test sandboxes point CODEX_HOME at a temp directory; never drive host UI from those.
-  if (resolved.startsWith('/var/folders/') || resolved.includes('/tmp/') || resolved.includes('/Temp/')) return false;
+  const temp = path.resolve(tmpdir());
+  const relativeToTemp = path.relative(temp, resolved);
+  if (configured.startsWith('/var/folders/') || configured.includes('/tmp/') ||
+      relativeToTemp === '' || (relativeToTemp !== '..' && !relativeToTemp.startsWith(`..${path.sep}`) && !path.isAbsolute(relativeToTemp))) return false;
   return path.resolve(destination) === path.resolve(path.join(resolved, 'pets', 'genpet-companion'));
 }
 
