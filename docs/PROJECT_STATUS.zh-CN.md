@@ -26,7 +26,7 @@
 | 何时触发 | 运行什么 | 能证明什么；不能证明什么 |
 |---|---|---|
 | 生命周期、映射、CLI 等源码改变 | `npm run verify:fast` | 类型检查与精简后的核心行为测试；不重复跑研究审计、不重新生图、不安装插件 |
-| 改动发布内容、准备交付 | `npm run verify:release` | 先跑快速回归，再重建 `plugins/genpet/`；检查插件无研发素材，在临时 Codex 环境通过仓库 marketplace 安装插件、确认安装副本不含 `node_modules`，并在该副本上跑完整 CLI 蛋→孵化→成长→状态→重置流程；不碰真实 Pet，也不证明悬浮窗显示 |
+| 改动发布内容、准备交付 | `npm run verify:release` | 先跑快速回归，再重建 `plugins/genpet/`；检查插件无研发素材，在临时 Codex 环境通过仓库 marketplace 安装插件、确认安装副本不含 `node_modules`，并在该副本上检查 CLI 领养、素材验收、一次原生导出及调试命令入口；成长、身份、重试和缓存细节由核心测试覆盖；不碰真实 Pet，也不证明悬浮窗显示 |
 | **当前**图像请求变为 `pending` | GenPet skill + Codex imagegen + 官方 hatch-pet QA；成长另比较同姿态同道具的原生单格 | 只验收这个请求 ID 的身份、动作、透明和可见比例；已有 `ready` 图集不重复生成，`paused` 不生成 |
 | 到期或状态变化且新素材已验收 | CLI `install-native`，检查 `displayStatus=confirmed` 与同一 Pet ID | 证明用户实际看到新素材；文件写入、逻辑年龄或离线候选都不能替代这一关 |
 

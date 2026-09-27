@@ -58,7 +58,7 @@ test('image references progress from shell-only to a revealed identity, never a 
   let state=await store.current();assert.equal(state.eggReference,shell.file);assert.equal(state.identityReference,undefined);
   await store.transaction(s=>{s.clockOffset=5*3_600_000;});
   request=artRequest(await store.current())!;assert.match(request.prompt,/FORWARD HATCHING/);
-  assert.match(request.prompt,/state-specific rows and sixteen look poses/);
+  assert.match(request.prompt,/all nine state rows and both eight-pose look rows independently from base/);
   assert.doesNotMatch(request.prompt,/egg-three profile/);
   assert.match(request.prompt,/seed-derived permanent marking/);
   assert.deepEqual(request.referenceFiles,[shell.file]);assert.ok(request.visual.hatchIdentity);
