@@ -11,6 +11,6 @@ description: Reset the GenPet only when the user requests a new egg and a new ad
 
 为本次动作创建一个 UUID 作为 operationId。网络重试复用同一个 ID；素材生成失败后继续完成当前 art request，不要再重置或再次加龄。
 
-随后执行共享的[素材生成和原生更新流程](../genpet/references/debug-completion.md)，不能只改变存档就结束。不要启动 subagent。
+随后执行共享的[素材生成和原生更新流程](../genpet/references/debug-completion.md)，不能只改变存档就结束。生图委派遵循共享 GenPet skill；主代理负责状态操作、验收和安装。
 
 MCP 尚未加载时，从此技能目录向上两级找到插件根目录，使用 `node dist/cli.js debug-reset`。参数格式见[调试说明](../../docs/DEBUG_COMMANDS.zh-CN.md)；传同一个 operationId 保持重试幂等。

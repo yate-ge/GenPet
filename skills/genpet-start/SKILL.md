@@ -9,7 +9,7 @@ description: Start or resume GenPet with /genpet-start. Adopts an egg only when 
 
 参数：无参数 = 启用自动成长（默认）；`manual` = 不创建定时任务，只在用户要求时更新。
 
-**绝不调用 `genpet_debug_reset`、`genpet_debug_grow`、`genpet_debug_state`，不改领养时间，不创建第二个原生 Pet。** 已有宠物时不要重新领养；用户想重新开始，请告诉他使用 `/genpet-reset`。不要启动 subagent。
+**绝不调用 `genpet_debug_reset`、`genpet_debug_grow`、`genpet_debug_state`，不改领养时间，不创建第二个原生 Pet。** 已有宠物时不要重新领养；用户想重新开始，请告诉他使用 `/genpet-reset`。生图委派遵循共享 GenPet skill；主代理负责状态操作、验收和安装。
 
 ## 步骤
 

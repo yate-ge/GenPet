@@ -96,7 +96,7 @@ flowchart LR
 | 活动情境 | `src/context.ts` | 只读近期 Codex 用户消息，归类为 构建/研究/创作/学习/休息 标签，不保存原文 |
 | 存储 | `src/store.ts` | `~/.genpet/state.json` 的事务读写、备份和幂等记录 |
 | 图像与安装 | `src/art.ts`、`src/image.ts` | 为当前设计生成唯一的图像请求 ID；校验 PNG/WebP 图集；原子替换原生 Pet 的精灵图 |
-| 原生刷新 | `src/native-refresh.ts`、`src/cdp-launcher.ts` | 优先通过现有 IPC 请求刷新；CDP 作为备用与显示哈希核验路径 |
+| 原生刷新 | `src/native-refresh.ts` | 仅通过现有 IPC 请求刷新 |
 | 调试 | `src/debug.ts` | reset/grow/state 的实现，带备份和 operationId 幂等 |
 | 生成管线 | `vendor/hatch-pet/` | 官方 Hatch Pet 工具：逐行生成动作、提取帧、组装 8×11 V2 图集并质检 |
 
@@ -113,7 +113,7 @@ flowchart LR
 - 本地 MCP 工具和可分发的 Codex 插件。
 - 插件里没有网站、HTTP 服务、浏览器页面或独立的悬浮窗程序。
 
-**原生刷新：** 首次初始化和后续换图都会通过 Codex 已有的本地 IPC 通道请求刷新，普通启动即可，不需要调试参数、重启或后台监控。IPC 成功表示刷新通知已转发，显示哈希未测量时仍返回 `displayStatus=unconfirmed`。IPC 失败时保留 CDP 备用路径。此内部协议已通过用户实机观察验证，宿主升级后需复验。详见[原生刷新说明](docs/NATIVE_REFRESH.zh-CN.md)。
+**原生刷新：** 首次初始化和后续换图都会通过 Codex 已有的本地 IPC 通道请求刷新，普通启动即可，不需要调试参数、重启或后台监控。IPC 成功表示刷新通知已转发，显示哈希未测量时仍返回 `displayStatus=unconfirmed`。IPC 失败时报告错误并保留重试状态。此内部协议已通过用户实机观察验证，宿主升级后需复验。详见[原生刷新说明](docs/NATIVE_REFRESH.zh-CN.md)。
 
 ## 成长机制
 
@@ -144,8 +144,6 @@ flowchart LR
 | `genpet_art_request` | 读取当前有边界的图像生成请求 |
 | `genpet_accept_art` | 质检后接收生成的头像或图集 |
 | `genpet_install_native` | 原子地导出已批准的当前设计图集 |
-| `genpet_install_cdp_launcher` | 安装可选的手动调试启动器 |
-| `genpet_remove_cdp_launcher` | 移除该启动器 |
 | `genpet_configure` | 开关情境读取、冻结装扮、自动生图、改名 |
 | `genpet_clear_context` | 清除已提取的标签，不删除原始对话 |
 | `genpet_debug_reset` | 明确要求时备份旧生命并重新开始一颗蛋 |
