@@ -30,7 +30,7 @@ test('release gate rejects same-version payload changes and permits a consistent
  try {
   const git=(...args:string[])=>execFileSync('git',args,{cwd:dir,stdio:'pipe'});
   git('init');git('config','user.name','Fixture');git('config','user.email','fixture@example.invalid');
-  const manifests=['package.json','.codex-plugin/plugin.json','plugins/genpet/package.json','plugins/genpet/.codex-plugin/plugin.json'];
+  const manifests=['package.json','plugins/genpet/package.json','plugins/genpet/.codex-plugin/plugin.json'];
   const setVersion=async(version:string)=>{
    for(const f of manifests){await mkdir(path.dirname(path.join(dir,f)),{recursive:true});await writeFile(path.join(dir,f),JSON.stringify({version}));}
    await writeFile(path.join(dir,'package-lock.json'),JSON.stringify({version,packages:{'':{version}}}));

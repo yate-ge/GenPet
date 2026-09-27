@@ -9,14 +9,14 @@
 | 生命周期与身份 | `src/core.ts` | 真正的领养时间、五小时孵化／情境窗口、每日成长和出生后身份冻结 |
 | 本地活动映射 | `src/context.ts`、`src/store.ts` | 只读近期 Codex 用户消息，提取有限标签和领养映射依据；不保存原文 |
 | 图像请求与安装 | `src/art.ts`、`src/native-refresh.ts` | 为当前设计生成唯一请求 ID、验收图集、原子替换同一个原生 Pet 并确认可见刷新 |
-| 调试控制 | `src/debug.ts`、`skills/genpet-{reset,grow,state}/` | 显式重置、逻辑加龄、道具覆盖；定时任务不调用它们 |
-| 生成管线 | `skills/genpet/`、`vendor/hatch-pet/` | Codex 内置 imagegen 生成角色与动作；官方管线组装和检查 V2 图集 |
-| 安装版插件 | `plugins/genpet/`、`.agents/plugins/marketplace.json` | 由 `npm run build:plugin` 生成并提交；用户用 `codex plugin marketplace add yate-ge/GenPet` 安装。只含打包后的运行时、技能、生成工具和必要说明，无需 npm；不含示例图、测试或开发脚本 |
+| 调试控制 | `src/debug.ts`、`plugins/genpet/skills/genpet-{reset,grow,state}/` | 显式重置、逻辑加龄、道具覆盖；定时任务不调用它们 |
+| 生成管线 | `plugins/genpet/skills/genpet/`、`plugins/genpet/vendor/hatch-pet/` | Codex 内置 imagegen 生成角色与动作；官方管线组装和检查 V2 图集 |
+| 安装版插件 | `plugins/genpet/`、`.agents/plugins/marketplace.json` | 唯一插件源码包直接提交；`npm run build:plugin` 只重建其中的运行时生成文件。用户用 `codex plugin marketplace add yate-ge/GenPet` 安装。插件无需 npm，且不含示例图、测试或开发源码 |
 | 源码与研发素材 | `src/`、`tests/`、`scripts/`、`assets/`、`docs/` | `assets` 是范例和测试夹具；`output/verification` 是忽略的本机证据，不属于插件 |
 
 ## 当前完成度
 
-- **工程链路已跑通：**一个 `genpet-companion`，真实领养时间不被调试测试重置；蛋、孵化、状态切换与无感刷新已有实机或隔离证据。三个调试技能及 12 个 MCP 工具在已安装插件中可发现。仓库本身即 Codex marketplace，可直接从 GitHub 安装。
+- **工程链路已跑通：**一个 `genpet-companion`，真实领养时间不被调试测试重置；蛋、孵化、状态切换与无感刷新已有实机或隔离证据。开始/恢复与三个调试技能通过安装包内的 Node CLI 完成操作。仓库本身即 Codex marketplace，可直接从 GitHub 安装。
 - **个性化有初步证据：**五类合成活动 × 五个 seed 的映射回归、1000 seed 的参数碰撞检查、三只同活动／同道具角色的原生尺寸图像对照。少量图像中有相近轮廓，尚不能声称任意两位用户都可被辨认。
 - **成长有隔离候选：**当前角色第 1 日的完整 V2 图集已生成并通过结构检查，静息格有可见比例变化；两处注视方向的帧差待复核。真实第 1 日尚未到期，不能把候选称作已显示的成长。
 - **研究结论尚未成立：**没有不同真实用户的盲辨或长期使用数据。当前演示证明机制可运行，不证明映射被用户认可、角色易辨认或长期依恋。
@@ -25,14 +25,14 @@
 
 | 何时触发 | 运行什么 | 能证明什么；不能证明什么 |
 |---|---|---|
-| 生命周期、映射、MCP 等源码改变 | `npm run verify:fast` | 类型、46 项行为测试和 25 组合成映射；不重新生图、不安装插件 |
-| 改动发布内容、准备交付 | `npm run verify:release` | 先跑快速回归，再重建 `plugins/genpet/`；检查插件无研发素材，在临时 Codex 环境通过仓库 marketplace 安装插件、确认安装副本不含 `node_modules`，并在该副本上跑完整 MCP 蛋→孵化→成长→状态→重置流程；不碰真实 Pet，也不证明悬浮窗显示 |
+| 生命周期、映射、CLI 等源码改变 | `npm run verify:fast` | 类型检查与精简后的核心行为测试；不重复跑研究审计、不重新生图、不安装插件 |
+| 改动发布内容、准备交付 | `npm run verify:release` | 先跑快速回归，再重建 `plugins/genpet/`；检查插件无研发素材，在临时 Codex 环境通过仓库 marketplace 安装插件、确认安装副本不含 `node_modules`，并在该副本上跑完整 CLI 蛋→孵化→成长→状态→重置流程；不碰真实 Pet，也不证明悬浮窗显示 |
 | **当前**图像请求变为 `pending` | GenPet skill + Codex imagegen + 官方 hatch-pet QA；成长另比较同姿态同道具的原生单格 | 只验收这个请求 ID 的身份、动作、透明和可见比例；已有 `ready` 图集不重复生成，`paused` 不生成 |
-| 到期或状态变化且新素材已验收 | `genpet_install_native`，检查 `displayStatus=confirmed` 与同一 Pet ID | 证明用户实际看到新素材；文件写入、逻辑年龄或离线候选都不能替代这一关 |
+| 到期或状态变化且新素材已验收 | CLI `install-native`，检查 `displayStatus=confirmed` 与同一 Pet ID | 证明用户实际看到新素材；文件写入、逻辑年龄或离线候选都不能替代这一关 |
 
 `npm run install:codex` 只在确定要更新本机插件时运行。每次文档、测试或候选图片检查后重复安装，没有增加验证力度。Codex 宿主升级时另跑 `npm run verify:native`；刷新适配器改变时另跑 `npm run verify:refresh`。真实用户研究按[评估方案](EVALUATION_PROTOCOL.zh-CN.md)独立开展，不与每次代码回归捆绑。
 
-每轮图像生成只处理**当前**设计，不补画错过的历史窗口；相同请求 ID 优先复用已验收素材。失败保留上一张合格图，记录失败项并停止无限修复。常规检查不调用 `genpet_debug_reset/grow/state`，也不生成第二个原生条目。项目的三个不同时间点必须分别报告：逻辑到期、素材验收完成、原生显示确认。
+每轮图像生成只处理**当前**设计，不补画错过的历史窗口；相同请求 ID 优先复用已验收素材。失败保留上一张合格图，记录失败项并停止无限修复。常规检查不运行 `debug-reset/grow/state`，也不生成第二个原生条目。项目的三个不同时间点必须分别报告：逻辑到期、素材验收完成、原生显示确认。
 
 ## 接下来真正需要证明的事
 

@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 const git = (...args) => execFileSync('git', args, {encoding:'utf8'}).trim();
 const current = JSON.parse(await readFile('package.json','utf8')).version;
 const lock = JSON.parse(await readFile('package-lock.json','utf8'));
-for (const file of ['.codex-plugin/plugin.json','plugins/genpet/package.json','plugins/genpet/.codex-plugin/plugin.json']) {
+for (const file of ['plugins/genpet/package.json','plugins/genpet/.codex-plugin/plugin.json']) {
   if (JSON.parse(await readFile(file,'utf8')).version !== current) throw new Error(`Version mismatch: ${file}`);
 }
 if (lock.version !== current || lock.packages[''].version !== current) throw new Error('Lockfile version mismatch');
