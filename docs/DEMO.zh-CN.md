@@ -16,7 +16,7 @@
 
 记录更新前的 Pet ID、领养时间、设计请求与素材文件。新素材完成生成和检查后，接受它并调用 `genpet_install_native`。确认仍只有一个 GenPet 条目，清单引用新素材且保留前一版清单，再观察同一原生宠物是否显示新形象。
 
-IPC 使用宿主内部的 `query-cache-invalidate` 消息。`automaticRefresh=true` 表示自动请求已转发，`displayStatus=unconfirmed` 表示未测量本次显示哈希；不应要求用户为此开启调试端口。IPC 失败时尝试已有 CDP。详见[原生刷新说明](NATIVE_REFRESH.zh-CN.md)。
+IPC 使用宿主内部的 `query-cache-invalidate` 消息。`automaticRefresh=true` 表示自动请求已转发，`displayStatus=unconfirmed` 表示未测量本次显示哈希；不应要求用户为此开启调试端口。IPC 失败时报告错误并保留重试状态。详见[原生刷新说明](NATIVE_REFRESH.zh-CN.md)。
 
 ## 开发验证
 

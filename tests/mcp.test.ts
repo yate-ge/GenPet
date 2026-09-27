@@ -10,9 +10,7 @@ test('MCP starts, exposes tools, adopts once, and produces pixel-native generati
  const transport=new StdioClientTransport({command:process.execPath,args:['--import','tsx','src/mcp.ts'],cwd:path.resolve(import.meta.dirname,'..'),env:{...process.env,GENPET_DATA_DIR:dir} as Record<string,string>,stderr:'pipe'});
  const client=new Client({name:'genpet-test',version:'1.0.0'});
  try {
-  await client.connect(transport);const {tools}=await client.listTools();assert.equal(tools.length,12);assert.equal(tools.some(t=>t.name==='genpet_open_lab'||t.name==='genpet_demo_native'),false);
-  assert.equal(tools.some(t=>t.name==='genpet_install_cdp_launcher'),true);
-  assert.equal(tools.some(t=>t.name==='genpet_remove_cdp_launcher'),true);
+  await client.connect(transport);const {tools}=await client.listTools();assert.equal(tools.length,10);assert.equal(tools.some(t=>t.name==='genpet_open_lab'||t.name==='genpet_demo_native'),false);
   const call=async(name:string,args:Record<string,unknown>={})=>{const r=await client.callTool({name,arguments:args});return {error:r.isError,value:JSON.parse((r.content as any)[0].text)};};
   await call('genpet_configure',{autoContext:false});
   assert.equal((await call('genpet_status')).value.state.pet,null);

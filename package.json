@@ -18,8 +18,6 @@
     "install:codex": "npm run build:plugin && npm run build && tsx scripts/install.ts",
     "export:pet": "tsx src/cli.ts install-native",
     "refresh:native": "tsx src/cli.ts refresh-native",
-    "install:cdp-launcher": "tsx src/cli.ts install-cdp-launcher",
-    "cdp:status": "tsx src/cli.ts cdp-status",
     "package:plugin": "npm run build:plugin && tsx scripts/package.ts",
     "verify:fast": "npm run check && npm test && npm run verify:personalization",
     "verify:release": "node scripts/verify-release.mjs",

@@ -2705,11 +2705,11 @@ var Module = (() => {
     var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
     var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions == "object" && typeof process.versions.node == "string";
     var scriptDirectory = "";
-    function locateFile(path9) {
+    function locateFile(path8) {
       if (Module2["locateFile"]) {
-        return Module2["locateFile"](path9, scriptDirectory);
+        return Module2["locateFile"](path8, scriptDirectory);
       }
-      return scriptDirectory + path9;
+      return scriptDirectory + path8;
     }
     var read_, readAsync, readBinary, setWindowTitle;
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -4219,253 +4219,8 @@ import { createHash as createHash2 } from "node:crypto";
 import { readFile as readFile4, readdir as readdir2 } from "node:fs/promises";
 import { homedir as homedir4 } from "node:os";
 import path4 from "node:path";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-var execFileAsync = promisify(execFile);
-var DEFAULT_PORTS = [Number(process.env.GENPET_CODEX_DEBUG_PORT) || 9222, 9341, 9223, 9222];
-async function sha256File(file) {
-  return createHash2("sha256").update(await readFile4(file)).digest("hex");
-}
-function hashSpriteDataUrl(value) {
-  const match = /url\((['"]?)data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)\1\)/.exec(value) || /^data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)$/.exec(value);
-  const b64 = match?.[2] ?? match?.[1];
-  if (!b64) return null;
-  return createHash2("sha256").update(Buffer.from(b64, "base64")).digest("hex");
-}
-async function fetchJson(url, timeoutMs = 400) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
-  } finally {
-    clearTimeout(timer);
-  }
-}
-async function discoverPorts(explicit) {
-  if (explicit?.length) return [...new Set(explicit)];
-  const found = /* @__PURE__ */ new Set();
-  for (const port of DEFAULT_PORTS) if (Number.isInteger(port) && port > 0) found.add(port);
-  const userData = path4.join(process.env.GENPET_CODEX_USER_DATA || path4.join(homedir4(), "Library/Application Support/Codex"), "DevToolsActivePort");
-  try {
-    const text = await readFile4(userData, "utf8");
-    const port = Number(text.split(/\r?\n/)[0]?.trim());
-    if (Number.isInteger(port) && port > 0) found.add(port);
-  } catch {
-  }
-  try {
-    const { stdout } = await execFileAsync("/bin/ps", ["-axo", "args"]);
-    for (const line of stdout.split("\n")) {
-      if (!/ChatGPT|Codex/i.test(line)) continue;
-      const match = /--remote-debugging-port=(\d+)/.exec(line);
-      if (match) found.add(Number(match[1]));
-    }
-  } catch {
-  }
-  return [...found];
-}
-async function listTargets(port) {
-  const list = await fetchJson(`http://127.0.0.1:${port}/json/list`);
-  return Array.isArray(list) ? list.filter((t) => t?.webSocketDebuggerUrl) : [];
-}
-var CdpSession = class {
-  constructor(url) {
-    this.url = url;
-  }
-  url;
-  nextId = 1;
-  socket = null;
-  pending = /* @__PURE__ */ new Map();
-  async open() {
-    if (this.socket) return;
-    this.socket = new WebSocket(this.url);
-    await new Promise((resolve, reject) => {
-      const socket = this.socket;
-      socket.addEventListener("open", () => resolve(), { once: true });
-      socket.addEventListener("error", () => reject(new Error("CDP WebSocket connection failed")), { once: true });
-    });
-    this.socket.addEventListener("message", (event2) => {
-      let message;
-      try {
-        message = JSON.parse(String(event2.data));
-      } catch {
-        return;
-      }
-      if (typeof message?.id !== "number") return;
-      const entry = this.pending.get(message.id);
-      if (!entry) return;
-      this.pending.delete(message.id);
-      if (message.error) entry.reject(new Error(message.error.message || "CDP error"));
-      else if (message.result?.exceptionDetails) entry.reject(new Error(message.result.exceptionDetails.text || "CDP evaluate threw"));
-      else entry.resolve(message.result?.result?.value);
-    });
-  }
-  async evaluate(expression2, timeoutMs = 2500) {
-    await this.open();
-    const id = this.nextId++;
-    const result2 = new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        this.pending.delete(id);
-        reject(new Error("CDP evaluate timed out"));
-      }, timeoutMs);
-      this.pending.set(id, {
-        resolve: (value) => {
-          clearTimeout(timer);
-          resolve(value);
-        },
-        reject: (error) => {
-          clearTimeout(timer);
-          reject(error);
-        }
-      });
-    });
-    this.socket.send(JSON.stringify({
-      id,
-      method: "Runtime.evaluate",
-      params: { expression: expression2, awaitPromise: true, returnByValue: true }
-    }));
-    return result2;
-  }
-  close() {
-    try {
-      this.socket?.close();
-    } catch {
-    }
-    this.socket = null;
-    this.pending.clear();
-  }
-};
-var READ_DISPLAY_EXPRESSION = `(() => {
-  const node = document.querySelector('[data-codex-pet-id]');
-  if (!node) return { ok: false, reason: 'pet-node-not-found' };
-  const style = getComputedStyle(node);
-  const image = style.backgroundImage || '';
-  const petId = node.getAttribute('data-codex-pet-id') || node.getAttribute('data-codex-pet-asset-ref') || '';
-  return { ok: true, petId, backgroundImage: image };
-})()`;
-function invalidateCustomAvatarsExpression(petId) {
-  const keys = JSON.stringify([["custom-avatars"], ["custom-avatars", "by-id", petId]]);
-  return `(() => {
-  const keys = ${keys};
-  const rootEl = document.querySelector('#root') || document.body;
-  const fiberKey = Object.keys(rootEl).find((key) => key.startsWith('__reactContainer$') || key.startsWith('__reactFiber$') || key.startsWith('__reactInternalInstance$'));
-  const root = fiberKey ? rootEl[fiberKey] : null;
-  const seen = new Set();
-  const clients = [];
-  const consider = (value, depth) => {
-    if (!value || typeof value !== 'object' || depth > 8 || seen.has(value) || clients.length > 2) return;
-    if (seen.size > 20000) return;
-    seen.add(value);
-    if (typeof value.invalidateQueries === 'function' && typeof value.getQueryCache === 'function') {
-      clients.push(value);
-      return;
-    }
-    let names;
-    try { names = Object.keys(value); } catch { return; }
-    for (const name of names) {
-      if (name === 'return' || name === 'child' || name === 'sibling' || name === 'alternate' || name === 'elementType' || name === 'type') continue;
-      try { consider(value[name], depth + 1); } catch { /* revoked */ }
-    }
-  };
-  const stack = root ? [root] : [];
-  const fibers = new Set();
-  while (stack.length && fibers.size < 500 && clients.length < 2) {
-    const node = stack.pop();
-    if (!node || fibers.has(node)) continue;
-    fibers.add(node);
-    consider(node.memoizedProps, 0);
-    consider(node.memoizedState, 0);
-    consider(node.dependencies, 0);
-    consider(node.updateQueue, 0);
-    if (node.child) stack.push(node.child);
-    if (node.sibling) stack.push(node.sibling);
-  }
-  if (!clients.length) return { ok: false, reason: 'query-client-not-found' };
-  return Promise.all(clients.map(async (client) => {
-    for (const queryKey of keys) {
-      try { await client.invalidateQueries({ queryKey }); }
-      catch (error) { return { ok: false, reason: String(error) }; }
-    }
-    return { ok: true };
-  })).then((results) => ({
-    ok: results.some((item) => item.ok),
-    clients: clients.length,
-    reason: results.find((item) => !item.ok)?.reason || null,
-  }));
-})()`;
-}
-function isMainWindow(target) {
-  return target.type === "page" && target.url.startsWith("app://") && !target.url.includes("avatar-overlay");
-}
-function isOverlayWindow(target) {
-  return target.type === "page" && target.url.includes("avatar-overlay");
-}
-function isPetRelevant(target) {
-  return isMainWindow(target) || isOverlayWindow(target);
-}
-async function readDisplay(sessions, petId) {
-  for (const session of sessions) {
-    try {
-      const value = await session.evaluate(READ_DISPLAY_EXPRESSION);
-      if (!value?.ok || !value.backgroundImage) continue;
-      const spriteSha256 = hashSpriteDataUrl(value.backgroundImage);
-      if (!spriteSha256) continue;
-      if (value.petId && value.petId !== petId && value.petId !== petId.replace(/^custom:/, "")) continue;
-      return { petId: value.petId || petId, spriteSha256, source: "cdp-dom" };
-    } catch {
-    }
-  }
-  return void 0;
-}
-async function withSessions(targets, fn) {
-  const sessions = targets.map((target) => new CdpSession(target.webSocketDebuggerUrl));
-  try {
-    return await fn(sessions);
-  } finally {
-    for (const session of sessions) session.close();
-  }
-}
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-function confirmedOutcome(strategy, before, after, expectedSpriteSha256, errors) {
-  const changed = !before || before.spriteSha256 !== after.spriteSha256;
-  return {
-    automaticRefresh: true,
-    displayStatus: "confirmed",
-    strategy,
-    before,
-    after,
-    expectedSpriteSha256,
-    notice: changed ? "Floating Pet reloaded the committed atlas for the same identity. Display hash matches the installed spritesheet." : "Floating Pet already showed the committed atlas; display hash matches the installed spritesheet.",
-    errors: errors.length ? errors : void 0
-  };
-}
-async function pollDisplayedHash(sessionsForRead, petId, expectedSpriteSha256, before, strategy, timeoutMs, errors) {
-  const started = Date.now();
-  let notedMismatch = false;
-  let after;
-  while (Date.now() - started <= timeoutMs) {
-    after = await withSessions(sessionsForRead, (sessions) => readDisplay(sessions, petId));
-    if (after?.spriteSha256 === expectedSpriteSha256) {
-      const changed = !before || before.spriteSha256 !== after.spriteSha256;
-      const alreadyCurrent = before?.spriteSha256 === expectedSpriteSha256;
-      if (changed || alreadyCurrent) return confirmedOutcome(strategy, before, after, expectedSpriteSha256, errors);
-    }
-    if (!notedMismatch && after && before && after.spriteSha256 !== before.spriteSha256 && after.spriteSha256 !== expectedSpriteSha256) {
-      errors.push("display hash changed but does not match the committed spritesheet");
-      notedMismatch = true;
-    }
-    if (Date.now() - started >= timeoutMs) break;
-    await delay(120);
-  }
-  return void 0;
-}
 async function refreshNativePet(options) {
-  const petId = options.petId ?? "custom:genpet-companion";
-  const expectedSpriteSha256 = await sha256File(options.expectedSpritePath);
-  const timeoutMs = options.timeoutMs ?? 4e3;
+  const expectedSpriteSha256 = createHash2("sha256").update(await readFile4(options.expectedSpritePath)).digest("hex");
   const errors = [];
   const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || isLiveNativeDestination(path4.dirname(options.expectedSpritePath)));
   if (useIpc) {
@@ -4478,85 +4233,21 @@ async function refreshNativePet(options) {
         strategy: "ipc-query-invalidate",
         ipc,
         expectedSpriteSha256,
-        notice: "Automatic refresh requested through the existing desktop IPC channel. No debug port or restart is needed. Router relay confirmed; the displayed sprite hash was not measured."
+        notice: "Automatic refresh requested through the existing desktop IPC channel. Router relay confirmed; the displayed sprite hash was not measured."
       };
     } catch (error) {
       errors.push(`ipc: ${error.message}`);
     }
   }
-  const discoveryErrors = [];
-  const ports = await discoverPorts(options.debugPorts);
-  let strategy = "none";
-  const unconfirmed = (strategy2, notice, before2, after2) => ({
+  return {
     automaticRefresh: false,
+    refreshRequested: false,
     displayStatus: "unconfirmed",
-    strategy: strategy2,
-    before: before2,
-    after: after2,
+    strategy: "none",
     expectedSpriteSha256,
-    notice,
+    notice: useIpc ? "Files committed to the same GenPet entry. IPC refresh failed; retry when the desktop is running and ready. Visible update remains unconfirmed." : "Files committed to the same GenPet entry. IPC refresh was skipped for this destination. Visible update remains unconfirmed.",
     errors: errors.length ? errors : void 0
-  });
-  let allTargets = [];
-  for (const port of ports) {
-    try {
-      const targets = await listTargets(port);
-      allTargets.push(...targets.filter(isPetRelevant));
-    } catch (error) {
-      discoveryErrors.push(`port ${port}: ${error.message}`);
-    }
-  }
-  if (!allTargets.length) {
-    errors.push(...discoveryErrors);
-    return unconfirmed(
-      strategy,
-      "Files committed to the same GenPet entry. Neither the existing IPC channel nor a remote-debugging channel was available. Automatic refresh was not requested; retry when the desktop is running and ready. Visible update remains unconfirmed."
-    );
-  }
-  const overlayTargets = allTargets.filter(isOverlayWindow);
-  const mainTargets = allTargets.filter(isMainWindow);
-  const sessionsForRead = [...overlayTargets, ...mainTargets];
-  const before = await withSessions(sessionsForRead, (sessions) => readDisplay(sessions, petId));
-  if (before?.spriteSha256 === expectedSpriteSha256) {
-    return confirmedOutcome("none", before, before, expectedSpriteSha256, errors);
-  }
-  const pageTargets = [...overlayTargets, ...mainTargets];
-  let triggerRan = false;
-  const invalidateMisses = [];
-  strategy = "cdp-query-invalidate";
-  await withSessions(pageTargets, async (sessions) => {
-    for (const session of sessions) {
-      try {
-        const result2 = await session.evaluate(invalidateCustomAvatarsExpression(petId), 8e3);
-        if (result2?.ok) triggerRan = true;
-        else if (result2?.reason) invalidateMisses.push(result2.reason);
-      } catch (error) {
-        errors.push(`invalidate: ${error.message}`);
-      }
-    }
-  });
-  if (!triggerRan && invalidateMisses.length) {
-    errors.push(`invalidate: ${invalidateMisses[0]}`);
-  }
-  if (triggerRan) {
-    const confirmed = await pollDisplayedHash(
-      sessionsForRead,
-      petId,
-      expectedSpriteSha256,
-      before,
-      "cdp-query-invalidate",
-      timeoutMs,
-      errors
-    );
-    if (confirmed) return confirmed;
-  }
-  const after = await withSessions(sessionsForRead, (sessions) => readDisplay(sessions, petId));
-  return unconfirmed(
-    strategy,
-    triggerRan ? "Host refresh trigger ran, but the floating Pet display hash was not confirmed against the new spritesheet before timeout. Do not report visible growth complete." : "Files committed to the same GenPet entry. Host refresh trigger did not run. Visible update is unconfirmed; this does not satisfy automatic-update acceptance.",
-    before,
-    after
-  );
+  };
 }
 function isLiveNativeDestination(destination) {
   if (process.env.GENPET_SKIP_NATIVE_REFRESH === "1") return false;
@@ -4614,8 +4305,8 @@ function artRequest(s) {
     "soft-fins": "one pair of small fleshy lateral fins attached to the sides of the HEAD"
   }[p.hatchIdentity?.appendage || "buds"];
   const birthGeometry = `The selected seed-derived morphology for THIS newborn is ${bodyInstruction} and ${appendageInstruction}. Render these exact targets visibly at 192x208 size; do not substitute another torso shape or appendage type. The two normal arms are separate from the head appendages.`;
-  const common = "Use the hatch-pet image-generation pipeline and native Codex Pet visual language: crisp low-resolution pixel art, stepped dark outlines, a limited palette with two or three shade levels. NOT plush, felt, fur, clay, painterly or 3D rendering. Private task text must never appear in the image or prompt. Generate state-specific rows with imagegen, then assemble and validate a transparent 8x11 v2 atlas. Never synthesize missing animation in code.";
-  const concept = isEgg ? `EGG FIRST: create an ordinary intact egg, not a disguised animal. No future creature has been selected or generated. The egg's silhouette is a simple ovate shell in warm ivory/gray. At most 5\u201310% of its surface carries extremely faint ${p.profile.palette} tint and sparse abstract ${p.dna.pattern} hints, variant ${p.dna.patternSeed}. No eyes, mouth, face, ears, limbs, leaves, recognizable creature pattern, or heraldic symbol. The hints must not reveal a species. Do not reference any hatchling or reverse-engineer an egg from one. Motion is limited to small shell wobbles, restrained hops and subtle attached shell-light changes; no blinking, exposed creature or detached effects. Look directions use restrained whole-shell leaning, with no invented eyes.` : `${s.identityReference ? "CONTINUE THE SAME REVEALED INDIVIDUAL. Preserve its approved face, palette, anatomy and identity marks exactly; change proportions and small accessories within the existing character." : `FORWARD HATCHING: this is the first time the creature is designed. The egg reference supplies only a subtle color echo and one abstract pattern echo; do not turn the egg silhouette or markings into a face. Design a distinct organism silhouette and head construction; the shell outline is not a head template. There is no predetermined adult to reverse-engineer. Create an organic fantasy creature within the shared rounded pixel family: a broad horizontal oval head with a blunt top, separate compact torso, tiny square eyes without bright highlights, a tiny mouth, two short arms and two short feet. Do not use a pointed egg-shaped head or shell-like ivory surface. ${birthGeometry} Keep buds under 10% of head width, leaflets under 15%, and fins similarly small. ${birthMark} Use the newly resolved birth identity below.`} Birth identity: ${JSON.stringify(p.hatchIdentity)}. Stage ${p.stage}, growth day ${p.growth.days}, normalized size ${p.growth.size.toFixed(2)} (adult maximum 1.25; keep native cell margins), expression weights ${JSON.stringify(p.growth.temperament)}, keepsake level ${p.growth.decorationLevel}/3. Visible growth must survive the official fit-to-cell normalization. Relative to the first approved hatchling, target torso length multiplier ${proportions.torsoLengthRelativeToBirth} and limb length multiplier ${proportions.limbLengthRelativeToBirth}; keep canonical head outline, facial features, palette and marks. Show maturity through torso-to-head and limb proportions, not merely enlarging the whole sprite. Do not shrink or recolor a prop to fake body growth. These are character design parameters, not a diagnosis of the user. Current prop: ${visual.prop}. Scene cue ${visual.scene} belongs in the habitat, not the transparent sprite. The approved realized character takes precedence over approximate initial targets; record deviations in provenance and never redraw identity to repair an old target.`;
+  const common = "Use the hatch-pet image-generation pipeline and native Codex Pet visual language: crisp low-resolution pixel art, stepped dark outlines, a limited palette with two or three shade levels. NOT plush, felt, fur, clay, painterly or 3D rendering. Private task text must never appear in the image or prompt. Generate state-specific rows with imagegen, then assemble and validate a transparent 8x11 v2 atlas. Never synthesize missing animation in code. Artistic and animation descriptions are generation goals, not exact acceptance thresholds: accept usable results with minor deviations under the GenPet artwork policy.";
+  const concept = isEgg ? `EGG FIRST: create an ordinary intact egg, not a disguised animal. No future creature has been selected or generated. The egg's silhouette is a simple ovate shell in warm ivory/gray. At most 5\u201310% of its surface carries extremely faint ${p.profile.palette} tint and sparse abstract ${p.dna.pattern} hints, variant ${p.dna.patternSeed}. No eyes, mouth, face, ears, limbs, leaves, recognizable creature pattern, or heraldic symbol. The hints must not reveal a species. Do not reference any hatchling or reverse-engineer an egg from one. Motion is limited to small shell wobbles, restrained hops and subtle attached shell-light changes; no blinking, exposed creature or detached effects. Look directions use restrained whole-shell leaning, with no invented eyes.` : `${s.identityReference ? "CONTINUE THE SAME REVEALED INDIVIDUAL. Preserve its approved face, palette, anatomy and identity marks exactly; change proportions and small accessories within the existing character." : `FORWARD HATCHING: this is the first time the creature is designed. The egg reference supplies only a subtle color echo and one abstract pattern echo; do not turn the egg silhouette or markings into a face. Design a distinct organism silhouette and head construction; the shell outline is not a head template. There is no predetermined adult to reverse-engineer. Create an organic fantasy creature within the shared rounded pixel family: a broad horizontal oval head with a blunt top, separate compact torso, tiny square eyes without bright highlights, a tiny mouth, two short arms and two short feet. Do not use a pointed egg-shaped head or shell-like ivory surface. ${birthGeometry} Keep buds under 10% of head width, leaflets under 15%, and fins similarly small. ${birthMark} Use the newly resolved birth identity below.`} Birth identity: ${JSON.stringify(p.hatchIdentity)}. Stage ${p.stage}, growth day ${p.growth.days}, normalized size ${p.growth.size.toFixed(2)} (adult maximum 1.25; keep native cell margins), expression weights ${JSON.stringify(p.growth.temperament)}, keepsake level ${p.growth.decorationLevel}/3. Aim for gradual growth within native cell fitting; subtle differences in a single update are acceptable. Relative to the first approved hatchling, target torso length multiplier ${proportions.torsoLengthRelativeToBirth} and limb length multiplier ${proportions.limbLengthRelativeToBirth}; keep canonical head outline, facial features, palette and marks. Show maturity through torso-to-head and limb proportions, not merely enlarging the whole sprite. Do not shrink or recolor a prop to fake body growth. These are character design parameters, not a diagnosis of the user. Current prop: ${visual.prop}. Scene cue ${visual.scene} belongs in the habitat, not the transparent sprite. The approved realized character takes precedence over approximate initial targets; record deviations in provenance and never redraw identity to repair an old target.`;
   return {
     id,
     status: current ? "ready" : s.settings.autoArt ? "pending" : "paused",
@@ -4713,7 +4404,7 @@ async function installNative(store2, options) {
   const shouldRefresh = injected || !skip && isLiveNativeDestination(result2.destination);
   if (shouldRefresh) {
     const spritePath = path5.join(result2.destination, result2.manifest.spritesheetPath);
-    refresh = await (options?.refresh ?? refreshNativePet)({ expectedSpritePath: spritePath, petId: "custom:genpet-companion", allowUiRefresh: !injected && isLiveNativeDestination(result2.destination) });
+    refresh = await (options?.refresh ?? refreshNativePet)({ expectedSpritePath: spritePath });
   }
   const automaticRefresh = refresh?.automaticRefresh ?? false;
   const displayStatus = refresh?.displayStatus ?? "unconfirmed";
@@ -4730,109 +4421,13 @@ async function nativeTick(store2) {
   if (ready && (ready.id !== s.nativeExport.artId || ready.createdAt !== s.nativeExport.artCreatedAt || s.nativeExport.refreshRequired)) await installNative(store2);
 }
 
-// src/cdp-launcher.ts
-import { chmod, mkdir as mkdir3, writeFile as writeFile3, rm as rm2, access } from "node:fs/promises";
-import { homedir as homedir5 } from "node:os";
-import path6 from "node:path";
-var CDP_PORT = 9222;
-var LAUNCHER_APP_NAME = "ChatGPT CDP.app";
-var CHATGPT_BINARY = "/Applications/ChatGPT.app/Contents/MacOS/ChatGPT";
-function launcherAppPath(homeDir = homedir5()) {
-  return path6.join(homeDir, "Applications", LAUNCHER_APP_NAME);
-}
-function launcherScript(port) {
-  return `#!/bin/bash
-# GenPet helper: start Codex/ChatGPT with a local remote-debugging port
-# so GenPet can auto-refresh the same native Pet after artwork updates.
-set -euo pipefail
-PORT=${port}
-BIN="${CHATGPT_BINARY}"
-if [[ ! -x "$BIN" ]]; then
-  BIN="/Applications/ChatGPT.app/Contents/MacOS/ChatGPT"
-fi
-if [[ ! -x "$BIN" ]]; then
-  osascript -e 'display alert "ChatGPT.app was not found in /Applications." as critical' || true
-  exit 1
-fi
-# Reuse an already-running instance if it already exposes the port.
-if curl -sf -m 0.3 "http://127.0.0.1:$PORT/json/version" >/dev/null 2>&1; then
-  open -a ChatGPT
-  exit 0
-fi
-exec "$BIN" --remote-debugging-port="$PORT"
-`;
-}
-function infoPlist() {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>CFBundleDevelopmentRegion</key><string>en</string>
-  <key>CFBundleDisplayName</key><string>ChatGPT CDP</string>
-  <key>CFBundleExecutable</key><string>launch-genpet-cdp</string>
-  <key>CFBundleIdentifier</key><string>com.genpet.chatgpt-cdp</string>
-  <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
-  <key>CFBundleName</key><string>ChatGPT CDP</string>
-  <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>1.0</string>
-  <key>CFBundleVersion</key><string>1</string>
-  <key>LSMinimumSystemVersion</key><string>12.0</string>
-  <key>LSUIElement</key><false/>
-  <key>NSHighResolutionCapable</key><true/>
-</dict>
-</plist>
-`;
-}
-async function isCdpAvailable(port = CDP_PORT) {
-  try {
-    const response = await fetch(`http://127.0.0.1:${port}/json/version`, { signal: AbortSignal.timeout(400) });
-    return response.ok;
-  } catch {
-    return false;
-  }
-}
-async function installCdpLauncher(options = {}) {
-  const port = options.port ?? CDP_PORT;
-  const homeDir = options.homeDir ?? homedir5();
-  const appRoot = launcherAppPath(homeDir);
-  const contents = path6.join(appRoot, "Contents");
-  const macOS = path6.join(contents, "MacOS");
-  const bin = path6.join(macOS, "launch-genpet-cdp");
-  await rm2(appRoot, { recursive: true, force: true });
-  await mkdir3(macOS, { recursive: true });
-  await writeFile3(path6.join(contents, "Info.plist"), infoPlist());
-  await writeFile3(bin, launcherScript(port));
-  await chmod(bin, 493);
-  return {
-    launcherApp: appRoot,
-    port,
-    howToUse: `Open ${LAUNCHER_APP_NAME} from ~/Applications only when a debugging channel is needed. No background monitor is installed.`,
-    securityNote: "The debug port listens on localhost only. Any local process could control Codex while it runs with this flag. Prefer this launcher on a personal machine; do not expose the port over the network."
-  };
-}
-async function removeCdpLauncher(options = {}) {
-  const homeDir = options.homeDir ?? homedir5();
-  await rm2(launcherAppPath(homeDir), { recursive: true, force: true });
-  return { removed: true };
-}
-async function ensureCdpLauncher(port = CDP_PORT) {
-  const app = launcherAppPath();
-  try {
-    await access(path6.join(app, "Contents", "MacOS", "launch-genpet-cdp"));
-    return { installed: true, launcherApp: app, alreadyPresent: true, port };
-  } catch {
-    const result2 = await installCdpLauncher({ port });
-    return { installed: true, alreadyPresent: false, ...result2 };
-  }
-}
-
 // src/cli.ts
-import path8 from "node:path";
+import path7 from "node:path";
 import { randomUUID as randomUUID5 } from "node:crypto";
 
 // src/debug.ts
-import { mkdir as mkdir4, writeFile as writeFile4 } from "node:fs/promises";
-import path7 from "node:path";
+import { mkdir as mkdir3, writeFile as writeFile3 } from "node:fs/promises";
+import path6 from "node:path";
 import { randomUUID as randomUUID4 } from "node:crypto";
 function operation(s, id, key) {
   if (!/^[a-zA-Z0-9_-]{1,100}$/.test(id)) throw new Error("operationId must contain 1\u2013100 letters, digits, underscores or hyphens. Reuse it only when retrying the same operation.");
@@ -4857,10 +4452,10 @@ function result(s, action, alreadyApplied = false, backup2) {
   };
 }
 async function backup(store2, s, action) {
-  const dir = path7.join(store2.root, "backups");
-  await mkdir4(dir, { recursive: true, mode: 448 });
-  const file = path7.join(dir, `${action}-${Date.now()}-${randomUUID4()}.json`);
-  await writeFile4(file, JSON.stringify(s, null, 2), { mode: 384, flag: "wx" });
+  const dir = path6.join(store2.root, "backups");
+  await mkdir3(dir, { recursive: true, mode: 448 });
+  const file = path6.join(dir, `${action}-${Date.now()}-${randomUUID4()}.json`);
+  await writeFile3(file, JSON.stringify(s, null, 2), { mode: 384, flag: "wx" });
   return file;
 }
 async function debugReset(store2, operationId) {
@@ -4987,24 +4582,15 @@ try {
     case "install-native":
       output = await installNative(store);
       break;
-    case "install-cdp-launcher":
-      output = await installCdpLauncher({ port: args[0] ? Number(args[0]) : CDP_PORT });
-      break;
-    case "remove-cdp-launcher":
-      output = await removeCdpLauncher();
-      break;
-    case "cdp-status":
-      output = { port: CDP_PORT, available: await isCdpAvailable(), launcher: await ensureCdpLauncher() };
-      break;
     case "refresh-native": {
       const s = await store.current();
-      const destination = path8.join(process.env.CODEX_HOME || path8.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion");
-      const manifest = JSON.parse(await (await import("node:fs/promises")).readFile(path8.join(destination, "pet.json"), "utf8"));
-      output = await refreshNativePet({ expectedSpritePath: path8.join(destination, manifest.spritesheetPath), petId: `custom:${manifest.id || "genpet-companion"}` });
+      const destination = path7.join(process.env.CODEX_HOME || path7.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion");
+      const manifest = JSON.parse(await (await import("node:fs/promises")).readFile(path7.join(destination, "pet.json"), "utf8"));
+      output = await refreshNativePet({ expectedSpritePath: path7.join(destination, manifest.spritesheetPath) });
       break;
     }
     default:
-      throw new Error("Commands: [--demo] status, tick, adopt [name], art-request, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native, install-cdp-launcher [port], remove-cdp-launcher, cdp-status; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>");
+      throw new Error("Commands: [--demo] status, tick, adopt [name], art-request, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>");
   }
   console.log(JSON.stringify(output, null, 2));
 } catch (e) {
