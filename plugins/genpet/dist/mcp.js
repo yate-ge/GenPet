@@ -24079,6 +24079,17 @@ var Store = class {
     await this.sync(s, true);
     return s.pet;
   }
+  /** Read persisted state without scanning, evolving, migrating or writing. */
+  async peek() {
+    try {
+      const state = JSON.parse(await readFile2(this.file, "utf8"));
+      if (state.version !== 1) throw new Error("Unsupported state version");
+      return state;
+    } catch (error2) {
+      if (error2.code === "ENOENT") return fresh();
+      throw error2;
+    }
+  }
   async current() {
     return this.transaction(async (s) => {
       await this.sync(s);

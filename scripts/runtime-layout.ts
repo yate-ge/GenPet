@@ -2,7 +2,7 @@
 import { cp, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
-const directories = ['skills', 'vendor', 'config', '.codex-plugin'];
+const directories = ['debugger-web', 'skills', 'vendor', 'config', '.codex-plugin'];
 const files = ['.mcp.json', 'LICENSE', 'THIRD_PARTY_NOTICES.md'];
 const helpers = ['normalize_alpha_noise.py', 'audit_atlas_growth.py', 'verify-install.mjs'];
 const helpDocs = ['DEBUG_COMMANDS.zh-CN.md', 'NATIVE_REFRESH.zh-CN.md'];
