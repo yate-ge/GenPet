@@ -21,7 +21,7 @@ function record(s:State,id:string,key:string,backup?:string) {
 function result(s:State,action:string,alreadyApplied=false,backup?:string) {
   return {action,alreadyApplied,backup,state:s,artRequest:artRequest(s),
     nativePetId:'genpet-companion',displayStatus:'unconfirmed',
-    notice:'Design state only. Generate/validate any pending artwork, then call genpet_install_native even when the requested atlas is already ready. Only its confirmed result proves visible completion.'};
+    notice:'Design state only. Generate/validate any pending artwork, then run install-native even when the requested atlas is already ready. Only its confirmed result proves visible completion.'};
 }
 async function backup(store:Store,s:State,action:string) {
   const dir=path.join(store.root,'backups');await mkdir(dir,{recursive:true,mode:0o700});

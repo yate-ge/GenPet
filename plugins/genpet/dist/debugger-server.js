@@ -2234,7 +2234,7 @@ async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
 
 // src/debugger-server.ts
 import { copyFile as copyFile2, readFile as readFile6, realpath, rename as rename3, writeFile as writeFile3 } from "node:fs/promises";
-import path6 from "node:path";
+import path7 from "node:path";
 import { homedir as homedir5 } from "node:os";
 import { randomBytes, randomUUID as randomUUID4 } from "node:crypto";
 import { pathToFileURL } from "node:url";
@@ -2242,7 +2242,7 @@ import { pathToFileURL } from "node:url";
 // src/store.ts
 import { mkdir, readFile as readFile2, rename, writeFile, rm, stat as stat2 } from "node:fs/promises";
 import { homedir as homedir3 } from "node:os";
-import path3 from "node:path";
+import path4 from "node:path";
 import { randomUUID as randomUUID2 } from "node:crypto";
 
 // src/core.ts
@@ -2679,17 +2679,31 @@ function deriveInitialProfile(scan) {
 
 // src/config.ts
 import { readFile } from "node:fs/promises";
+import path3 from "node:path";
+
+// src/plugin-root.ts
+import { existsSync } from "node:fs";
 import path2 from "node:path";
 import { fileURLToPath } from "node:url";
+function pluginRoot() {
+  const moduleDirectory = path2.dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    path2.resolve(moduleDirectory, ".."),
+    path2.resolve(moduleDirectory, "..", "plugins", "genpet")
+  ];
+  return candidates.find((candidate) => existsSync(path2.join(candidate, ".codex-plugin", "plugin.json"))) ?? candidates[0];
+}
+
+// src/config.ts
 async function adoptionConfig() {
-  const file = process.env.GENPET_POLICY_FILE || path2.resolve(path2.dirname(fileURLToPath(import.meta.url)), "../config/policy.json");
+  const file = process.env.GENPET_POLICY_FILE || path3.join(pluginRoot(), "config", "policy.json");
   const config = JSON.parse(await readFile(file, "utf8"));
   if (!config || typeof config !== "object" || !config.defaultProfile || !config.timing) throw new Error("Invalid GenPet adoption policy");
   return config;
 }
 
 // src/store.ts
-var dataRoot = () => process.env.GENPET_DATA_DIR || path3.join(homedir3(), ".genpet");
+var dataRoot = () => process.env.GENPET_DATA_DIR || path4.join(homedir3(), ".genpet");
 var fresh = () => ({ version: 1, pet: null, clockOffset: 0, settings: { autoContext: true, freezeOutfit: false, autoArt: true }, importedIds: [], lastScanAt: 0, scanInfo: { messages: 0, files: 0, warnings: [] }, art: [] });
 function configureState(s, input) {
   if (input.freezeOutfit === true && !s.settings.freezeOutfit) s.settings.lockedOutfit = { prop: s.pet?.state.prop || "none", scene: s.pet?.state.scene || "nest" };
@@ -2701,7 +2715,7 @@ var Store = class {
   constructor(root = dataRoot(), demo = false) {
     this.root = root;
     this.demo = demo;
-    this.file = path3.join(root, demo ? "demo.json" : "state.json");
+    this.file = path4.join(root, demo ? "demo.json" : "state.json");
   }
   root;
   demo;
@@ -2816,13 +2830,13 @@ var Store = class {
 
 // src/art.ts
 import { mkdir as mkdir2, readFile as readFile5, copyFile, writeFile as writeFile2, rename as rename2 } from "node:fs/promises";
-import path5 from "node:path";
+import path6 from "node:path";
 import { createHash as createHash3, randomUUID as randomUUID3 } from "node:crypto";
 
 // src/image.ts
 var import_pngjs = __toESM(require_png(), 1);
 import { readFile as readFile3 } from "node:fs/promises";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync as existsSync2, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 
@@ -2866,11 +2880,11 @@ var Module = (() => {
     var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
     var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions == "object" && typeof process.versions.node == "string";
     var scriptDirectory = "";
-    function locateFile(path7) {
+    function locateFile(path8) {
       if (Module2["locateFile"]) {
-        return Module2["locateFile"](path7, scriptDirectory);
+        return Module2["locateFile"](path8, scriptDirectory);
       }
-      return scriptDirectory + path7;
+      return scriptDirectory + path8;
     }
     var read_, readAsync, readBinary, setWindowTitle;
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -4254,7 +4268,7 @@ async function readImageInfo(file) {
 var webpReady;
 function webpWasm() {
   const bundled = fileURLToPath2(new URL("./webp_dec.wasm", import.meta.url));
-  return existsSync(bundled) ? bundled : createRequire(import.meta.url).resolve("@jsquash/webp/codec/dec/webp_dec.wasm");
+  return existsSync2(bundled) ? bundled : createRequire(import.meta.url).resolve("@jsquash/webp/codec/dec/webp_dec.wasm");
 }
 async function decodeRgba(file) {
   const buf = await readFile3(file);
@@ -4280,11 +4294,11 @@ async function decodeRgba(file) {
 import { createHash as createHash2 } from "node:crypto";
 import { readFile as readFile4, readdir as readdir2 } from "node:fs/promises";
 import { homedir as homedir4, tmpdir } from "node:os";
-import path4 from "node:path";
+import path5 from "node:path";
 async function refreshNativePet(options) {
   const expectedSpriteSha256 = createHash2("sha256").update(await readFile4(options.expectedSpritePath)).digest("hex");
   const errors = [];
-  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || isLiveNativeDestination(path4.dirname(options.expectedSpritePath)));
+  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || isLiveNativeDestination(path5.dirname(options.expectedSpritePath)));
   if (useIpc) {
     try {
       const ipc = await refreshViaIpc(options.ipcSocketPath ?? void 0, options.timeoutMs ?? 2e3);
@@ -4313,15 +4327,15 @@ async function refreshNativePet(options) {
 }
 function isLiveNativeDestination(destination) {
   if (process.env.GENPET_SKIP_NATIVE_REFRESH === "1") return false;
-  const live = path4.join(homedir4(), ".codex", "pets", "genpet-companion");
-  if (path4.resolve(destination) === path4.resolve(live)) return true;
+  const live = path5.join(homedir4(), ".codex", "pets", "genpet-companion");
+  if (path5.resolve(destination) === path5.resolve(live)) return true;
   const configured = process.env.CODEX_HOME;
   if (!configured) return false;
-  const resolved = path4.resolve(configured);
-  const temp = path4.resolve(tmpdir());
-  const relativeToTemp = path4.relative(temp, resolved);
-  if (configured.startsWith("/var/folders/") || configured.includes("/tmp/") || relativeToTemp === "" || relativeToTemp !== ".." && !relativeToTemp.startsWith(`..${path4.sep}`) && !path4.isAbsolute(relativeToTemp)) return false;
-  return path4.resolve(destination) === path4.resolve(path4.join(resolved, "pets", "genpet-companion"));
+  const resolved = path5.resolve(configured);
+  const temp = path5.resolve(tmpdir());
+  const relativeToTemp = path5.relative(temp, resolved);
+  if (configured.startsWith("/var/folders/") || configured.includes("/tmp/") || relativeToTemp === "" || relativeToTemp !== ".." && !relativeToTemp.startsWith(`..${path5.sep}`) && !path5.isAbsolute(relativeToTemp)) return false;
+  return path5.resolve(destination) === path5.resolve(path5.join(resolved, "pets", "genpet-companion"));
 }
 async function listInstalledSprites(destination) {
   try {
@@ -4388,7 +4402,7 @@ function artRequest(s) {
     adoptionTrace: p.adoptionTrace ?? null,
     referenceFiles: [...new Set(references.filter((f) => !!f))],
     prompt: common + " " + concept,
-    reason: isEgg ? "Only an abstract shell identity exists. The creature will be resolved at the five-hour hatch boundary." : forced ? `Explicit debug state: ${forced.kind}; not observed user activity. Use genpet_debug_state auto to resume activity-based appearance.` : p.state.reason,
+    reason: isEgg ? "Only an abstract shell identity exists. The creature will be resolved at the five-hour hatch boundary." : forced ? `Explicit debug state: ${forced.kind}; not observed user activity. Use debug-state auto to resume activity-based appearance.` : p.state.reason,
     contract: { columns: 8, cellWidth: 192, cellHeight: 208, rows: 11, spriteVersionNumber: 2 },
     note: "Image synthesis runs in Codex through the GenPet skill. State hatching and completion of new artwork are separate. Preserve the last approved native atlas until its successor passes QA."
   };
@@ -4418,20 +4432,20 @@ async function exportNative(s, destination) {
   if (!art) throw new Error("No approved atlas for this current design yet. Run the GenPet image-generation skill first.");
   const meta = await validateImage(art.file, "atlas");
   await mkdir2(destination, { recursive: true });
-  const ext = path5.extname(art.file);
+  const ext = path6.extname(art.file);
   const hash2 = createHash3("sha256").update(await readFile5(art.file)).digest("hex").slice(0, 16);
   const spriteName = `spritesheet-${hash2}${ext}`;
-  const sprite = path5.join(destination, spriteName);
-  const temporary = path5.join(destination, `.pending-${randomUUID3()}${ext}`);
+  const sprite = path6.join(destination, spriteName);
+  const temporary = path6.join(destination, `.pending-${randomUUID3()}${ext}`);
   await copyFile(art.file, temporary);
   await rename2(temporary, sprite);
-  const manifest = { id: path5.basename(destination), displayName: s.pet.profile.name, description: "GenPet \xB7 a growing image-generated companion", spriteVersionNumber: meta.height === 2288 ? 2 : 1, spritesheetPath: spriteName };
-  await copyFile(path5.join(destination, "pet.json"), path5.join(destination, "previous-pet.json")).catch((e) => {
+  const manifest = { id: path6.basename(destination), displayName: s.pet.profile.name, description: "GenPet \xB7 a growing image-generated companion", spriteVersionNumber: meta.height === 2288 ? 2 : 1, spritesheetPath: spriteName };
+  await copyFile(path6.join(destination, "pet.json"), path6.join(destination, "previous-pet.json")).catch((e) => {
     if (e.code !== "ENOENT") throw e;
   });
-  const manifestTemporary = path5.join(destination, `.pet-${randomUUID3()}.json`);
+  const manifestTemporary = path6.join(destination, `.pet-${randomUUID3()}.json`);
   await writeFile2(manifestTemporary, JSON.stringify(manifest, null, 2));
-  await rename2(manifestTemporary, path5.join(destination, "pet.json"));
+  await rename2(manifestTemporary, path6.join(destination, "pet.json"));
   return {
     destination,
     manifest,
@@ -4447,13 +4461,13 @@ async function exportNative(s, destination) {
 async function installNative(store, options) {
   if (store.demo) throw new Error("Demo state cannot install a native Pet. Use isolated file exports for developer tests; the live companion is updated in place.");
   const s = await store.current();
-  const result = await exportNative(s, path5.join(process.env.CODEX_HOME || path5.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion"));
+  const result = await exportNative(s, path6.join(process.env.CODEX_HOME || path6.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion"));
   let refresh;
   const injected = typeof options?.refresh === "function";
   const skip = !injected && process.env.GENPET_SKIP_NATIVE_REFRESH === "1";
   const shouldRefresh = injected || !skip && isLiveNativeDestination(result.destination);
   if (shouldRefresh) {
-    const spritePath = path5.join(result.destination, result.manifest.spritesheetPath);
+    const spritePath = path6.join(result.destination, result.manifest.spritesheetPath);
     refresh = await (options?.refresh ?? refreshNativePet)({ expectedSpritePath: spritePath });
   }
   const automaticRefresh = refresh?.automaticRefresh ?? false;
@@ -4466,18 +4480,18 @@ async function installNative(store, options) {
 }
 
 // src/debugger-server.ts
-var debuggerRoot = path6.resolve(import.meta.dirname, "..");
+var debuggerRoot = pluginRoot();
 async function bundledAssets() {
   return { portraits: {} };
 }
 var SPRITE_NAME = /^spritesheet-[a-f0-9]{8,64}\.(webp|png)$/;
 function nativePetDirectory() {
-  return path6.join(process.env.CODEX_HOME || path6.join(homedir5(), ".codex"), "pets", "genpet-companion");
+  return path7.join(process.env.CODEX_HOME || path7.join(homedir5(), ".codex"), "pets", "genpet-companion");
 }
 async function nativePetSelection() {
   try {
-    const home = process.env.CODEX_HOME || path6.join(homedir5(), ".codex");
-    const state = JSON.parse(await readFile6(path6.join(home, ".codex-global-state.json"), "utf8"));
+    const home = process.env.CODEX_HOME || path7.join(homedir5(), ".codex");
+    const state = JSON.parse(await readFile6(path7.join(home, ".codex-global-state.json"), "utf8"));
     const value = state["electron-persisted-atom-state"]?.["selected-avatar-id"];
     const selectedPetId = typeof value === "string" ? value : null;
     return { selectedPetId, genpetSelected: selectedPetId === "custom:genpet-companion" };
@@ -4489,7 +4503,7 @@ async function listNativeSprites() {
   const destination = nativePetDirectory();
   let current = null;
   try {
-    current = JSON.parse(await readFile6(path6.join(destination, "pet.json"), "utf8")).spritesheetPath ?? null;
+    current = JSON.parse(await readFile6(path7.join(destination, "pet.json"), "utf8")).spritesheetPath ?? null;
   } catch {
   }
   const sprites = (await listInstalledSprites(destination)).filter((name) => SPRITE_NAME.test(name)).sort();
@@ -4502,19 +4516,19 @@ async function runNativeIpc(mode) {
 }
 async function switchNativeSprite(name, method = "ipc", ipcRunner = runNativeIpc) {
   if (!["ipc", "file"].includes(method)) throw new Error("\u672A\u77E5\u5237\u65B0\u65B9\u5F0F");
-  if (!SPRITE_NAME.test(name) || name !== path6.basename(name)) throw new Error("\u53EA\u80FD\u9009\u62E9\u5DF2\u5B89\u88C5\u7684\u56FE\u96C6\u6587\u4EF6");
+  if (!SPRITE_NAME.test(name) || name !== path7.basename(name)) throw new Error("\u53EA\u80FD\u9009\u62E9\u5DF2\u5B89\u88C5\u7684\u56FE\u96C6\u6587\u4EF6");
   const destination = nativePetDirectory();
-  const sprite = path6.join(destination, name);
+  const sprite = path7.join(destination, name);
   const root = await realpath(destination);
   const resolved = await realpath(sprite);
-  if (resolved !== path6.join(root, name)) throw new Error("\u53EA\u80FD\u9009\u62E9\u5DF2\u5B89\u88C5\u7684\u56FE\u96C6\u6587\u4EF6");
-  const manifestPath = path6.join(destination, "pet.json");
+  if (resolved !== path7.join(root, name)) throw new Error("\u53EA\u80FD\u9009\u62E9\u5DF2\u5B89\u88C5\u7684\u56FE\u96C6\u6587\u4EF6");
+  const manifestPath = path7.join(destination, "pet.json");
   const manifest = JSON.parse(await readFile6(manifestPath, "utf8"));
   const next = { ...manifest, spritesheetPath: name };
-  await copyFile2(manifestPath, path6.join(destination, "previous-pet.json")).catch((error) => {
+  await copyFile2(manifestPath, path7.join(destination, "previous-pet.json")).catch((error) => {
     if (error.code !== "ENOENT") throw error;
   });
-  const temporary = path6.join(destination, `.pet-${randomUUID4()}.json`);
+  const temporary = path7.join(destination, `.pet-${randomUUID4()}.json`);
   await writeFile3(temporary, JSON.stringify(next, null, 2));
   await rename3(temporary, manifestPath);
   const live = isLiveNativeDestination(destination);
@@ -4522,7 +4536,7 @@ async function switchNativeSprite(name, method = "ipc", ipcRunner = runNativeIpc
   if (method === "ipc") return { spritesheet: name, refresh: await ipcRunner("refresh") };
 }
 async function startServer(port = Number(process.env.GENPET_PORT || 47831), root, options = {}) {
-  const real = new Store(root), demo = new Store(path6.join(real.root, "debugger"), true);
+  const real = new Store(root), demo = new Store(path7.join(real.root, "debugger"), true);
   const token = randomBytes(24).toString("hex");
   const server = http.createServer(async (req, res) => {
     const json = (value, status = 200) => {
@@ -4625,10 +4639,10 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
       {
         const routes = { "/": "index.html", "/app.js": "app.js", "/style.css": "style.css" };
         if (!routes[url.pathname]) return json({ error: "Not found" }, 404);
-        file = path6.join(debuggerRoot, "debugger-web", routes[url.pathname]);
+        file = path7.join(debuggerRoot, "debugger-web", routes[url.pathname]);
       }
       const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".webp": "image/webp", ".json": "application/json", ".svg": "image/svg+xml" };
-      res.writeHead(200, { "Content-Type": types[path6.extname(file)] || "application/octet-stream", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'" });
+      res.writeHead(200, { "Content-Type": types[path7.extname(file)] || "application/octet-stream", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'" });
       res.end(await readFile6(file));
     } catch (e) {
       if (!res.headersSent) json({ error: e.message }, e.code === "ENOENT" ? 404 : 400);

@@ -1,6 +1,6 @@
 {
   "name": "genpet",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "An image-generated native Codex Pet that begins as an egg and grows with local activity.",
   "author": {
     "name": "GenPet contributors"
@@ -13,7 +13,6 @@
     "growth"
   ],
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "GenPet",
     "shortDescription": "A native pixel companion, growing with you.",

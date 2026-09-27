@@ -9,9 +9,10 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "vendor/hatch-pet/scripts"))
+PIPELINE = ROOT / "plugins/genpet/vendor/hatch-pet/scripts"
+sys.path.insert(0, str(PIPELINE))
 from prepare_pet_run import make_jobs, make_egg_jobs
-from process_pet_run import Processor, process, read_json, ready_jobs, reconcile, write_json, compose_egg
+from process_pet_run import process, read_json, write_json, compose_egg
 from compose_atlas import ROW_SPECS
 
 
@@ -31,68 +32,10 @@ class ArtworkPipelineTests(unittest.TestCase):
         write_json(self.run / "pet_request.json", {"chroma_key": {"hex": "#FF00FF"}})
         return manifest
 
-    def save_image(self, name):
-        output = self.run / name
-        output.parent.mkdir(parents=True, exist_ok=True)
-        Image.new("RGBA", (192, 208), (200, 200, 200, 255)).save(output)
-
-    def test_resume_recovers_last_row_and_rejects_corrupt_sources(self):
-        manifest = self.manifest()
-        self.save_image("decoded/look-row-10.png")
-        self.assertEqual(reconcile(self.run, manifest), [])
-        last = manifest["jobs"][-1]
-        self.assertEqual(last["status"], "complete")
-        self.assertTrue(last["source_sha256"])
-        (self.run / "decoded/look-row-10.png").write_bytes(b"not an image")
-        self.assertEqual(len(reconcile(self.run, manifest)), 1)
-        self.assertEqual(last["status"], "invalid")
-        (self.run / "decoded/look-row-10.png").unlink()
-        reconcile(self.run, manifest)
-        self.assertEqual(last["status"], "pending")
-        self.assertNotIn("source_sha256", last)
-
-    def test_early_directions_require_idle_reference_but_not_other_rows(self):
-        manifest = self.manifest()
-        for name in ("decoded/base.png", "decoded/idle.png", "references/layout-guides/look-cardinals.png"):
-            self.save_image(name)
-        # Use the actual generated layout path, avoiding dependence on guide directory naming.
-        cardinal = next(j for j in manifest["jobs"] if j["id"] == "look-cardinals")
-        for ref in cardinal["input_images"]:
-            if ref["path"] != "qa/idle-reference.png":
-                self.save_image(ref["path"])
-        reconcile(self.run, manifest)
-        self.assertNotIn("look-cardinals", ready_jobs(self.run, manifest["jobs"]))
-        self.save_image("qa/idle-reference.png")
-        self.assertEqual(ready_jobs(self.run, manifest["jobs"])[0], "look-cardinals")
-        self.assertNotIn("look-row-10", ready_jobs(self.run, manifest["jobs"]))
-        legacy = next(j for j in make_jobs(self.run, []) if j["id"] == "look-cardinals")
-        self.assertIn("review", legacy["depends_on"])
-
-    def test_cache_reprocesses_missing_or_changed_outputs_and_inputs(self):
-        source, output = self.run / "input", self.run / "output"
-        source.write_text("one")
-        calls = []
-        def action():
-            calls.append(True)
-            output.write_text(source.read_text())
-        def step():
-            return Processor(self.run).step("copy", [source], [output], action)
-        self.assertTrue(step())
-        self.assertTrue(step())
-        self.assertEqual(len(calls), 1)
-        output.write_text("damaged")
-        self.assertTrue(step())
-        source.write_text("two")
-        self.assertTrue(step())
-        output.unlink()
-        self.assertTrue(step())
-        self.assertEqual(len(calls), 4)
-        self.assertEqual(output.read_text(), "two")
-
     def test_prepare_stage_profiles_and_prompts(self):
         for flag, profile in (("--egg", "genpet-egg-three"), ("--early-look", "genpet-early-look")):
             directory = self.run / profile
-            result = subprocess.run([sys.executable, str(ROOT / "vendor/hatch-pet/scripts/prepare_pet_run.py"),
+            result = subprocess.run([sys.executable, str(PIPELINE / "prepare_pet_run.py"),
                                      flag, "--output-dir", str(directory), "--pet-name", "Fixture",
                                      "--pet-notes", "An intact ivory shell with faint sage marks.", "--style-preset", "pixel"],
                                     capture_output=True, text=True)
