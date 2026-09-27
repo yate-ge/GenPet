@@ -108,5 +108,10 @@ export class Store {
       capturedAt:s.pet.adoptedAt};
     await this.sync(s,true); return s.pet;
   }
+  /** Read persisted state without scanning, evolving, migrating or writing. */
+  async peek():Promise<State> {
+    try { const state=JSON.parse(await readFile(this.file,'utf8')); if(state.version!==1)throw new Error('Unsupported state version'); return state; }
+    catch(error) { if((error as NodeJS.ErrnoException).code==='ENOENT')return fresh(); throw error; }
+  }
   async current() { return this.transaction(async s=>{ await this.sync(s); if(s.pet) s.pet=evolvePet(s.pet,this.now(s)); return s; }); }
 }

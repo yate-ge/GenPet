@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { launchDebugger } from './debugger.js';
 import { Store } from './store.js';
 import { artRequest, acceptArt, installNative, nativeTick } from './art.js';
 import { refreshNativePet } from './native-refresh.js';
@@ -11,6 +12,7 @@ const [command,...args]=argv;const store=new Store(undefined,demo);
 try {
  let output:unknown;
  switch(command){
+  case 'debugger':output=await launchDebugger();break;
   case 'status':output=await store.current();break;
   case 'tick':await nativeTick(store);output=await store.current();break;
   case 'adopt':output=await store.transaction(s=>store.adopt(s,args[0]?{name:args[0]}:demo?{name:'GenPet Demo'}:{}));break;
@@ -38,7 +40,7 @@ try {
    output=await refreshNativePet({expectedSpritePath:path.join(destination,manifest.spritesheetPath)});
    break;
   }
-  default:throw new Error('Commands: [--demo] status, tick, adopt [name], art-request, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>');
+  default:throw new Error('Commands: debugger; [--demo] status, tick, adopt [name], art-request, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>');
  }
  console.log(JSON.stringify(output,null,2));
 }catch(e){console.error((e as Error).message);process.exitCode=1;}

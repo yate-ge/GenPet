@@ -5,7 +5,7 @@ description: Adopt, grow, personalize, generate artwork for, and install GenPet 
 
 # GenPet
 
-GenPet runs in the native Codex Pet surface. A separate external development debugger is not bundled or exposed as a plugin tool. Do not substitute a website or a separate floating application for the native Pet.
+GenPet runs in the native Codex Pet surface. The optional bundled web debugger starts only on explicit /genpet-debugger requests. Opening it reads persisted state without changing the pet. Do not substitute a website or a separate floating application for the native Pet.
 
 ## Read and adopt
 

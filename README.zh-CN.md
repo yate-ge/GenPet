@@ -28,7 +28,7 @@ GenPet 直接使用 Codex 自带的 Pet 窗口和动画状态，在此之上加�
 
 在任意 Codex 任务中发送下面这段话：
 
-> 请从 GitHub 仓库 yate-ge/GenPet 安装 GenPet Codex 插件，不需要 clone 仓库或运行 npm。先确认 `node --version` 为 22 或更高、`codex` CLI 可用。用 `codex plugin list` 检查是否已有 GenPet：已从 `genpet` marketplace 安装时，运行 `codex plugin marketplace upgrade genpet` 更新；来自其他 marketplace 时先告诉我它的来源，不要装第二个 GenPet；尚未安装时，依次运行 `codex plugin marketplace add yate-ge/GenPet`、`codex plugin marketplace upgrade genpet` 和 `codex plugin add genpet@genpet`；marketplace 已存在也必须 upgrade，不能把 already added 当作更新成功。完成后用 `codex plugin list` 确认 `genpet@genpet` 为 installed, enabled，并报告 marketplace 提交、版本和安装路径。使用新版插件自带的 `scripts/verify-install.mjs`，传入实际安装目录和已刷新的 marketplace 中 plugins/genpet 目录，核对清单版本和所有发布文件哈希；缺少核验脚本或内容不一致时不能宣称升级成功。技能和 MCP 工具要在新的 Codex 任务中才会加载，当前任务无法确认时请直接说明。只安装插件：不要领养、重置或加龄宠物，不要生成图像，保留 `~/.genpet/` 和 `~/.codex/pets/genpet-companion/`。
+> 请从 GitHub 仓库 yate-ge/GenPet 安装 GenPet Codex 插件，不需要 clone 仓库或运行 npm。用 `codex plugin list` 检查是否已有 GenPet：已从 `genpet` marketplace 安装时，运行 `codex plugin marketplace upgrade genpet` 更新；来自其他 marketplace 时先告诉我它的来源，不要装第二个 GenPet；尚未安装时，依次运行 `codex plugin marketplace add yate-ge/GenPet`、`codex plugin marketplace upgrade genpet` 和 `codex plugin add genpet@genpet`；marketplace 已存在也必须 upgrade，不能把 already added 当作更新成功。完成后用 `codex plugin list` 确认 `genpet@genpet` 为 installed, enabled，并报告 marketplace 提交、版本和安装路径。使用新版插件自带的 `scripts/verify-install.mjs`，传入实际安装目录和已刷新的 marketplace 中 plugins/genpet 目录，核对清单版本和所有发布文件哈希；缺少核验脚本或内容不一致时不能宣称升级成功。技能和 MCP 工具要在新的 Codex 任务中才会加载，当前任务无法确认时请直接说明。只安装插件：不要领养、重置或加龄宠物，不要生成图像，保留 `~/.genpet/` 和 `~/.codex/pets/genpet-companion/`。
 
 装好后新建任务，输入 **`/genpet-start`**。
 
@@ -112,7 +112,7 @@ flowchart LR
 - 五小时孵化与情境窗口、每日成长、离线补算、孵化后身份不变、情境记录可撤回。
 - 自动从近期 Codex 用户消息提取本地活动标签；内置生成流程不需要问卷，也不需要 API key。
 - 本地 MCP 工具和可分发的 Codex 插件。
-- 插件里没有网站、HTTP 服务、浏览器页面或独立的悬浮窗程序。
+- 宠物使用原生窗口；插件附带的 HTTP 调试页面默认关闭，仅在 /genpet-debugger 时启动。
 
 **原生刷新：** 首次初始化和后续换图都会通过 Codex 已有的本地 IPC 通道请求刷新，普通启动即可，不需要调试参数、重启或后台监控。IPC 成功表示刷新通知已转发，显示哈希未测量时仍返回 `displayStatus=unconfirmed`。IPC 失败时报告错误并保留重试状态。此内部协议已通过用户实机观察验证，宿主升级后需复验。详见[原生刷新说明](docs/NATIVE_REFRESH.zh-CN.md)。
 
@@ -202,3 +202,7 @@ node <marketplace>/plugins/genpet/scripts/verify-install.mjs <installed-plugin> 
 ```
 
 This checks manifest versions and file hashes, including the delegation policy. Report the marketplace commit as well as the installed version and path. A successful check does not prove that an already-running chat reloaded its skills or that delegated image generation has been tested.
+
+## 按需网页调试器
+
+使用 `/genpet-debugger` 启动随插件附带的本地调试页面。默认不启动、不监听端口；重复调用复用服务。打开页面只读存档，真实伙伴与独立成长实验室分别操作。页面提供停止按钮，关闭标签页本身不会停止服务。CLI 为 `node dist/cli.js debugger`，链接 CLI 后可用 `genpet debugger`。
