@@ -34,3 +34,19 @@
 真实用户映射、成长和状态的分层实验条件见[验证方案](EVALUATION_PROTOCOL.zh-CN.md)；尚未采集参与者数据。
 
 五小时孵化/情境边界与每日成长是逻辑时间；调度延迟、图像生成、验收和可见刷新分别计时。正常成长使用真实时钟；显式 grow 加速的宠物应标记为调试样本。详见 [调试命令](DEBUG_COMMANDS.zh-CN.md)。
+
+
+## 2026-09-27 IPC 默认刷新交付
+
+用户在外部调试网页确认 IPC 刷新可行。生产适配器已改为 IPC 优先、CDP 备用，首次安装和已有图集的恢复均请求刷新。IPC 转发成功后 `refreshRequired=false`；显示哈希未测量仍为 `unconfirmed`。
+
+`npm run verify:release` 通过：源码检查、全量测试、构建、临时 Codex home 安装和已安装插件完整生命周期。新增隔离测试覆盖分片数据帧、超时、断连、超大帧、目录权限、失败回退与首次/重复安装。
+
+本机已有 `genpet@genpet` 缓存已备份并更新为本地 IPC 开发构建（版本仍为 0.1.0，Git marketplace 来源保持不变；当时尚未推送 GitHub）。用安装包 CLI 实际运行 `install-native`，结果为 `strategy=ipc-query-invalidate`、`automaticRefresh=true`、`refreshRequired=false`、`displayStatus=unconfirmed`。已有自动成长心跳已更新，并使用安装包 CLI 避免旧聊天已加载 MCP 的版本滞后。新聊天加载更新后的 MCP/技能。
+
+
+## 2026-09-27 提交交付记录
+
+本次提交包含 IPC 生产适配器、首次初始化与重复安装刷新规则、探测脚本、隔离回归测试，以及可直接安装的插件构建产物和说明。通过宿主已有 IPC 通道失效 `custom-avatars` 查询缓存，无需添加启动参数。
+
+验证沿用本轮已经通过的 `npm run verify:release` 和用户对调试网页 IPC 刷新的确认；后续插件实际使用测试由用户进行。IPC 回执证明路由转发，显示图集哈希仍单独标记为 `unconfirmed`。外部 GenPet-Debugger、本机安装缓存和自动成长任务配置不属于此仓库提交内容。
