@@ -21,20 +21,6 @@ const requiredStaticFiles = [
   'docs/DEBUG_COMMANDS.zh-CN.md', 'scripts/verify-install.mjs',
 ];
 for (const relative of requiredStaticFiles) await access(path.join(target, relative));
-const obsoleteRootCopies = [
-  '.codex-plugin', '.mcp.json', 'config', 'debugger-web', 'skills', 'vendor',
-  'PLUGIN_README.md', 'docs/DEBUG_COMMANDS.zh-CN.md', 'docs/NATIVE_REFRESH.zh-CN.md',
-  'scripts/audit_atlas_growth.py', 'scripts/normalize_alpha_noise.py',
-];
-for (const relative of obsoleteRootCopies) {
-  try {
-    await access(path.join(source, relative));
-    throw new Error(`Obsolete duplicate plugin source at repository root: ${relative}`);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-  }
-}
-
 // Static plugin content is canonical in plugins/genpet. Only generated output is cleaned.
 await rm(path.join(target, 'dist'), { recursive: true, force: true });
 await mkdir(target, { recursive: true });

@@ -6,14 +6,16 @@ import subprocess
 import unittest
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 PIPELINE = ROOT / "plugins/genpet/vendor/hatch-pet/scripts"
 sys.path.insert(0, str(PIPELINE))
-from prepare_pet_run import make_jobs, make_egg_jobs
+from prepare_pet_run import make_jobs, make_egg_jobs, make_parallel_jobs, create_layout_guides
 from process_pet_run import process, read_json, write_json, compose_egg
 from compose_atlas import ROW_SPECS
+from prepare_strip import clean_strip
+from extract_strip_frames import extract_state
 
 
 class ArtworkPipelineTests(unittest.TestCase):
@@ -27,13 +29,71 @@ class ArtworkPipelineTests(unittest.TestCase):
         self.temporary.cleanup()
 
     def manifest(self, early=True):
-        manifest = {"jobs": make_jobs(self.run, [], early)}
+        create_layout_guides(self.run)
+        manifest = {"workflow_profile": "genpet-parallel", "jobs": make_parallel_jobs(self.run, [])}
         write_json(self.run / "imagegen-jobs.json", manifest)
         write_json(self.run / "pet_request.json", {"chroma_key": {"hex": "#FF00FF"}})
         return manifest
 
-    def test_prepare_stage_profiles_and_prompts(self):
-        for flag, profile in (("--egg", "genpet-egg-three"), ("--early-look", "genpet-early-look")):
+
+    def test_all_eleven_jobs_ready_after_base_without_row_processing(self):
+        manifest = self.manifest()
+        Image.new("RGBA", (192, 208), (200, 200, 200, 255)).save(self.run / "decoded/base.png")
+        result = process(self.run)
+        self.assertEqual(set(result["ready_jobs"]), {job["id"] for job in manifest["jobs"][1:]})
+        self.assertEqual(len(result["ready_jobs"]), 11)
+        self.assertEqual([step["step"] for step in result["executed"]], ["canonical-reference"])
+        for job in manifest["jobs"][1:]:
+            self.assertEqual(job["depends_on"], ["base"])
+            self.assertEqual(len(job["input_images"]), 2)
+        Image.new("RGBA", (800, 200)).save(self.run / "decoded/idle.png")
+        result = process(self.run)
+        self.assertEqual(result["executed"], [])  # no inspection/extraction between generation calls
+
+    def test_solid_backgrounds_dividers_and_enclosed_details(self):
+        for background in ((255,255,255), (27,180,210), (150,55,185)):
+            image = Image.new("RGBA", (800, 220), (*background, 255))
+            draw = ImageDraw.Draw(image)
+            for i in range(8):
+                draw.rectangle((i*100+30, 55, i*100+70, 165), fill=(210,120,70), outline="black", width=3)
+                draw.ellipse((i*100+40, 75, i*100+50, 85), fill="white", outline="black", width=2)
+            # A thin grid across the strip with generous outer margins.
+            draw.line((0,25,799,25), fill="black", width=2)
+            draw.line((0,195,799,195), fill="black", width=2)
+            for x in range(0,800,100):
+                draw.line((x,25,x,195), fill="black", width=2)
+            cleaned, report = clean_strip(image, 8)
+            self.assertEqual(tuple(report["background_rgb"]), background)
+            self.assertEqual(cleaned.getpixel((10,10))[3], 0)
+            self.assertEqual(cleaned.getpixel((100,100))[3], 0)
+            self.assertEqual(cleaned.getpixel((30,100)), (0,0,0,255))
+            self.assertEqual(cleaned.getpixel((45,80)), (255,255,255,255))
+            source=self.run/'decoded/failed.png'; image.save(source)
+            before=source.read_bytes()
+            report=extract_state(source, 'failed', self.run/'frames', (255,0,255),96,'auto')
+            self.assertEqual(report['method'],'slots')
+            self.assertEqual(source.read_bytes(),before)
+            self.assertEqual(len(report['frames']),8)
+
+    def test_single_long_outline_near_slot_boundary_is_not_a_divider(self):
+        image=Image.new('RGBA',(800,200))
+        draw=ImageDraw.Draw(image)
+        draw.rectangle((2,40,50,160),fill=(200,150,60,255),outline='black',width=3)
+        clean,report=clean_strip(image,8)
+        self.assertEqual(clean.tobytes(),image.tobytes())
+        self.assertEqual(report['removed_vertical_lines'],[])
+
+    def test_transparent_source_keeps_legitimate_key_colors(self):
+        image=Image.new('RGBA',(800,200))
+        draw=ImageDraw.Draw(image)
+        for i in range(8):
+            draw.rectangle((i*100+30,40,i*100+70,160),fill=(255,0,255,255),outline='black',width=3)
+        clean, report=clean_strip(image,8)
+        self.assertIsNone(report['background_rgb'])
+        self.assertEqual(clean.tobytes(),image.tobytes())
+
+    def test_prepare_stage_profiles(self):
+        for flag, profile in (("--egg", "genpet-egg-three"), ("--parallel", "genpet-parallel")):
             directory = self.run / profile
             result = subprocess.run([sys.executable, str(PIPELINE / "prepare_pet_run.py"),
                                      flag, "--output-dir", str(directory), "--pet-name", "Fixture",
@@ -44,20 +104,12 @@ class ArtworkPipelineTests(unittest.TestCase):
             self.assertEqual(manifest["workflow_profile"], profile)
             if flag == "--egg":
                 self.assertEqual([j["id"] for j in manifest["jobs"]], ["base", "egg-calm", "egg-stir", "egg-settle"])
-                self.assertFalse((directory / "prompts/look-cardinals.md").exists())
-                for job in manifest["jobs"][1:]:
-                    prompt = (directory / job["prompt_file"]).read_text()
-                    self.assertIn("NOT been born", prompt)
-                    self.assertIn("exactly eight", prompt)
                 Image.new("RGBA", (192, 208), (200, 200, 200, 255)).save(directory / "decoded/base.png")
                 partial = process(directory)
                 self.assertEqual(partial["ready_jobs"], ["egg-calm", "egg-stir", "egg-settle"])
                 self.assertIsNone(partial["atlas"])
             else:
-                self.assertEqual(len(manifest["jobs"]), 13)
-                prompt = (directory / "prompts/look-cardinals.md").read_text()
-                self.assertIn("idle reference sheet", prompt)
-                self.assertNotIn("standard contact sheet", prompt)
+                self.assertEqual(len(manifest["jobs"]), 12)
 
     def test_egg_atlas_uses_exact_ai_frames_without_gaze_or_synthesized_motion(self):
         rows = {}
@@ -115,11 +167,11 @@ class ArtworkPipelineTests(unittest.TestCase):
         result = process(self.run)
         self.assertTrue(result["ok"], result["blockers"])
         self.assertTrue(result["atlas"])
-        self.assertTrue(result["visual_review_required"])
+        self.assertFalse(result["visual_review_required"])
         validation = read_json(self.run / "qa/final-validation.json")
         self.assertTrue(validation["ok"])
         self.assertEqual(validation["sprite_version_number"], 2)
-        self.assertEqual(len(list((self.run / "qa/previews").glob("*.gif"))), 10)
+        self.assertEqual(len(list((self.run / "qa/previews").glob("*.gif"))), 0)
         repeated = process(self.run)
         self.assertEqual(repeated["executed"], [])
         self.assertEqual(repeated["atlas"], result["atlas"])

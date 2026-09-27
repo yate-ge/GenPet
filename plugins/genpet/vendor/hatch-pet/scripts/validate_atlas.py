@@ -124,6 +124,7 @@ def main() -> None:
     parser.add_argument("--json-out")
     parser.add_argument("--min-used-pixels", type=int, default=50)
     parser.add_argument("--near-opaque-threshold", type=float, default=0.95)
+    parser.add_argument("--structural-only", action="store_true", help="Validate geometry, alpha and slot occupancy without assuming one background color.")
     parser.add_argument("--chroma-key", default="#00FF00")
     parser.add_argument("--chroma-leak-threshold", type=float, default=36.0)
     parser.add_argument("--max-chroma-leak-pixels", type=int, default=400)
@@ -196,13 +197,13 @@ def main() -> None:
                 "used": used,
                 "nontransparent_pixels": nontransparent,
             }
-            chroma_leak_pixels = opaque_chroma_key_count(
+            chroma_leak_pixels = None if args.structural_only else opaque_chroma_key_count(
                 cell,
                 chroma_key,
                 args.chroma_leak_threshold,
             )
             cell_info["opaque_chroma_key_pixels"] = chroma_leak_pixels
-            chroma_fringe_pixels = chroma_fringe_count(
+            chroma_fringe_pixels = None if args.structural_only else chroma_fringe_count(
                 cell,
                 chroma_key=chroma_key,
                 distance_threshold=args.chroma_fringe_threshold,
@@ -215,7 +216,7 @@ def main() -> None:
                 errors.append(
                     f"{state} row {row_index} column {column_index} is empty or too sparse ({nontransparent} pixels)"
                 )
-            if used and chroma_leak_pixels > args.max_chroma_leak_pixels:
+            if used and chroma_leak_pixels is not None and chroma_leak_pixels > args.max_chroma_leak_pixels:
                 message = (
                     f"{state} row {row_index} column {column_index} has {chroma_leak_pixels} "
                     f"opaque pixels near chroma key {args.chroma_key}; this usually means "
@@ -225,7 +226,7 @@ def main() -> None:
                     warnings.append(message)
                 else:
                     errors.append(message)
-            if used and chroma_fringe_pixels > args.max_chroma_fringe_pixels:
+            if used and chroma_fringe_pixels is not None and chroma_fringe_pixels > args.max_chroma_fringe_pixels:
                 message = (
                     f"{state} row {row_index} column {column_index} has {chroma_fringe_pixels} "
                     f"visible edge pixels contaminated by chroma key {args.chroma_key}"
@@ -266,6 +267,7 @@ def main() -> None:
         )
 
     result = {
+        "validation_mode": "structural" if args.structural_only else "structural-and-chroma",
         "ok": not errors,
         "file": str(atlas_path),
         "format": source_format,
