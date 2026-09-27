@@ -10,6 +10,7 @@ import re
 from pathlib import Path
 
 from PIL import Image
+from prepare_strip import clean_strip, slot_crops, usable_frames
 
 CELL_WIDTH = 192
 CELL_HEIGHT = 208
@@ -317,16 +318,28 @@ def extract_state(
     threshold: float,
     method: str,
 ) -> dict[str, object]:
-    frame_count = ROW_FRAME_COUNTS[state]
+    frame_count = 8 if state in ("look-row-9", "look-row-10") else ROW_FRAME_COUNTS[state]
     with Image.open(strip_path) as opened:
-        strip = remove_chroma_background(opened, chroma_key, threshold)
+        strip, cleanup = clean_strip(opened, frame_count)
 
     state_dir = output_root / state
     state_dir.mkdir(parents=True, exist_ok=True)
 
     frames = None
     used_method = method
-    if method in {"auto", "components"}:
+    if method == "auto":
+        crops = slot_crops(strip, frame_count)
+        frames = [fit_to_cell(crop) for crop in crops]
+        # Prefer the declared grid. Uneven layouts fall back deterministically to
+        # components only when a slot is empty or a cut intersects visible artwork.
+        cuts = [round(i * strip.width / frame_count) for i in range(1, frame_count)]
+        split = any(strip.getchannel("A").crop((x, 0, x + 1, strip.height)).getbbox() for x in cuts)
+        used_method = "slots"
+        if not usable_frames(frames) or split:
+            alternate = extract_component_frames(strip, frame_count)
+            if alternate is not None and usable_frames(alternate):
+                frames, used_method = alternate, "components"
+    if method == "components":
         frames = extract_component_frames(strip, frame_count)
         if frames is None and method == "components":
             raise SystemExit(f"could not find {frame_count} sprite components in {strip_path}")
@@ -341,12 +354,14 @@ def extract_state(
             frames = extract_slot_frames(strip, frame_count)
             used_method = "slots"
 
+    if not usable_frames(frames):
+        raise ValueError(f"Missing visible frames after grid/component extraction: {strip_path}")
     outputs = []
     for index, frame in enumerate(frames):
         output = state_dir / f"{index:02d}.png"
         frame.save(output)
         outputs.append(str(output))
-    return {"state": state, "frames": outputs, "method": used_method}
+    return {"state": state, "frames": outputs, "method": used_method, "cleanup": cleanup}
 
 
 def main() -> None:

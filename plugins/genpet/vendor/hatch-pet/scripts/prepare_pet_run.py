@@ -788,6 +788,31 @@ This is one of three AI-generated egg loops. Its frames will be reused in native
 do not try to represent the native character actions. Minor motion differences are acceptable when usable."""
 
 
+BACKGROUND_CONTRACT = """Use a uniform solid background clearly distinct from every pet/prop color. Any suitable color is acceptable; no exact hex code is required. No gradients, texture, scenery or shadows. Separate frames with empty background only: NO separator lines, grid lines, boxes, borders or guide marks. The layout guide is spacing metadata, never artwork to copy."""
+
+
+def make_parallel_jobs(run_dir, copied_refs):
+    jobs = [job for job in make_jobs(run_dir, copied_refs) if job["id"] != "look-cardinals"]
+    for job in jobs[1:]:
+        job["depends_on"] = ["base"]
+        job["parallelizable_after"] = ["base"]
+        job["input_images"] = [ref for ref in job["input_images"]
+                               if ref["path"] == CANONICAL_BASE_PATH or ref["path"].startswith(LAYOUT_GUIDE_DIR + "/")]
+        job["derivation_policy"] = {"may_derive": False, "reason": "independent AI row based on canonical base"}
+        for name in ("mirror_policy", "look_mechanics_file", "retry_prompt_file"):
+            job.pop(name, None)
+    return jobs
+
+
+def parallel_row_prompt(args, state, count, action):
+    return f"""Generate {state}: exactly {count} complete full-body poses in one horizontal strip.
+Use only the canonical base for character identity, proportions, palette, markings and props.
+Keep scale and baseline consistent with that base. One pose centered in each invisible equal-width slot,
+with generous padding and no clipping or overlap. Preserve the native pixel-art style.
+Action: {action}
+{BACKGROUND_CONTRACT}"""
+
+
 def make_jobs(
     run_dir: Path,
     copied_refs: list[dict[str, object]],
@@ -996,6 +1021,7 @@ def main() -> None:
     parser.add_argument("--pet-notes", default="")
     parser.add_argument("--early-look", action="store_true",
                         help="Start directions after base and idle; use extracted idle frames for scale and baseline.")
+    parser.add_argument("--parallel", action="store_true", help="GenPet: base then all eleven rows independently.")
     parser.add_argument("--egg", action="store_true",
                         help="Unhatched GenPet: base plus three AI shell loops; no separate character actions or look poses.")
     parser.add_argument(
@@ -1147,7 +1173,7 @@ def main() -> None:
     )
 
     write_text(prompt_dir / "base-pet.md", base_pet_prompt(args))
-    for state, row, frames, purpose in ([] if args.egg else ROWS):
+    for state, row, frames, purpose in ([] if args.egg or args.parallel else ROWS):
         write_text(
             row_prompt_dir / f"{state}.md",
             row_prompt(args, state, row, frames, purpose),
@@ -1156,7 +1182,7 @@ def main() -> None:
             row_retry_prompt_dir / f"{state}.md",
             retry_row_prompt(args, state, row, frames, purpose),
         )
-    for state, row, directions, _purpose in ([] if args.egg else LOOK_ROWS):
+    for state, row, directions, _purpose in ([] if args.egg or args.parallel else LOOK_ROWS):
         write_text(
             row_prompt_dir / f"{state}.md",
             look_row_prompt(args, row, directions),
@@ -1168,14 +1194,14 @@ def main() -> None:
     if args.egg:
         for state in EGG_ANIMATIONS:
             write_text(row_prompt_dir / f"{state}.md", egg_row_prompt(args, state))
-    else:
+    elif not args.parallel:
         write_text(prompt_dir / "look-cardinals.md", look_cardinal_prompt(args))
-    for label, expected_direction in ([] if args.egg else LOOK_CARDINALS):
+    for label, expected_direction in ([] if args.egg or args.parallel else LOOK_CARDINALS):
         write_text(
             look_anchor_repair_prompt_dir / f"{label}.md",
             look_cardinal_repair_prompt(args, label, expected_direction),
         )
-    if args.early_look and not args.egg:
+    if args.early_look and not args.egg and not args.parallel:
         # Keep prompts and their actual reference dependencies in agreement.
         look_prompts = [prompt_dir / "look-cardinals.md"]
         look_prompts += list(look_anchor_repair_prompt_dir.glob("*.md"))
@@ -1187,13 +1213,29 @@ def main() -> None:
             text = text.replace("completed standard contact sheet", "approved idle reference sheet")
             text = text.replace("standard contact sheet", "approved idle reference sheet")
             write_text(prompt_path, text)
+    if args.parallel or args.egg:
+        base = base_pet_prompt(args)
+        base = base.replace(f"perfectly flat pure {args.chroma_key['name']} {args.chroma_key['hex']} chroma-key background", "uniform contrasting solid-color background")
+        base = base.replace(f"Keep {args.chroma_key['hex']} and close colors out of the pet, props, highlights, and effects.", "")
+        write_text(prompt_dir / "base-pet.md", base + "\n" + BACKGROUND_CONTRACT)
+        if args.egg:
+            for state in EGG_ANIMATIONS:
+                text = egg_row_prompt(args, state).replace(f"Flat pure {args.chroma_key['hex']} background, no guide lines or labels.", BACKGROUND_CONTRACT)
+                write_text(row_prompt_dir / f"{state}.md", text)
+        else:
+            for state, _row, count, _purpose in ROWS:
+                write_text(row_prompt_dir / f"{state}.md", parallel_row_prompt(args, state, count, STATE_PROMPTS[state]))
+            for state, _row, directions, _purpose in LOOK_ROWS:
+                action = "Look directions in this exact left-to-right order: " + ", ".join(directions)
+                action += ". Angles run clockwise in screen coordinates: 0 up, 90 viewer-right, 180 down, 270 viewer-left. Move eyes/head naturally; keep the body upright. This row is independent; do not wait for any other row or cardinal image."
+                write_text(row_prompt_dir / f"{state}.md", parallel_row_prompt(args, state, 8, action))
     jobs = {
         "schema_version": 1,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "run_dir": str(run_dir),
         "primary_generation_skill": "$imagegen",
-        "workflow_profile": "genpet-egg-three" if args.egg else "genpet-early-look" if args.early_look else "standard",
-        "jobs": make_egg_jobs(run_dir, copied_refs) if args.egg else make_jobs(run_dir, copied_refs, args.early_look),
+        "workflow_profile": "genpet-egg-three" if args.egg else "genpet-parallel" if args.parallel else "genpet-early-look" if args.early_look else "standard",
+        "jobs": make_egg_jobs(run_dir, copied_refs) if args.egg else make_parallel_jobs(run_dir, copied_refs) if args.parallel else make_jobs(run_dir, copied_refs, args.early_look),
     }
     (run_dir / "imagegen-jobs.json").write_text(json.dumps(jobs, indent=2) + "\n", encoding="utf-8")
 
