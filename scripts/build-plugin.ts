@@ -22,7 +22,7 @@ await mkdir(target, { recursive: true });
 await copyRuntimeFiles(source, target);
 
 await build({
-  entryPoints: { mcp: 'src/mcp.ts', cli: 'src/cli.ts' },
+  entryPoints: { mcp: 'src/mcp.ts', cli: 'src/cli.ts', 'debugger-server': 'src/debugger-server.ts' },
   absWorkingDir: source,
   outdir: path.join(target, 'dist'),
   bundle: true,
@@ -38,7 +38,7 @@ const wasm = createRequire(import.meta.url).resolve('@jsquash/webp/codec/dec/web
 await cp(wasm, path.join(target, 'dist', 'webp_dec.wasm'));
 
 const runtimePackage = {
-  name: pkg.name, version: pkg.version, private: true, type: 'module', license: pkg.license,
+  bin: { genpet: 'dist/cli.js' }, name: pkg.name, version: pkg.version, private: true, type: 'module', license: pkg.license,
   description: pkg.description, engines: pkg.engines,
   scripts: { start: 'node dist/mcp.js', 'pet:status': 'node dist/cli.js status', 'pet:adopt': 'node dist/cli.js adopt', 'pet:install': 'node dist/cli.js install-native' },
 };

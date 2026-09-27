@@ -44,7 +44,7 @@ Sidebar **Plugins** → **Add plugin marketplace** → source `yate-ge/GenPet` (
 
 In any Codex task, send:
 
-> 请从 GitHub 仓库 yate-ge/GenPet 安装 GenPet Codex 插件，不需要 clone 仓库或运行 npm。先确认 `node --version` 为 22 或更高、`codex` CLI 可用。用 `codex plugin list` 检查是否已有 GenPet：已从 `genpet` marketplace 安装时，运行 `codex plugin marketplace upgrade genpet` 更新；来自其他 marketplace 时先告诉我它的来源，不要装第二个 GenPet；尚未安装时，依次运行 `codex plugin marketplace add yate-ge/GenPet`、`codex plugin marketplace upgrade genpet` 和 `codex plugin add genpet@genpet`；marketplace 已存在也必须 upgrade，不能把 already added 当作更新成功。完成后用 `codex plugin list` 确认 `genpet@genpet` 为 installed, enabled，并报告 marketplace 提交、版本和安装路径。使用新版插件自带的 `scripts/verify-install.mjs`，传入实际安装目录和已刷新的 marketplace 中 plugins/genpet 目录，核对清单版本和所有发布文件哈希；缺少核验脚本或内容不一致时不能宣称升级成功。技能和 MCP 工具要在新的 Codex 任务中才会加载，当前任务无法确认时请直接说明。只安装插件：不要领养、重置或加龄宠物，不要生成图像，保留 `~/.genpet/` 和 `~/.codex/pets/genpet-companion/`。
+> 请从 GitHub 仓库 yate-ge/GenPet 安装 GenPet Codex 插件，不需要 clone 仓库或运行 npm。用 `codex plugin list` 检查是否已有 GenPet：已从 `genpet` marketplace 安装时，运行 `codex plugin marketplace upgrade genpet` 更新；来自其他 marketplace 时先告诉我它的来源，不要装第二个 GenPet；尚未安装时，依次运行 `codex plugin marketplace add yate-ge/GenPet`、`codex plugin marketplace upgrade genpet` 和 `codex plugin add genpet@genpet`；marketplace 已存在也必须 upgrade，不能把 already added 当作更新成功。完成后用 `codex plugin list` 确认 `genpet@genpet` 为 installed, enabled，并报告 marketplace 提交、版本和安装路径。使用新版插件自带的 `scripts/verify-install.mjs`，传入实际安装目录和已刷新的 marketplace 中 plugins/genpet 目录，核对清单版本和所有发布文件哈希；缺少核验脚本或内容不一致时不能宣称升级成功。技能和 MCP 工具要在新的 Codex 任务中才会加载，当前任务无法确认时请直接说明。只安装插件：不要领养、重置或加龄宠物，不要生成图像，保留 `~/.genpet/` 和 `~/.codex/pets/genpet-companion/`。
 
 ### Install manually
 
@@ -165,9 +165,9 @@ Context is read locally from Codex JSONL user messages. System/developer message
 
 Image-generation prompts contain pet design parameters and activity motifs, not private chat text. Derived activity state is stored locally. Artwork prompts and reference images are processed through the Codex image-generation service; raw task text is not included in those prompts. Generated outputs are saved locally.
 
-## External development debugger
+## Optional bundled debugger
 
-A separate sibling project, `GenPet-Debugger`, can inspect state and accelerate an isolated demo clock. It is not required to use GenPet, is not exposed through plugin tools, and is excluded from both release archives. All product interaction happens through Codex and its native Pet.
+Run `/genpet-debugger` to open the bundled local debugging page. It is off by default; repeated launches reuse the server. Opening the page only reads saved state. Real companion actions and the isolated growth laboratory are separate. Stop the server using the page button; closing the tab alone does not stop it. The CLI equivalent is `node dist/cli.js debugger` (or `genpet debugger` when the CLI is linked). GenPet itself continues to use the native Pet surface.
 
 ## Testing and release
 

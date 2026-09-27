@@ -34,4 +34,4 @@ GENPET_DATA_DIR=/absolute/temporary/test-data node dist/cli.js --demo art-reques
 
 日常代码改动运行 `npm run verify:fast`。准备发布时运行 `npm run verify:release`：它会检查源码、重建 `plugins/genpet/`，在临时 Codex 环境通过仓库 marketplace 安装插件，然后在安装副本上运行隔离 MCP 全流程；不会重置真实宠物或安装到用户的 Pets 目录。真实显示另按当前设计请求验收，详见[验证工作流](PROJECT_STATUS.zh-CN.md)。
 
-`assets/examples/lifecycle/` 保留离线正向孵化、成长与道具变化样本及其来源记录。这些是开发证据，不是用户宠物的候选形象，也不能替代真实宠物的视觉验收。网页调试器独立于本插件。
+`assets/examples/lifecycle/` 保留离线正向孵化、成长与道具变化样本及其来源记录。这些是开发证据，不是用户宠物的候选形象，也不能替代真实宠物的视觉验收。网页调试器随插件附带，默认关闭。
