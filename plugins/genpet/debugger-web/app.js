@@ -164,6 +164,14 @@ function render() {
     }
     const native = $('#native-switch');
     native.hidden = isDemo;
+    if (!isDemo) {
+        const selection = data.nativeSelection;
+        text('#native-selection', selection?.genpetSelected === true
+            ? 'Codex 当前已选中 GenPet。'
+            : selection?.genpetSelected === false
+                ? 'Codex 当前未选中 GenPet。请先在 Pets 设置中选择 GenPet；IPC 无法切换选中项。'
+                : '无法确认 Codex 当前选中的 Pet；请在 Pets 设置中确认已选中 GenPet。');
+    }
     const spriteBox = $('#native-sprites');
     spriteBox.replaceChildren();
     const sprites = data.nativeSprites?.sprites || [];
@@ -185,7 +193,9 @@ function render() {
         button.addEventListener("click", async () => { button.disabled = true; try {
             const result = await api({ action: 'switch-native', spritesheet: name, refreshMethod: $('#refresh-method').value });
             showIpcResult(result);
-            toast(result.refresh?.displayStatus === 'confirmed' ? '悬浮宠物已换成这一版。' : '文件已切换，请观察悬浮宠物；执行结果见下方。');
+            toast(result.refresh?.selection?.genpetSelected === false
+                ? '图集已更新，但 Codex 未选中 GenPet；请先在 Pets 设置中选择。'
+                : result.refresh?.displayStatus === 'confirmed' ? '悬浮宠物已换成这一版。' : '文件已切换，请观察悬浮宠物；执行结果见下方。');
         }
         finally {
             button.disabled = false;
@@ -271,7 +281,7 @@ $('#copy-request').addEventListener("click", async () => { if (!data.artRequest)
 catch {
     toast('复制不可用，请在 Codex 中使用 genpet_art_request。');
 } });
-$('#export-button').addEventListener("click", async () => { const result = await api({ action: 'export' }); showIpcResult(result); toast('原生安装结果见下方；刷新请求与可见显示分别确认。'); });
+$('#export-button').addEventListener("click", async () => { const result = await api({ action: 'export' }); showIpcResult(result); toast(data.nativeSelection?.genpetSelected === false ? (data.state.pet?.stage === 'egg' ? '蛋已安装。打开 Codex 的 Pets，选择 GenPet，就能看到你的蛋。' : '形象已安装。打开 Codex 的 Pets，选择 GenPet，就能看到你的伙伴。') : '原生安装结果见下方；刷新请求与可见显示分别确认。'); });
 function showIpcResult(result) { text('#ipc-result', new Date().toLocaleTimeString() + '\n' + JSON.stringify(result, null, 2)); }
 for (const [id, action] of [['ipc-refresh', 'ipc-refresh']])
     $('#' + id).addEventListener("click", async () => {
@@ -281,6 +291,9 @@ for (const [id, action] of [['ipc-refresh', 'ipc-refresh']])
         try {
             const result = await api({ action });
             showIpcResult(result);
+            toast(result.selection?.genpetSelected === false
+                ? '刷新请求已发送，但 Codex 未选中 GenPet；请先在 Pets 设置中选择。'
+                : '刷新请求已发送；请观察 Codex 悬浮宠物。');
         }
         catch (error) {
             showIpcResult({ error: error.message });

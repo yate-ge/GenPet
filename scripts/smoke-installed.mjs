@@ -3,9 +3,10 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { mkdtemp,rm,readFile,access,readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import assert from 'node:assert/strict';
 const root=path.resolve(process.argv[2]||'.');
-const { readImageInfo }=await import(path.resolve(process.argv[3]||root,'dist','image.js'));
+const { readImageInfo }=await import(pathToFileURL(path.resolve(process.argv[3]||root,'dist','image.js')).href);
 const fixtureRoot=path.resolve(process.argv[3]||root);
 const temp=await mkdtemp(path.join(tmpdir(),'genpet-installed-'));
 const client=new Client({name:'genpet-installed-smoke',version:'0.1.0'});
