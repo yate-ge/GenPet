@@ -4,7 +4,7 @@ import path from 'node:path';
 
 const directories = ['skills', 'vendor', 'config', '.codex-plugin'];
 const files = ['.mcp.json', 'LICENSE', 'THIRD_PARTY_NOTICES.md'];
-const helpers = ['normalize_alpha_noise.py', 'audit_atlas_growth.py'];
+const helpers = ['normalize_alpha_noise.py', 'audit_atlas_growth.py', 'verify-install.mjs'];
 const helpDocs = ['DEBUG_COMMANDS.zh-CN.md', 'NATIVE_REFRESH.zh-CN.md'];
 const distributable = (file: string) => !file.split(path.sep).includes('__pycache__') && !/\.pyc$|\.DS_Store$/.test(file);
 

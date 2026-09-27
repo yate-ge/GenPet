@@ -27,6 +27,7 @@ const exists = file => access(file).then(() => true, () => false);
 run('Source checks', 'npm', ['run', 'verify:fast']);
 run('Compile smoke helpers', 'npm', ['run', 'build']);
 run('Build committed plugin', 'npm', ['run', 'build:plugin']);
+run('Release version', 'npm', ['run', 'verify:version']);
 
 for (const relative of ['.mcp.json', 'README.md', 'dist/mcp.js', 'dist/cli.js', 'dist/webp_dec.wasm', 'skills/genpet/SKILL.md', 'vendor/hatch-pet/SKILL.md', 'scripts/audit_atlas_growth.py']) {
   assert.ok(await exists(path.join(plugin, relative)), `Missing from plugin: ${relative}`);
@@ -47,7 +48,9 @@ try {
   const installed = path.join(cache, version);
   assert.equal(await exists(path.join(installed, 'node_modules')), false, 'Installed plugin must not depend on node_modules');
   const { version: expected } = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
-  assert.ok(version.startsWith(expected), `Installed ${version}, expected ${expected}`);
+  const installedVersion = JSON.parse(await readFile(path.join(installed, '.codex-plugin/plugin.json'), 'utf8')).version;
+  assert.equal(installedVersion, expected);
+  run('Installed package integrity', process.execPath, [path.join(root, 'scripts', 'verify-install.mjs'), installed, plugin]);
   // The installed copy lives outside the repository, so no dependency can resolve from its node_modules.
   run('Isolated plugin lifecycle', process.execPath, [path.join(root, 'scripts', 'smoke-installed.mjs'), installed, root]);
   console.log(`Plugin ${version} verified in an isolated Codex home. The installed user Pet was not changed.`);
