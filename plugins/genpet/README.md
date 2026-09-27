@@ -33,3 +33,5 @@ node <marketplace>/plugins/genpet/scripts/verify-install.mjs <installed-plugin> 
 ```
 
 This checks manifest versions and file hashes, including the delegation policy. Report the marketplace commit as well as the installed version and path. A successful check does not prove that an already-running chat reloaded its skills or that delegated image generation has been tested.
+
+Optional debugger: `/genpet-debugger` opens a local page on demand. It is off by default. Opening reads saved state; the laboratory uses isolated demo data. Stop it with the page button.

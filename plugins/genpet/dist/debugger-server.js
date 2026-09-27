@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { createRequire as __genpetCreateRequire } from 'node:module'; const require = __genpetCreateRequire(import.meta.url);
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -2124,15 +2123,120 @@ var require_png = __commonJS({
   }
 });
 
-// src/debugger.ts
-import { spawn } from "node:child_process";
-import path3 from "node:path";
+// src/debugger-server.ts
+import http from "node:http";
+
+// src/native-ipc.ts
+import net from "node:net";
+import { lstat } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import path from "node:path";
+import { homedir } from "node:os";
+async function refreshViaIpc(socketPath = path.join(process.env.CODEX_HOME || path.join(homedir(), ".codex"), "ipc", "ipc.sock"), timeoutMs = 2e3) {
+  const [file, directory] = await Promise.all([lstat(socketPath), lstat(path.dirname(socketPath))]);
+  const uid = process.getuid?.();
+  if (uid == null || file.uid !== uid || directory.uid !== uid || !file.isSocket() || !directory.isDirectory() || directory.mode & 18) {
+    throw Error("IPC socket must belong to the current user in a protected directory");
+  }
+  const sockets = /* @__PURE__ */ new Set();
+  const pending = /* @__PURE__ */ new Set();
+  let failure;
+  const fail = (error) => {
+    failure ??= error;
+    for (const reject of [...pending]) reject(error);
+  };
+  const deadline = setTimeout(() => fail(Error("IPC refresh timed out")), timeoutMs);
+  function connect() {
+    return new Promise((resolve, reject) => {
+      if (failure) return reject(failure);
+      pending.add(reject);
+      const socket = net.createConnection(socketPath);
+      sockets.add(socket);
+      const requestId = randomUUID();
+      let buffer = Buffer.alloc(0);
+      let listener;
+      const send = (message) => {
+        if (failure) throw failure;
+        const body = Buffer.from(JSON.stringify(message));
+        const header = Buffer.alloc(4);
+        header.writeUInt32LE(body.length);
+        socket.write(Buffer.concat([header, body]));
+      };
+      socket.on("error", fail);
+      socket.on("close", () => fail(Error("IPC connection closed")));
+      socket.on("connect", () => send({ type: "request", requestId, sourceClientId: "genpet", version: 0, method: "initialize", params: { clientType: "genpet" } }));
+      socket.on("data", (chunk) => {
+        buffer = Buffer.concat([buffer, chunk]);
+        while (buffer.length >= 4) {
+          const length = buffer.readUInt32LE(0);
+          if (length > 16 * 1024 * 1024) {
+            fail(Error("IPC frame too large"));
+            return;
+          }
+          if (buffer.length < length + 4) return;
+          let message;
+          try {
+            message = JSON.parse(buffer.subarray(4, length + 4).toString());
+          } catch {
+            fail(Error("Invalid IPC JSON"));
+            return;
+          }
+          buffer = buffer.subarray(length + 4);
+          if (!message || typeof message !== "object") {
+            fail(Error("Invalid IPC message"));
+            return;
+          }
+          if (message.type === "response" && message.requestId === requestId) {
+            if (message.resultType !== "success" || typeof message.result?.clientId !== "string") {
+              fail(Error("IPC initialization rejected"));
+              return;
+            }
+            pending.delete(reject);
+            resolve({ id: message.result.clientId, send, onMessage: (fn) => {
+              listener = fn;
+            } });
+          }
+          listener?.(message);
+        }
+      });
+    });
+  }
+  try {
+    const observer = await connect();
+    const sender = await connect();
+    await new Promise((resolve, reject) => {
+      if (failure) return reject(failure);
+      pending.add(reject);
+      observer.onMessage((message) => {
+        if (message.type === "broadcast" && message.method === "query-cache-invalidate" && message.version === 0 && message.sourceClientId === sender.id && JSON.stringify(message.params) === JSON.stringify({ queryKey: ["custom-avatars"], reset: false })) {
+          pending.delete(reject);
+          resolve();
+        }
+      });
+      sender.send({ type: "broadcast", method: "query-cache-invalidate", version: 0, sourceClientId: sender.id, params: { queryKey: ["custom-avatars"], reset: false } });
+    });
+    return { socketPath, handshakeConfirmed: true, relayConfirmed: true, hostRefreshRequested: true };
+  } finally {
+    clearTimeout(deadline);
+    for (const socket of sockets) {
+      socket.removeAllListeners("close");
+      socket.destroy();
+    }
+  }
+}
+
+// src/debugger-server.ts
+import { copyFile as copyFile2, readFile as readFile6, realpath, rename as rename3, writeFile as writeFile3 } from "node:fs/promises";
+import path6 from "node:path";
+import { homedir as homedir5 } from "node:os";
+import { randomBytes, randomUUID as randomUUID4 } from "node:crypto";
+import { pathToFileURL } from "node:url";
 
 // src/store.ts
 import { mkdir, readFile as readFile2, rename, writeFile, rm, stat as stat2 } from "node:fs/promises";
-import { homedir as homedir2 } from "node:os";
-import path2 from "node:path";
-import { randomUUID } from "node:crypto";
+import { homedir as homedir3 } from "node:os";
+import path3 from "node:path";
+import { randomUUID as randomUUID2 } from "node:crypto";
 
 // src/core.ts
 var HOUR = 36e5;
@@ -2193,12 +2297,12 @@ function validatePolicy(policy) {
   if (policy.maxEvents > 1e3 || policy.maxContextEntries > 1e4) throw new Error("History limits are too large");
 }
 function hash(value) {
-  let result2 = 2166136261;
+  let result = 2166136261;
   for (const character of value) {
-    result2 ^= character.codePointAt(0);
-    result2 = Math.imul(result2, 16777619);
+    result ^= character.codePointAt(0);
+    result = Math.imul(result, 16777619);
   }
-  return result2 >>> 0;
+  return result >>> 0;
 }
 function resolveHatchIdentity(pet) {
   const resolvedAt = pet.adoptedAt + pet.policy.hatchHours * HOUR;
@@ -2383,10 +2487,39 @@ function addContextBatch(original, inputs, nowMs) {
   for (const input of inputs) insertContext(pet, input, nowMs);
   return evolvePet(pet, nowMs);
 }
+function addContext(original, input, nowMs) {
+  return addContextBatch(original, [input], nowMs);
+}
+function removeContext(original, id, nowMs) {
+  const pet = evolvePet(original, nowMs);
+  const removed = pet.context.find((entry) => entry.id === id);
+  if (!removed) return pet;
+  pet.context = pet.context.filter((entry) => entry.id !== id);
+  pet.events = pet.events.filter((entry) => !entry.id.endsWith(`-${id}`));
+  if (removed.milestone) {
+    const day = Math.floor((removed.occurredAt - pet.adoptedAt) / DAY);
+    if (!pet.context.some((entry) => entry.milestone && Math.floor((entry.occurredAt - pet.adoptedAt) / DAY) === day)) {
+      pet.growth.milestoneDays = pet.growth.milestoneDays.filter((value) => value !== day);
+      pet.growth.decorationLevel = Math.min(3, pet.growth.milestoneDays.length);
+      pet.events = pet.events.filter((entry) => !(entry.type === "milestone" && entry.id.endsWith(`-${day}`)));
+    }
+  }
+  refreshState(pet, pet.lastEvaluatedAt);
+  refreshExpression(pet);
+  return pet;
+}
+function updateProfile(original, patch) {
+  const pet = migratePet(original);
+  pet.profile = { ...pet.profile, ...patch };
+  validateProfile(pet.profile);
+  pet.profile.name = pet.profile.name.trim();
+  refreshExpression(pet);
+  return pet;
+}
 
 // src/context.ts
 import { createHash } from "node:crypto";
-import { homedir } from "node:os";
+import { homedir as homedir2 } from "node:os";
 import { join } from "node:path";
 import { open, readdir, stat } from "node:fs/promises";
 var MAX_FILE_BYTES = 2 * 1024 * 1024;
@@ -2405,11 +2538,11 @@ function classify(text) {
   scores.sort((a, b) => b.score - a.score);
   return scores[0].score > 0 && scores[0].score > scores[1].score ? scores[0].kind : null;
 }
-function userText(record2) {
-  if (record2?.type === "event_msg" && record2.payload?.type === "user_message") return typeof record2.payload.message === "string" ? record2.payload.message : null;
-  if (record2?.type !== "response_item" || record2.payload?.type !== "message" || record2.payload.role !== "user") return null;
-  if (!Array.isArray(record2.payload.content)) return null;
-  return record2.payload.content.filter((part) => part?.type === "input_text" || part?.type === "text").map((part) => typeof part.text === "string" ? part.text : "").join("\n");
+function userText(record) {
+  if (record?.type === "event_msg" && record.payload?.type === "user_message") return typeof record.payload.message === "string" ? record.payload.message : null;
+  if (record?.type !== "response_item" || record.payload?.type !== "message" || record.payload.role !== "user") return null;
+  if (!Array.isArray(record.payload.content)) return null;
+  return record.payload.content.filter((part) => part?.type === "input_text" || part?.type === "text").map((part) => typeof part.text === "string" ? part.text : "").join("\n");
 }
 function cleanText(text) {
   return text.replace(/<(environment_context|recommended_plugins|send_user_message_question_reply)\b[^>]*>[\s\S]*?<\/\1>/gi, "").replace(/<\/?(?:environment_context|recommended_plugins|send_user_message_question_reply)\b[^>]*>[\s\S]*$/gi, "").replace(/\s+/g, " ").trim().slice(0, 16e3);
@@ -2419,8 +2552,8 @@ async function scanCodexContext(options = {}) {
   const hours = options.hours ?? 5;
   if (!Number.isFinite(nowMs) || !Number.isFinite(hours) || hours <= 0 || hours > 168) throw new Error("Context window must be between 0 and 168 hours with a finite clock.");
   const startMs = nowMs - hours * 36e5;
-  const root = options.codexHome ?? process.env.CODEX_HOME ?? join(homedir(), ".codex");
-  const result2 = { entries: [], stats: { files: 0, messages: 0 }, warnings: [] };
+  const root = options.codexHome ?? process.env.CODEX_HOME ?? join(homedir2(), ".codex");
+  const result = { entries: [], stats: { files: 0, messages: 0 }, warnings: [] };
   const warnings = /* @__PURE__ */ new Set();
   const candidates = [];
   try {
@@ -2438,11 +2571,11 @@ async function scanCodexContext(options = {}) {
     if (error.code !== "ENOENT") warnings.add("\u90E8\u5206\u672C\u5730\u4F1A\u8BDD\u76EE\u5F55\u65E0\u6CD5\u8BFB\u53D6\u3002");
   }
   for (const candidate of candidates) {
-    if (result2.stats.files >= MAX_FILES) {
+    if (result.stats.files >= MAX_FILES) {
       warnings.add("\u5DF2\u8FBE\u5230 200 \u4E2A\u4F1A\u8BDD\u6587\u4EF6\u4E0A\u9650\uFF1B\u672C\u6B21\u7ED3\u679C\u53EF\u80FD\u4E0D\u5B8C\u6574\u3002");
       break;
     }
-    result2.stats.files++;
+    result.stats.files++;
     let text;
     let handle;
     try {
@@ -2477,16 +2610,16 @@ async function scanCodexContext(options = {}) {
     const matches = /* @__PURE__ */ new Map();
     for (const line of text.split("\n")) {
       if (!line.trim()) continue;
-      let record2;
+      let record;
       try {
-        record2 = JSON.parse(line);
+        record = JSON.parse(line);
       } catch {
         warnings.add("\u90E8\u5206\u4F1A\u8BDD\u5305\u542B\u672A\u5B8C\u6210\u6216\u65E0\u6548\u8BB0\u5F55\uFF0C\u5DF2\u8DF3\u8FC7\u3002");
         continue;
       }
-      const at = typeof record2.timestamp === "number" ? record2.timestamp : Date.parse(record2.timestamp);
+      const at = typeof record.timestamp === "number" ? record.timestamp : Date.parse(record.timestamp);
       if (!Number.isFinite(at) || at < startMs || at > nowMs) continue;
-      const raw = userText(record2);
+      const raw = userText(record);
       if (!raw) continue;
       if (raw.includes("<heartbeat>") || /^\s*[/\$](?:genpet:)?genpet-(?:start|reset|grow|state)\b/.test(raw)) continue;
       const prompt = cleanText(raw);
@@ -2494,7 +2627,7 @@ async function scanCodexContext(options = {}) {
       const promptId = digest(prompt);
       if (seen.has(promptId)) continue;
       seen.add(promptId);
-      result2.stats.messages++;
+      result.stats.messages++;
       const kind2 = classify(prompt);
       if (!kind2) continue;
       const group = matches.get(kind2) ?? { count: 0, at, ids: [] };
@@ -2507,11 +2640,11 @@ async function scanCodexContext(options = {}) {
     if (!ranked.length || ranked[1] && ranked[0][1].count === ranked[1][1].count) continue;
     const [kind, evidence] = ranked[0];
     const externalId = `codex-local:${digest(`${candidate.file}:${kind}:${Math.floor(evidence.at / 18e6)}`).slice(0, 24)}`;
-    result2.entries.push({ kind, summary: `\u672C\u5730 Codex \xB7 ${LABELS[kind]} \xB7 ${evidence.count} \u6761\u4EFB\u52A1\u7EBF\u7D22`, source: "codex-local", occurredAt: evidence.at, externalId });
+    result.entries.push({ kind, summary: `\u672C\u5730 Codex \xB7 ${LABELS[kind]} \xB7 ${evidence.count} \u6761\u4EFB\u52A1\u7EBF\u7D22`, source: "codex-local", occurredAt: evidence.at, externalId });
   }
-  result2.entries.sort((a, b) => a.occurredAt - b.occurredAt || a.externalId.localeCompare(b.externalId));
-  result2.warnings = [...warnings];
-  return result2;
+  result.entries.sort((a, b) => a.occurredAt - b.occurredAt || a.externalId.localeCompare(b.externalId));
+  result.warnings = [...warnings];
+  return result;
 }
 function summarizeInitialActivity(scan) {
   const counts = { build: 0, research: 0, create: 0, learn: 0, rest: 0 };
@@ -2539,23 +2672,29 @@ function deriveInitialProfile(scan) {
 
 // src/config.ts
 import { readFile } from "node:fs/promises";
-import path from "node:path";
+import path2 from "node:path";
 import { fileURLToPath } from "node:url";
 async function adoptionConfig() {
-  const file = process.env.GENPET_POLICY_FILE || path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../config/policy.json");
+  const file = process.env.GENPET_POLICY_FILE || path2.resolve(path2.dirname(fileURLToPath(import.meta.url)), "../config/policy.json");
   const config = JSON.parse(await readFile(file, "utf8"));
   if (!config || typeof config !== "object" || !config.defaultProfile || !config.timing) throw new Error("Invalid GenPet adoption policy");
   return config;
 }
 
 // src/store.ts
-var dataRoot = () => process.env.GENPET_DATA_DIR || path2.join(homedir2(), ".genpet");
+var dataRoot = () => process.env.GENPET_DATA_DIR || path3.join(homedir3(), ".genpet");
 var fresh = () => ({ version: 1, pet: null, clockOffset: 0, settings: { autoContext: true, freezeOutfit: false, autoArt: true }, importedIds: [], lastScanAt: 0, scanInfo: { messages: 0, files: 0, warnings: [] }, art: [] });
+function configureState(s, input) {
+  if (input.freezeOutfit === true && !s.settings.freezeOutfit) s.settings.lockedOutfit = { prop: s.pet?.state.prop || "none", scene: s.pet?.state.scene || "nest" };
+  if (input.freezeOutfit === false) delete s.settings.lockedOutfit;
+  for (const key of ["autoContext", "freezeOutfit", "autoArt"]) if (typeof input[key] === "boolean") s.settings[key] = input[key];
+  return s.settings;
+}
 var Store = class {
-  constructor(root = dataRoot(), demo2 = false) {
+  constructor(root = dataRoot(), demo = false) {
     this.root = root;
-    this.demo = demo2;
-    this.file = path2.join(root, demo2 ? "demo.json" : "state.json");
+    this.demo = demo;
+    this.file = path3.join(root, demo ? "demo.json" : "state.json");
   }
   root;
   demo;
@@ -2596,11 +2735,11 @@ var Store = class {
           delete state.identityReference;
         }
       }
-      const result2 = await fn(state);
-      const tmp = this.file + "." + randomUUID() + ".tmp";
+      const result = await fn(state);
+      const tmp = this.file + "." + randomUUID2() + ".tmp";
       await writeFile(tmp, JSON.stringify(state, null, 2), { mode: 384 });
       await rename(tmp, this.file);
-      return result2;
+      return result;
     } finally {
       await rm(lock, { recursive: true, force: true });
     }
@@ -2668,45 +2807,9 @@ var Store = class {
   }
 };
 
-// src/debugger.ts
-async function launchDebugger(port = Number(process.env.GENPET_PORT || 47831)) {
-  if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("GENPET_PORT must be an integer between 1024 and 65535");
-  const url = `http://127.0.0.1:${port}`;
-  const root = path3.resolve(dataRoot());
-  async function inspect() {
-    let response;
-    try {
-      response = await fetch(url + "/api/health", { signal: AbortSignal.timeout(500) });
-    } catch {
-      return false;
-    }
-    const state = await response.json().catch(() => null);
-    if (state?.service !== "genpet-debugger" || state.root !== root) throw new Error("Debugger port is occupied by another service or data directory. Set GENPET_PORT to a different port.");
-    return true;
-  }
-  if (await inspect()) return { url, reused: true };
-  const child = spawn(process.execPath, [path3.join(import.meta.dirname, "debugger-server.js")], {
-    detached: true,
-    stdio: "ignore",
-    env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: root }
-  });
-  let failure;
-  child.once("error", (error) => {
-    failure = error;
-  });
-  child.unref();
-  for (let i = 0; i < 50; i++) {
-    if (failure) throw failure;
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    if (await inspect()) return { url, reused: false };
-    if (child.exitCode !== null) throw new Error("Debugger failed to start; check whether the port is occupied.");
-  }
-  throw new Error("Debugger startup timed out.");
-}
-
 // src/art.ts
 import { mkdir as mkdir2, readFile as readFile5, copyFile, writeFile as writeFile2, rename as rename2 } from "node:fs/promises";
-import path6 from "node:path";
+import path5 from "node:path";
 import { createHash as createHash3, randomUUID as randomUUID3 } from "node:crypto";
 
 // src/image.ts
@@ -2756,11 +2859,11 @@ var Module = (() => {
     var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
     var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions == "object" && typeof process.versions.node == "string";
     var scriptDirectory = "";
-    function locateFile(path9) {
+    function locateFile(path7) {
       if (Module2["locateFile"]) {
-        return Module2["locateFile"](path9, scriptDirectory);
+        return Module2["locateFile"](path7, scriptDirectory);
       }
-      return scriptDirectory + path9;
+      return scriptDirectory + path7;
     }
     var read_, readAsync, readBinary, setWindowTitle;
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -3056,8 +3159,8 @@ var Module = (() => {
     function instantiateAsync(binary, binaryFile, imports, callback) {
       if (!binary && typeof WebAssembly.instantiateStreaming == "function" && !isDataURI(binaryFile) && typeof fetch == "function") {
         return fetch(binaryFile, { credentials: "same-origin" }).then(function(response) {
-          var result2 = WebAssembly.instantiateStreaming(response, imports);
-          return result2.then(callback, function(reason) {
+          var result = WebAssembly.instantiateStreaming(response, imports);
+          return result.then(callback, function(reason) {
             err("wasm streaming compile failed: " + reason);
             err("falling back to ArrayBuffer instantiation");
             return instantiateArrayBuffer(binaryFile, imports, callback);
@@ -3080,8 +3183,8 @@ var Module = (() => {
         return exports;
       }
       addRunDependency("wasm-instantiate");
-      function receiveInstantiationResult(result2) {
-        receiveInstance(result2["instance"]);
+      function receiveInstantiationResult(result) {
+        receiveInstance(result["instance"]);
       }
       if (Module2["instantiateWasm"]) {
         try {
@@ -3531,9 +3634,9 @@ var Module = (() => {
         Module2[name].argCount = numArguments;
       }
     }
-    function dynCallLegacy(sig, ptr, args2) {
+    function dynCallLegacy(sig, ptr, args) {
       var f = Module2["dynCall_" + sig];
-      return args2 && args2.length ? f.apply(null, [ptr].concat(args2)) : f.call(null, ptr);
+      return args && args.length ? f.apply(null, [ptr].concat(args)) : f.call(null, ptr);
     }
     var wasmTableMirror = [];
     function getWasmTableEntry(funcPtr) {
@@ -3544,11 +3647,11 @@ var Module = (() => {
       }
       return func;
     }
-    function dynCall(sig, ptr, args2) {
+    function dynCall(sig, ptr, args) {
       if (sig.includes("j")) {
-        return dynCallLegacy(sig, ptr, args2);
+        return dynCallLegacy(sig, ptr, args);
       }
-      var rtn = getWasmTableEntry(ptr).apply(null, args2);
+      var rtn = getWasmTableEntry(ptr).apply(null, args);
       return rtn;
     }
     function getDynCaller(sig, ptr) {
@@ -3942,26 +4045,26 @@ var Module = (() => {
     }
     function craftEmvalAllocator(argCount) {
       var argsList = new Array(argCount + 1);
-      return function(constructor, argTypes, args2) {
+      return function(constructor, argTypes, args) {
         argsList[0] = constructor;
         for (var i = 0; i < argCount; ++i) {
           var argType = requireRegisteredType(HEAPU32[argTypes + i * 4 >> 2], "parameter " + i);
-          argsList[i + 1] = argType["readValueFromPointer"](args2);
-          args2 += argType["argPackAdvance"];
+          argsList[i + 1] = argType["readValueFromPointer"](args);
+          args += argType["argPackAdvance"];
         }
         var obj = new (constructor.bind.apply(constructor, argsList))();
         return Emval.toHandle(obj);
       };
     }
     var emval_newers = {};
-    function __emval_new(handle, argCount, argTypes, args2) {
+    function __emval_new(handle, argCount, argTypes, args) {
       handle = Emval.toValue(handle);
       var newer = emval_newers[argCount];
       if (!newer) {
         newer = craftEmvalAllocator(argCount);
         emval_newers[argCount] = newer;
       }
-      return newer(handle, argTypes, args2);
+      return newer(handle, argTypes, args);
     }
     function _abort() {
       abort("");
@@ -4108,10 +4211,10 @@ async function decode(buffer) {
   if (!emscriptenModule)
     init();
   const module = await emscriptenModule;
-  const result2 = module.decode(buffer);
-  if (!result2)
+  const result = module.decode(buffer);
+  if (!result)
     throw new Error("Decoding error");
-  return result2;
+  return result;
 }
 
 // src/image.ts
@@ -4166,114 +4269,15 @@ async function decodeRgba(file) {
   return { ...info, data: new Uint8Array(decoded.data.buffer, decoded.data.byteOffset, decoded.data.byteLength) };
 }
 
-// src/native-ipc.ts
-import net from "node:net";
-import { lstat } from "node:fs/promises";
-import { randomUUID as randomUUID2 } from "node:crypto";
-import path4 from "node:path";
-import { homedir as homedir3 } from "node:os";
-async function refreshViaIpc(socketPath = path4.join(process.env.CODEX_HOME || path4.join(homedir3(), ".codex"), "ipc", "ipc.sock"), timeoutMs = 2e3) {
-  const [file, directory] = await Promise.all([lstat(socketPath), lstat(path4.dirname(socketPath))]);
-  const uid = process.getuid?.();
-  if (uid == null || file.uid !== uid || directory.uid !== uid || !file.isSocket() || !directory.isDirectory() || directory.mode & 18) {
-    throw Error("IPC socket must belong to the current user in a protected directory");
-  }
-  const sockets = /* @__PURE__ */ new Set();
-  const pending = /* @__PURE__ */ new Set();
-  let failure;
-  const fail = (error) => {
-    failure ??= error;
-    for (const reject of [...pending]) reject(error);
-  };
-  const deadline = setTimeout(() => fail(Error("IPC refresh timed out")), timeoutMs);
-  function connect() {
-    return new Promise((resolve, reject) => {
-      if (failure) return reject(failure);
-      pending.add(reject);
-      const socket = net.createConnection(socketPath);
-      sockets.add(socket);
-      const requestId = randomUUID2();
-      let buffer = Buffer.alloc(0);
-      let listener;
-      const send = (message) => {
-        if (failure) throw failure;
-        const body = Buffer.from(JSON.stringify(message));
-        const header = Buffer.alloc(4);
-        header.writeUInt32LE(body.length);
-        socket.write(Buffer.concat([header, body]));
-      };
-      socket.on("error", fail);
-      socket.on("close", () => fail(Error("IPC connection closed")));
-      socket.on("connect", () => send({ type: "request", requestId, sourceClientId: "genpet", version: 0, method: "initialize", params: { clientType: "genpet" } }));
-      socket.on("data", (chunk) => {
-        buffer = Buffer.concat([buffer, chunk]);
-        while (buffer.length >= 4) {
-          const length = buffer.readUInt32LE(0);
-          if (length > 16 * 1024 * 1024) {
-            fail(Error("IPC frame too large"));
-            return;
-          }
-          if (buffer.length < length + 4) return;
-          let message;
-          try {
-            message = JSON.parse(buffer.subarray(4, length + 4).toString());
-          } catch {
-            fail(Error("Invalid IPC JSON"));
-            return;
-          }
-          buffer = buffer.subarray(length + 4);
-          if (!message || typeof message !== "object") {
-            fail(Error("Invalid IPC message"));
-            return;
-          }
-          if (message.type === "response" && message.requestId === requestId) {
-            if (message.resultType !== "success" || typeof message.result?.clientId !== "string") {
-              fail(Error("IPC initialization rejected"));
-              return;
-            }
-            pending.delete(reject);
-            resolve({ id: message.result.clientId, send, onMessage: (fn) => {
-              listener = fn;
-            } });
-          }
-          listener?.(message);
-        }
-      });
-    });
-  }
-  try {
-    const observer = await connect();
-    const sender = await connect();
-    await new Promise((resolve, reject) => {
-      if (failure) return reject(failure);
-      pending.add(reject);
-      observer.onMessage((message) => {
-        if (message.type === "broadcast" && message.method === "query-cache-invalidate" && message.version === 0 && message.sourceClientId === sender.id && JSON.stringify(message.params) === JSON.stringify({ queryKey: ["custom-avatars"], reset: false })) {
-          pending.delete(reject);
-          resolve();
-        }
-      });
-      sender.send({ type: "broadcast", method: "query-cache-invalidate", version: 0, sourceClientId: sender.id, params: { queryKey: ["custom-avatars"], reset: false } });
-    });
-    return { socketPath, handshakeConfirmed: true, relayConfirmed: true, hostRefreshRequested: true };
-  } finally {
-    clearTimeout(deadline);
-    for (const socket of sockets) {
-      socket.removeAllListeners("close");
-      socket.destroy();
-    }
-  }
-}
-
 // src/native-refresh.ts
 import { createHash as createHash2 } from "node:crypto";
 import { readFile as readFile4, readdir as readdir2 } from "node:fs/promises";
 import { homedir as homedir4 } from "node:os";
-import path5 from "node:path";
+import path4 from "node:path";
 async function refreshNativePet(options) {
   const expectedSpriteSha256 = createHash2("sha256").update(await readFile4(options.expectedSpritePath)).digest("hex");
   const errors = [];
-  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || isLiveNativeDestination(path5.dirname(options.expectedSpritePath)));
+  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || isLiveNativeDestination(path4.dirname(options.expectedSpritePath)));
   if (useIpc) {
     try {
       const ipc = await refreshViaIpc(options.ipcSocketPath ?? void 0, options.timeoutMs ?? 2e3);
@@ -4302,13 +4306,21 @@ async function refreshNativePet(options) {
 }
 function isLiveNativeDestination(destination) {
   if (process.env.GENPET_SKIP_NATIVE_REFRESH === "1") return false;
-  const live = path5.join(homedir4(), ".codex", "pets", "genpet-companion");
-  if (path5.resolve(destination) === path5.resolve(live)) return true;
+  const live = path4.join(homedir4(), ".codex", "pets", "genpet-companion");
+  if (path4.resolve(destination) === path4.resolve(live)) return true;
   const configured = process.env.CODEX_HOME;
   if (!configured) return false;
-  const resolved = path5.resolve(configured);
+  const resolved = path4.resolve(configured);
   if (resolved.startsWith("/var/folders/") || resolved.includes("/tmp/") || resolved.includes("/Temp/")) return false;
-  return path5.resolve(destination) === path5.resolve(path5.join(resolved, "pets", "genpet-companion"));
+  return path4.resolve(destination) === path4.resolve(path4.join(resolved, "pets", "genpet-companion"));
+}
+async function listInstalledSprites(destination) {
+  try {
+    const names = await readdir2(destination);
+    return names.filter((name) => name.startsWith("spritesheet"));
+  } catch {
+    return [];
+  }
 }
 
 // src/art.ts
@@ -4389,29 +4401,6 @@ async function validateImage(file, kind) {
   }
   return meta;
 }
-async function acceptArt(store2, input) {
-  if (!path6.isAbsolute(input.file)) throw new Error("Artifact file must be an absolute local path");
-  if (input.provenance.length < 12) throw new Error("Record generation method and visual QA in provenance");
-  await validateImage(input.file, input.kind);
-  return store2.transaction(async (s) => {
-    await store2.sync(s);
-    if (s.pet) s.pet = evolvePet(s.pet, store2.now(s));
-    const request = artRequest(s);
-    if (!request || request.id !== input.requestId) throw new Error("Stale design request; read the current request before committing an image");
-    const dir = path6.join(store2.root, "art");
-    await mkdir2(dir, { recursive: true });
-    const ext = path6.extname(input.file).toLowerCase();
-    const file = path6.join(dir, `${request.id}-${input.kind}-${randomUUID3()}${ext}`);
-    await copyFile(input.file, file);
-    const record2 = { id: request.id, stage: s.pet.stage, growthDay: s.pet.growth.days, windowIndex: s.pet.state.windowIndex, file, kind: input.kind, createdAt: Date.now(), provenance: input.provenance };
-    if (input.kind === "portrait") {
-      if (s.pet.stage === "egg" && !s.eggReference) s.eggReference = file;
-      if (s.pet.stage !== "egg" && !s.identityReference) s.identityReference = file;
-    }
-    s.art = s.art.filter((a) => !(a.id === record2.id && a.kind === record2.kind)).concat(record2).slice(-79);
-    return record2;
-  });
-}
 async function exportNative(s, destination) {
   if (!s.pet) throw new Error("Adopt a pet first");
   const request = artRequest(s);
@@ -4419,20 +4408,20 @@ async function exportNative(s, destination) {
   if (!art) throw new Error("No approved atlas for this current design yet. Run the GenPet image-generation skill first.");
   const meta = await validateImage(art.file, "atlas");
   await mkdir2(destination, { recursive: true });
-  const ext = path6.extname(art.file);
+  const ext = path5.extname(art.file);
   const hash2 = createHash3("sha256").update(await readFile5(art.file)).digest("hex").slice(0, 16);
   const spriteName = `spritesheet-${hash2}${ext}`;
-  const sprite = path6.join(destination, spriteName);
-  const temporary = path6.join(destination, `.pending-${randomUUID3()}${ext}`);
+  const sprite = path5.join(destination, spriteName);
+  const temporary = path5.join(destination, `.pending-${randomUUID3()}${ext}`);
   await copyFile(art.file, temporary);
   await rename2(temporary, sprite);
-  const manifest = { id: path6.basename(destination), displayName: s.pet.profile.name, description: "GenPet \xB7 a growing image-generated companion", spriteVersionNumber: meta.height === 2288 ? 2 : 1, spritesheetPath: spriteName };
-  await copyFile(path6.join(destination, "pet.json"), path6.join(destination, "previous-pet.json")).catch((e) => {
+  const manifest = { id: path5.basename(destination), displayName: s.pet.profile.name, description: "GenPet \xB7 a growing image-generated companion", spriteVersionNumber: meta.height === 2288 ? 2 : 1, spritesheetPath: spriteName };
+  await copyFile(path5.join(destination, "pet.json"), path5.join(destination, "previous-pet.json")).catch((e) => {
     if (e.code !== "ENOENT") throw e;
   });
-  const manifestTemporary = path6.join(destination, `.pet-${randomUUID3()}.json`);
+  const manifestTemporary = path5.join(destination, `.pet-${randomUUID3()}.json`);
   await writeFile2(manifestTemporary, JSON.stringify(manifest, null, 2));
-  await rename2(manifestTemporary, path6.join(destination, "pet.json"));
+  await rename2(manifestTemporary, path5.join(destination, "pet.json"));
   return {
     destination,
     manifest,
@@ -4445,209 +4434,200 @@ async function exportNative(s, destination) {
     notice: "Files committed to the same GenPet entry. Host display refresh has not run yet; call install-native to trigger automatic refresh, or use the refresh adapter."
   };
 }
-async function installNative(store2, options) {
-  if (store2.demo) throw new Error("Demo state cannot install a native Pet. Use isolated file exports for developer tests; the live companion is updated in place.");
-  const s = await store2.current();
-  const result2 = await exportNative(s, path6.join(process.env.CODEX_HOME || path6.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion"));
+async function installNative(store, options) {
+  if (store.demo) throw new Error("Demo state cannot install a native Pet. Use isolated file exports for developer tests; the live companion is updated in place.");
+  const s = await store.current();
+  const result = await exportNative(s, path5.join(process.env.CODEX_HOME || path5.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion"));
   let refresh;
   const injected = typeof options?.refresh === "function";
   const skip = !injected && process.env.GENPET_SKIP_NATIVE_REFRESH === "1";
-  const shouldRefresh = injected || !skip && isLiveNativeDestination(result2.destination);
+  const shouldRefresh = injected || !skip && isLiveNativeDestination(result.destination);
   if (shouldRefresh) {
-    const spritePath = path6.join(result2.destination, result2.manifest.spritesheetPath);
+    const spritePath = path5.join(result.destination, result.manifest.spritesheetPath);
     refresh = await (options?.refresh ?? refreshNativePet)({ expectedSpritePath: spritePath });
   }
   const automaticRefresh = refresh?.automaticRefresh ?? false;
   const displayStatus = refresh?.displayStatus ?? "unconfirmed";
   const notice = refresh?.notice ?? "Files committed to the same GenPet entry. Host refresh was skipped for this non-live destination; visible update remains unconfirmed.";
-  await store2.transaction((state) => {
-    state.nativeExport = { artId: result2.artId, artCreatedAt: result2.artCreatedAt, at: Date.now(), destination: result2.destination, refreshRequired: !automaticRefresh };
+  await store.transaction((state) => {
+    state.nativeExport = { artId: result.artId, artCreatedAt: result.artCreatedAt, at: Date.now(), destination: result.destination, refreshRequired: !automaticRefresh };
   });
-  return { ...result2, automaticRefresh, displayStatus, refreshRequired: !automaticRefresh, notice, refresh };
-}
-async function nativeTick(store2) {
-  const s = await store2.current();
-  if (!s.nativeExport || !s.pet) return;
-  const ready = [...s.art].reverse().find((a) => a.kind === "atlas" && a.id === artRequest(s)?.id);
-  if (ready && (ready.id !== s.nativeExport.artId || ready.createdAt !== s.nativeExport.artCreatedAt || s.nativeExport.refreshRequired)) await installNative(store2);
+  return { ...result, automaticRefresh, displayStatus, refreshRequired: !automaticRefresh, notice, refresh };
 }
 
-// src/cli.ts
-import path8 from "node:path";
-import { randomUUID as randomUUID5 } from "node:crypto";
-
-// src/debug.ts
-import { mkdir as mkdir3, writeFile as writeFile3 } from "node:fs/promises";
-import path7 from "node:path";
-import { randomUUID as randomUUID4 } from "node:crypto";
-function operation(s, id, key) {
-  if (!/^[a-zA-Z0-9_-]{1,100}$/.test(id)) throw new Error("operationId must contain 1\u2013100 letters, digits, underscores or hyphens. Reuse it only when retrying the same operation.");
-  const previous = s.debug?.operations.find((o) => o.id === id);
-  if (previous && previous.key !== key) throw new Error("operationId already belongs to a different operation.");
-  return previous;
+// src/debugger-server.ts
+var debuggerRoot = path6.resolve(import.meta.dirname, "..");
+async function bundledAssets() {
+  return { portraits: {} };
 }
-function record(s, id, key, backup2) {
-  s.debug ??= { growthOffsetMs: 0, operations: [] };
-  s.debug.operations = [...s.debug.operations, { id, key, at: Date.now(), ...backup2 ? { backup: backup2 } : {} }].slice(-50);
+var SPRITE_NAME = /^spritesheet-[a-f0-9]{8,64}\.(webp|png)$/;
+function nativePetDirectory() {
+  return path6.join(process.env.CODEX_HOME || path6.join(homedir5(), ".codex"), "pets", "genpet-companion");
 }
-function result(s, action, alreadyApplied = false, backup2) {
-  return {
-    action,
-    alreadyApplied,
-    backup: backup2,
-    state: s,
-    artRequest: artRequest(s),
-    nativePetId: "genpet-companion",
-    displayStatus: "unconfirmed",
-    notice: "Design state only. Generate/validate any pending artwork, then call genpet_install_native even when the requested atlas is already ready. Only its confirmed result proves visible completion."
-  };
-}
-async function backup(store2, s, action) {
-  const dir = path7.join(store2.root, "backups");
-  await mkdir3(dir, { recursive: true, mode: 448 });
-  const file = path7.join(dir, `${action}-${Date.now()}-${randomUUID4()}.json`);
-  await writeFile3(file, JSON.stringify(s, null, 2), { mode: 384, flag: "wx" });
-  return file;
-}
-async function debugReset(store2, operationId) {
-  return store2.transaction(async (s) => {
-    const prior = operation(s, operationId, "reset");
-    if (prior) return result(s, "reset", true, prior.backup);
-    const saved = await backup(store2, s, "reset");
-    const settings = { ...s.settings, freezeOutfit: false };
-    delete settings.lockedOutfit;
-    const history = s.debug?.operations || [];
-    for (const key of Object.keys(s)) delete s[key];
-    Object.assign(s, {
-      version: 1,
-      pet: null,
-      clockOffset: 0,
-      settings,
-      importedIds: [],
-      lastScanAt: 0,
-      scanInfo: { messages: 0, files: 0, warnings: [] },
-      art: [],
-      debug: { growthOffsetMs: 0, operations: history }
-    });
-    await store2.adopt(s);
-    record(s, operationId, "reset", saved);
-    return result(s, "reset", false, saved);
-  });
-}
-async function debugGrow(store2, operationId, target = "next", days) {
-  if (!["next", "hatch", "juvenile", "adult"].includes(target)) throw new Error("Unknown growth target.");
-  if (days !== void 0 && (!Number.isInteger(days) || days < 1 || days > 90)) throw new Error("days must be an integer between 1 and 90.");
-  if (days !== void 0 && target !== "next") throw new Error("Choose either days or a stage target.");
-  return store2.transaction(async (s) => {
-    const key = `grow:${target}:${days ?? ""}`;
-    const prior = operation(s, operationId, key);
-    if (prior) return result(s, "grow", true, prior.backup);
-    if (!s.pet) throw new Error("Adopt an egg first.");
-    await store2.sync(s, true);
-    s.pet = evolvePet(s.pet, store2.now(s));
-    const p = s.pet, now = store2.now(s), hatch = p.adoptedAt + p.policy.hatchHours * HOUR;
-    if (p.stage === "egg" && (!s.eggReference || artRequest(s)?.status !== "ready")) throw new Error("Generate and approve this egg portrait and atlas before hatching.");
-    if (p.stage === "egg" && (days !== void 0 || !["next", "hatch"].includes(target))) throw new Error("Hatch and approve the birth identity first; later growth must reference that individual.");
-    if (p.stage !== "egg" && !s.identityReference) throw new Error("Generate and approve the first hatchling portrait before further growth.");
-    let destination;
-    if (target === "hatch" || p.stage === "egg") destination = hatch;
-    else if (target === "juvenile" || target === "adult") destination = hatch + p.policy[target === "juvenile" ? "juvenileDays" : "adultDays"] * p.policy.growthHours * HOUR;
-    else destination = hatch + (p.growth.days + (days ?? 1)) * p.policy.growthHours * HOUR;
-    if (destination <= now) throw new Error("This growth target is already reached. Choose a later target; debug growth never reverses age.");
-    const saved = await backup(store2, s, "grow");
-    s.debug ??= { growthOffsetMs: 0, operations: [] };
-    s.debug.growthOffsetMs += destination - now;
-    s.pet = evolvePet(p, store2.now(s));
-    record(s, operationId, key, saved);
-    return result(s, "grow", false, saved);
-  });
-}
-async function debugState(store2, operationId, kind) {
-  if (!["build", "research", "create", "learn", "rest", "none", "auto"].includes(kind)) throw new Error("Unknown debug state.");
-  return store2.transaction(async (s) => {
-    const key = `state:${kind}`, prior = operation(s, operationId, key);
-    if (prior) return result(s, "state", true);
-    if (!s.pet) throw new Error("Adopt an egg first.");
-    await store2.sync(s);
-    s.pet = evolvePet(s.pet, store2.now(s));
-    if (s.pet.stage === "egg" && kind !== "auto") throw new Error("Eggs have no props. Hatch first; do not reveal a creature during incubation.");
-    s.debug ??= { growthOffsetMs: 0, operations: [] };
-    if (kind === "auto") delete s.debug.stateOverride;
-    else s.debug.stateOverride = { kind, at: Date.now() };
-    record(s, operationId, key);
-    return result(s, "state");
-  });
-}
-
-// src/cli.ts
-var argv = process.argv.slice(2);
-var demo = argv[0] === "--demo";
-if (demo) argv.shift();
-var [command, ...args] = argv;
-var store = new Store(void 0, demo);
-try {
-  let output;
-  switch (command) {
-    case "debugger":
-      output = await launchDebugger();
-      break;
-    case "status":
-      output = await store.current();
-      break;
-    case "tick":
-      await nativeTick(store);
-      output = await store.current();
-      break;
-    case "adopt":
-      output = await store.transaction((s) => store.adopt(s, args[0] ? { name: args[0] } : demo ? { name: "GenPet Demo" } : {}));
-      break;
-    case "advance": {
-      if (!demo) throw new Error("Time travel requires --demo; the real adoption clock is immutable.");
-      const hours = Number(args[0]);
-      if (!Number.isFinite(hours) || hours <= 0 || hours > 24 * 90) throw new Error("Use a positive demo time jump of at most 90 days.");
-      output = await store.transaction((s) => {
-        if (!s.pet) throw new Error("Adopt a demo egg first.");
-        s.clockOffset += hours * HOUR;
-        s.pet = evolvePet(s.pet, store.now(s));
-        return s.pet;
-      });
-      break;
-    }
-    case "art-request":
-      output = artRequest(await store.current());
-      break;
-    case "debug-reset":
-      output = await debugReset(store, args[0] || randomUUID5());
-      break;
-    case "debug-grow": {
-      const value = args[0] || "next";
-      output = await debugGrow(store, args[1] || randomUUID5(), /^\d+$/.test(value) ? "next" : value, /^\d+$/.test(value) ? Number(value) : void 0);
-      break;
-    }
-    case "debug-state":
-      output = await debugState(store, args[1] || randomUUID5(), args[0]);
-      break;
-    case "accept-art": {
-      const [requestId, file, kind, ...provenance] = args;
-      if (kind !== "portrait" && kind !== "atlas") throw new Error('Usage: accept-art REQUEST_ID /absolute/image.png portrait|atlas "Imagegen provenance and QA"');
-      output = await acceptArt(store, { requestId, file, kind, provenance: provenance.join(" ") });
-      break;
-    }
-    case "install-native":
-      output = await installNative(store);
-      break;
-    case "refresh-native": {
-      const s = await store.current();
-      const destination = path8.join(process.env.CODEX_HOME || path8.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion");
-      const manifest = JSON.parse(await (await import("node:fs/promises")).readFile(path8.join(destination, "pet.json"), "utf8"));
-      output = await refreshNativePet({ expectedSpritePath: path8.join(destination, manifest.spritesheetPath) });
-      break;
-    }
-    default:
-      throw new Error("Commands: debugger; [--demo] status, tick, adopt [name], art-request, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>");
+async function listNativeSprites() {
+  const destination = nativePetDirectory();
+  let current = null;
+  try {
+    current = JSON.parse(await readFile6(path6.join(destination, "pet.json"), "utf8")).spritesheetPath ?? null;
+  } catch {
   }
-  console.log(JSON.stringify(output, null, 2));
-} catch (e) {
-  console.error(e.message);
-  process.exitCode = 1;
+  const sprites = (await listInstalledSprites(destination)).filter((name) => SPRITE_NAME.test(name)).sort();
+  return { destination, current, sprites, live: isLiveNativeDestination(destination) };
 }
+async function runNativeIpc(mode) {
+  if (mode === "probe") throw new Error("Use explicit refresh to request IPC refresh");
+  if (!isLiveNativeDestination(nativePetDirectory())) throw new Error("Isolated destinations cannot refresh the host");
+  return refreshViaIpc();
+}
+async function switchNativeSprite(name, method = "ipc", ipcRunner = runNativeIpc) {
+  if (!["ipc", "file"].includes(method)) throw new Error("\u672A\u77E5\u5237\u65B0\u65B9\u5F0F");
+  if (!SPRITE_NAME.test(name) || name !== path6.basename(name)) throw new Error("\u53EA\u80FD\u9009\u62E9\u5DF2\u5B89\u88C5\u7684\u56FE\u96C6\u6587\u4EF6");
+  const destination = nativePetDirectory();
+  const sprite = path6.join(destination, name);
+  const root = await realpath(destination);
+  const resolved = await realpath(sprite);
+  if (resolved !== path6.join(root, name)) throw new Error("\u53EA\u80FD\u9009\u62E9\u5DF2\u5B89\u88C5\u7684\u56FE\u96C6\u6587\u4EF6");
+  const manifestPath = path6.join(destination, "pet.json");
+  const manifest = JSON.parse(await readFile6(manifestPath, "utf8"));
+  const next = { ...manifest, spritesheetPath: name };
+  await copyFile2(manifestPath, path6.join(destination, "previous-pet.json")).catch((error) => {
+    if (error.code !== "ENOENT") throw error;
+  });
+  const temporary = path6.join(destination, `.pet-${randomUUID4()}.json`);
+  await writeFile3(temporary, JSON.stringify(next, null, 2));
+  await rename3(temporary, manifestPath);
+  const live = isLiveNativeDestination(destination);
+  if (method === "file") return { spritesheet: name, refresh: { displayStatus: "unconfirmed", strategy: "file-only", notice: "\u53EA\u66FF\u6362\u6587\u4EF6\uFF0C\u5C1A\u672A\u8BF7\u6C42\u5237\u65B0\u3002" } };
+  if (method === "ipc") return { spritesheet: name, refresh: await ipcRunner("refresh") };
+}
+async function startServer(port = Number(process.env.GENPET_PORT || 47831), root, options = {}) {
+  const real = new Store(root), demo = new Store(path6.join(real.root, "debugger"), true);
+  const token = randomBytes(24).toString("hex");
+  const server = http.createServer(async (req, res) => {
+    const json = (value, status = 200) => {
+      res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" });
+      res.end(JSON.stringify(value));
+    };
+    try {
+      const host = req.headers.host || "";
+      if (!/^(127\.0\.0\.1|localhost)(:\d+)?$/.test(host)) return json({ error: "Local access only" }, 403);
+      if (req.headers.origin && req.headers.origin !== `http://${host}`) return json({ error: "Origin rejected" }, 403);
+      const url = new URL(req.url || "/", "http://" + host);
+      const store = url.searchParams.get("demo") === "1" ? demo : real;
+      if (req.method === "GET" && url.pathname === "/api/health") return json({ service: "genpet-debugger", root: real.root });
+      if (req.method === "GET" && url.pathname === "/favicon.ico") {
+        res.writeHead(204);
+        res.end();
+        return;
+      }
+      if (req.method === "GET" && url.pathname === "/api/state") {
+        const state = await store.peek();
+        return json({ state, now: store.now(state), demo: store.demo, token, artRequest: artRequest(state), assets: await bundledAssets(), actions, nativeSprites: store.demo ? null : await listNativeSprites() });
+      }
+      if (req.method === "GET" && url.pathname === "/api/art-request") return json(artRequest(await store.peek()));
+      if (req.method === "POST" && url.pathname === "/api/action") {
+        const origin = req.headers.origin;
+        if (origin && origin !== `http://${host}`) return json({ error: "Origin rejected" }, 403);
+        if (req.headers["x-genpet-token"] !== token) return json({ error: "Invalid request token" }, 403);
+        let body = "";
+        for await (const chunk of req) {
+          body += chunk;
+          if (body.length > 16384) throw new Error("Request too large");
+        }
+        const input = JSON.parse(body);
+        let result;
+        if (input.action === "stop") {
+          json({ ok: true, result: { stopped: true } });
+          server.close();
+          server.closeIdleConnections();
+          return;
+        }
+        if (input.action === "export") {
+          if (store.demo) throw new Error("\u6F14\u793A\u6A21\u5F0F\u4E0D\u80FD\u5B89\u88C5\u771F\u5B9E\u539F\u751F\u5BA0\u7269");
+          result = await installNative(store);
+        } else if (input.action === "ipc-probe" || input.action === "ipc-refresh") {
+          if (store.demo) throw new Error("\u6F14\u793A\u6A21\u5F0F\u4E0D\u80FD\u64CD\u4F5C\u771F\u5B9E\u5BBF\u4E3B IPC");
+          result = await (options.ipcRunner || runNativeIpc)(input.action === "ipc-probe" ? "probe" : "refresh");
+        } else if (input.action === "switch-native") {
+          if (store.demo) throw new Error("\u6F14\u793A\u6A21\u5F0F\u4E0D\u80FD\u5207\u6362\u771F\u5B9E\u60AC\u6D6E\u5BA0\u7269");
+          result = await switchNativeSprite(String(input.spritesheet || ""), String(input.refreshMethod || "ipc"), options.ipcRunner || runNativeIpc);
+        } else result = await store.transaction(async (s) => {
+          if (input.action === "adopt") return store.adopt(s, input.profile || {});
+          if (input.action === "settings") {
+            return configureState(s, input);
+          }
+          if (input.action === "clear-context") {
+            if (s.pet) for (const c of [...s.pet.context]) s.pet = removeContext(s.pet, c.id, store.now(s));
+            return { cleared: true };
+          }
+          if (input.action === "scan") {
+            await store.sync(s, true);
+            return s.scanInfo;
+          }
+          if (!s.pet) throw new Error("Adopt a pet first");
+          if (input.action === "profile") {
+            s.pet = updateProfile(s.pet, input.profile);
+            return s.pet;
+          }
+          if (input.action === "context") {
+            s.pet = addContext(s.pet, { kind: input.kind, summary: input.summary || "", source: "user", milestone: input.milestone === true }, store.now(s));
+            return s.pet;
+          }
+          if (input.action === "advance") {
+            if (!store.demo) throw new Error("Time travel is available only in the demo");
+            if (typeof input.hours !== "number" || !Number.isFinite(input.hours) || input.hours <= 0 || input.hours > 24 * 90) throw new Error("Invalid demo time jump");
+            s.clockOffset += input.hours * HOUR;
+            s.pet = evolvePet(s.pet, store.now(s));
+            return s.pet;
+          }
+          if (input.action === "reset-demo") {
+            if (!store.demo) throw new Error("Only demo data can be reset");
+            s.clockOffset = 0;
+            s.pet = createPet({ ...DEFAULT_PROFILE, name: "GenPet Demo" }, Date.now(), "genpet-demo-egg");
+            s.art = [];
+            return s.pet;
+          }
+          throw new Error("Unknown action");
+        });
+        return json({ ok: true, result });
+      }
+      if (req.method === "GET" && url.pathname.startsWith("/art/")) {
+        const state = await store.peek();
+        const record = state.art.find((a) => `${a.id}-${a.kind}` === url.pathname.slice(5));
+        if (!record) return json({ error: "Art not found" }, 404);
+        res.writeHead(200, { "Content-Type": record.file.endsWith(".webp") ? "image/webp" : "image/png", "Cache-Control": "private, max-age=3600" });
+        res.end(await readFile6(record.file));
+        return;
+      }
+      if (req.method !== "GET") return json({ error: "Not found" }, 404);
+      let file;
+      {
+        const routes = { "/": "index.html", "/app.js": "app.js", "/style.css": "style.css" };
+        if (!routes[url.pathname]) return json({ error: "Not found" }, 404);
+        file = path6.join(debuggerRoot, "debugger-web", routes[url.pathname]);
+      }
+      const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".webp": "image/webp", ".json": "application/json", ".svg": "image/svg+xml" };
+      res.writeHead(200, { "Content-Type": types[path6.extname(file)] || "application/octet-stream", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'" });
+      res.end(await readFile6(file));
+    } catch (e) {
+      if (!res.headersSent) json({ error: e.message }, e.code === "ENOENT" ? 404 : 400);
+      else res.end();
+    }
+  });
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(port, "127.0.0.1", resolve);
+  });
+  return server;
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const server = await startServer();
+  console.log(`GenPet debugger is ready at http://127.0.0.1:${server.address().port}`);
+  for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => server.close(() => process.exit(0)));
+}
+export {
+  listNativeSprites,
+  runNativeIpc,
+  startServer,
+  switchNativeSprite
+};
