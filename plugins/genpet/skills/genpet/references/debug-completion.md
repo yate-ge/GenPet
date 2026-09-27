@@ -1,6 +1,6 @@
 # 调试动作的完成条件
 
-先读本插件的 [GenPet skill](../SKILL.md) 的 Generate or update artwork 部分。调试只豁免用户明确要求的重置或年龄加速，其他视觉规则、官方 atlas 合约和 QA 均保持。
+先读本插件的 [GenPet skill](../SKILL.md) 的 Generate or update artwork 部分。调试只豁免用户明确要求的重置或年龄加速，原生 atlas 合约保持；视觉验收与生图委派遵循 GenPet 的 artwork-workflow，轻微偏差不触发重生成。
 
 1. 变更工具只更新设计状态。检查返回的 artRequest；pending 使用内置 imagegen 和 bundled hatch-pet 生成、验收 portrait/atlas。一次只完成当前设计；每动作行最多两次修复。paused 说明用户关闭了 autoArt，不擅自开启，报告设计已改变但素材生成暂停。
 2. ready 可以复用同一用户、同一设计 ID 的已验收 atlas。**ready 也必须调用 genpet_install_native**，因为当前屏幕可能仍是其他道具或阶段。不要使用打包示例替代真实形象。

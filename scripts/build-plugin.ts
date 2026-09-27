@@ -4,7 +4,7 @@
  * `codex plugin marketplace add yate-ge/GenPet` installs this directory directly.
  * Everything is bundled into dist/, so the installed plugin needs no npm install.
  */
-import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { build } from 'esbuild';
@@ -44,3 +44,18 @@ const runtimePackage = {
 };
 await writeFile(path.join(target, 'package.json'), JSON.stringify(runtimePackage, null, 2) + '\n');
 console.log(`Built ${path.relative(source, target)} (v${pkg.version})`);
+
+// Reject obsolete desktop debugging integration in every published text file.
+async function verifyRefreshTransport(directory: string): Promise<void> {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const file = path.join(directory, entry.name);
+    if (entry.isDirectory()) await verifyRefreshTransport(file);
+    else if (/\.(?:js|json|md|ts|py|yaml|yml)$/.test(entry.name)) {
+      const text = await readFile(file, 'utf8');
+      if (/\bcdp\b|remote-debugging|DevToolsActivePort|webSocketDebuggerUrl|Runtime\.evaluate/i.test(text)) {
+        throw new Error(`Obsolete refresh integration in published file: ${path.relative(target, file)}`);
+      }
+    }
+  }
+}
+await verifyRefreshTransport(target);

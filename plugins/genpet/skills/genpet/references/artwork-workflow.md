@@ -1,0 +1,35 @@
+# Artwork acceptance and delegation
+
+## Accept usable artwork
+
+Keep the requested design direction. Treat animation descriptions, exact angles, proportions and aesthetic details as generation guidance, not a checklist whose every mismatch requires another image. This policy overrides artistic rejection language in the GenPet generation steps and request prompt as well as the bundled hatch-pet artistic QA, blind-review and retry requirements. Those descriptions remain generation goals; final usability decides acceptance.
+
+Accept when the atlas can load and play correctly and the character remains intact and recognizable at native size. Motion, style, direction or prompt differences do not block acceptance when the resulting animation is usable, even if the difference from the prompt is substantial. Record a short note only when useful. A subtle growth update also passes; do not claim a visible change that was not observed. Do not add new artistic restrictions while reviewing.
+
+Block only on concrete compatibility failures or substantial visible damage, such as missing required frames, wrong layout/version, an unremoved background, severe clipping, broken extraction or loss of character identity. Preserve the V2 layout, required frame positions, transparency and manifest contract. Preserve egg-first lifecycle and the canonical individual. Distinguish actual damaged pixels from a checker or extraction problem.
+
+Run deterministic checks and review the final contact sheet and motion previews once at native size. Inspect individual sources only to diagnose a concrete problem. Independent blind reviewers, precise direction classification, geometric growth thresholds and additional review rounds are optional diagnostics, not release gates. Do not request user approval for minor deviations.
+
+Keep raw validation reports truthful. If a bundled checker rejects an invisible or minor issue, record the check and why it does not affect usability in provenance; accept with warnings rather than claiming that checker passed. Fully transparent RGB residue can be cleared without changing visible pixels. Small edge-color or continuity warnings need no regeneration when the native-size result is usable. Never bypass a structural failure or weaken thresholds globally merely to get `ok: true`.
+
+For a real blocker, first check whether extraction, transparent-pixel cleanup or assembly can fix it without inventing artwork. If new pixels are needed, regenerate only the affected row with the same references. Allow one targeted regeneration per affected row and two regeneration calls total per run, shared across all workers. If still blocked, preserve the previous installed pet and report the concrete failure. Never regenerate for a warning, restart the entire design to fix one row, or repeatedly revisit an accepted row.
+
+## Final output is the boundary
+
+Judge the converted atlas, not whether a source strip perfectly follows the layout prompt. Guides, separator lines, uneven spacing, extra margins or removable background in the source are acceptable if deterministic extraction can produce intact final cells. Try crop boundaries, registration and cleanup before requesting new artwork; do not erase parts of the character to force a pass. A source-check failure is diagnostic, not automatically a final-atlas failure.
+
+Direction meaning is not a loader requirement. An upright egg in a down-facing slot, ambiguous cardinals, similar adjacent poses, an incorrect gaze quadrant or a reversed directional interpretation may all be accepted when playback remains usable. Do not require an egg to communicate all 16 angles clearly. Retain the renderer's cell order, but do not regenerate solely because the image content does not match the slot label. Likewise, similar state animations, weak waving, an almost static idle or growth that is hard to notice do not block installation. Visible corruption that actually spoils playback remains a blocker; disagreement with the intended action does not.
+
+The technical floor for our V2 output is a decodable supported PNG/WebP atlas at 1536×2288, an 8×11 grid of 192×208 cells, occupied required frame slots, transparent unused slots (with the neutral utility cell handled by the assembler), usable background transparency, and a matching version-2 manifest and sprite path. These govern loading and playback; image-generation job counts, cardinal anchor generation, blind votes, exact component counts and aesthetic thresholds are pipeline choices. Keep honest provenance for any deterministic reuse or conversion; never describe duplicated poses as newly generated distinct animation.
+
+Request freshness, the same native Pet identity, preserved lifecycle state and keeping the previous valid installation on failure are GenPet state-integrity rules, not artistic QA. A valid animation is not permission to install an unrelated or stale design or silently reset the pet. Existing canonical references guide continuity; small facial, marking and proportion differences are acceptable. Only a clearly different individual warrants treating identity as a blocker.
+
+## Delegate generation, keep the parent concise
+
+Use a generation subagent when collaboration tools are available. Give it only the current request, the relevant skill and policy paths, output directory, reference image paths and assigned visual jobs. Prefer a fresh minimal context over forking the whole conversation. Keep dependent jobs ordered: establish a canonical reference before grounded rows, then supply approved look references to subsequent look jobs. A worker may process a coherent group of jobs; avoid extra agents just for voting or review.
+
+The worker loads imagegen and uses its built-in tool, saves selected project assets to the run directory, and checks local usability under this policy. It does not accept art, install the Pet, alter lifecycle state, create schedules or spawn additional workers. It reports a concrete blocker to the parent before spending the shared regeneration budget. If image generation is unavailable in the worker, return the limitation; the parent continues directly without repeating completed jobs or switching to an API workflow silently.
+
+Return only a compact text result containing `request_id`, `files` (absolute saved paths), `jobs_completed`, `warnings`, `blockers`, `generation_calls` and `regeneration_calls`. Do not embed intermediate images, base64 or full prompt dumps in the final handoff. Keep required tool-native image output in the worker context; do not suppress tool requirements or promise the application will hide every child-tool event. Delegation reduces parent-context clutter, not the cost of the underlying image calls.
+
+The parent assembles or verifies the final atlas, performs the final usability check, records honest provenance and installs the current accepted request. User-facing updates summarize progress, a meaningful blocker or the final result. Show the final pet when useful; do not repeat source strips and per-row QA images in the main chat unless requested.

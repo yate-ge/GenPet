@@ -17,6 +17,6 @@ Start a new Codex task and run **`/genpet-start`**. It adopts an egg if you have
 
 The `/` menu exposes `genpet-reset`, `genpet-grow`, and `genpet-state` skills for explicit debugging; their parameters are in [debug commands](docs/DEBUG_COMMANDS.zh-CN.md). Reset starts a new adoption clock, while grow keeps the existing identity and changes only logical debug age. The scheduled growth task never calls these debug commands.
 
-Generation requires a Codex run. After installation, GenPet uses existing local IPC to invalidate the custom-avatar cache; no debug port is required. `automaticRefresh=true` with IPC means the refresh request was relayed, while `displayStatus=unconfirmed` means no displayed-image hash was measured. Existing CDP remains a fallback. See [native refresh behavior](docs/NATIVE_REFRESH.zh-CN.md).
+Generation requires a Codex run. After installation, GenPet uses existing local IPC to invalidate the custom-avatar cache; no debug port is required. `automaticRefresh=true` with IPC means the refresh request was relayed, while `displayStatus=unconfirmed` means no displayed-image hash was measured. See [native refresh behavior](docs/NATIVE_REFRESH.zh-CN.md).
 
 Local Pet state and generated artwork live in `~/.genpet/`; the native entry lives at `~/.codex/pets/genpet-companion/`. They are not stored inside this plugin directory. The original GenPet code is MIT licensed; the bundled Hatch Pet utilities are Apache-2.0 licensed. See `THIRD_PARTY_NOTICES.md`.
