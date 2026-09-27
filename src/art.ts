@@ -51,7 +51,7 @@ export function artRequest(s: State) {
   return {id,status:current?'ready':s.settings.autoArt?'pending':'paused',phase:isEgg?'incubating':'revealed',visual,
     adoptionTrace:p.adoptionTrace??null,
     referenceFiles:[...new Set(references.filter((f):f is string=>!!f))],prompt:common+' '+concept,
-    reason:isEgg?'Only an abstract shell identity exists. The creature will be resolved at the five-hour hatch boundary.':forced?`Explicit debug state: ${forced.kind}; not observed user activity. Use genpet_debug_state auto to resume activity-based appearance.`:p.state.reason,
+    reason:isEgg?'Only an abstract shell identity exists. The creature will be resolved at the five-hour hatch boundary.':forced?`Explicit debug state: ${forced.kind}; not observed user activity. Use debug-state auto to resume activity-based appearance.`:p.state.reason,
     contract:{columns:8,cellWidth:192,cellHeight:208,rows:11,spriteVersionNumber:2},
     note:'Image synthesis runs in Codex through the GenPet skill. State hatching and completion of new artwork are separate. Preserve the last approved native atlas until its successor passes QA.'};
 }

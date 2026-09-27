@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, access, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, access } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { nativePetSelection, startServer } from '../src/debugger-server.js';
+import { startServer } from '../src/debugger-server.js';
 import { Store } from '../src/store.js';
 import { createPet, DEFAULT_PROFILE } from '../src/core.js';
 
@@ -32,21 +32,4 @@ test('debugger reads without writes, protects actions, isolates demo and stops',
   for(const route of ['/','/app.js','/style.css'])assert.equal((await fetch(url+route)).status,200);
   assert.equal((await action({action:'stop'})).status,200);
  } finally {server.close();server.closeAllConnections();await rm(root,{recursive:true,force:true});}
-});
-
-test('debugger reports native Pet selection without changing it',async()=>{
- const root=await mkdtemp(path.join(tmpdir(),'genpet-selection-test-'));
- const previous=process.env.CODEX_HOME;
- process.env.CODEX_HOME=root;
- const file=path.join(root,'.codex-global-state.json');
- try {
-  await writeFile(file,JSON.stringify({'electron-persisted-atom-state':{'selected-avatar-id':'custom:genpet-companion'}}));
-  assert.deepEqual(await nativePetSelection(),{selectedPetId:'custom:genpet-companion',genpetSelected:true});
-  await writeFile(file,JSON.stringify({'electron-persisted-atom-state':{'selected-avatar-id':'custom:another-pet'}}));
-  assert.deepEqual(await nativePetSelection(),{selectedPetId:'custom:another-pet',genpetSelected:false});
-  assert.match(await readFile(file,'utf8'),/custom:another-pet/);
- } finally {
-  if(previous===undefined)delete process.env.CODEX_HOME;else process.env.CODEX_HOME=previous;
-  await rm(root,{recursive:true,force:true});
- }
 });

@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "genpet": {
-      "command": "node",
-      "args": ["dist/mcp.js"],
-      "cwd": "."
-    }
-  }
-}

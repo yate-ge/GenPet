@@ -22,4 +22,4 @@ execFileSync('python3',[path.join(creator,'update_plugin_cachebuster.py'),target
 execFileSync('codex',['plugin','add',`genpet@${marketplaceName}`,'--json'],{stdio:'inherit'});
 const retired=await retireLegacyDemo(process.env.CODEX_HOME||path.join(homedir(),'.codex'),path.join(homedir(),'.genpet','backups'));
 if(retired)console.log(`Retired legacy GenPet Demo entry; recoverable backup: ${retired.backup}`);
-console.log(`Installed GenPet from ${target}. New Codex tasks will load its skill and MCP tools.`);
+console.log(`Installed GenPet from ${target}. New Codex tasks will load its skills.`);

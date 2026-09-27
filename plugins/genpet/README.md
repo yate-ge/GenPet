@@ -12,7 +12,7 @@ codex plugin marketplace upgrade genpet
 codex plugin add genpet@genpet
 ```
 
-In Codex Desktop you can instead use **Plugins** → **Add plugin marketplace** with source `yate-ge/GenPet`. Update with `codex plugin marketplace upgrade genpet`. Installing the plugin does not adopt a Pet or create a scheduled growth task; see the [project README](https://github.com/yate-ge/GenPet#install) for an Agent prompt that installs it for you.
+In Codex Desktop you can instead use **Plugins** → **Add plugin marketplace** with source `yate-ge/GenPet`. Update with `codex plugin marketplace upgrade genpet`. See the [agent installation playbook](https://github.com/yate-ge/GenPet/blob/main/docs/AGENT_INSTALL.md) for the complete install and verification procedure.
 
 Start a new Codex task and run **`/genpet-start`**. It adopts an egg if you have none, generates your own artwork, installs one `genpet-companion` entry and sets up hourly growth; select it once in Codex Pets. With an existing pet it only completes what is missing and never re-adopts. `/genpet-start manual` skips the schedule.
 
