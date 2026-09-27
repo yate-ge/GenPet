@@ -62,7 +62,7 @@ def reconcile(run, manifest):
             if job.get("source_sha256") != sha or not job.get("completed_at"):
                 job["completed_at"] = datetime.now(timezone.utc).isoformat()
             job.update(status="complete", source_path=str(source), source_sha256=sha,
-                       completion_basis="saved-decodable-source; visual review remains required")
+                       completion_basis="saved-decodable-source")
         except (OSError, ValueError) as error:
             job["status"] = "invalid"
             blockers.append({"job": job["id"], "error": str(error),
@@ -73,17 +73,16 @@ def reconcile(run, manifest):
 
 def ready_jobs(run, jobs):
     complete = {job["id"] for job in jobs if job["status"] == "complete"}
-    # Prefer the long direction chain as slots free up, without adding workers.
-    priority = ["base", "idle", "look-cardinals", "look-row-9", "look-row-10"]
     ready = [job["id"] for job in jobs if job["status"] == "pending"
              and set(job["depends_on"]).issubset(complete)
              and all((run / ref["path"]).is_file() for ref in job["input_images"])]
-    return sorted(ready, key=lambda name: priority.index(name) if name in priority else len(priority))
+    return ready
 
 
 class Processor:
-    def __init__(self, run):
+    def __init__(self, run, previews=False):
         self.run = run
+        self.previews = previews
         self.cache_path = run / "qa/processing-cache.json"
         self.cache = read_json(self.cache_path) if self.cache_path.exists() else {}
         # Includes imported helpers so code changes invalidate cached processing.
@@ -148,19 +147,25 @@ def final_previews(atlas, directory):
 def finish_atlas(processor, extended, key):
     run = processor.run
     atlas, clean = run / "final/spritesheet.webp", run / "final/spritesheet.png"
-    cleanup, validation = run / "qa/chroma-cleanup.json", run / "qa/final-validation.json"
-    if not processor.step("cleanup", [extended], [clean, atlas, cleanup],
-                          lambda: processor.command("despill_chroma_edges.py", extended, "--output", clean,
-                          "--webp-output", atlas, "--json-out", cleanup, "--chroma-key", key), key):
+    validation = run / "qa/final-validation.json"
+    def pack():
+        with Image.open(extended) as opened:
+            image = clear_transparent_rgb(opened.convert("RGBA"))
+        image.save(clean)
+        image.save(atlas, lossless=True, exact=True)
+    # Each source has already had its actual background removed. A single global
+    # key here would damage legitimate colors from rows with a different background.
+    if not processor.step("pack", [extended], [clean, atlas], pack):
         return False
     complete = processor.step("validate-v2", [atlas], [validation],
                               lambda: processor.command("validate_atlas.py", atlas,
-                              "--require-v2", "--chroma-key", key, "--json-out", validation), key)
-    processor.step("final-contact", [atlas], [run / "qa/final-contact-sheet.png"],
+                              "--require-v2", "--structural-only", "--json-out", validation))
+    if processor.previews:
+        processor.step("final-contact", [atlas], [run / "qa/final-contact-sheet.png"],
                    lambda: processor.command("make_contact_sheet.py", atlas,
                    "--scale", 1, "--output", run / "qa/final-contact-sheet.png"))
-    previews = [run / "qa/previews" / f"{state}.gif" for state in [*ROW_DURATIONS, "look"]]
-    processor.step("final-previews", [atlas], previews,
+        previews = [run / "qa/previews" / f"{state}.gif" for state in [*ROW_DURATIONS, "look"]]
+        processor.step("final-previews", [atlas], previews,
                    lambda: final_previews(atlas, run / "qa/previews"))
     def portrait():
         with Image.open(atlas) as image:
@@ -221,11 +226,11 @@ def process_egg(processor, jobs, available, key):
     return finish_atlas(processor, extended, key)
 
 
-def process(run):
+def process(run, previews=False):
     run = Path(run).resolve()
     manifest = read_json(run / "imagegen-jobs.json")
     request = read_json(run / "pet_request.json")
-    processor = Processor(run)
+    processor = Processor(run, previews)
     processor.blockers.extend(reconcile(run, manifest))
     jobs = {job["id"]: job for job in manifest["jobs"]}
     available = {name for name, job in jobs.items() if job["status"] == "complete"}
@@ -233,13 +238,19 @@ def process(run):
     for directory in ("qa", "frames", "final", "references"):
         (run / directory).mkdir(exist_ok=True)
     canonical = run / CANONICAL_BASE_PATH
-    if "base" in available and (manifest.get("workflow_profile") in ("genpet-early-look", "genpet-egg-three")
+    if "base" in available and (manifest.get("workflow_profile") in ("genpet-parallel", "genpet-early-look", "genpet-egg-three")
                                 or not canonical.exists()):
         base = run / jobs["base"]["output_path"]
         processor.step("canonical-reference", [base], [canonical], lambda: shutil.copyfile(base, canonical))
     rows = {}
     is_egg = manifest.get("workflow_profile") == "genpet-egg-three"
-    for state, _row, count in ([] if is_egg else ROW_SPECS):
+    is_parallel = manifest.get("workflow_profile") == "genpet-parallel"
+    # New runs only publish the base on the critical path; extract once all sources
+    # exist. Legacy manifests keep their incremental reference dependencies.
+    sources_ready = set(jobs).issubset(available)
+    extract_now = sources_ready or not (is_egg or is_parallel)
+    specs = [*ROW_SPECS, ("look-row-9", 9, 8), ("look-row-10", 10, 8)] if is_parallel else ROW_SPECS
+    for state, _row, count in ([] if is_egg or not extract_now else specs):
         if state not in available:
             continue
         source = run / jobs[state]["output_path"]
@@ -252,7 +263,7 @@ def process(run):
 
         if processor.step(f"extract-{state}", [source], [*frames, report], extract, key):
             rows[state] = frames
-    if "idle" in rows:
+    if "idle" in rows and not is_parallel:
         processor.step("idle-reference", rows["idle"], [run / "qa/idle-reference.png"],
                        lambda: idle_reference(rows["idle"], run / "qa/idle-reference.png"))
 
@@ -270,8 +281,21 @@ def process(run):
                            "--output", run / "decoded/look-anchors-approved.png"))
 
     atlas = run / "final/spritesheet.webp"
-    complete = process_egg(processor, jobs, available, key) if is_egg else False
-    if len(rows) == len(ROW_SPECS) and not processor.blockers:
+    complete = process_egg(processor, jobs, available, key) if is_egg and sources_ready else False
+    if is_parallel and len(rows) == 11 and not processor.blockers:
+        extended = run / "qa/extended-raw.png"
+        def compose():
+            image = Image.new("RGBA", (1536, 2288))
+            for state, row, count in specs:
+                for col, path in enumerate(rows[state]):
+                    with Image.open(path) as frame:
+                        image.alpha_composite(frame.convert("RGBA"), (192 * col, 208 * row))
+            with Image.open(rows["idle"][0]) as neutral:
+                image.alpha_composite(neutral.convert("RGBA"), (192 * 6, 0))
+            clear_transparent_rgb(image).save(extended)
+        if processor.step("parallel-atlas", [p for frames in rows.values() for p in frames], [extended], compose):
+            complete = finish_atlas(processor, extended, key)
+    if not is_parallel and len(rows) == len(ROW_SPECS) and not processor.blockers:
         standard = run / "qa/standard-atlas.png"
         standard_ok = processor.step("standard-atlas", [p for frames in rows.values() for p in frames],
                                      [standard], lambda: processor.command("compose_atlas.py",
@@ -296,8 +320,8 @@ def process(run):
               "blockers": processor.blockers,
               "atlas": str(atlas) if complete and not processor.blockers else None,
               "portrait": str(run / "final/portrait.png") if complete and not processor.blockers else None,
-              "visual_review_required": True,
-              "note": "Source completion is not visual acceptance. Review the final sheet and loops, then accept the current request through GenPet."}
+              "visual_review_required": False,
+              "note": "Accept only after atlas/portrait paths are returned and the current request ID is rechecked. No visual review or aesthetic regeneration."}
     write_json(run / "qa/processing-result.json", result)
     return result
 
@@ -305,8 +329,9 @@ def process(run):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", required=True)
+    parser.add_argument("--previews", action="store_true", help="Optional diagnostic previews; not an acceptance gate.")
     args = parser.parse_args()
-    result = process(args.run_dir)
+    result = process(args.run_dir, previews=args.previews)
     print(json.dumps(result, indent=2))
     raise SystemExit(0 if result["ok"] else 1)
 

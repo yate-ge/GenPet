@@ -1,6 +1,6 @@
 {
   "name": "genpet",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "An image-generated native Codex Pet that begins as an egg and grows with local activity.",
   "author": {
     "name": "GenPet contributors"
