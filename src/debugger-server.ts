@@ -18,6 +18,18 @@ function nativePetDirectory() {
  return path.join(process.env.CODEX_HOME||path.join(homedir(),'.codex'),'pets','genpet-companion');
 }
 
+export async function nativePetSelection() {
+ try {
+  const home=process.env.CODEX_HOME||path.join(homedir(),'.codex');
+  const state=JSON.parse(await readFile(path.join(home,'.codex-global-state.json'),'utf8'));
+  const value=state['electron-persisted-atom-state']?.['selected-avatar-id'];
+  const selectedPetId=typeof value==='string'?value:null;
+  return {selectedPetId,genpetSelected:selectedPetId==='custom:genpet-companion'};
+ } catch {
+  return {selectedPetId:null,genpetSelected:null};
+ }
+}
+
 export async function listNativeSprites() {
  const destination=nativePetDirectory();
  let current:string|null=null;
@@ -29,7 +41,7 @@ export async function listNativeSprites() {
 export async function runNativeIpc(mode:'probe'|'refresh') {
  if(mode==='probe')throw new Error('Use explicit refresh to request IPC refresh');
  if(!isLiveNativeDestination(nativePetDirectory()))throw new Error('Isolated destinations cannot refresh the host');
- return refreshViaIpc();
+ return {...await refreshViaIpc(),selection:await nativePetSelection()};
 }
 type IpcRunner=typeof runNativeIpc;
 export async function switchNativeSprite(name:string, method='ipc', ipcRunner:IpcRunner=runNativeIpc) {
@@ -64,7 +76,7 @@ export async function startServer(port=Number(process.env.GENPET_PORT||47831), r
    if(req.method==='GET'&&url.pathname==='/api/health')return json({service:'genpet-debugger',root:real.root});
    if(req.method==='GET'&&url.pathname==='/favicon.ico'){res.writeHead(204);res.end();return;}
    if(req.method==='GET'&&url.pathname==='/api/state') {
-    const state=await store.peek();return json({state,now:store.now(state),demo:store.demo,token,artRequest:artRequest(state),assets:await bundledAssets(),actions,nativeSprites:store.demo?null:await listNativeSprites()});
+    const state=await store.peek();return json({state,now:store.now(state),demo:store.demo,token,artRequest:artRequest(state),assets:await bundledAssets(),actions,nativeSprites:store.demo?null:await listNativeSprites(),nativeSelection:store.demo?null:await nativePetSelection()});
    }
    if(req.method==='GET'&&url.pathname==='/api/art-request')return json(artRequest(await store.peek()));
    if(req.method==='POST'&&url.pathname==='/api/action') {

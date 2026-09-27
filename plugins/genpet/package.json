@@ -3,7 +3,7 @@
     "genpet": "dist/cli.js"
   },
   "name": "genpet",
-  "version": "0.2.0",
+  "version": "0.2.4",
   "private": true,
   "type": "module",
   "license": "MIT",

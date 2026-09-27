@@ -10,11 +10,15 @@ import { randomUUID } from 'node:crypto';
 
 const mode = process.argv[2] ?? 'probe';
 if (!['probe', 'refresh'].includes(mode)) throw Error('Usage: node scripts/probe-native-ipc.mjs [probe|refresh]');
-const socketPath = path.join(process.env.CODEX_HOME || path.join(os.homedir(), '.codex'), 'ipc', 'ipc.sock');
-const [socketInfo, directoryInfo] = await Promise.all([lstat(socketPath), lstat(path.dirname(socketPath))]);
-const uid = process.getuid?.();
-if (uid == null || socketInfo.uid !== uid || directoryInfo.uid !== uid || !socketInfo.isSocket() || !directoryInfo.isDirectory() || (directoryInfo.mode & 0o022)) {
-  throw Error('Expected a current-user-owned socket in a non-writable-by-others directory');
+const socketPath = process.platform === 'win32'
+  ? '\\\\.\\pipe\\codex-ipc'
+  : path.join(process.env.CODEX_HOME || path.join(os.homedir(), '.codex'), 'ipc', 'ipc.sock');
+if (process.platform !== 'win32') {
+  const [socketInfo, directoryInfo] = await Promise.all([lstat(socketPath), lstat(path.dirname(socketPath))]);
+  const uid = process.getuid?.();
+  if (uid == null || socketInfo.uid !== uid || directoryInfo.uid !== uid || !socketInfo.isSocket() || !directoryInfo.isDirectory() || (directoryInfo.mode & 0o022)) {
+    throw Error('Expected a current-user-owned socket in a non-writable-by-others directory');
+  }
 }
 
 function connect() {

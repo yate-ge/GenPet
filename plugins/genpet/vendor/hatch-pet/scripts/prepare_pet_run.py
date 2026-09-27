@@ -754,9 +754,44 @@ Output one centered complete full-body pose on a flat pure {chroma_name} {chroma
 Do not rotate, skew, or tilt the whole sprite to fake gaze. Do not add replacement eyes, labels, arrows, guide marks, shadows, scenery, detached effects, or chroma-key colors inside the pet."""
 
 
+EGG_ANIMATIONS = {
+    "egg-calm": "A very small, slow whole-shell wobble that settles gently; quiet incubation.",
+    "egg-stir": "A more noticeable but restrained whole-shell wobble, then settle; no jump or directional travel.",
+    "egg-settle": "A brief startled shell tilt followed by a gradual return to stillness; no damage or distress face.",
+}
+
+
+def make_egg_jobs(run_dir, copied_refs):
+    base = make_jobs(run_dir, copied_refs)[0]
+    return [base, *[
+        {"id": state, "kind": "egg-row-strip", "status": "pending",
+         "prompt_file": f"prompts/rows/{state}.md", "output_path": f"decoded/{state}.png",
+         "depends_on": ["base"], "parallelizable_after": ["base"],
+         "input_images": [{"path": CANONICAL_BASE_PATH, "role": "canonical intact egg shell"},
+                          {"path": f"{LAYOUT_GUIDE_DIR}/running-right.png", "role": "eight-slot spacing guide only"}],
+         "generation_skill": "$imagegen", "frames": 8,
+         "requires_grounded_generation": True, "allow_prompt_only_generation": False,
+         "derivation_policy": {"may_derive": False, "reason": "each of the three shell motions is AI-generated"}}
+        for state in EGG_ANIMATIONS]]
+
+
+def egg_row_prompt(args, state):
+    return f"""Generate one horizontal strip of exactly eight complete frames of the SAME intact egg.
+Use the canonical egg reference for its individual shell shape, palette and faint abstract markings.
+Use the eight-slot guide only for spacing. Keep each shell wholly within its own slot, with generous margins,
+the same scale and baseline throughout. Flat pure {args.chroma_key['hex']} background, no guide lines or labels.
+Motion: {EGG_ANIMATIONS[state]} First and last frames should join naturally as a loop.
+The Pet has NOT been born. No eyes, face, mouth, limbs, ears, cracks, exposed creature, props, work,
+reviewing, waving, gaze following, jumping, shadows or detached effects. Express only physical shell motion.
+Style and identity: {args.pet_notes}
+This is one of three AI-generated egg loops. Its frames will be reused in native state slots;
+do not try to represent the native character actions. Minor motion differences are acceptable when usable."""
+
+
 def make_jobs(
     run_dir: Path,
     copied_refs: list[dict[str, object]],
+    early_look: bool = False,
 ) -> list[dict[str, object]]:
     reference_inputs = [
         {"path": rel(Path(str(ref["copied_path"])), run_dir), "role": "pet reference"}
@@ -831,7 +866,8 @@ def make_jobs(
                 "mirror_policy": derivation_policy if state == "running-left" else {},
             }
         )
-    standard_job_ids = [state for state, _row, _frames, _purpose in ROWS]
+    look_dependencies = ["base", "idle"] if early_look else [state for state, _row, _frames, _purpose in ROWS]
+    look_reference = "qa/idle-reference.png" if early_look else "qa/contact-sheet.png"
     jobs.append(
         {
             "id": "look-cardinals",
@@ -853,8 +889,8 @@ def make_jobs(
                     "role": "canonical identity reference",
                 },
                 {
-                    "path": "qa/contact-sheet.png",
-                    "role": "approved standard-row identity, scale, and baseline reference",
+                    "path": look_reference,
+                    "role": "approved animation identity, scale, and baseline reference",
                 },
             ],
             "output_path": "decoded/look-cardinals.png",
@@ -862,7 +898,7 @@ def make_jobs(
                 f"decoded/look-anchors/{label}.png" for label, _direction in LOOK_CARDINALS
             ],
             "approved_strip_path": "decoded/look-anchors-approved.png",
-            "depends_on": standard_job_ids,
+            "depends_on": look_dependencies,
             "generation_skill": "$imagegen",
             "requires_grounded_generation": True,
             "allow_prompt_only_generation": False,
@@ -870,7 +906,7 @@ def make_jobs(
             "look_mechanics_file": "qa/look-mechanics.md",
             "directions": [label for label, _direction in LOOK_CARDINALS],
             "packaging_eligible": False,
-            "parallelizable_after": standard_job_ids,
+            "parallelizable_after": look_dependencies,
             "derivation_policy": {
                 "may_derive": False,
                 "reason": "cardinal directions require grounded pet-specific generation",
@@ -907,8 +943,8 @@ def make_jobs(
                         "role": "canonical identity reference",
                     },
                     {
-                        "path": "qa/contact-sheet.png",
-                        "role": "approved standard-row identity, scale, and baseline reference",
+                        "path": look_reference,
+                        "role": "approved animation identity, scale, and baseline reference",
                     },
                     {
                         "path": "decoded/look-anchors-approved.png",
@@ -958,6 +994,10 @@ def main() -> None:
     parser.add_argument("--reference", action="append", default=[])
     parser.add_argument("--output-dir", default="")
     parser.add_argument("--pet-notes", default="")
+    parser.add_argument("--early-look", action="store_true",
+                        help="Start directions after base and idle; use extracted idle frames for scale and baseline.")
+    parser.add_argument("--egg", action="store_true",
+                        help="Unhatched GenPet: base plus three AI shell loops; no separate character actions or look poses.")
     parser.add_argument(
         "--brand-name",
         default="",
@@ -1107,7 +1147,7 @@ def main() -> None:
     )
 
     write_text(prompt_dir / "base-pet.md", base_pet_prompt(args))
-    for state, row, frames, purpose in ROWS:
+    for state, row, frames, purpose in ([] if args.egg else ROWS):
         write_text(
             row_prompt_dir / f"{state}.md",
             row_prompt(args, state, row, frames, purpose),
@@ -1116,7 +1156,7 @@ def main() -> None:
             row_retry_prompt_dir / f"{state}.md",
             retry_row_prompt(args, state, row, frames, purpose),
         )
-    for state, row, directions, _purpose in LOOK_ROWS:
+    for state, row, directions, _purpose in ([] if args.egg else LOOK_ROWS):
         write_text(
             row_prompt_dir / f"{state}.md",
             look_row_prompt(args, row, directions),
@@ -1125,18 +1165,35 @@ def main() -> None:
             row_retry_prompt_dir / f"{state}.md",
             retry_look_row_prompt(args, row, directions),
         )
-    write_text(prompt_dir / "look-cardinals.md", look_cardinal_prompt(args))
-    for label, expected_direction in LOOK_CARDINALS:
+    if args.egg:
+        for state in EGG_ANIMATIONS:
+            write_text(row_prompt_dir / f"{state}.md", egg_row_prompt(args, state))
+    else:
+        write_text(prompt_dir / "look-cardinals.md", look_cardinal_prompt(args))
+    for label, expected_direction in ([] if args.egg else LOOK_CARDINALS):
         write_text(
             look_anchor_repair_prompt_dir / f"{label}.md",
             look_cardinal_repair_prompt(args, label, expected_direction),
         )
+    if args.early_look and not args.egg:
+        # Keep prompts and their actual reference dependencies in agreement.
+        look_prompts = [prompt_dir / "look-cardinals.md"]
+        look_prompts += list(look_anchor_repair_prompt_dir.glob("*.md"))
+        look_prompts += [directory / f"{state}.md"
+                         for directory in (row_prompt_dir, row_retry_prompt_dir)
+                         for state, _row, _directions, _purpose in LOOK_ROWS]
+        for prompt_path in look_prompts:
+            text = prompt_path.read_text(encoding="utf-8")
+            text = text.replace("completed standard contact sheet", "approved idle reference sheet")
+            text = text.replace("standard contact sheet", "approved idle reference sheet")
+            write_text(prompt_path, text)
     jobs = {
         "schema_version": 1,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "run_dir": str(run_dir),
         "primary_generation_skill": "$imagegen",
-        "jobs": make_jobs(run_dir, copied_refs),
+        "workflow_profile": "genpet-egg-three" if args.egg else "genpet-early-look" if args.early_look else "standard",
+        "jobs": make_egg_jobs(run_dir, copied_refs) if args.egg else make_jobs(run_dir, copied_refs, args.early_look),
     }
     (run_dir / "imagegen-jobs.json").write_text(json.dumps(jobs, indent=2) + "\n", encoding="utf-8")
 
