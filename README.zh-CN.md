@@ -11,7 +11,7 @@ GenPet 直接使用 Codex 自带的 Pet 窗口和动画状态，在此之上加�
 需要：
 
 - 支持自定义 Pet 和插件的 **Codex 桌面端**；
-- **Node.js 22+**，并且 `node` 在 `PATH` 中（插件的 MCP 服务用 `node` 运行）；
+- **Node.js 22+**，并且 `node` 在 `PATH` 中（插件用它运行内置 CLI）；
 - 可用的 **git**（Codex 用它从 GitHub 拉取插件）。
 
 不需要 clone 仓库、不需要 `npm install`、也不需要构建：本仓库本身就是一个 Codex 插件市场，`plugins/genpet/` 是已经构建好的插件。
@@ -22,13 +22,14 @@ GenPet 直接使用 Codex 自带的 Pet 窗口和动画状态，在此之上加�
 2. 点「添加插件市场」（在插件页面的「添加」或右上角「页面操作」菜单中）。
 3. 「来源」填 `yate-ge/GenPet`，「Git 引用」留空（跟随 main），点「添加插件市场」。
 4. 在插件列表中找到 GenPet，点安装，并确认它已启用。
-5. 新建一个 Codex 任务（新任务才会加载插件的技能和工具），输入 **`/genpet-start`**。
+5. 新建一个 Codex 任务（新任务才会加载更新后的插件技能），输入 **`/genpet-start`**。
 
 ### 方式二：让 Codex Agent 帮你装
 
-在任意 Codex 任务中发送下面这段话：
+在任意 Codex 任务中只需发送下面这句。具体安装、更新和核验规则由链接中的 agent 安装文档维护，用户不需要把它们全部写进 prompt：
 
-> 请从 GitHub 仓库 yate-ge/GenPet 安装 GenPet Codex 插件，不需要 clone 仓库或运行 npm。用 `codex plugin list` 检查是否已有 GenPet：已从 `genpet` marketplace 安装时，运行 `codex plugin marketplace upgrade genpet` 更新；来自其他 marketplace 时先告诉我它的来源，不要装第二个 GenPet；尚未安装时，依次运行 `codex plugin marketplace add yate-ge/GenPet`、`codex plugin marketplace upgrade genpet` 和 `codex plugin add genpet@genpet`；marketplace 已存在也必须 upgrade，不能把 already added 当作更新成功。完成后用 `codex plugin list` 确认 `genpet@genpet` 为 installed, enabled，并报告 marketplace 提交、版本和安装路径。使用新版插件自带的 `scripts/verify-install.mjs`，传入实际安装目录和已刷新的 marketplace 中 plugins/genpet 目录，核对清单版本和所有发布文件哈希；缺少核验脚本或内容不一致时不能宣称升级成功。技能和 MCP 工具要在新的 Codex 任务中才会加载，当前任务无法确认时请直接说明。只安装插件：不要领养、重置或加龄宠物，不要生成图像，保留 `~/.genpet/` 和 `~/.codex/pets/genpet-companion/`。
+> 请安装或更新 GitHub 仓库 `yate-ge/GenPet` 的 GenPet Codex 插件。开始前先阅读并严格执行：
+> https://github.com/yate-ge/GenPet/blob/main/docs/AGENT_INSTALL.md
 
 装好后新建任务，输入 **`/genpet-start`**。
 
@@ -67,7 +68,7 @@ codex plugin remove genpet@genpet         # 卸载插件；~/.genpet/ 里的宠�
 
 ## 架构
 
-GenPet 分成三层：**Codex 里的 Agent 负责"画"，本地 MCP 服务负责"记"，Codex 原生 Pet 负责"显示"。** 插件本身没有任何常驻进程：只有在任务或定时任务调用工具时，MCP 服务才运行。
+GenPet 分成三层：**Codex 里的 Agent 负责调度和“画”，内置 Node CLI 负责本地状态，Codex 原生 Pet 负责“显示”。** 插件没有常驻进程；每条 CLI 命令完成一次操作后立即退出。
 
 ```mermaid
 flowchart LR
@@ -80,28 +81,28 @@ flowchart LR
     PW["原生 Pet 悬浮窗"]
   end
   S -- "按请求生成" --> IG --> HP
-  HP -- "校验通过的图集" --> M
-  S -- "调用 MCP 工具" --> M["GenPet MCP 服务<br>dist/mcp.js（Node）"]
-  M --> ST[("~/.genpet/<br>state.json · art/ · backups/")]
-  M -. "只读用户消息" .-> SE[("~/.codex/sessions")]
-  M -- "原子写入" --> PET[("~/.codex/pets/<br>genpet-companion")]
+  HP -- "校验通过的图集" --> C
+  S -- "执行 CLI 命令" --> C["GenPet CLI<br>dist/cli.js（Node）"]
+  C --> ST[("~/.genpet/<br>state.json · art/ · backups/")]
+  C -. "只读用户消息" .-> SE[("~/.codex/sessions")]
+  C -- "原子写入" --> PET[("~/.codex/pets/<br>genpet-companion")]
   PET --> PW
-  M -. "现有 IPC：自动请求刷新" .-> PW
+  C -. "现有 IPC：自动请求刷新" .-> PW
 ```
 
 | 模块 | 源码 | 职责 |
 |---|---|---|
-| 技能 | `skills/genpet*/` | 告诉 Agent 何时读状态、何时生成图像、如何质检和安装；`/genpet-start` 负责开始或恢复，另外三个是调试命令 |
-| MCP 服务 | `src/mcp.ts` | 把下面各模块暴露为 12 个 `genpet_*` 工具 |
+| 技能 | `plugins/genpet/skills/genpet*/` | 告诉 Agent 何时读状态、何时生成图像、如何质检和安装；`/genpet-start` 负责开始或恢复，另外三个是调试命令 |
+| CLI | `src/cli.ts` | 用一个返回 JSON 的命令接口连接下面各模块与技能 |
 | 生命周期引擎 | `src/core.ts` | 以领养时间为锚点计算孵化、五小时情境窗口、每日成长和离线补算；孵化时一次性确定出生身份 |
 | 活动情境 | `src/context.ts` | 只读近期 Codex 用户消息，归类为 构建/研究/创作/学习/休息 标签，不保存原文 |
 | 存储 | `src/store.ts` | `~/.genpet/state.json` 的事务读写、备份和幂等记录 |
 | 图像与安装 | `src/art.ts`、`src/image.ts` | 为当前设计生成唯一的图像请求 ID；校验 PNG/WebP 图集；原子替换原生 Pet 的精灵图 |
 | 原生刷新 | `src/native-refresh.ts` | 仅通过现有 IPC 请求刷新 |
 | 调试 | `src/debug.ts` | reset/grow/state 的实现，带备份和 operationId 幂等 |
-| 生成管线 | `vendor/hatch-pet/` | 官方 Hatch Pet 工具：逐行生成动作、提取帧、组装 8×11 V2 图集并质检 |
+| 生成管线 | `plugins/genpet/vendor/hatch-pet/` | 官方 Hatch Pet 工具：逐行生成动作、提取帧、组装 8×11 V2 图集并质检 |
 
-**一次成长更新的流程：** 定时心跳触发 GenPet 技能 → `genpet_status` 让引擎补算时间，得出当前阶段和道具 → `genpet_art_request` 给出这个设计的请求（已有图像就是 `ready`，不重复生成）→ Agent 用 imagegen 和 hatch-pet 生成并质检 → `genpet_accept_art` 保存到 `~/.genpet/art/` → `genpet_install_native` 原子写入 `genpet-companion` 并尝试刷新悬浮窗。任何一步失败都保留上一张通过质检的图像。
+**一次成长更新的流程：** 定时心跳触发 GenPet 技能 → `status` 让引擎补算时间，得出当前阶段和道具 → `art-request` 给出这个设计的请求（已有图像就是 `ready`，不重复生成）→ Agent 用 imagegen 和 hatch-pet 生成并质检 → `accept-art` 保存到 `~/.genpet/art/` → `install-native` 原子写入 `genpet-companion` 并尝试刷新悬浮窗。任何一步失败都保留上一张通过质检的图像。
 
 **分发：** 仓库根目录的 `.agents/plugins/marketplace.json` 让整个仓库成为一个 Codex 插件市场。`npm run build:plugin` 用 esbuild 把 `src/` 和全部 npm 依赖打包进 `plugins/genpet/dist/`，图像解码使用 WebAssembly，没有原生模块。Codex 从 GitHub 拉取后直接运行，不需要 npm。
 
@@ -111,10 +112,10 @@ flowchart LR
 - 蛋优先：只有带微弱线索的普通蛋壳，没有预先选定的生物；出生身份在孵化时根据孵化期活动和随机种子一次性确定。
 - 五小时孵化与情境窗口、每日成长、离线补算、孵化后身份不变、情境记录可撤回。
 - 自动从近期 Codex 用户消息提取本地活动标签；内置生成流程不需要问卷，也不需要 API key。
-- 本地 MCP 工具和可分发的 Codex 插件。
+- 内置 Node CLI 和可分发的 Codex 插件。
 - 宠物使用原生窗口；插件附带的 HTTP 调试页面默认关闭，仅在 /genpet-debugger 时启动。
 
-**原生刷新：** 首次初始化和后续换图都会通过 Codex 已有的本地 IPC 通道请求刷新，普通启动即可，不需要调试参数、重启或后台监控。IPC 成功表示刷新通知已转发，显示哈希未测量时仍返回 `displayStatus=unconfirmed`。IPC 失败时报告错误并保留重试状态。此内部协议已通过用户实机观察验证，宿主升级后需复验。详见[原生刷新说明](docs/NATIVE_REFRESH.zh-CN.md)。
+**原生刷新：** 首次初始化和后续换图都会通过 Codex 已有的本地 IPC 通道请求刷新，普通启动即可，不需要调试参数、重启或后台监控。IPC 成功表示刷新通知已转发，显示哈希未测量时仍返回 `displayStatus=unconfirmed`。IPC 失败时报告错误并保留重试状态。此内部协议已通过用户实机观察验证，宿主升级后需复验。详见[原生刷新说明](plugins/genpet/docs/NATIVE_REFRESH.zh-CN.md)。
 
 ## 成长机制
 
@@ -122,11 +123,11 @@ flowchart LR
 
 孵化后每满 24 小时增加一个成长日，默认第 7 天进入幼年、第 21 天成年。体型变化有上限；日常活动只适度影响表情倾向，不决定能否成长。没有连续打卡、工作量比拼、健康下降或缺席惩罚。
 
-最近一个已结束的五小时窗口决定活动道具：构建/工具、研究/书、创作/画笔、学习/探索、休息/枕头。稳定身份和运行时的任务动作相互独立。新领养的时间和默认值可在 `config/policy.json`（或 `GENPET_POLICY_FILE` 指定的文件）中修改，已有宠物保留自己保存的策略。更多细节见[蛋优先机制](docs/MECHANISM.zh-CN.md)和[自定义默认值](docs/CUSTOMIZATION.zh-CN.md)。
+最近一个已结束的五小时窗口决定活动道具：构建/工具、研究/书、创作/画笔、学习/探索、休息/枕头。稳定身份和运行时的任务动作相互独立。新领养的时间和默认值可在 `plugins/genpet/config/policy.json`（或 `GENPET_POLICY_FILE` 指定的文件）中修改，已有宠物保留自己保存的策略。更多细节见[蛋优先机制](docs/MECHANISM.zh-CN.md)和[自定义默认值](docs/CUSTOMIZATION.zh-CN.md)。
 
 ## 定时成长
 
-成长检查和图像生成由 Codex 原生定时任务触发。插件内没有定时器、后台监控、LaunchAgent、cron 或网站；MCP 进程只响应工具调用，生命周期引擎在被调用时根据保存的时间戳补算。
+成长检查和图像生成由 Codex 原生定时任务触发。插件内没有定时器、后台监控、LaunchAgent、cron 或网站；CLI 只在每次操作时运行，生命周期引擎根据保存的时间戳补算。
 
 开启自动成长时，使用一个 Codex 原生线程心跳每小时检查一次。引擎判断五小时孵化/情境边界和 24 小时成长边界，同时发生的变化只产生一个当前设计；已就绪或已暂停的图像不会重复生成。定时任务可用性、生成耗时和原生刷新都可能让可见更新有所延迟。
 
@@ -136,26 +137,26 @@ flowchart LR
 
 图像生成提示词只包含宠物设计参数和活动道具，不包含私人聊天内容。提示词和参考图由 Codex 图像生成服务处理；生成结果保存在本地。
 
-## MCP 工具
+## CLI 命令
 
-| 工具 | 用途 |
+| 命令 | 用途 |
 |---|---|
-| `genpet_status` | 补算生命周期并读取本地活动标签 |
-| `genpet_adopt` | 领养一颗蛋，不会覆盖已有宠物 |
-| `genpet_art_request` | 读取当前有边界的图像生成请求 |
-| `genpet_accept_art` | 质检后接收生成的头像或图集 |
-| `genpet_install_native` | 原子地导出已批准的当前设计图集 |
-| `genpet_configure` | 开关情境读取、冻结装扮、自动生图、改名 |
-| `genpet_clear_context` | 清除已提取的标签，不删除原始对话 |
-| `genpet_debug_reset` | 明确要求时备份旧生命并重新开始一颗蛋 |
-| `genpet_debug_grow` | 推进逻辑年龄，保持已揭晓的身份 |
-| `genpet_debug_state` | 测试用的道具覆盖，或恢复自动映射 |
+| `status` | 补算生命周期并读取本地活动标签 |
+| `adopt` | 领养一颗蛋，不会覆盖已有宠物 |
+| `art-request` | 读取当前有边界的图像生成请求 |
+| `accept-art` | 质检后接收生成的头像或图集 |
+| `install-native` | 原子地导出已批准的当前设计图集 |
+| `configure` | 开关情境读取、冻结装扮、自动生图或改名 |
+| `clear-context` | 清除已提取的标签，不删除原始对话 |
+| `debug-reset` | 明确要求时备份旧生命并重新开始一颗蛋 |
+| `debug-grow` | 推进逻辑年龄，保持已揭晓的身份 |
+| `debug-state` | 测试用的道具覆盖，或恢复自动映射 |
 
-命令行提供等价的诊断操作：`node dist/cli.js status`、`adopt`、`art-request`、`accept-art`、`install-native`。`accept-art` 需要请求 ID、绝对文件路径、类型和来源说明，绝不会伪造生成的图像。
+从已安装插件根目录运行 `node dist/cli.js <命令>`。`accept-art` 需要请求 ID、绝对文件路径、类型和来源说明，绝不会伪造生成的图像。
 
 ## 调试斜杠命令
 
-除了 `/genpet-start`，插件还包含 `genpet-reset`、`genpet-grow`、`genpet-state` 三个调试技能，可在 `/` 菜单中找到，或用 `$genpet-reset`、`$genpet-grow`、`$genpet-state` 调用。reset 备份后开始新的生命；grow 加速同一个身份的成长；state 修改道具或恢复自动映射。每个流程都会生成并校验缺失的图像，然后安装到同一个原生 Pet。参数见[调试命令说明](docs/DEBUG_COMMANDS.zh-CN.md)。定时维护任务从不调用这些调试命令。
+除了 `/genpet-start`，插件还包含 `genpet-reset`、`genpet-grow`、`genpet-state` 三个调试技能，可在 `/` 菜单中找到，或用 `$genpet-reset`、`$genpet-grow`、`$genpet-state` 调用。reset 备份后开始新的生命；grow 加速同一个身份的成长；state 修改道具或恢复自动映射。每个流程都会生成并校验缺失的图像，然后安装到同一个原生 Pet。参数见[调试命令说明](plugins/genpet/docs/DEBUG_COMMANDS.zh-CN.md)。定时维护任务从不调用这些调试命令。
 
 ## 开发
 
@@ -163,7 +164,7 @@ flowchart LR
 npm ci
 npm run build
 npm test
-npm run build:plugin   # 修改了插件包含的内容后，重新生成 plugins/genpet/
+npm run build:plugin   # 重建 plugins/genpet/ 内的运行时生成文件
 ```
 
 用户状态保存在仓库之外的 `~/.genpet/`；测试时可用 `GENPET_DATA_DIR` 覆盖。`CODEX_HOME` 控制读取的 Codex 目录和原生 Pet 的安装位置。
@@ -171,17 +172,18 @@ npm run build:plugin   # 修改了插件包含的内容后，重新生成 plugin
 | 位置 | 用途 | 是否进入 `plugins/genpet/` |
 |---|---|---|
 | `.agents/plugins/marketplace.json` | 让仓库成为名为 `genpet` 的 Codex 插件市场 | — |
-| `plugins/genpet/` | 用户实际安装的插件，由 `npm run build:plugin` 生成并提交，不要手改 | — |
-| `src/` | 运行时源码 | 连同所有 npm 依赖打包进 `dist/mcp.js` 和 `dist/cli.js` |
+| `plugins/genpet/` | 用户实际安装的唯一插件源码包；静态文件直接在这里编辑 | — |
+| `src/` | 运行时源码 | 连同所有 npm 依赖打包进 `dist/cli.js` 和 `dist/debugger-server.js` |
 | `tests/`、`.github/` | 测试和 CI | 否 |
-| `scripts/` | 构建、安装和验证工具 | 只有技能用到的两个图像质检脚本 |
+| `scripts/` | 仓库级构建、安装和验证工具 | 否 |
 | `assets/` | 生成的示例和隔离测试夹具 | 否 |
-| `docs/` | 研究、设计、验证和帮助文档 | 只有调试命令和原生刷新两份帮助 |
-| `skills/`、`vendor/hatch-pet/`、`config/` | Codex 工作流、官方图集工具和策略默认值 | 是 |
+| `docs/` | 研究、设计和验证文档 | 否 |
+| `plugins/genpet/skills/`、`vendor/`、`config/` | 唯一的 Codex 工作流、官方图集工具和策略默认值 | 已位于插件内 |
+| `plugins/genpet/dist/`、`package.json` | 生成的运行时包和元数据 | 由 `npm run build:plugin` 重建 |
 | `output/` | 被忽略的本地构建和报告 | 否 |
 
 - `npm run verify:fast`：源码改动后的快速检查。
-- `npm run verify:release`：交付前运行。它会重建 `plugins/genpet/`，通过仓库市场安装到临时 Codex 环境，确认安装副本不含 `node_modules`，并在副本上跑完整的 MCP 生命周期流程。CI 还会检查提交的 `plugins/genpet/` 是否与源码一致。两条命令都不会重置或安装真实的 Pet。
+- `npm run verify:release`：交付前运行。它会重建 `plugins/genpet/` 内的生成文件，通过仓库市场把该唯一插件包安装到临时 Codex 环境，确认安装副本不含 `node_modules`，并在副本上跑完整的 CLI 生命周期流程。CI 还会检查生成文件是否过期。两条命令都不会重置或安装真实的 Pet。
 
 通过单元测试不能代替在 Codex 里实际选中并观察宠物。何时需要单独验证图像生成和原生显示，见[项目地图与验证工作流](docs/PROJECT_STATUS.zh-CN.md)；开发和发布流程见 [CONTRIBUTING](CONTRIBUTING.md)。
 

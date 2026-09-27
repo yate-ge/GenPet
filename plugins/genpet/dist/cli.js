@@ -2126,12 +2126,12 @@ var require_png = __commonJS({
 
 // src/debugger.ts
 import { spawn } from "node:child_process";
-import path3 from "node:path";
+import path4 from "node:path";
 
 // src/store.ts
 import { mkdir, readFile as readFile2, rename, writeFile, rm, stat as stat2 } from "node:fs/promises";
 import { homedir as homedir2 } from "node:os";
-import path2 from "node:path";
+import path3 from "node:path";
 import { randomUUID } from "node:crypto";
 
 // src/core.ts
@@ -2383,6 +2383,32 @@ function addContextBatch(original, inputs, nowMs) {
   for (const input of inputs) insertContext(pet, input, nowMs);
   return evolvePet(pet, nowMs);
 }
+function removeContext(original, id, nowMs) {
+  const pet = evolvePet(original, nowMs);
+  const removed = pet.context.find((entry) => entry.id === id);
+  if (!removed) return pet;
+  pet.context = pet.context.filter((entry) => entry.id !== id);
+  pet.events = pet.events.filter((entry) => !entry.id.endsWith(`-${id}`));
+  if (removed.milestone) {
+    const day = Math.floor((removed.occurredAt - pet.adoptedAt) / DAY);
+    if (!pet.context.some((entry) => entry.milestone && Math.floor((entry.occurredAt - pet.adoptedAt) / DAY) === day)) {
+      pet.growth.milestoneDays = pet.growth.milestoneDays.filter((value) => value !== day);
+      pet.growth.decorationLevel = Math.min(3, pet.growth.milestoneDays.length);
+      pet.events = pet.events.filter((entry) => !(entry.type === "milestone" && entry.id.endsWith(`-${day}`)));
+    }
+  }
+  refreshState(pet, pet.lastEvaluatedAt);
+  refreshExpression(pet);
+  return pet;
+}
+function updateProfile(original, patch) {
+  const pet = migratePet(original);
+  pet.profile = { ...pet.profile, ...patch };
+  validateProfile(pet.profile);
+  pet.profile.name = pet.profile.name.trim();
+  refreshExpression(pet);
+  return pet;
+}
 
 // src/context.ts
 import { createHash } from "node:crypto";
@@ -2539,23 +2565,43 @@ function deriveInitialProfile(scan) {
 
 // src/config.ts
 import { readFile } from "node:fs/promises";
+import path2 from "node:path";
+
+// src/plugin-root.ts
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+function pluginRoot() {
+  const moduleDirectory = path.dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    path.resolve(moduleDirectory, ".."),
+    path.resolve(moduleDirectory, "..", "plugins", "genpet")
+  ];
+  return candidates.find((candidate) => existsSync(path.join(candidate, ".codex-plugin", "plugin.json"))) ?? candidates[0];
+}
+
+// src/config.ts
 async function adoptionConfig() {
-  const file = process.env.GENPET_POLICY_FILE || path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../config/policy.json");
+  const file = process.env.GENPET_POLICY_FILE || path2.join(pluginRoot(), "config", "policy.json");
   const config = JSON.parse(await readFile(file, "utf8"));
   if (!config || typeof config !== "object" || !config.defaultProfile || !config.timing) throw new Error("Invalid GenPet adoption policy");
   return config;
 }
 
 // src/store.ts
-var dataRoot = () => process.env.GENPET_DATA_DIR || path2.join(homedir2(), ".genpet");
+var dataRoot = () => process.env.GENPET_DATA_DIR || path3.join(homedir2(), ".genpet");
 var fresh = () => ({ version: 1, pet: null, clockOffset: 0, settings: { autoContext: true, freezeOutfit: false, autoArt: true }, importedIds: [], lastScanAt: 0, scanInfo: { messages: 0, files: 0, warnings: [] }, art: [] });
+function configureState(s, input) {
+  if (input.freezeOutfit === true && !s.settings.freezeOutfit) s.settings.lockedOutfit = { prop: s.pet?.state.prop || "none", scene: s.pet?.state.scene || "nest" };
+  if (input.freezeOutfit === false) delete s.settings.lockedOutfit;
+  for (const key of ["autoContext", "freezeOutfit", "autoArt"]) if (typeof input[key] === "boolean") s.settings[key] = input[key];
+  return s.settings;
+}
 var Store = class {
   constructor(root = dataRoot(), demo2 = false) {
     this.root = root;
     this.demo = demo2;
-    this.file = path2.join(root, demo2 ? "demo.json" : "state.json");
+    this.file = path3.join(root, demo2 ? "demo.json" : "state.json");
   }
   root;
   demo;
@@ -2672,7 +2718,7 @@ var Store = class {
 async function launchDebugger(port = Number(process.env.GENPET_PORT || 47831)) {
   if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("GENPET_PORT must be an integer between 1024 and 65535");
   const url = `http://127.0.0.1:${port}`;
-  const root = path3.resolve(dataRoot());
+  const root = path4.resolve(dataRoot());
   async function inspect() {
     let response;
     try {
@@ -2685,7 +2731,7 @@ async function launchDebugger(port = Number(process.env.GENPET_PORT || 47831)) {
     return true;
   }
   if (await inspect()) return { url, reused: true };
-  const child = spawn(process.execPath, [path3.join(import.meta.dirname, "debugger-server.js")], {
+  const child = spawn(process.execPath, [path4.join(import.meta.dirname, "debugger-server.js")], {
     detached: true,
     stdio: "ignore",
     env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: root }
@@ -2706,13 +2752,13 @@ async function launchDebugger(port = Number(process.env.GENPET_PORT || 47831)) {
 
 // src/art.ts
 import { mkdir as mkdir2, readFile as readFile5, copyFile, writeFile as writeFile2, rename as rename2 } from "node:fs/promises";
-import path6 from "node:path";
+import path7 from "node:path";
 import { createHash as createHash3, randomUUID as randomUUID3 } from "node:crypto";
 
 // src/image.ts
 var import_pngjs = __toESM(require_png(), 1);
 import { readFile as readFile3 } from "node:fs/promises";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync as existsSync2, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 
@@ -2756,11 +2802,11 @@ var Module = (() => {
     var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
     var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions == "object" && typeof process.versions.node == "string";
     var scriptDirectory = "";
-    function locateFile(path9) {
+    function locateFile(path10) {
       if (Module2["locateFile"]) {
-        return Module2["locateFile"](path9, scriptDirectory);
+        return Module2["locateFile"](path10, scriptDirectory);
       }
-      return scriptDirectory + path9;
+      return scriptDirectory + path10;
     }
     var read_, readAsync, readBinary, setWindowTitle;
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -4144,7 +4190,7 @@ async function readImageInfo(file) {
 var webpReady;
 function webpWasm() {
   const bundled = fileURLToPath2(new URL("./webp_dec.wasm", import.meta.url));
-  return existsSync(bundled) ? bundled : createRequire(import.meta.url).resolve("@jsquash/webp/codec/dec/webp_dec.wasm");
+  return existsSync2(bundled) ? bundled : createRequire(import.meta.url).resolve("@jsquash/webp/codec/dec/webp_dec.wasm");
 }
 async function decodeRgba(file) {
   const buf = await readFile3(file);
@@ -4170,16 +4216,16 @@ async function decodeRgba(file) {
 import net from "node:net";
 import { lstat } from "node:fs/promises";
 import { randomUUID as randomUUID2 } from "node:crypto";
-import path4 from "node:path";
+import path5 from "node:path";
 import { homedir as homedir3 } from "node:os";
 function desktopIpcPath() {
-  return process.platform === "win32" ? "\\\\.\\pipe\\codex-ipc" : path4.join(process.env.CODEX_HOME || path4.join(homedir3(), ".codex"), "ipc", "ipc.sock");
+  return process.platform === "win32" ? "\\\\.\\pipe\\codex-ipc" : path5.join(process.env.CODEX_HOME || path5.join(homedir3(), ".codex"), "ipc", "ipc.sock");
 }
 async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
   if (process.platform === "win32") {
     if (!socketPath.startsWith("\\\\.\\pipe\\")) throw Error("Expected a local Windows named pipe");
   } else {
-    const [file, directory] = await Promise.all([lstat(socketPath), lstat(path4.dirname(socketPath))]);
+    const [file, directory] = await Promise.all([lstat(socketPath), lstat(path5.dirname(socketPath))]);
     const uid = process.getuid?.();
     if (uid == null || file.uid !== uid || directory.uid !== uid || !file.isSocket() || !directory.isDirectory() || directory.mode & 18) {
       throw Error("IPC socket must belong to the current user in a protected directory");
@@ -4276,11 +4322,11 @@ async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
 import { createHash as createHash2 } from "node:crypto";
 import { readFile as readFile4, readdir as readdir2 } from "node:fs/promises";
 import { homedir as homedir4, tmpdir } from "node:os";
-import path5 from "node:path";
+import path6 from "node:path";
 async function refreshNativePet(options) {
   const expectedSpriteSha256 = createHash2("sha256").update(await readFile4(options.expectedSpritePath)).digest("hex");
   const errors = [];
-  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || isLiveNativeDestination(path5.dirname(options.expectedSpritePath)));
+  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || isLiveNativeDestination(path6.dirname(options.expectedSpritePath)));
   if (useIpc) {
     try {
       const ipc = await refreshViaIpc(options.ipcSocketPath ?? void 0, options.timeoutMs ?? 2e3);
@@ -4309,15 +4355,15 @@ async function refreshNativePet(options) {
 }
 function isLiveNativeDestination(destination) {
   if (process.env.GENPET_SKIP_NATIVE_REFRESH === "1") return false;
-  const live = path5.join(homedir4(), ".codex", "pets", "genpet-companion");
-  if (path5.resolve(destination) === path5.resolve(live)) return true;
+  const live = path6.join(homedir4(), ".codex", "pets", "genpet-companion");
+  if (path6.resolve(destination) === path6.resolve(live)) return true;
   const configured = process.env.CODEX_HOME;
   if (!configured) return false;
-  const resolved = path5.resolve(configured);
-  const temp = path5.resolve(tmpdir());
-  const relativeToTemp = path5.relative(temp, resolved);
-  if (configured.startsWith("/var/folders/") || configured.includes("/tmp/") || relativeToTemp === "" || relativeToTemp !== ".." && !relativeToTemp.startsWith(`..${path5.sep}`) && !path5.isAbsolute(relativeToTemp)) return false;
-  return path5.resolve(destination) === path5.resolve(path5.join(resolved, "pets", "genpet-companion"));
+  const resolved = path6.resolve(configured);
+  const temp = path6.resolve(tmpdir());
+  const relativeToTemp = path6.relative(temp, resolved);
+  if (configured.startsWith("/var/folders/") || configured.includes("/tmp/") || relativeToTemp === "" || relativeToTemp !== ".." && !relativeToTemp.startsWith(`..${path6.sep}`) && !path6.isAbsolute(relativeToTemp)) return false;
+  return path6.resolve(destination) === path6.resolve(path6.join(resolved, "pets", "genpet-companion"));
 }
 
 // src/art.ts
@@ -4376,7 +4422,7 @@ function artRequest(s) {
     adoptionTrace: p.adoptionTrace ?? null,
     referenceFiles: [...new Set(references.filter((f) => !!f))],
     prompt: common + " " + concept,
-    reason: isEgg ? "Only an abstract shell identity exists. The creature will be resolved at the five-hour hatch boundary." : forced ? `Explicit debug state: ${forced.kind}; not observed user activity. Use genpet_debug_state auto to resume activity-based appearance.` : p.state.reason,
+    reason: isEgg ? "Only an abstract shell identity exists. The creature will be resolved at the five-hour hatch boundary." : forced ? `Explicit debug state: ${forced.kind}; not observed user activity. Use debug-state auto to resume activity-based appearance.` : p.state.reason,
     contract: { columns: 8, cellWidth: 192, cellHeight: 208, rows: 11, spriteVersionNumber: 2 },
     note: "Image synthesis runs in Codex through the GenPet skill. State hatching and completion of new artwork are separate. Preserve the last approved native atlas until its successor passes QA."
   };
@@ -4400,7 +4446,7 @@ async function validateImage(file, kind) {
   return meta;
 }
 async function acceptArt(store2, input) {
-  if (!path6.isAbsolute(input.file)) throw new Error("Artifact file must be an absolute local path");
+  if (!path7.isAbsolute(input.file)) throw new Error("Artifact file must be an absolute local path");
   if (input.provenance.length < 12) throw new Error("Record generation method and visual QA in provenance");
   await validateImage(input.file, input.kind);
   return store2.transaction(async (s) => {
@@ -4408,10 +4454,10 @@ async function acceptArt(store2, input) {
     if (s.pet) s.pet = evolvePet(s.pet, store2.now(s));
     const request = artRequest(s);
     if (!request || request.id !== input.requestId) throw new Error("Stale design request; read the current request before committing an image");
-    const dir = path6.join(store2.root, "art");
+    const dir = path7.join(store2.root, "art");
     await mkdir2(dir, { recursive: true });
-    const ext = path6.extname(input.file).toLowerCase();
-    const file = path6.join(dir, `${request.id}-${input.kind}-${randomUUID3()}${ext}`);
+    const ext = path7.extname(input.file).toLowerCase();
+    const file = path7.join(dir, `${request.id}-${input.kind}-${randomUUID3()}${ext}`);
     await copyFile(input.file, file);
     const record2 = { id: request.id, stage: s.pet.stage, growthDay: s.pet.growth.days, windowIndex: s.pet.state.windowIndex, file, kind: input.kind, createdAt: Date.now(), provenance: input.provenance };
     if (input.kind === "portrait") {
@@ -4429,20 +4475,20 @@ async function exportNative(s, destination) {
   if (!art) throw new Error("No approved atlas for this current design yet. Run the GenPet image-generation skill first.");
   const meta = await validateImage(art.file, "atlas");
   await mkdir2(destination, { recursive: true });
-  const ext = path6.extname(art.file);
+  const ext = path7.extname(art.file);
   const hash2 = createHash3("sha256").update(await readFile5(art.file)).digest("hex").slice(0, 16);
   const spriteName = `spritesheet-${hash2}${ext}`;
-  const sprite = path6.join(destination, spriteName);
-  const temporary = path6.join(destination, `.pending-${randomUUID3()}${ext}`);
+  const sprite = path7.join(destination, spriteName);
+  const temporary = path7.join(destination, `.pending-${randomUUID3()}${ext}`);
   await copyFile(art.file, temporary);
   await rename2(temporary, sprite);
-  const manifest = { id: path6.basename(destination), displayName: s.pet.profile.name, description: "GenPet \xB7 a growing image-generated companion", spriteVersionNumber: meta.height === 2288 ? 2 : 1, spritesheetPath: spriteName };
-  await copyFile(path6.join(destination, "pet.json"), path6.join(destination, "previous-pet.json")).catch((e) => {
+  const manifest = { id: path7.basename(destination), displayName: s.pet.profile.name, description: "GenPet \xB7 a growing image-generated companion", spriteVersionNumber: meta.height === 2288 ? 2 : 1, spritesheetPath: spriteName };
+  await copyFile(path7.join(destination, "pet.json"), path7.join(destination, "previous-pet.json")).catch((e) => {
     if (e.code !== "ENOENT") throw e;
   });
-  const manifestTemporary = path6.join(destination, `.pet-${randomUUID3()}.json`);
+  const manifestTemporary = path7.join(destination, `.pet-${randomUUID3()}.json`);
   await writeFile2(manifestTemporary, JSON.stringify(manifest, null, 2));
-  await rename2(manifestTemporary, path6.join(destination, "pet.json"));
+  await rename2(manifestTemporary, path7.join(destination, "pet.json"));
   return {
     destination,
     manifest,
@@ -4458,13 +4504,13 @@ async function exportNative(s, destination) {
 async function installNative(store2, options) {
   if (store2.demo) throw new Error("Demo state cannot install a native Pet. Use isolated file exports for developer tests; the live companion is updated in place.");
   const s = await store2.current();
-  const result2 = await exportNative(s, path6.join(process.env.CODEX_HOME || path6.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion"));
+  const result2 = await exportNative(s, path7.join(process.env.CODEX_HOME || path7.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion"));
   let refresh;
   const injected = typeof options?.refresh === "function";
   const skip = !injected && process.env.GENPET_SKIP_NATIVE_REFRESH === "1";
   const shouldRefresh = injected || !skip && isLiveNativeDestination(result2.destination);
   if (shouldRefresh) {
-    const spritePath = path6.join(result2.destination, result2.manifest.spritesheetPath);
+    const spritePath = path7.join(result2.destination, result2.manifest.spritesheetPath);
     refresh = await (options?.refresh ?? refreshNativePet)({ expectedSpritePath: spritePath });
   }
   const automaticRefresh = refresh?.automaticRefresh ?? false;
@@ -4483,12 +4529,12 @@ async function nativeTick(store2) {
 }
 
 // src/cli.ts
-import path8 from "node:path";
+import path9 from "node:path";
 import { randomUUID as randomUUID5 } from "node:crypto";
 
 // src/debug.ts
 import { mkdir as mkdir3, writeFile as writeFile3 } from "node:fs/promises";
-import path7 from "node:path";
+import path8 from "node:path";
 import { randomUUID as randomUUID4 } from "node:crypto";
 function operation(s, id, key) {
   if (!/^[a-zA-Z0-9_-]{1,100}$/.test(id)) throw new Error("operationId must contain 1\u2013100 letters, digits, underscores or hyphens. Reuse it only when retrying the same operation.");
@@ -4509,13 +4555,13 @@ function result(s, action, alreadyApplied = false, backup2) {
     artRequest: artRequest(s),
     nativePetId: "genpet-companion",
     displayStatus: "unconfirmed",
-    notice: "Design state only. Generate/validate any pending artwork, then call genpet_install_native even when the requested atlas is already ready. Only its confirmed result proves visible completion."
+    notice: "Design state only. Generate/validate any pending artwork, then run install-native even when the requested atlas is already ready. Only its confirmed result proves visible completion."
   };
 }
 async function backup(store2, s, action) {
-  const dir = path7.join(store2.root, "backups");
+  const dir = path8.join(store2.root, "backups");
   await mkdir3(dir, { recursive: true, mode: 448 });
-  const file = path7.join(dir, `${action}-${Date.now()}-${randomUUID4()}.json`);
+  const file = path8.join(dir, `${action}-${Date.now()}-${randomUUID4()}.json`);
   await writeFile3(file, JSON.stringify(s, null, 2), { mode: 384, flag: "wx" });
   return file;
 }
@@ -4595,6 +4641,11 @@ var demo = argv[0] === "--demo";
 if (demo) argv.shift();
 var [command, ...args] = argv;
 var store = new Store(void 0, demo);
+var boolean = (value, key) => {
+  if (value === "true") return true;
+  if (value === "false") return false;
+  throw new Error(`${key} must be true or false.`);
+};
 try {
   let output;
   switch (command) {
@@ -4608,9 +4659,16 @@ try {
       await nativeTick(store);
       output = await store.current();
       break;
-    case "adopt":
-      output = await store.transaction((s) => store.adopt(s, args[0] ? { name: args[0] } : demo ? { name: "GenPet Demo" } : {}));
+    case "adopt": {
+      const [name, palette] = args;
+      if (palette && !["sage", "peach", "sky", "lilac"].includes(palette)) throw new Error("Palette must be sage, peach, sky, or lilac.");
+      const profile = {};
+      if (name) profile.name = name;
+      else if (demo) profile.name = "GenPet Demo";
+      if (palette) profile.palette = palette;
+      output = await store.transaction((s) => store.adopt(s, profile));
       break;
+    }
     case "advance": {
       if (!demo) throw new Error("Time travel requires --demo; the real adoption clock is immutable.");
       const hours = Number(args[0]);
@@ -4625,6 +4683,29 @@ try {
     }
     case "art-request":
       output = artRequest(await store.current());
+      break;
+    case "configure": {
+      const input = {};
+      for (const argument of args) {
+        const split = argument.indexOf("=");
+        if (split < 1) throw new Error("Configure values use key=value.");
+        const key = argument.slice(0, split), value = argument.slice(split + 1);
+        if (["autoContext", "freezeOutfit", "autoArt"].includes(key)) input[key] = boolean(value, key);
+        else if (key === "name") input.name = value;
+        else throw new Error(`Unknown setting: ${key}`);
+      }
+      output = await store.transaction((s) => {
+        configureState(s, input);
+        if (typeof input.name === "string" && s.pet) s.pet = updateProfile(s.pet, { name: input.name });
+        return s;
+      });
+      break;
+    }
+    case "clear-context":
+      output = await store.transaction((s) => {
+        if (s.pet) for (const entry of [...s.pet.context]) s.pet = removeContext(s.pet, entry.id, store.now(s));
+        return { cleared: true, state: s };
+      });
       break;
     case "debug-reset":
       output = await debugReset(store, args[0] || randomUUID5());
@@ -4648,13 +4729,13 @@ try {
       break;
     case "refresh-native": {
       const s = await store.current();
-      const destination = path8.join(process.env.CODEX_HOME || path8.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion");
-      const manifest = JSON.parse(await (await import("node:fs/promises")).readFile(path8.join(destination, "pet.json"), "utf8"));
-      output = await refreshNativePet({ expectedSpritePath: path8.join(destination, manifest.spritesheetPath) });
+      const destination = path9.join(process.env.CODEX_HOME || path9.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion");
+      const manifest = JSON.parse(await (await import("node:fs/promises")).readFile(path9.join(destination, "pet.json"), "utf8"));
+      output = await refreshNativePet({ expectedSpritePath: path9.join(destination, manifest.spritesheetPath) });
       break;
     }
     default:
-      throw new Error("Commands: debugger; [--demo] status, tick, adopt [name], art-request, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>");
+      throw new Error("Commands: debugger; [--demo] status, tick, adopt [name] [sage|peach|sky|lilac], art-request, configure key=value..., clear-context, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>");
   }
   console.log(JSON.stringify(output, null, 2));
 } catch (e) {

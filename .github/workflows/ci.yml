@@ -12,18 +12,27 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Fast branch checks
+        if: github.event_name == 'push' && github.ref != 'refs/heads/main'
+        run: npm run verify:fast
       - uses: actions/setup-python@v5
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
         with:
           python-version: '3.12'
-      - run: python -m pip install Pillow
-      - run: python tests/artwork_pipeline_test.py
+      - if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+        run: python -m pip install Pillow
+      - if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+        run: python tests/artwork_pipeline_test.py
       # The release gate exercises the official marketplace/install CLI.
-      - run: npm install -g @openai/codex@0.157.0
-      - run: npm run verify:release
+      - if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+        run: npm install -g @openai/codex@0.157.0
+      - if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+        run: npm run verify:release
         env:
           GENPET_RELEASE_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
       # plugins/genpet is what users install from GitHub; it must match the source.
       - name: Committed plugin is up to date
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
         run: |
           git status --porcelain -- plugins .agents
           test -z "$(git status --porcelain -- plugins .agents)" || { echo "Run npm run build:plugin and commit plugins/genpet"; exit 1; }

@@ -279,7 +279,7 @@ $('#copy-request').addEventListener("click", async () => { if (!data.artRequest)
     toast('生成任务已复制。');
 }
 catch {
-    toast('复制不可用，请在 Codex 中使用 genpet_art_request。');
+    toast('复制不可用，请在插件目录运行 node dist/cli.js art-request。');
 } });
 $('#export-button').addEventListener("click", async () => { const result = await api({ action: 'export' }); showIpcResult(result); toast(data.nativeSelection?.genpetSelected === false ? (data.state.pet?.stage === 'egg' ? '蛋已安装。打开 Codex 的 Pets，选择 GenPet，就能看到你的蛋。' : '形象已安装。打开 Codex 的 Pets，选择 GenPet，就能看到你的伙伴。') : '原生安装结果见下方；刷新请求与可见显示分别确认。'); });
 function showIpcResult(result) { text('#ipc-result', new Date().toLocaleTimeString() + '\n' + JSON.stringify(result, null, 2)); }

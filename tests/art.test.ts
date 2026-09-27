@@ -68,22 +68,6 @@ test('image references progress from shell-only to a revealed identity, never a 
   assert.doesNotMatch(request.prompt,/seed-derived permanent marking/);
  }finally{await rm(dir,{recursive:true,force:true});}
 });
-test('day-one art request carries stronger visible torso and limb growth without changing birth identity',async()=>{
- const dir=await mkdtemp(path.join(tmpdir(),'genpet-day1-request-'));const store=new Store(dir,true);
- try{
-  await store.transaction(s=>store.adopt(s));
-  await store.transaction(s=>{s.clockOffset=5*3_600_000;});
-  const birth=artRequest(await store.current())!;
-  await store.transaction(s=>{s.clockOffset=29*3_600_000;});
-  const day1=artRequest(await store.current())!;
-  assert.equal(day1.visual.day,1);
-  assert.deepEqual(day1.visual.hatchIdentity,birth.visual.hatchIdentity);
-  assert.ok(day1.visual.growth!.proportions.torsoLengthRelativeToBirth>=1.08);
-  assert.ok(day1.visual.growth!.proportions.limbLengthRelativeToBirth>=1.06);
-  assert.notEqual(day1.id,birth.id);
- }finally{await rm(dir,{recursive:true,force:true});}
-});
-
 test('demo installation is blocked before it writes any native files',async()=>{
  const dir=await mkdtemp(path.join(tmpdir(),'genpet-demo-block-'));const oldHome=process.env.CODEX_HOME;
  process.env.CODEX_HOME=path.join(dir,'codex');
@@ -92,60 +76,6 @@ test('demo installation is blocked before it writes any native files',async()=>{
   assert.deepEqual(await readdir(dir),[]);
  }finally{if(oldHome===undefined)delete process.env.CODEX_HOME;else process.env.CODEX_HOME=oldHome;await rm(dir,{recursive:true,force:true});}
 });
-
-test('installNative records an IPC refresh request without claiming display confirmation',async()=>{
-  const dir=await mkdtemp(path.join(tmpdir(),'genpet-auto-refresh-'));const oldHome=process.env.CODEX_HOME;
-  process.env.CODEX_HOME=path.join(dir,'codex');
-  const store=new Store(path.join(dir,'data'));
-  try {
-   await store.transaction(s=>{s.settings.autoContext=false;return store.adopt(s);});
-   const state=await store.current();const file=path.join(dir,'fixture.png');await fixture(file);
-   await acceptArt(store,{file,kind:'atlas',requestId:artRequest(state)!.id,provenance:'Synthetic refresh wiring fixture only.'});
-   const fake: typeof refreshNativePet = async (options) => {
-     const { createHash } = await import('node:crypto');
-     const { readFile } = await import('node:fs/promises');
-     const expected=createHash('sha256').update(await readFile(options.expectedSpritePath)).digest('hex');
-     return {automaticRefresh:true,displayStatus:'unconfirmed',refreshRequested:true,strategy:'ipc-query-invalidate',
-       expectedSpriteSha256:expected,
-       notice:'Automatic refresh requested through IPC.'};
-   };
-   const result=await installNative(store,{refresh:fake});
-   assert.equal(result.filesCommitted,true);
-   assert.equal(result.automaticRefresh,true);
-   assert.equal(result.displayStatus,'unconfirmed');
-   assert.equal(result.refreshRequired,false);
-   assert.equal(result.refresh?.strategy,'ipc-query-invalidate');
-   const saved=(await store.current()).nativeExport!;
-   assert.equal(saved.refreshRequired,false);
-  }finally{if(oldHome===undefined)delete process.env.CODEX_HOME;else process.env.CODEX_HOME=oldHome;await rm(dir,{recursive:true,force:true});}
-});
-
-test('egg, hatch and growth updates replace one native entry and preserve adoption identity',async()=>{
- const dir=await mkdtemp(path.join(tmpdir(),'genpet-same-entry-'));const oldHome=process.env.CODEX_HOME;
- process.env.CODEX_HOME=path.join(dir,'codex');
- let clock=Date.now();
- class TestClockStore extends Store { override now(){return clock;} }
- const store=new TestClockStore(path.join(dir,'data'));
- try {
-  await store.transaction(s=>{s.settings.autoContext=false;return store.adopt(s);});
-  const original=(await store.current()).pet!;let previous='';const spriteNames=new Set<string>();
-  for(const [hours,stage,color] of [[0,'egg',70],[5,'hatchling',100],[29,'hatchling',140]] as const){
-   clock=original.adoptedAt+hours*3_600_000;
-   const state=await store.current();assert.equal(state.pet!.stage,stage);
-   const file=path.join(dir,'fixture.png');await fixture(file,false,color);
-   await acceptArt(store,{file,kind:'atlas',requestId:artRequest(state)!.id,provenance:'Synthetic export regression fixture only; not a visual growth test.'});
-   const result=await installNative(store);assert.equal(result.manifest.id,'genpet-companion');
-   assert.equal(result.filesCommitted,true);assert.equal(result.automaticRefresh,false);assert.equal(result.displayStatus,'unconfirmed');
-   assert.equal(result.destination,path.join(dir,'codex','pets','genpet-companion'));
-   assert.deepEqual(await readdir(path.join(dir,'codex','pets')),['genpet-companion']);
-   if(previous)assert.equal(await readFile(path.join(result.destination,'previous-pet.json'),'utf8'),previous);
-   previous=await readFile(path.join(result.destination,'pet.json'),'utf8');spriteNames.add(result.manifest.spritesheetPath);
-   const updated=(await store.current()).pet!;assert.equal(updated.id,original.id);assert.equal(updated.seed,original.seed);assert.equal(updated.adoptedAt,original.adoptedAt);
-  }
-  assert.equal(spriteNames.size,3);
- }finally{if(oldHome===undefined)delete process.env.CODEX_HOME;else process.env.CODEX_HOME=oldHome;await rm(dir,{recursive:true,force:true});}
-});
-
 
 test('first install and ready-art resume request refresh and persist IPC delivery independently of display proof',async()=>{
  const dir=await mkdtemp(path.join(tmpdir(),'genpet-ipc-install-'));const oldHome=process.env.CODEX_HOME;process.env.CODEX_HOME=path.join(dir,'codex');

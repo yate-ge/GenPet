@@ -2,7 +2,7 @@
 
 ## 当前实现：仅使用 IPC
 
-2026-09-27，用户在调试网页确认普通启动下 IPC 刷新可行。`genpet_install_native` 已接入同一消息路径：
+2026-09-27，用户在调试网页确认普通启动下 IPC 刷新可行。CLI 的 `install-native` 已接入同一消息路径：
 
 1. 验证当前设计的已验收图集，原子写入同一个 `genpet-companion`。
 2. macOS 连接 `$CODEX_HOME/ipc/ipc.sock`（默认 `~/.codex/ipc/ipc.sock`）；Windows 连接本机命名管道 `\\.\pipe\codex-ipc`。

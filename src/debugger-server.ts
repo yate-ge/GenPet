@@ -9,8 +9,9 @@ import { Store, configureState } from './store.js';
 import { HOUR, addContext, createPet, evolvePet, updateProfile, removeContext, DEFAULT_PROFILE } from './core.js';
 import { artRequest, installNative, actions } from './art.js';
 import { isLiveNativeDestination, listInstalledSprites } from './native-refresh.js';
+import { pluginRoot } from './plugin-root.js';
 
-const debuggerRoot=path.resolve(import.meta.dirname,'..');
+const debuggerRoot=pluginRoot();
 async function bundledAssets(){return {portraits:{}};}
 const SPRITE_NAME=/^spritesheet-[a-f0-9]{8,64}\.(webp|png)$/;
 

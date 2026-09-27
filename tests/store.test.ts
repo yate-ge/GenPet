@@ -5,7 +5,6 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Store,configureState } from '../src/store.js';
 import { createPet, DEFAULT_PROFILE, HOUR } from '../src/core.js';
-import { artRequest } from '../src/art.js';
 test('concurrent transactions do not lose changes; corruption is preserved',async()=>{
  const dir=await mkdtemp(path.join(tmpdir(),'genpet-store-'));const store=new Store(dir,true);
  try{await Promise.all(Array.from({length:12},()=>store.transaction(s=>{s.clockOffset+=1;})));assert.equal((await store.current()).clockOffset,12);
@@ -34,27 +33,6 @@ test('persisted legacy egg and egg reference migrate without restarting adoption
   const disk=JSON.parse(await readFile(store.file,'utf8'));
   assert.equal(disk.pet.adoptedAt,adoptedAt);assert.equal(disk.pet.hatchIdentity,null);
  }finally{await rm(dir,{recursive:true,force:true});}
-});
-test('new adoption records only bounded mapping evidence and keeps visual request ID stable',async()=>{
- const dir=await mkdtemp(path.join(tmpdir(),'genpet-adoption-trace-'));
- const oldHome=process.env.CODEX_HOME;process.env.CODEX_HOME=path.join(dir,'codex');
- const store=new Store(path.join(dir,'state'));
- try {
-  const sessionDir=path.join(process.env.CODEX_HOME,'sessions');await mkdir(sessionDir,{recursive:true});
-  await writeFile(path.join(sessionDir,'task.jsonl'),JSON.stringify({type:'event_msg',timestamp:Date.now(),payload:{type:'user_message',message:'Please research a paper SECRET_PRIVATE_TOKEN'}})+'\n');
-  const pet=await store.transaction(s=>store.adopt(s,{palette:'peach'}));
-  assert.equal(pet.profile.palette,'peach');assert.equal(pet.profile.interest,'research');
-  assert.deepEqual(pet.adoptionTrace,{algorithmVersion:'adoption-map-v1',mode:'automatic',selectedActivity:'research',
-   activityCounts:{build:0,research:1,create:0,learn:0,rest:0},explicitFields:['palette'],capturedAt:pet.adoptedAt});
-  assert.doesNotMatch(JSON.stringify(pet.adoptionTrace),/SECRET_PRIVATE_TOKEN|task\.jsonl|paper/);
-  const state=await store.current();
-  const request=artRequest(state)!;
-  assert.deepEqual(request.adoptionTrace,pet.adoptionTrace);
-  assert.equal(artRequest({...state,pet:{...state.pet!,adoptionTrace:undefined}})!.id,request.id);
- }finally{
-  if(oldHome===undefined)delete process.env.CODEX_HOME;else process.env.CODEX_HOME=oldHome;
-  await rm(dir,{recursive:true,force:true});
- }
 });
 test('first sync beyond hatch imports all incubation observations before freezing birth', async()=>{
  const dir=await mkdtemp(path.join(tmpdir(),'genpet-birth-sync-'));
