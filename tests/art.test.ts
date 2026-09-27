@@ -142,3 +142,17 @@ test('egg, hatch and growth updates replace one native entry and preserve adopti
   assert.equal(spriteNames.size,3);
  }finally{if(oldHome===undefined)delete process.env.CODEX_HOME;else process.env.CODEX_HOME=oldHome;await rm(dir,{recursive:true,force:true});}
 });
+
+
+test('first install and ready-art resume request refresh and persist IPC delivery independently of display proof',async()=>{
+ const dir=await mkdtemp(path.join(tmpdir(),'genpet-ipc-install-'));const oldHome=process.env.CODEX_HOME;process.env.CODEX_HOME=path.join(dir,'codex');
+ const store=new Store(path.join(dir,'data'));let calls=0;
+ try{
+  await store.transaction(s=>{s.settings.autoContext=false;return store.adopt(s);});
+  const file=path.join(dir,'fixture.png');await fixture(file);
+  await acceptArt(store,{file,kind:'atlas',requestId:artRequest(await store.current())!.id,provenance:'Synthetic IPC wiring fixture only.'});
+  const adapter:typeof refreshNativePet=async()=>{calls++;return {automaticRefresh:true,refreshRequested:true,displayStatus:'unconfirmed',strategy:'ipc-query-invalidate',expectedSpriteSha256:'fixture',notice:'IPC delivered'};};
+  for(let i=0;i<2;i++){const r=await installNative(store,{refresh:adapter});assert.equal(r.refreshRequired,false);assert.equal(r.displayStatus,'unconfirmed');assert.equal(r.automaticRefresh,true);}
+  assert.equal(calls,2);assert.equal((await store.current()).nativeExport!.refreshRequired,false);
+ }finally{if(oldHome===undefined)delete process.env.CODEX_HOME;else process.env.CODEX_HOME=oldHome;await rm(dir,{recursive:true,force:true});}
+});

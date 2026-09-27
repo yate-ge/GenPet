@@ -18,7 +18,7 @@ test('hashSpriteDataUrl matches raw image bytes for css url and bare data url', 
 });
 
 test('live refresh invalidates the host query cache and does not click settings', () => {
-  assert.deepEqual([...LIVE_REFRESH_ATTEMPTS], ['cdp-query-invalidate']);
+  assert.deepEqual([...LIVE_REFRESH_ATTEMPTS], ['ipc-query-invalidate', 'cdp-query-invalidate']);
 });
 
 test('refresh without a debug channel reports unconfirmed and never claims automatic refresh', async () => {

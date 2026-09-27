@@ -85,7 +85,7 @@ flowchart LR
   M -. "只读用户消息" .-> SE[("~/.codex/sessions")]
   M -- "原子写入" --> PET[("~/.codex/pets/<br>genpet-companion")]
   PET --> PW
-  M -. "本机调试通道：刷新并确认" .-> PW
+  M -. "现有 IPC：自动请求刷新" .-> PW
 ```
 
 | 模块 | 源码 | 职责 |
@@ -96,7 +96,7 @@ flowchart LR
 | 活动情境 | `src/context.ts` | 只读近期 Codex 用户消息，归类为 构建/研究/创作/学习/休息 标签，不保存原文 |
 | 存储 | `src/store.ts` | `~/.genpet/state.json` 的事务读写、备份和幂等记录 |
 | 图像与安装 | `src/art.ts`、`src/image.ts` | 为当前设计生成唯一的图像请求 ID；校验 PNG/WebP 图集；原子替换原生 Pet 的精灵图 |
-| 原生刷新 | `src/native-refresh.ts`、`src/cdp-launcher.ts` | 通过仅限本机的调试端口让 Codex 重新读取 Pet，并核对悬浮窗实际显示的图像哈希 |
+| 原生刷新 | `src/native-refresh.ts`、`src/cdp-launcher.ts` | 优先通过现有 IPC 请求刷新；CDP 作为备用与显示哈希核验路径 |
 | 调试 | `src/debug.ts` | reset/grow/state 的实现，带备份和 operationId 幂等 |
 | 生成管线 | `vendor/hatch-pet/` | 官方 Hatch Pet 工具：逐行生成动作、提取帧、组装 8×11 V2 图集并质检 |
 
@@ -113,7 +113,7 @@ flowchart LR
 - 本地 MCP 工具和可分发的 Codex 插件。
 - 插件里没有网站、HTTP 服务、浏览器页面或独立的悬浮窗程序。
 
-**原生刷新：** 当前 Codex 版本没有经过验证的公开热更新接口。GenPet 通过仅限本机的调试通道让宿主的自定义头像查询失效，然后检查悬浮 Pet 实际显示的精灵图哈希；它不会打开设置或模拟点击。确认显示需要本地调试通道处于开启状态，GenPet 不会为此运行后台进程。图像生成仍需要在 Codex 任务中进行，Node 进程无法自行调用桌面端的 imagegen。详见[原生刷新说明](docs/NATIVE_REFRESH.zh-CN.md)。
+**原生刷新：** 首次初始化和后续换图都会通过 Codex 已有的本地 IPC 通道请求刷新，普通启动即可，不需要调试参数、重启或后台监控。IPC 成功表示刷新通知已转发，显示哈希未测量时仍返回 `displayStatus=unconfirmed`。IPC 失败时保留 CDP 备用路径。此内部协议已通过用户实机观察验证，宿主升级后需复验。详见[原生刷新说明](docs/NATIVE_REFRESH.zh-CN.md)。
 
 ## 成长机制
 

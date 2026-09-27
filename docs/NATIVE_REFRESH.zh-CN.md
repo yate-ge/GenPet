@@ -1,38 +1,31 @@
-# 原生自动刷新：实现与验证
+# 原生自动刷新
 
-目标：新素材提交后，正在显示的同一个 `genpet-companion` 自动更新；用户无需手动点击 Refresh、重新选择宠物或改用另一个 Pet ID。
+## 当前实现：IPC 优先
 
-## 当前实现
+2026-09-27，用户在调试网页确认普通启动下 IPC 刷新可行。`genpet_install_native` 已接入同一消息路径：
 
-`genpet_install_native` 原子提交清单与图集后调用 `src/native-refresh.ts`：
+1. 验证当前设计的已验收图集，原子写入同一个 `genpet-companion`。
+2. 连接当前用户的 `$CODEX_HOME/ipc/ipc.sock`（默认 `~/.codex/ipc/ipc.sock`）。
+3. 握手后广播 `query-cache-invalidate`，查询键为 `['custom-avatars']`，覆盖列表与按 ID 的查询。
+4. 用第二个临时客户端确认路由器转发，然后关闭连接。没有新服务器或常驻任务。
+5. IPC 不可用时尝试已有 CDP 通道；两者失败则保留 `refreshRequired=true`，供后续重试。
 
-1. 连接 Codex 的本机 CDP 通道。
-2. 在主窗口和悬浮宠物窗口里找到宿主的查询客户端，作废 `custom-avatars` 及其按 ID 的查询。这和设置里 Refresh 按钮调用的是同一次缓存失效，不点击任何控件。
-3. 从浮动 Pet 的 `background-image` 读取实际显示素材。只有 SHA-256 与新提交图集一致时，才返回 `automaticRefresh: true` 和 `displayStatus: confirmed`。
+首次 `/genpet-start`、已有素材的恢复和后续换图都会调用安装与刷新。普通打开 Codex 即可，不要求启动参数、额外启动器或重启。首次使用仍可能需要在 Pets 中选择 GenPet 一次；刷新不替用户更改选中的宠物。
 
-当前宿主没有已验证的公开 Pet 热刷新 API，因此设置页可能短暂出现。CDP 只绑定本机；开启后，本机其他进程也可能控制 Codex。
+## 返回值
 
-## 调试通道边界
+| 情况 | automaticRefresh | displayStatus | refreshRequired |
+|---|---|---|---|
+| IPC 通知已转发 | true | unconfirmed | false |
+| CDP 核对实际显示哈希成功 | true | confirmed | false |
+| 两种通道均失败 | false | unconfirmed | true |
 
-GenPet 不会为原 Codex App 安装启动监控器。此前试验过的 `KeepAlive` LaunchAgent 每 0.5 秒运行一次完整进程扫描，造成持续 CPU 占用和大量 fork；该方案已删除。
+IPC 的 `automaticRefresh=true` 表示已自动触发刷新请求，**不表示每次都测量了屏幕显示**。`refresh.ipc` 提供握手与转发证据，`refresh.refreshRequested=true` 明确表示请求已发送。技能应报告“已安装并自动请求刷新”，不应因未测量哈希而反复安装或要求开启调试端口。
 
-可选的 `~/Applications/ChatGPT CDP.app` 只是按需手动入口，不包含常驻进程。普通方式打开原 `/Applications/ChatGPT.app` 时，GenPet 不会强制重启或注入启动参数。
+## 兼容性与边界
 
-可用 `genpet_remove_cdp_launcher` 或 `node dist/cli.js remove-cdp-launcher` 移除手动入口。
+这是经过实机测试的宿主内部协议，不是公开稳定 API。已验证宿主 `26.924.22138` / build `11645`。消息版本为 0，四字节小端长度加 JSON；连接验证当前用户所有权和目录权限，限制消息大小与总等待时间。宿主升级后需复验。
 
-## 2026-09-25 实机验收
+调试/隔离数据不触发真实宿主刷新。生产失败不伪造显示确认，不修改应用包，不安装 LaunchAgent，不重新领养或建立第二个 Pet。
 
-在同一个 `custom:genpet-companion` 上完成了两次无人点击的显示切换：
-
-- 奶油图 `4b55d877…` → 紫色测试图 `0a9b4acd…`
-- 紫色测试图 `0a9b4acd…` → 正式奶油图 `4b55d877…`
-
-两次均返回 `automaticRefresh: true`、`displayStatus: confirmed`，`strategy: cdp-settings-refresh`。最终清单已恢复到正式奶油图。这证明有可用 CDP 通道时显示刷新链路有效，不代表需要或应当常驻扫描进程。
-
-2026-09-25 实机：替换 `pet.json` 不会让运行中的 Codex 自己换图。从页面表面找不到查询客户端。沿着 React 纤维找到查询客户端后，作废 `custom-avatars` 会让悬浮窗重读文件。同一轮里显示从空手图 `f57f727c…` 换成扳手图 `0fae5c53…`，再作废一次后又回到空手图，两次都没有点击设置。
-
-## 验收边界
-
-文件写入成功不等于显示成功；只有浮动窗口的实际素材摘要匹配才算完成。如果调试通道不可用、Refresh 没有触发或摘要不匹配，结果必须保持 `unconfirmed`，并继续显示上一份已批准素材。
-
-图像生成仍由 Codex 技能运行完成。Node 进程不能自行调用 imagegen。
+CDP 保留作为备用。旧方案需要调试参数；现有 IPC 成功时不依赖它。历史上的高频进程扫描 LaunchAgent 已删除，不恢复该方案。
