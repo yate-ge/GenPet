@@ -17,7 +17,7 @@ GenPet uses Codex's own Pet window and animation states. It adds a local life-cy
 - Local MCP tools and a distributable Codex plugin.
 - No website, HTTP server, browser page or separate floating-window runtime in this plugin.
 
-Generation requires a Codex run. After installation, GenPet uses existing local IPC to invalidate the custom-avatar cache; no debug port is required. `automaticRefresh=true` with IPC means the refresh request was relayed, while `displayStatus=unconfirmed` means no displayed-image hash was measured. Existing CDP remains a fallback. See [native refresh behavior](docs/NATIVE_REFRESH.zh-CN.md).
+Generation requires a Codex run. After installation, GenPet uses existing local IPC to invalidate the custom-avatar cache; no debug port is required. `automaticRefresh=true` with IPC means the refresh request was relayed, while `displayStatus=unconfirmed` means no displayed-image hash was measured. See [native refresh behavior](docs/NATIVE_REFRESH.zh-CN.md).
 
 ## Develop
 
@@ -97,7 +97,7 @@ flowchart LR
 | Activity context | `src/context.ts` | Reads recent Codex user messages locally into build/research/create/learn/rest labels; stores no text |
 | Store | `src/store.ts` | Transactions, backups and idempotency records in `~/.genpet/state.json` |
 | Art and install | `src/art.ts`, `src/image.ts` | One request ID per design; PNG/WebP atlas validation; atomic sprite replacement in the native Pet |
-| Native refresh | `src/native-refresh.ts`, `src/cdp-launcher.ts` | Requests a Pet reload over existing IPC; CDP fallback can check the displayed sprite hash |
+| Native refresh | `src/native-refresh.ts` | Requests a Pet reload over existing IPC |
 | Debug | `src/debug.ts` | reset/grow/state with backups and operationId idempotency |
 | Generation pipeline | `vendor/hatch-pet/` | Official Hatch Pet tools: per-row generation, frame extraction, 8×11 V2 atlas assembly and QA |
 
@@ -132,8 +132,6 @@ For development on this machine, `npm ci && npm run install:codex` rebuilds `plu
 | `genpet_art_request` | Read the current bounded image-generation request |
 | `genpet_accept_art` | Accept a generated portrait or atlas after QA |
 | `genpet_install_native` | Atomically export the approved current-design atlas |
-| `genpet_install_cdp_launcher` | Enable stock-app startup with the local refresh channel |
-| `genpet_remove_cdp_launcher` | Remove the optional ChatGPT CDP launcher |
 | `genpet_configure` | Toggle ingestion, outfit freeze, auto-art, rename |
 | `genpet_clear_context` | Remove derived labels; preserve source chats |
 | `genpet_debug_reset` | Back up the old life and start a new egg, on explicit request |

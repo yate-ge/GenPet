@@ -4,40 +4,22 @@ import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { hashSpriteDataUrl, refreshNativePet, isLiveNativeDestination, LIVE_REFRESH_ATTEMPTS } from '../src/native-refresh.js';
+import { refreshNativePet, isLiveNativeDestination } from '../src/native-refresh.js';
 
-test('hashSpriteDataUrl matches raw image bytes for css url and bare data url', () => {
-  const bytes = Buffer.from('not-a-real-sprite');
-  const b64 = bytes.toString('base64');
-  const expected = createHash('sha256').update(bytes).digest('hex');
-  assert.equal(hashSpriteDataUrl(`url("data:image/webp;base64,${b64}")`), expected);
-  assert.equal(hashSpriteDataUrl(`url(data:image/png;base64,${b64})`), expected);
-  assert.equal(hashSpriteDataUrl(`data:image/webp;base64,${b64}`), expected);
-  assert.equal(hashSpriteDataUrl('url(https://example.invalid/sprite.webp)'), null);
-  assert.equal(hashSpriteDataUrl(''), null);
-});
-
-test('live refresh invalidates the host query cache and does not click settings', () => {
-  assert.deepEqual([...LIVE_REFRESH_ATTEMPTS], ['ipc-query-invalidate', 'cdp-query-invalidate']);
-});
-
-test('refresh without a debug channel reports unconfirmed and never claims automatic refresh', async () => {
+test('refresh for an isolated destination reports unconfirmed and never claims automatic refresh', async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'genpet-refresh-'));
   try {
     const sprite = path.join(dir, 'spritesheet.webp');
     await writeFile(sprite, Buffer.from('fixture-sprite-bytes'));
     const outcome = await refreshNativePet({
       expectedSpritePath: sprite,
-      petId: 'custom:genpet-companion',
-      debugPorts: [1], // nothing listens on port 1
       timeoutMs: 200,
-      allowUiRefresh: false,
     });
     assert.equal(outcome.automaticRefresh, false);
     assert.equal(outcome.displayStatus, 'unconfirmed');
     assert.equal(outcome.strategy, 'none');
     assert.equal(outcome.expectedSpriteSha256, createHash('sha256').update(Buffer.from('fixture-sprite-bytes')).digest('hex'));
-    assert.match(outcome.notice, /unconfirmed|remote-debugging/i);
+    assert.match(outcome.notice, /unconfirmed/i);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

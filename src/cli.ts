@@ -2,7 +2,6 @@
 import { Store } from './store.js';
 import { artRequest, acceptArt, installNative, nativeTick } from './art.js';
 import { refreshNativePet } from './native-refresh.js';
-import { installCdpLauncher, removeCdpLauncher, ensureCdpLauncher, isCdpAvailable, CDP_PORT } from './cdp-launcher.js';
 import { HOUR, evolvePet } from './core.js';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -32,17 +31,14 @@ try {
    output=await acceptArt(store,{requestId,file,kind,provenance:provenance.join(' ')});break;
   }
   case 'install-native':output=await installNative(store);break;
-  case 'install-cdp-launcher':output=await installCdpLauncher({port:args[0]?Number(args[0]):CDP_PORT});break;
-  case 'remove-cdp-launcher':output=await removeCdpLauncher();break;
-  case 'cdp-status':output={port:CDP_PORT,available:await isCdpAvailable(),launcher:await ensureCdpLauncher()};break;
   case 'refresh-native':{
    const s=await store.current();
    const destination=path.join(process.env.CODEX_HOME||path.join((await import('node:os')).homedir(),'.codex'),'pets','genpet-companion');
    const manifest=JSON.parse(await (await import('node:fs/promises')).readFile(path.join(destination,'pet.json'),'utf8'));
-   output=await refreshNativePet({expectedSpritePath:path.join(destination,manifest.spritesheetPath),petId:`custom:${manifest.id||'genpet-companion'}`});
+   output=await refreshNativePet({expectedSpritePath:path.join(destination,manifest.spritesheetPath)});
    break;
   }
-  default:throw new Error('Commands: [--demo] status, tick, adopt [name], art-request, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native, install-cdp-launcher [port], remove-cdp-launcher, cdp-status; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>');
+  default:throw new Error('Commands: [--demo] status, tick, adopt [name], art-request, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>');
  }
  console.log(JSON.stringify(output,null,2));
 }catch(e){console.error((e as Error).message);process.exitCode=1;}
