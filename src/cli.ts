@@ -7,6 +7,8 @@ import { HOUR, evolvePet, removeContext, updateProfile, type Palette } from './c
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { debugReset, debugGrow, debugState, type GrowthTarget, type DebugState } from './debug.js';
+import { getNativePetCatalog } from './native-pets.js';
+import { readNativePetLive, selectNativePetLive } from './native-pet-live.js';
 const argv=process.argv.slice(2);const demo=argv[0]==='--demo';if(demo)argv.shift();
 const [command,...args]=argv;const store=new Store(undefined,demo);
 const boolean=(value:string,key:string)=>{if(value==='true')return true;if(value==='false')return false;throw new Error(`${key} must be true or false.`);};
@@ -14,6 +16,23 @@ try {
  let output:unknown;
  switch(command){
   case 'debugger':output=await launchDebugger();break;
+  case 'switch-pet':{
+   if(demo)throw new Error('switch-pet controls the real Codex desktop and cannot run with --demo.');
+   const usage='Usage: switch-pet [PET_ID|--current|--list|--help]';
+   if(args.length>1)throw new Error(usage);
+   const target=args[0]??'--current';
+   if(target==='--help'){output={usage,examples:['switch-pet --list','switch-pet --current','switch-pet dewey','switch-pet custom:genpet-companion']};break;}
+   if(target==='--current'){
+    const current=await readNativePetLive();
+    if(!current.available)throw new Error(`${current.reason} Run this command from a local Codex desktop chat with its app-tools connection.`);
+    output=current;break;
+   }
+   if(target.startsWith('-')&&target!=='--list')throw new Error(usage);
+   const catalog=await getNativePetCatalog();
+   if(target==='--list'){output={pets:catalog.pets,...(catalog.errors?{errors:catalog.errors}:{})};break;}
+   if(!catalog.pets.some(pet=>pet.id===target))throw new Error(`Unknown pet ID: ${target}. Use switch-pet --list to see builtin and local pet IDs.`);
+   output=await selectNativePetLive(target);break;
+  }
   case 'status':output=await store.current();break;
   case 'tick':await nativeTick(store);output=await store.current();break;
   case 'adopt':{
@@ -58,7 +77,7 @@ try {
    output=await refreshNativePet({expectedSpritePath:path.join(destination,manifest.spritesheetPath)});
    break;
   }
-  default:throw new Error('Commands: debugger; [--demo] status, tick, adopt [name] [sage|peach|sky|lilac], art-request, configure key=value..., clear-context, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>');
+  default:throw new Error('Commands: debugger; switch-pet [PET_ID|--current|--list|--help]; [--demo] status, tick, adopt [name] [sage|peach|sky|lilac], art-request, configure key=value..., clear-context, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>');
  }
  console.log(JSON.stringify(output,null,2));
 }catch(e){console.error((e as Error).message);process.exitCode=1;}

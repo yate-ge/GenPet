@@ -1,5 +1,6 @@
 const $ = s => document.querySelector(s);
 let mode = new URLSearchParams(location.search).get('demo') === '1' ? 'demo' : 'live', data, action = 'idle', spriteImage, frame = 0, frameAt = 0, lastAsset = '', toastTimer;
+let nativePetDraft = null, nativePetSavePending = false;
 const stageLabels = { egg: '还在蛋里，悄悄期待', hatchling: '初见世界 · 幼体', juvenile: '正在探索 · 少年', adult: '自在生长 · 成熟' };
 const stageNames = { egg: '一颗蛋', hatchling: '初生', juvenile: '探索', adult: '自在' };
 const sceneNames = { nest: 'THE NEST / 小小的窝', library: 'THE LIBRARY / 阅读角', workshop: 'THE WORKSHOP / 小工坊', studio: 'THE STUDIO / 创作间', garden: 'THE GARDEN / 探索花园', meadow: 'THE MEADOW / 休息草地' };
@@ -162,15 +163,19 @@ function render() {
         item.append(a, b);
         $('#explanation').append(item);
     }
+    renderNativePets(isDemo);
     const native = $('#native-switch');
     native.hidden = isDemo;
     if (!isDemo) {
-        const selection = data.nativeSelection;
-        text('#native-selection', selection?.genpetSelected === true
-            ? 'Codex 当前已选中 GenPet。'
+        const selection = data.nativePets?.selection || data.nativeSelection;
+        const liveSelection = selection?.source === 'app-tools' && selection.liveVerified === true;
+        text('#native-selection', liveSelection
+            ? selection.genpetSelected ? '宿主当前选择了 GenPet；图集更新后的画面请观察 Codex 悬浮宠物。' : '宿主当前选择了其他宠物；可在上方切换到 GenPet，再刷新图集。'
+            : selection?.genpetSelected === true
+                ? '配置中选择了 GenPet；尚未验证 Codex 窗口的实时选择。'
             : selection?.genpetSelected === false
-                ? 'Codex 当前未选中 GenPet。请先在 Pets 设置中选择 GenPet；IPC 无法切换选中项。'
-                : '无法确认 Codex 当前选中的 Pet；请在 Pets 设置中确认已选中 GenPet。');
+                ? '配置中选择了其他宠物。请在 Codex 的 Pets 设置中选择 GenPet，再刷新图集。'
+                : '暂时无法读取宠物选择配置；请在 Codex 的 Pets 设置中确认已选中 GenPet。');
     }
     const spriteBox = $('#native-sprites');
     spriteBox.replaceChildren();
@@ -194,7 +199,7 @@ function render() {
             const result = await api({ action: 'switch-native', spritesheet: name, refreshMethod: $('#refresh-method').value });
             showIpcResult(result);
             toast(result.refresh?.selection?.genpetSelected === false
-                ? '图集已更新，但 Codex 未选中 GenPet；请先在 Pets 设置中选择。'
+                ? '图集已更新；配置中选择了其他宠物，请在 Codex 的 Pets 设置中确认选择。'
                 : result.refresh?.displayStatus === 'confirmed' ? '悬浮宠物已换成这一版。' : '文件已切换，请观察悬浮宠物；执行结果见下方。');
         }
         finally {
@@ -204,6 +209,66 @@ function render() {
         spriteBox.append(row);
     }
     updateCountdown();
+}
+function renderNativePets(isDemo) {
+    $('#native-pets').hidden = isDemo;
+    if (isDemo)
+        return;
+    const catalog = data.nativePets;
+    const pets = catalog?.pets || [];
+    const selection = catalog?.selection || data.nativeSelection;
+    const immediate = catalog?.activation?.immediate === true;
+    const liveSelection = selection?.source === 'app-tools' && selection.liveVerified === true;
+    const selectionLabel = liveSelection ? '宿主当前选择' : '配置中选择';
+    const selected = pets.find(pet => pet.id === selection?.selectedPetId);
+    const selectedName = selected?.displayName || selection?.selectedPetId;
+    text('#native-pet-selected', `${selectionLabel}：${selectedName || '暂时无法读取'}`);
+    text('#native-pet-capability', immediate
+        ? liveSelection ? '已通过 Codex 宿主设置通道读取当前选择，可立即切换。' : '宿主当前选择暂时无法读取；这里显示保存的配置。宿主设置通道支持立即切换。'
+        : liveSelection ? '已读取宿主当前选择，即时切换通道暂不可用。仍可保存下次启动的选择。' : '即时切换通道暂不可用。这里显示保存的配置，尚未验证宿主当前选择。');
+    text('#native-pet-choice-label', immediate ? '要切换的宠物' : '下次启动使用的宠物');
+    text('#native-pet-apply-note', immediate
+        ? '立即切换会更新宿主选择，无需重启。画面请观察 Codex 悬浮宠物。'
+        : '保存后需要完全退出并重新打开 Codex。如需立即更换，请在 Codex 的 Pets 设置中切换。');
+    const choice = $('#native-pet-choice');
+    const choiceId = nativePetDraft ?? selection?.selectedPetId ?? '';
+    choice.replaceChildren();
+    if (!pets.some(pet => pet.id === choiceId)) {
+        const unavailable = document.createElement('option');
+        unavailable.value = choiceId;
+        unavailable.textContent = choiceId ? `未在列表中：${choiceId}` : '请选择宠物';
+        unavailable.disabled = true;
+        choice.append(unavailable);
+    }
+    for (const pet of pets) {
+        const option = document.createElement('option');
+        option.value = pet.id;
+        option.textContent = `${pet.displayName} · ${pet.source === 'builtin' ? '内置' : '本地'}`;
+        choice.append(option);
+    }
+    choice.value = choiceId;
+    choice.disabled = nativePetSavePending || !pets.length;
+    $('#save-native-pet').disabled = nativePetSavePending || !pets.some(pet => pet.id === choiceId) || ((!immediate || liveSelection) && choiceId === selection?.selectedPetId);
+    text('#save-native-pet', nativePetSavePending ? '正在更新…' : immediate ? '立即切换' : '保存选择（需重启）');
+    text('#native-pet-list-summary', `可读取的宠物 · ${pets.length}`);
+    const list = $('#native-pet-list');
+    list.replaceChildren();
+    for (const pet of pets) {
+        const row = document.createElement('li');
+        const isSelected = pet.id === selection?.selectedPetId;
+        row.className = 'native-pet-row' + (isSelected ? ' selected' : '');
+        const name = document.createElement('span');
+        name.textContent = pet.displayName;
+        const detail = document.createElement('span');
+        detail.className = 'native-pet-detail';
+        detail.textContent = `${pet.source === 'builtin' ? '内置' : '本地'}${isSelected ? ` · ${selectionLabel}` : ''}`;
+        row.append(name, detail);
+        list.append(row);
+    }
+    $('#native-pet-empty').hidden = pets.length > 0;
+    const errors = catalog?.errors || [];
+    $('#native-pet-errors').hidden = !errors.length;
+    text('#native-pet-errors', errors.length ? '部分信息未能读取，列表可能不完整。选择状态以上方说明为准。' : '');
 }
 function eventText(event, pet) { switch (event.type) {
     case 'adopted': return '领养成功。故事从一颗独一无二的蛋开始。';
@@ -257,6 +322,32 @@ function animate(timestamp) {
 }
 $('#live-tab').addEventListener("click", () => setMode('live'));
 $('#demo-tab').addEventListener("click", () => setMode('demo'));
+$('#native-pet-choice').addEventListener("change", () => {
+    nativePetDraft = $('#native-pet-choice').value;
+    renderNativePets(mode === 'demo');
+});
+$('#save-native-pet').addEventListener("click", async () => {
+    if (nativePetSavePending || mode === 'demo' || $('#save-native-pet').disabled)
+        return;
+    const petId = $('#native-pet-choice').value;
+    const applyMode = data.nativePets?.activation?.immediate === true ? 'live' : 'save';
+    nativePetSavePending = true;
+    renderNativePets(false);
+    try {
+        const result = await api({ action: 'select-native-pet', petId, applyMode });
+        nativePetDraft = null;
+        toast(result.immediate === true
+            ? '已更新宿主当前选择，无需重启。'
+            : '选择已保存。完全退出并重新打开 Codex 后生效；当前画面尚未切换。');
+    }
+    catch {
+        // api() displays the server error; keep the choice available for retry.
+    }
+    finally {
+        nativePetSavePending = false;
+        renderNativePets(mode === 'demo');
+    }
+});
 $('#adopt-button').addEventListener("click", async () => { await api({ action: 'adopt' }); toast('领养成功。已根据近期日常建立专属设计方案。'); });
 $('#pet-touch').addEventListener("click", () => { action = data?.state.pet?.stage === 'egg' ? 'idle' : 'waving'; frame = 0; frameAt = 0; $('#pet-touch').classList.add('greet'); text('#pet-reaction', data?.state.pet?.stage === 'egg' ? '轻轻地，回应你一下。' : '嗨，我在。'); setTimeout(() => { $('#pet-touch').classList.remove('greet'); text('#pet-reaction', ''); }, 1600); });
 for (const button of document.querySelectorAll('[data-hours]'))
@@ -292,7 +383,7 @@ for (const [id, action] of [['ipc-refresh', 'ipc-refresh']])
             const result = await api({ action });
             showIpcResult(result);
             toast(result.selection?.genpetSelected === false
-                ? '刷新请求已发送，但 Codex 未选中 GenPet；请先在 Pets 设置中选择。'
+                ? '刷新请求已发送；配置中选择了其他宠物，请在 Codex 的 Pets 设置中确认选择。'
                 : '刷新请求已发送；请观察 Codex 悬浮宠物。');
         }
         catch (error) {
