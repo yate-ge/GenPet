@@ -10,6 +10,9 @@ import { HOUR, addContext, createPet, evolvePet, updateProfile, removeContext, D
 import { artRequest, installNative, actions } from './art.js';
 import { isLiveNativeDestination, listInstalledSprites } from './native-refresh.js';
 import { pluginRoot } from './plugin-root.js';
+import { getNativePetCatalog, readNativePetSelection } from './native-pets.js';
+import { saveNativePetSelection } from './native-pet-config.js';
+import { readNativePetLive, selectNativePetLive } from './native-pet-live.js';
 
 const debuggerRoot=pluginRoot();
 async function bundledAssets(){return {portraits:{}};}
@@ -20,15 +23,7 @@ function nativePetDirectory() {
 }
 
 export async function nativePetSelection() {
- try {
-  const home=process.env.CODEX_HOME||path.join(homedir(),'.codex');
-  const state=JSON.parse(await readFile(path.join(home,'.codex-global-state.json'),'utf8'));
-  const value=state['electron-persisted-atom-state']?.['selected-avatar-id'];
-  const selectedPetId=typeof value==='string'?value:null;
-  return {selectedPetId,genpetSelected:selectedPetId==='custom:genpet-companion'};
- } catch {
-  return {selectedPetId:null,genpetSelected:null};
- }
+ return readNativePetSelection();
 }
 
 export async function listNativeSprites() {
@@ -66,8 +61,23 @@ export async function switchNativeSprite(name:string, method='ipc', ipcRunner:Ip
 
 }
 
-export async function startServer(port=Number(process.env.GENPET_PORT||47831), root?:string, options:{ipcRunner?:IpcRunner}={}) {
+type LivePetBridge={read:typeof readNativePetLive;select:typeof selectNativePetLive};
+export async function startServer(port=Number(process.env.GENPET_PORT||47831), root?:string, options:{ipcRunner?:IpcRunner;nativeHome?:string;livePets?:LivePetBridge|null}={}) {
  const real=new Store(root),demo=new Store(path.join(real.root,'debugger'),true);const token=randomBytes(24).toString('hex');
+ // Explicit test homes never inherit access to the running desktop's pipe.
+ const livePets=options.livePets!==undefined?options.livePets:!options.nativeHome&&isLiveNativeDestination(nativePetDirectory())?{read:readNativePetLive,select:selectNativePetLive}:null;
+ async function petCatalog() {
+  const catalog=await getNativePetCatalog(options.nativeHome);
+  if(livePets) {
+   const live=await livePets.read();
+   if(live.available) {
+    const selectedPetId=live.effectiveSelectedPetId??live.selectedPetId;
+    catalog.selection={selectedPetId,genpetSelected:selectedPetId==='custom:genpet-companion',source:'app-tools',liveVerified:true};
+    catalog.activation={immediate:true,reason:'已连接宿主设置通道，可立即更换当前宠物。'};
+   } else catalog.activation={immediate:false,reason:'宿主设置通道暂不可用；可保存选择供下次启动使用。'};
+  }
+  return catalog;
+ }
  const server=http.createServer(async(req,res)=>{
   const json=(value:unknown,status=200)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(value));};
   try {
@@ -77,7 +87,7 @@ export async function startServer(port=Number(process.env.GENPET_PORT||47831), r
    if(req.method==='GET'&&url.pathname==='/api/health')return json({service:'genpet-debugger',root:real.root});
    if(req.method==='GET'&&url.pathname==='/favicon.ico'){res.writeHead(204);res.end();return;}
    if(req.method==='GET'&&url.pathname==='/api/state') {
-    const state=await store.peek();return json({state,now:store.now(state),demo:store.demo,token,artRequest:artRequest(state),assets:await bundledAssets(),actions,nativeSprites:store.demo?null:await listNativeSprites(),nativeSelection:store.demo?null:await nativePetSelection()});
+    const state=await store.peek();const nativePets=store.demo?null:await petCatalog();return json({state,now:store.now(state),demo:store.demo,token,artRequest:artRequest(state),assets:await bundledAssets(),actions,nativeSprites:store.demo?null:await listNativeSprites(),nativeSelection:nativePets?.selection??null,nativePets});
    }
    if(req.method==='GET'&&url.pathname==='/api/art-request')return json(artRequest(await store.peek()));
    if(req.method==='POST'&&url.pathname==='/api/action') {
@@ -89,6 +99,16 @@ export async function startServer(port=Number(process.env.GENPET_PORT||47831), r
     if(input.action==='export'){if(store.demo)throw new Error('演示模式不能安装真实原生宠物');result=await installNative(store);}
     else if(input.action==='ipc-probe'||input.action==='ipc-refresh'){if(store.demo)throw new Error('演示模式不能操作真实宿主 IPC');result=await (options.ipcRunner||runNativeIpc)(input.action==='ipc-probe'?'probe':'refresh');}
     else if(input.action==='switch-native'){if(store.demo)throw new Error('演示模式不能切换真实悬浮宠物');result=await switchNativeSprite(String(input.spritesheet||''),String(input.refreshMethod||'ipc'),options.ipcRunner||runNativeIpc);}
+    else if(input.action==='select-native-pet'){
+     if(store.demo)throw new Error('演示模式不能更改 Codex 的宠物选择');
+     const petId=String(input.petId||'');
+     if(input.applyMode==='live') {
+      if(!livePets)throw new Error('即时切换通道不可用，请从当前 Codex 会话重新打开 debugger。');
+      if(!(await getNativePetCatalog(options.nativeHome)).pets.some(pet=>pet.id===petId))throw new Error('未知宠物，未更改选择。');
+      result=await livePets.select(petId);
+     } else if(input.applyMode===undefined||input.applyMode==='save') result=await saveNativePetSelection(petId,options.nativeHome);
+     else throw new Error('未知宠物切换方式');
+    }
     else result=await store.transaction(async s=>{
      if(input.action==='adopt')return store.adopt(s,input.profile||{});
      if(input.action==='settings') {

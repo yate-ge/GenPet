@@ -17,7 +17,7 @@ export async function launchDebugger(port=Number(process.env.GENPET_PORT||47831)
  }
  if(await inspect())return {url,reused:true};
  const child=spawn(process.execPath,[path.join(import.meta.dirname,'debugger-server.js')],{
-  detached:true,stdio:'ignore',env:{...process.env,GENPET_PORT:String(port),GENPET_DATA_DIR:root},
+  detached:true,windowsHide:true,stdio:'ignore',env:{...process.env,GENPET_PORT:String(port),GENPET_DATA_DIR:root},
  });
  let failure:Error|undefined;
  child.once('error',error=>{failure=error;});child.unref();
