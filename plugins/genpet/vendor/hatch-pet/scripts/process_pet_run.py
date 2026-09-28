@@ -43,9 +43,30 @@ def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def record_review(run, job_id, verdict, note):
+    """Record a human/agent visual decision; this helper does not judge pixels."""
+    run = Path(run).resolve()
+    manifest = read_json(run / "imagegen-jobs.json")
+    job = next(job for job in manifest["jobs"] if job["id"] == job_id)
+    source = (run / job["output_path"]).resolve()
+    if not source.is_relative_to(run) or not note.strip() or verdict not in ("pass", "fail"):
+        raise ValueError("A valid source, verdict and concrete review note are required")
+    with Image.open(source) as opened:
+        opened.load()
+    path = run / "qa/source-reviews.json"
+    records = read_json(path) if path.exists() else {}
+    entry = {"sha256": digest(source), "verdict": verdict, "note": note,
+             "reviewed_at": datetime.now(timezone.utc).isoformat()}
+    records.setdefault(job_id, []).append(entry)
+    write_json(path, records)
+    return {"job_id": job_id, **entry}
+
+
 def reconcile(run, manifest):
-    """Complete means a source is saved and decodable, NOT visually approved."""
+    """New runs require a visual pass bound to the exact decodable source."""
     blockers = []
+    review_path = run / "qa/source-reviews.json"
+    reviews = read_json(review_path) if review_path.exists() else {}
     for job in manifest["jobs"]:
         source = (run / job["output_path"]).resolve()
         if not source.is_relative_to(run):
@@ -59,10 +80,18 @@ def reconcile(run, manifest):
             with Image.open(source) as opened:
                 opened.load()
             sha = digest(source)
+            if manifest.get("source_review_required"):
+                history = reviews.get(job["id"], [])
+                review = history[-1] if history else {}
+                if review.get("sha256") != sha or review.get("verdict") != "pass":
+                    job.update(status="awaiting-review", source_sha256=sha)
+                    job.pop("completion_basis", None)
+                    job.pop("completed_at", None)
+                    continue
             if job.get("source_sha256") != sha or not job.get("completed_at"):
                 job["completed_at"] = datetime.now(timezone.utc).isoformat()
             job.update(status="complete", source_path=str(source), source_sha256=sha,
-                       completion_basis="saved-decodable-source")
+                       completion_basis="visual-pass-and-decodable-source" if manifest.get("source_review_required") else "saved-decodable-source")
         except (OSError, ValueError) as error:
             job["status"] = "invalid"
             blockers.append({"job": job["id"], "error": str(error),
@@ -316,12 +345,13 @@ def process(run, previews=False):
               "source_complete": sorted(available),
               "ready_jobs": ready_jobs(run, manifest["jobs"]) if not processor.blockers else [],
               "pending_jobs": [name for name in jobs if name not in available],
+              "review_jobs": [name for name, job in jobs.items() if job["status"] == "awaiting-review"],
               "executed": processor.executed, "reused": processor.reused,
               "blockers": processor.blockers,
               "atlas": str(atlas) if complete and not processor.blockers else None,
               "portrait": str(run / "final/portrait.png") if complete and not processor.blockers else None,
-              "visual_review_required": False,
-              "note": "Accept only after atlas/portrait paths are returned and the current request ID is rechecked. No visual review or aesthetic regeneration."}
+              "visual_review_required": any(job["status"] == "awaiting-review" for job in jobs.values()),
+              "note": "Accept only after atlas/portrait paths are returned and the current request ID is rechecked. Source review is independent per job; no final aesthetic gate."}
     write_json(run / "qa/processing-result.json", result)
     return result
 
@@ -330,7 +360,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", required=True)
     parser.add_argument("--previews", action="store_true", help="Optional diagnostic previews; not an acceptance gate.")
+    parser.add_argument("--record-review", metavar="JOB_ID")
+    parser.add_argument("--verdict", choices=("pass", "fail"))
+    parser.add_argument("--note")
     args = parser.parse_args()
+    if args.record_review:
+        if not args.verdict or not args.note:
+            parser.error("--record-review requires --verdict and --note")
+        print(json.dumps(record_review(args.run_dir, args.record_review, args.verdict, args.note), indent=2))
+        return
     result = process(args.run_dir, previews=args.previews)
     print(json.dumps(result, indent=2))
     raise SystemExit(0 if result["ok"] else 1)

@@ -11,6 +11,7 @@ from pathlib import Path
 
 from PIL import Image
 from prepare_strip import clean_strip, slot_crops, usable_frames
+from despill_chroma_edges import decontaminate_image, edge_band, chroma_similarity, chroma_saturation
 
 CELL_WIDTH = 192
 CELL_HEIGHT = 208
@@ -242,11 +243,38 @@ def component_frame_groups(
     return groups
 
 
+def register_frames(images, origins=None):
+    """One affine transform for the entire row; preserve temporal x/y offsets."""
+    origins = origins or [(0, 0)] * len(images)
+    boxes = [(bbox[0] + x, bbox[1] + y, bbox[2] + x, bbox[3] + y)
+             for image, (x, y) in zip(images, origins) if (bbox := image.getbbox())]
+    if not boxes:
+        return [Image.new("RGBA", (CELL_WIDTH, CELL_HEIGHT)) for _ in images]
+    left, top = min(b[0] for b in boxes), min(b[1] for b in boxes)
+    right, bottom = max(b[2] for b in boxes), max(b[3] for b in boxes)
+    width, height = right - left, bottom - top
+    scale = min((CELL_WIDTH - 10) / width, (CELL_HEIGHT - 10) / height, 1.0)
+    size = (max(1, round(width * scale)), max(1, round(height * scale)))
+    frames = []
+    for image, (x, y) in zip(images, origins):
+        viewport = Image.new("RGBA", (width, height))
+        viewport.alpha_composite(image, (x - left, y - top))
+        if viewport.size != size:
+            viewport = viewport.resize(size, Image.Resampling.LANCZOS)
+        target = Image.new("RGBA", (CELL_WIDTH, CELL_HEIGHT))
+        target.alpha_composite(viewport, ((CELL_WIDTH - size[0]) // 2, (CELL_HEIGHT - size[1]) // 2))
+        frames.append(target)
+    return frames
+
+
 def extract_component_frames(strip: Image.Image, frame_count: int) -> list[Image.Image] | None:
     groups = component_frame_groups(strip, frame_count)
     if groups is None:
         return None
-    return [fit_to_cell(component_group_image(strip, group)) for group in groups]
+    images = [component_group_image(strip, group, padding=0) for group in groups]
+    origins = [(component_bounds(group)[0] - round(i * strip.width / frame_count), component_bounds(group)[1])
+               for i, group in enumerate(groups)]
+    return register_frames(images, origins)
 
 
 def component_bounds(components: list[dict[str, object]]) -> tuple[int, int, int, int]:
@@ -259,55 +287,12 @@ def component_bounds(components: list[dict[str, object]]) -> tuple[int, int, int
 
 
 def extract_slot_frames(strip: Image.Image, frame_count: int) -> list[Image.Image]:
-    slot_width = strip.width / frame_count
-    frames = []
-    for index in range(frame_count):
-        left = round(index * slot_width)
-        right = round((index + 1) * slot_width)
-        crop = strip.crop((left, 0, right, strip.height))
-        frames.append(fit_to_cell(crop))
-    return frames
+    return register_frames(slot_crops(strip, frame_count))
 
 
 def extract_stable_slot_frames(strip: Image.Image, frame_count: int) -> list[Image.Image]:
-    groups = component_frame_groups(strip, frame_count)
-    padding = 4
-    if groups is not None:
-        bboxes = [component_bounds(group) for group in groups]
-        shared_top = max(0, min(bbox[1] for bbox in bboxes) - padding)
-        shared_bottom = min(strip.height, max(bbox[3] for bbox in bboxes) + padding)
-        viewport_width = max(bbox[2] - bbox[0] for bbox in bboxes) + padding * 2
-        viewport_height = max(1, shared_bottom - shared_top)
-        frames = []
-        for group, bbox in zip(groups, bboxes):
-            grouped = component_group_image(strip, group, padding=padding)
-            grouped_top = max(0, bbox[1] - padding)
-            viewport = Image.new(
-                "RGBA",
-                (viewport_width, viewport_height),
-                (0, 0, 0, 0),
-            )
-            left = (viewport_width - grouped.width) // 2
-            viewport.alpha_composite(grouped, (left, grouped_top - shared_top))
-            frames.append(fit_viewport_to_cell(viewport))
-        return frames
-
-    bbox = strip.getbbox()
-    if bbox is None:
-        return [
-            Image.new("RGBA", (CELL_WIDTH, CELL_HEIGHT), (0, 0, 0, 0)) for _ in range(frame_count)
-        ]
-
-    shared_top = max(0, bbox[1] - padding)
-    shared_bottom = min(strip.height, bbox[3] + padding)
-    slot_width = strip.width / frame_count
-    frames = []
-    for index in range(frame_count):
-        left = round(index * slot_width)
-        right = round((index + 1) * slot_width)
-        crop = strip.crop((left, shared_top, right, shared_bottom))
-        frames.append(fit_viewport_to_cell(crop))
-    return frames
+    frames = extract_component_frames(strip, frame_count)
+    return frames if frames is not None else extract_slot_frames(strip, frame_count)
 
 
 def extract_state(
@@ -329,7 +314,7 @@ def extract_state(
     used_method = method
     if method == "auto":
         crops = slot_crops(strip, frame_count)
-        frames = [fit_to_cell(crop) for crop in crops]
+        frames = register_frames(crops)
         # Prefer the declared grid. Uneven layouts fall back deterministically to
         # components only when a slot is empty or a cut intersects visible artwork.
         cuts = [round(i * strip.width / frame_count) for i in range(1, frame_count)]
@@ -356,12 +341,33 @@ def extract_state(
 
     if not usable_frames(frames):
         raise ValueError(f"Missing visible frames after grid/component extraction: {strip_path}")
+    # Despill at native resolution with this source's detected background, not a
+    # single key applied to the whole atlas. Already transparent inputs are untouched.
+    cleanup["despill"] = []
+    if cleanup["background_rgb"] is not None:
+        for index, frame in enumerate(frames):
+            key = tuple(cleanup["background_rgb"])
+            # Strong matte pixels are background coverage, not opaque character
+            # edges. Merely recoloring them leaves a dark, ragged halo behind.
+            boundary = edge_band(frame.getchannel("A"), 3)
+            pixels = list(frame.getdata())
+            removed = 0
+            for i, ((r, g, b, a), edge) in enumerate(zip(pixels, boundary)):
+                if edge and chroma_saturation((r, g, b)) >= 0.45 and chroma_similarity((r, g, b), key) >= 0.9:
+                    pixels[i] = (0, 0, 0, 0)
+                    removed += 1
+            frame.putdata(pixels)
+            frames[index], report = decontaminate_image(frame, chroma_key=key, edge_radius=3)
+            report["removed_matte_pixels"] = removed
+            cleanup["despill"].append(report)
+    if not usable_frames(frames):
+        raise ValueError(f"Missing visible frames after edge cleanup: {strip_path}")
     outputs = []
     for index, frame in enumerate(frames):
         output = state_dir / f"{index:02d}.png"
         frame.save(output)
         outputs.append(str(output))
-    return {"state": state, "frames": outputs, "method": used_method, "cleanup": cleanup}
+    return {"state": state, "frames": outputs, "method": used_method, "registration": "shared-row-transform", "cleanup": cleanup}
 
 
 def main() -> None:

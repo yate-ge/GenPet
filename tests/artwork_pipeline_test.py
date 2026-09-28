@@ -12,10 +12,10 @@ ROOT = Path(__file__).resolve().parents[1]
 PIPELINE = ROOT / "plugins/genpet/vendor/hatch-pet/scripts"
 sys.path.insert(0, str(PIPELINE))
 from prepare_pet_run import make_jobs, make_egg_jobs, make_parallel_jobs, create_layout_guides
-from process_pet_run import process, read_json, write_json, compose_egg
+from process_pet_run import process, read_json, write_json, compose_egg, record_review
 from compose_atlas import ROW_SPECS
 from prepare_strip import clean_strip
-from extract_strip_frames import extract_state
+from extract_strip_frames import extract_state, register_frames, extract_component_frames
 
 
 class ArtworkPipelineTests(unittest.TestCase):
@@ -49,6 +49,33 @@ class ArtworkPipelineTests(unittest.TestCase):
         Image.new("RGBA", (800, 200)).save(self.run / "decoded/idle.png")
         result = process(self.run)
         self.assertEqual(result["executed"], [])  # no inspection/extraction between generation calls
+
+    def test_review_gate_is_per_source_and_invalidates_replaced_pixels(self):
+        manifest = self.manifest()
+        manifest["source_review_required"] = True
+        write_json(self.run / "imagegen-jobs.json", manifest)
+        Image.new("RGBA", (192, 208), "gold").save(self.run / "decoded/base.png")
+        pending = process(self.run)
+        self.assertEqual(pending["review_jobs"], ["base"])
+        self.assertEqual(pending["ready_jobs"], [])
+        self.assertFalse((self.run / "references/canonical-base.png").exists())
+        record_review(self.run, "base", "pass", "Complete stage-appropriate reference")
+        self.assertEqual(len(process(self.run)["ready_jobs"]), 11)
+        Image.new("RGBA", (1152, 208), "gold").save(self.run / "decoded/idle.png")
+        record_review(self.run, "idle", "fail", "Repeated static copies, no breathing")
+        failed = process(self.run)
+        self.assertEqual(failed["review_jobs"], ["idle"])
+        self.assertEqual(len(failed["ready_jobs"]), 10)
+        self.assertIsNone(failed["atlas"])
+        Image.new("RGBA", (1152, 208), "orange").save(self.run / "decoded/idle.png")
+        record_review(self.run, "idle", "pass", "Test fixture simulates reviewer approval")
+        self.assertIn("idle", process(self.run)["source_complete"])
+        Image.new("RGBA", (1152, 208), "red").save(self.run / "decoded/idle.png")
+        replaced = process(self.run)
+        self.assertNotIn("idle", replaced["source_complete"])
+        self.assertEqual(replaced["review_jobs"], ["idle"])
+        self.assertTrue(replaced["visual_review_required"])
+        self.assertEqual(replaced["executed"], [])
 
     def test_solid_backgrounds_dividers_and_enclosed_details(self):
         for background in ((255,255,255), (27,180,210), (150,55,185)):
@@ -92,6 +119,39 @@ class ArtworkPipelineTests(unittest.TestCase):
         self.assertIsNone(report['background_rgb'])
         self.assertEqual(clean.tobytes(),image.tobytes())
 
+    def test_registration_preserves_motion_scale_and_loop_endpoints(self):
+        images=[]
+        for x,y in [(35,130),(40,95),(45,60),(40,95),(35,130)]:
+            im=Image.new('RGBA',(150,220))
+            ImageDraw.Draw(im).rectangle((x,y,x+49,y+59),fill=(220,170,90,255))
+            images.append(im)
+        frames=register_frames(images)
+        boxes=[im.getbbox() for im in frames]
+        self.assertEqual(len({(b[2]-b[0],b[3]-b[1]) for b in boxes}),1)
+        self.assertEqual(boxes[0][1]-boxes[2][1],70)
+        self.assertEqual(boxes[2][0]-boxes[0][0],10)
+        self.assertEqual(frames[0].tobytes(),frames[-1].tobytes())
+        strip=Image.new('RGBA',(750,220))
+        for i,im in enumerate(images): strip.alpha_composite(im,(150*i,0))
+        components=extract_component_frames(strip,5)
+        self.assertEqual([im.getbbox() for im in components],boxes)
+
+    def test_each_source_key_cleans_colored_edges_without_erasing_black_outline(self):
+        for bg in [(250,0,250),(20,160,250)]:
+            im=Image.new('RGBA',(600,210),(*bg,255));draw=ImageDraw.Draw(im)
+            for i in range(6):
+                # Opaque blended background rim outside an intact black outline.
+                rim=tuple(round(c*.6) for c in bg)
+                draw.rectangle((100*i+28,48,100*i+72,152),fill=(*rim,255))
+                draw.rectangle((100*i+30,50,100*i+70,150),fill=(220,190,100),outline='black',width=3)
+            source=self.run/'decoded/idle.png';im.save(source)
+            report=extract_state(source,'idle',self.run/'frames',(255,0,255),96,'auto')
+            with Image.open(report['frames'][0]) as frame:
+                colors=list(frame.convert('RGBA').getdata())
+                self.assertTrue(any((r,g,b,a)==(0,0,0,255) for r,g,b,a in colors))
+                self.assertFalse(any(a>32 and b>r+50 and b>g+30 for r,g,b,a in colors))
+                self.assertFalse(any(a>32 and r>g+60 and b>g+60 for r,g,b,a in colors))
+
     def test_prepare_stage_profiles(self):
         for flag, profile in (("--egg", "genpet-egg-three"), ("--parallel", "genpet-parallel")):
             directory = self.run / profile
@@ -102,9 +162,17 @@ class ArtworkPipelineTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             manifest = read_json(directory / "imagegen-jobs.json")
             self.assertEqual(manifest["workflow_profile"], profile)
+            self.assertTrue(manifest["source_review_required"])
             if flag == "--egg":
                 self.assertEqual([j["id"] for j in manifest["jobs"]], ["base", "egg-calm", "egg-stir", "egg-settle"])
                 Image.new("RGBA", (192, 208), (200, 200, 200, 255)).save(directory / "decoded/base.png")
+                self.assertEqual(process(directory)["review_jobs"], ["base"])
+                reviewed = subprocess.run([sys.executable, str(PIPELINE / "process_pet_run.py"),
+                                           "--run-dir", str(directory), "--record-review", "base",
+                                           "--verdict", "pass", "--note", "Fixture review for CLI test"],
+                                          capture_output=True, text=True)
+                self.assertEqual(reviewed.returncode, 0, reviewed.stderr)
+                self.assertEqual(json.loads(reviewed.stdout)["verdict"], "pass")
                 partial = process(directory)
                 self.assertEqual(partial["ready_jobs"], ["egg-calm", "egg-stir", "egg-settle"])
                 self.assertIsNone(partial["atlas"])
@@ -136,12 +204,15 @@ class ArtworkPipelineTests(unittest.TestCase):
 
     def test_egg_pipeline_retains_all_native_slots_and_resumes_without_processing(self):
         manifest = self.manifest()
-        manifest.update(workflow_profile="genpet-egg-three", jobs=make_egg_jobs(self.run, []))
+        manifest.update(workflow_profile="genpet-egg-three", jobs=make_egg_jobs(self.run, []), source_review_required=True)
         write_json(self.run / "imagegen-jobs.json", manifest)
         with Image.open(ROOT / "assets/pets/mystery-egg/spritesheet.webp") as atlas:
             atlas.crop((0, 0, 192, 208)).save(self.run / "decoded/base.png")
             for state in ("egg-calm", "egg-stir", "egg-settle"):
                 atlas.crop((0, 208, 1536, 416)).save(self.run / "decoded" / f"{state}.png")
+        self.assertIsNone(process(self.run)["atlas"])
+        for job in manifest["jobs"]:
+            record_review(self.run, job["id"], "pass", "Fixture approval for processing test only")
         result = process(self.run)
         self.assertTrue(result["ok"], result["blockers"])
         self.assertTrue(result["atlas"])
