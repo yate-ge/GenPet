@@ -152,6 +152,35 @@ class ArtworkPipelineTests(unittest.TestCase):
                 self.assertFalse(any(a>32 and b>r+50 and b>g+30 for r,g,b,a in colors))
                 self.assertFalse(any(a>32 and r>g+60 and b>g+60 for r,g,b,a in colors))
 
+    def test_jump_uses_idle_size_and_baseline_without_erasing_height_motion(self):
+        reference = Image.new("RGBA", (192, 208))
+        ImageDraw.Draw(reference).rectangle((56, 70, 135, 189), fill=(200, 170, 90, 255))
+        original = reference.tobytes()
+        images = []
+        for lift in (0, 10, 25, 10, 0):
+            frame = Image.new("RGBA", (240, 440))
+            ImageDraw.Draw(frame).rectangle((40, 140 - lift * 2, 199, 379 - lift * 2),
+                                             fill=(200, 170, 90, 255))
+            images.append(frame)
+        frames = register_frames(images, jump_reference=reference)
+        boxes = [im.getchannel("A").point(lambda a: 255 if a >= 128 else 0).getbbox() for im in frames]
+        self.assertEqual(reference.tobytes(), original)
+        self.assertEqual(boxes[0], reference.getbbox())
+        self.assertEqual(boxes[-1], reference.getbbox())
+        self.assertEqual({(b[2]-b[0], b[3]-b[1]) for b in boxes}, {(80, 120)})
+        self.assertEqual(boxes[0][1] - boxes[2][1], 25)
+
+    def test_oversized_jump_is_rejected_instead_of_shrunk_or_clipped(self):
+        reference = Image.new("RGBA", (192, 208))
+        ImageDraw.Draw(reference).rectangle((56, 10, 135, 199), fill="white")
+        images = []
+        for lift in (0, 15, 30, 15, 0):
+            frame = Image.new("RGBA", (192, 260))
+            ImageDraw.Draw(frame).rectangle((56, 50-lift, 135, 239-lift), fill="white")
+            images.append(frame)
+        with self.assertRaisesRegex(ValueError, "Regenerate only jumping"):
+            register_frames(images, jump_reference=reference)
+
     def test_prepare_stage_profiles(self):
         for flag, profile in (("--egg", "genpet-egg-three"), ("--parallel", "genpet-parallel")):
             directory = self.run / profile
@@ -231,21 +260,44 @@ class ArtworkPipelineTests(unittest.TestCase):
         atlas.crop((0, 0, 192, 208)).save(self.run / "decoded/base.png")
         for state, row, count in [*ROW_SPECS, ("look-row-9", 9, 8), ("look-row-10", 10, 8)]:
             atlas.crop((0, row * 208, count * 192, (row + 1) * 208)).save(self.run / "decoded" / f"{state}.png")
+        # This test covers packaging/cache, with a jump that fits at idle scale.
+        # The old egg fixture has unrelated silhouette widths in these two rows.
+        for state, lifts in (("idle", [0] * 6), ("jumping", [0, 8, 16, 8, 0])):
+            strip = Image.new("RGBA", (192 * len(lifts), 208))
+            draw = ImageDraw.Draw(strip)
+            for i, lift in enumerate(lifts):
+                draw.rectangle((192*i+56, 70-lift, 192*i+135, 189-lift), fill=(200,170,90,255))
+            strip.save(self.run / "decoded" / f"{state}.png")
         cardinals = Image.new("RGBA", (192 * 4, 208))
         for index, (row, col) in enumerate(((9, 0), (9, 4), (10, 0), (10, 4))):
             cardinals.alpha_composite(atlas.crop((col * 192, row * 208, (col + 1) * 192, (row + 1) * 208)), (index * 192, 0))
         cardinals.save(self.run / "decoded/look-cardinals.png")
-        result = process(self.run)
+        result = process(self.run, previews=True)
         self.assertTrue(result["ok"], result["blockers"])
         self.assertTrue(result["atlas"])
         self.assertFalse(result["visual_review_required"])
         validation = read_json(self.run / "qa/final-validation.json")
         self.assertTrue(validation["ok"])
         self.assertEqual(validation["sprite_version_number"], 2)
-        self.assertEqual(len(list((self.run / "qa/previews").glob("*.gif"))), 0)
-        repeated = process(self.run)
+        for name in ("idle-jump", "idle-look"):
+            with Image.open(self.run / "qa/previews" / f"{name}.gif") as preview:
+                self.assertEqual(preview.size, (192, 208))
+                self.assertGreater(preview.n_frames, 1)
+        repeated = process(self.run, previews=True)
         self.assertEqual(repeated["executed"], [])
         self.assertEqual(repeated["atlas"], result["atlas"])
+        # A changed idle reference must invalidate jump extraction, not other rows.
+        source = self.run / "decoded/idle.png"
+        with Image.open(source) as strip:
+            draw = ImageDraw.Draw(strip)
+            for i in range(6):
+                draw.rectangle((192*i+54, 70, 192*i+137, 189), fill=(200,170,90,255))
+            strip.save(source)
+        changed = process(self.run, previews=True)
+        self.assertTrue(changed["ok"], changed["blockers"])
+        steps = {step["step"] for step in changed["executed"]}
+        self.assertIn("extract-jumping", steps)
+        self.assertNotIn("extract-waving", steps)
         # A valid image container with missing visible frames must not pass.
         Image.new("RGBA", (192 * 6, 208)).save(self.run / "decoded/review.png")
         broken = process(self.run)
