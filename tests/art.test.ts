@@ -54,6 +54,7 @@ test('image references progress from shell-only to a revealed identity, never a 
   assert.match(request.prompt,/egg-three profile/);
   assert.match(request.prompt,/three AI-generated eight-frame loops/);
   assert.match(request.prompt,/one neutral calm frame across all sixteen look slots/);
+  assert.doesNotMatch(request.prompt,/Do not visually inspect/);
   const shell=await acceptArt(store,{file,kind:'portrait',requestId:request.id,provenance:'Synthetic reference test only; never distributed.'});
   let state=await store.current();assert.equal(state.eggReference,shell.file);assert.equal(state.identityReference,undefined);
   await store.transaction(s=>{s.clockOffset=5*3_600_000;});
@@ -61,6 +62,9 @@ test('image references progress from shell-only to a revealed identity, never a 
   assert.match(request.prompt,/all nine state rows and both eight-pose look rows independently from base/);
   assert.doesNotMatch(request.prompt,/egg-three profile/);
   assert.match(request.prompt,/seed-derived permanent marking/);
+  assert.match(request.prompt,/natural head and body turns/);
+  assert.match(request.prompt,/Visually review each generated source/);
+  assert.doesNotMatch(request.prompt,/torso facing the viewer|change gaze only|validate structure only/);
   assert.deepEqual(request.referenceFiles,[shell.file]);assert.ok(request.visual.hatchIdentity);
   const child=await acceptArt(store,{file,kind:'portrait',requestId:request.id,provenance:'Synthetic reference test only; never distributed.'});
   state=await store.current();assert.equal(state.identityReference,child.file);assert.equal(state.eggReference,shell.file);
