@@ -781,6 +781,8 @@ Use the canonical egg reference for its individual shell shape, palette and fain
 Use the eight-slot guide only for spacing. Keep each shell wholly within its own slot, with generous margins,
 the same scale and baseline throughout. Flat pure {args.chroma_key['hex']} background, no guide lines or labels.
 Motion: {EGG_ANIMATIONS[state]} First and last frames should join naturally as a loop.
+Draw consecutive time samples of this ONE shell motion, ordered left-to-right, with small progressive
+changes in tilt and visible motion. Do not draw alternative shell poses or eight identical copies.
 The Pet has NOT been born. No eyes, face, mouth, limbs, ears, cracks, exposed creature, props, work,
 reviewing, waving, gaze following, jumping, shadows or detached effects. Express only physical shell motion.
 Style and identity: {args.pet_notes}
@@ -804,12 +806,31 @@ def make_parallel_jobs(run_dir, copied_refs):
     return jobs
 
 
+MOTION_SEQUENCES = {
+    "idle": "Breathe gently: resting, slightly inhale, fullest inhale with a blink, begin exhaling, finish exhaling, return near resting.",
+    "running-right": "One complete in-place rightward walk cycle: contact, recoil, passing, high point, opposite contact, opposite recoil, opposite passing, opposite high point. Keep facing screen-right throughout; no travel across slots.",
+    "running-left": "One complete in-place leftward walk cycle: contact, recoil, passing, high point, opposite contact, opposite recoil, opposite passing, opposite high point. Keep facing screen-left throughout; no travel across slots.",
+    "waving": "One gentle wave using the SAME hand throughout: hand raised near cheek, tilt hand outward, tilt hand inward, return near the initial raised-hand pose. The other hand and torso remain still.",
+    "jumping": "One small jump: slight crouch on the ground, ascending, airborne apex, descending, soft landing near the initial ground pose. Preserve actual vertical displacement inside fixed slots; do not recenter each airborne pose.",
+    "failed": "One small disappointed head-dip cycle while standing: neutral, begin lowering head, lower slightly, lowest head pose, hold with a blink, begin lifting, nearly restored, return near neutral. Never sit, lie down or turn around.",
+    "waiting": "Keep both hands together at chest level for one patient loop: upright, lean forward slightly, finish the small lean, blink while holding, ease back, return near upright. No waving, shrugging or new symbols.",
+    "running": "One focused thinking loop while standing, one hand resting under the chin throughout: neutral, small head dip, slightly deeper dip, blink, begin recovering, return near neutral. Keep the same stance and hand placement; do not switch tasks or add a laptop, paper or magnifier.",
+    "review": "One attentive inspection loop with arms held still: neutral, slight head tilt, finish that tilt, small squint, ease back, return near neutral. No celebration, waving or pose changes.",
+}
+
+
 def parallel_row_prompt(args, state, count, action):
-    return f"""Generate {state}: exactly {count} complete full-body poses in one horizontal strip.
+    motion = state in MOTION_SEQUENCES
+    contract = ("These are consecutive time samples of ONE continuous cyclic action, NOT alternative poses, expression stickers or a storyboard. Read left-to-right in time. Adjacent frames differ only by a small motion increment; the last frame transitions naturally into the first. Include visible motion, not identical copies. Fixed camera, body orientation and ground line. Keep the same props present in every frame; never introduce or swap props, symbols or detached effects. Adapt the described hand/foot gesture to the base pet's existing anatomy without adding limbs."
+                if motion else "These are ordered gaze samples, not a body turntable. Keep the camera and torso facing the viewer in EVERY cell, matching base. Never show the back or rotate the entire body into profile. Only eyes and small head/neck adjustments express the screen-space target; keep feet, torso scale and position fixed.")
+    return f"""Generate {state}: exactly {count} full-body {'animation frames of one continuous action' if motion else 'gaze samples'} in one horizontal strip.
 Use only the canonical base for character identity, proportions, palette, markings and props.
-Keep scale and baseline consistent with that base. One pose centered in each invisible equal-width slot,
+Keep apparent scale consistent across the row. Keep the ground baseline fixed; jumping intentionally
+changes body height above it. Move the pose inside its viewport, never resize or recenter individual poses.
+Use identical fixed viewports in invisible equal-width slots,
 with generous padding and no clipping or overlap. Preserve the native pixel-art style.
-Action: {action}
+{contract}
+Sequence: {MOTION_SEQUENCES[state] if motion else action}
 {BACKGROUND_CONTRACT}"""
 
 
@@ -1235,6 +1256,7 @@ def main() -> None:
         "run_dir": str(run_dir),
         "primary_generation_skill": "$imagegen",
         "workflow_profile": "genpet-egg-three" if args.egg else "genpet-parallel" if args.parallel else "genpet-early-look" if args.early_look else "standard",
+        "source_review_required": bool(args.egg or args.parallel),
         "jobs": make_egg_jobs(run_dir, copied_refs) if args.egg else make_parallel_jobs(run_dir, copied_refs) if args.parallel else make_jobs(run_dir, copied_refs, args.early_look),
     }
     (run_dir / "imagegen-jobs.json").write_text(json.dumps(jobs, indent=2) + "\n", encoding="utf-8")
