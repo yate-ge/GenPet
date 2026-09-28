@@ -171,6 +171,10 @@ def final_previews(atlas, directory):
     looks = [image.crop((col * 192, row * 208, (col + 1) * 192, (row + 1) * 208))
              for row in (9, 10) for col in range(8)]
     save_preview(looks, [150] * 16, directory / "look.gif")
+    idle = image.crop((0, 0, 192, 208))
+    jump = [image.crop((col * 192, 4 * 208, (col + 1) * 192, 5 * 208)) for col in range(5)]
+    save_preview([idle, *jump, idle], [600, *ROW_DURATIONS["jumping"], 600], directory / "idle-jump.gif")
+    save_preview([idle, *looks, idle], [600, *([150] * 16), 600], directory / "idle-look.gif")
 
 
 def finish_atlas(processor, extended, key):
@@ -193,7 +197,7 @@ def finish_atlas(processor, extended, key):
         processor.step("final-contact", [atlas], [run / "qa/final-contact-sheet.png"],
                    lambda: processor.command("make_contact_sheet.py", atlas,
                    "--scale", 1, "--output", run / "qa/final-contact-sheet.png"))
-        previews = [run / "qa/previews" / f"{state}.gif" for state in [*ROW_DURATIONS, "look"]]
+        previews = [run / "qa/previews" / f"{state}.gif" for state in [*ROW_DURATIONS, "look", "idle-jump", "idle-look"]]
         processor.step("final-previews", [atlas], previews,
                    lambda: final_previews(atlas, run / "qa/previews"))
     def portrait():
@@ -285,12 +289,20 @@ def process(run, previews=False):
         source = run / jobs[state]["output_path"]
         frames = [run / "frames" / state / f"{index:02d}.png" for index in range(count)]
         report = run / "qa" / f"extraction-{state}.json"
+        idle = rows.get("idle", [None])[0] if state == "jumping" else None
+        if state == "jumping" and idle is None:
+            continue
 
-        def extract(source=source, state=state, report=report):
-            result = extract_state(source, state, run / "frames", parse_hex_color(key), 96, "auto")
+        def extract(source=source, state=state, report=report, idle=idle):
+            reference = None
+            if idle is not None:
+                with Image.open(idle) as image:
+                    reference = image.convert("RGBA")
+            result = extract_state(source, state, run / "frames", parse_hex_color(key), 96, "auto", reference)
             write_json(report, result)
 
-        if processor.step(f"extract-{state}", [source], [*frames, report], extract, key):
+        inputs = [source, idle] if idle is not None else [source]
+        if processor.step(f"extract-{state}", inputs, [*frames, report], extract, key):
             rows[state] = frames
     if "idle" in rows and not is_parallel:
         processor.step("idle-reference", rows["idle"], [run / "qa/idle-reference.png"],
@@ -351,7 +363,7 @@ def process(run, previews=False):
               "atlas": str(atlas) if complete and not processor.blockers else None,
               "portrait": str(run / "final/portrait.png") if complete and not processor.blockers else None,
               "visual_review_required": any(job["status"] == "awaiting-review" for job in jobs.values()),
-              "note": "Accept only after atlas/portrait paths are returned and the current request ID is rechecked. Source review is independent per job; no final aesthetic gate."}
+              "note": "Accept only after atlas/portrait paths are returned and the current request ID is rechecked. Source reviews do not verify processed pixels: inspect idle-jump and idle-look previews for size, direction and continuity before installation."}
     write_json(run / "qa/processing-result.json", result)
     return result
 
