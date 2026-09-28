@@ -1,6 +1,6 @@
 {
   "name": "genpet",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "description": "A bounded, personalized companion that grows with you. A GenFaceUI-inspired Codex plugin.",
@@ -16,6 +16,7 @@
     "install:codex": "npm run build:plugin && npm run build && tsx scripts/install.ts",
     "export:pet": "tsx src/cli.ts install-native",
     "refresh:native": "tsx src/cli.ts refresh-native",
+    "pet:switch": "node plugins/genpet/dist/cli.js switch-pet",
     "package:plugin": "npm run build:plugin && npm run verify:version && tsx scripts/package.ts",
     "verify:fast": "npm run check && npm test",
     "verify:release": "node scripts/verify-release.mjs",
@@ -25,7 +26,8 @@
   },
   "dependencies": {
     "@jsquash/webp": "^1.5.0",
-    "pngjs": "^7.0.0"
+    "pngjs": "^7.0.0",
+    "smol-toml": "^1.9.0"
   },
   "devDependencies": {
     "@types/node": "^22.19.0",

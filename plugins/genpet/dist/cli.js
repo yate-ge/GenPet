@@ -1976,10 +1976,10 @@ var require_packer_sync = __commonJS({
 var require_png_sync = __commonJS({
   "node_modules/pngjs/lib/png-sync.js"(exports) {
     "use strict";
-    var parse = require_parser_sync();
+    var parse2 = require_parser_sync();
     var pack = require_packer_sync();
     exports.read = function(buffer, options) {
-      return parse(buffer, options || {});
+      return parse2(buffer, options || {});
     };
     exports.write = function(png, options) {
       return pack(png, options);
@@ -2431,11 +2431,11 @@ function classify(text) {
   scores.sort((a, b) => b.score - a.score);
   return scores[0].score > 0 && scores[0].score > scores[1].score ? scores[0].kind : null;
 }
-function userText(record2) {
-  if (record2?.type === "event_msg" && record2.payload?.type === "user_message") return typeof record2.payload.message === "string" ? record2.payload.message : null;
-  if (record2?.type !== "response_item" || record2.payload?.type !== "message" || record2.payload.role !== "user") return null;
-  if (!Array.isArray(record2.payload.content)) return null;
-  return record2.payload.content.filter((part) => part?.type === "input_text" || part?.type === "text").map((part) => typeof part.text === "string" ? part.text : "").join("\n");
+function userText(record3) {
+  if (record3?.type === "event_msg" && record3.payload?.type === "user_message") return typeof record3.payload.message === "string" ? record3.payload.message : null;
+  if (record3?.type !== "response_item" || record3.payload?.type !== "message" || record3.payload.role !== "user") return null;
+  if (!Array.isArray(record3.payload.content)) return null;
+  return record3.payload.content.filter((part) => part?.type === "input_text" || part?.type === "text").map((part) => typeof part.text === "string" ? part.text : "").join("\n");
 }
 function cleanText(text) {
   return text.replace(/<(environment_context|recommended_plugins|send_user_message_question_reply)\b[^>]*>[\s\S]*?<\/\1>/gi, "").replace(/<\/?(?:environment_context|recommended_plugins|send_user_message_question_reply)\b[^>]*>[\s\S]*$/gi, "").replace(/\s+/g, " ").trim().slice(0, 16e3);
@@ -2503,16 +2503,16 @@ async function scanCodexContext(options = {}) {
     const matches = /* @__PURE__ */ new Map();
     for (const line of text.split("\n")) {
       if (!line.trim()) continue;
-      let record2;
+      let record3;
       try {
-        record2 = JSON.parse(line);
+        record3 = JSON.parse(line);
       } catch {
         warnings.add("\u90E8\u5206\u4F1A\u8BDD\u5305\u542B\u672A\u5B8C\u6210\u6216\u65E0\u6548\u8BB0\u5F55\uFF0C\u5DF2\u8DF3\u8FC7\u3002");
         continue;
       }
-      const at = typeof record2.timestamp === "number" ? record2.timestamp : Date.parse(record2.timestamp);
+      const at = typeof record3.timestamp === "number" ? record3.timestamp : Date.parse(record3.timestamp);
       if (!Number.isFinite(at) || at < startMs || at > nowMs) continue;
-      const raw = userText(record2);
+      const raw = userText(record3);
       if (!raw) continue;
       if (raw.includes("<heartbeat>") || /^\s*[/\$](?:genpet:)?genpet-(?:start|reset|grow|state)\b/.test(raw)) continue;
       const prompt = cleanText(raw);
@@ -2733,6 +2733,7 @@ async function launchDebugger(port = Number(process.env.GENPET_PORT || 47831)) {
   if (await inspect()) return { url, reused: true };
   const child = spawn(process.execPath, [path4.join(import.meta.dirname, "debugger-server.js")], {
     detached: true,
+    windowsHide: true,
     stdio: "ignore",
     env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: root }
   });
@@ -2802,11 +2803,11 @@ var Module = (() => {
     var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
     var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions == "object" && typeof process.versions.node == "string";
     var scriptDirectory = "";
-    function locateFile(path10) {
+    function locateFile(path11) {
       if (Module2["locateFile"]) {
-        return Module2["locateFile"](path10, scriptDirectory);
+        return Module2["locateFile"](path11, scriptDirectory);
       }
-      return scriptDirectory + path10;
+      return scriptDirectory + path11;
     }
     var read_, readAsync, readBinary, setWindowTitle;
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -4459,13 +4460,13 @@ async function acceptArt(store2, input) {
     const ext = path7.extname(input.file).toLowerCase();
     const file = path7.join(dir, `${request.id}-${input.kind}-${randomUUID3()}${ext}`);
     await copyFile(input.file, file);
-    const record2 = { id: request.id, stage: s.pet.stage, growthDay: s.pet.growth.days, windowIndex: s.pet.state.windowIndex, file, kind: input.kind, createdAt: Date.now(), provenance: input.provenance };
+    const record3 = { id: request.id, stage: s.pet.stage, growthDay: s.pet.growth.days, windowIndex: s.pet.state.windowIndex, file, kind: input.kind, createdAt: Date.now(), provenance: input.provenance };
     if (input.kind === "portrait") {
       if (s.pet.stage === "egg" && !s.eggReference) s.eggReference = file;
       if (s.pet.stage !== "egg" && !s.identityReference) s.identityReference = file;
     }
-    s.art = s.art.filter((a) => !(a.id === record2.id && a.kind === record2.kind)).concat(record2).slice(-79);
-    return record2;
+    s.art = s.art.filter((a) => !(a.id === record3.id && a.kind === record3.kind)).concat(record3).slice(-79);
+    return record3;
   });
 }
 async function exportNative(s, destination) {
@@ -4529,8 +4530,8 @@ async function nativeTick(store2) {
 }
 
 // src/cli.ts
-import path9 from "node:path";
-import { randomUUID as randomUUID5 } from "node:crypto";
+import path10 from "node:path";
+import { randomUUID as randomUUID6 } from "node:crypto";
 
 // src/debug.ts
 import { mkdir as mkdir3, writeFile as writeFile3 } from "node:fs/promises";
@@ -4635,6 +4636,1019 @@ async function debugState(store2, operationId, kind) {
   });
 }
 
+// src/native-pets.ts
+import { readFile as readFile6, readdir as readdir3 } from "node:fs/promises";
+import { homedir as homedir5 } from "node:os";
+import path9 from "node:path";
+
+// node_modules/smol-toml/dist/error.js
+function getLineColFromPtr(string, ptr) {
+  let lines = string.slice(0, ptr).split(/\r?\n/);
+  return [lines.length, lines.pop().length + 1];
+}
+function makeCodeBlock(string, line, column) {
+  let lines = string.split(/\r?\n/);
+  let codeblock = "";
+  let numberLen = (Math.log10(line + 1) | 0) + 1;
+  for (let i = line - 1; i <= line + 1; i++) {
+    let l = lines[i - 1];
+    if (!l)
+      continue;
+    codeblock += i.toString().padEnd(numberLen, " ");
+    codeblock += ":  ";
+    codeblock += l;
+    codeblock += "\n";
+    if (i === line) {
+      codeblock += " ".repeat(numberLen + column + 2);
+      codeblock += "^\n";
+    }
+  }
+  return codeblock;
+}
+var TomlError = class _TomlError extends Error {
+  line;
+  column;
+  codeblock;
+  constructor(message, options) {
+    const [line, column] = getLineColFromPtr(options.toml, options.ptr);
+    const codeblock = makeCodeBlock(options.toml, line, column);
+    super(`Invalid TOML document: ${message}
+
+${codeblock}`, options);
+    this.line = line;
+    this.column = column;
+    this.codeblock = codeblock;
+  }
+  /** @internal */
+  static x(message, ctx, ptr) {
+    throw new _TomlError(message, { toml: ctx.s, ptr: ptr ?? ctx.p });
+  }
+};
+
+// node_modules/smol-toml/dist/primitive.js
+function parseString(ctx) {
+  let startPtr = ctx.p;
+  let c = ctx.s.charCodeAt(ctx.p++);
+  let first = c;
+  let isLiteral = c === 39;
+  let isMultiline = c === ctx.s.charCodeAt(ctx.p) && c === ctx.s.charCodeAt(ctx.p + 1);
+  if (isMultiline) {
+    if ((c = ctx.s.charCodeAt(ctx.p += 2)) === 10)
+      ctx.p++;
+    else if (c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10)
+      ctx.p += 2;
+  }
+  let parsed = "";
+  let sliceStart = ctx.p;
+  let state = 0;
+  for (; ctx.p < ctx.s.length; ctx.p++) {
+    c = ctx.s.charCodeAt(ctx.p);
+    if (isMultiline && (c === 10 || c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10)) {
+      state = state && 3;
+    } else if (c < 32 && c !== 9 || c === 127) {
+      TomlError.x("control characters are not allowed in strings", ctx);
+    } else if ((!state || state === 3) && c === first && (!isMultiline || ctx.s.charCodeAt(ctx.p + 1) === first && ctx.s.charCodeAt(ctx.p + 2) === first)) {
+      if (isMultiline) {
+        if (ctx.s.charCodeAt(ctx.p + 3) === first)
+          ctx.p++;
+        if (ctx.s.charCodeAt(ctx.p + 3) === first)
+          ctx.p++;
+      }
+      if (!state) {
+        let s = ctx.s.slice(sliceStart, ctx.p);
+        parsed = parsed ? parsed + s : s;
+      }
+      ctx.p += isMultiline ? 3 : 1;
+      return parsed;
+    } else if (!state) {
+      if (!isLiteral && c === 92) {
+        parsed += ctx.s.slice(sliceStart, sliceStart = ctx.p);
+        state = 1;
+      }
+    } else if (state === 1) {
+      if (c === 120 || c === 117 || c === 85) {
+        let errPtr = ctx.p++ - 1;
+        let value = 0;
+        let len = c === 120 ? 2 : c === 117 ? 4 : 8;
+        for (let j = 0; j < len; j++, ctx.p++) {
+          let hex = ctx.s.charCodeAt(ctx.p);
+          let digit = (
+            /* 0-9 */
+            hex >= 48 && hex <= 57 ? hex - 48 : (
+              /* A-F */
+              hex >= 65 && hex <= 70 ? hex - 65 + 10 : (
+                /* a-f */
+                hex >= 97 && hex <= 102 ? hex - 97 + 10 : -1
+              )
+            )
+          );
+          if (digit < 0)
+            TomlError.x("invalid non-hex character in unicode escape", ctx);
+          value = value << 4 | digit;
+        }
+        if (value < 0 || value > 1114111 || value >= 55296 && value <= 57343) {
+          TomlError.x("invalid unicode escape", ctx, errPtr);
+        }
+        parsed += String.fromCodePoint(value);
+        sliceStart = ctx.p--;
+        state = 0;
+      } else if (isMultiline && (c === 32 || c === 9)) {
+        state = 2;
+      } else {
+        if (c === 98)
+          parsed += "\b";
+        else if (c === 116)
+          parsed += "	";
+        else if (c === 110)
+          parsed += "\n";
+        else if (c === 102)
+          parsed += "\f";
+        else if (c === 114)
+          parsed += "\r";
+        else if (c === 101)
+          parsed += "\x1B";
+        else if (c === 34)
+          parsed += '"';
+        else if (c === 92)
+          parsed += "\\";
+        else
+          TomlError.x("unrecognised escape sequence", ctx);
+        sliceStart = ctx.p + 1;
+        state = 0;
+      }
+    } else if (c !== 32 && c !== 9) {
+      if (state === 2)
+        TomlError.x("invalid escape: only line-ending whitespace may be escaped", ctx, sliceStart);
+      state = !isLiteral && c === 92 ? 1 : 0;
+      sliceStart = ctx.p;
+    }
+  }
+  TomlError.x("unfinished string", ctx, startPtr);
+}
+
+// node_modules/smol-toml/dist/date.js
+var DATE_TIME_RE = /^(\d{4}-\d{2}-\d{2})?[Tt ]?(?:(\d{2}):\d{2}(?::\d{2}(?:\.\d+)?)?)?(Z|z|[-+]\d{2}:\d{2})?$/i;
+var TomlDate = class _TomlDate extends Date {
+  #hasDate = false;
+  #hasTime = false;
+  #offset = null;
+  constructor(date, fasttype, unsafeDelim) {
+    let hasDate = true;
+    let hasTime = true;
+    let offset = "Z";
+    let c;
+    if (typeof date === "string") {
+      if (fasttype)
+        prep: {
+          if (fasttype < 3) {
+            if (+date.slice(11, 13) > 23) {
+              date = "";
+              break prep;
+            }
+            if (fasttype === 2) {
+              offset = null;
+              date += "Z";
+            } else if ((c = date.charCodeAt(date.length - 1)) !== 90 && c !== 122) {
+              offset = date.slice(date.length - 6);
+            }
+            if (unsafeDelim)
+              date = date.slice(0, 10) + "T" + date.slice(11);
+          } else if (fasttype === 4) {
+            date = +date.slice(0, 2) > 23 ? "" : `0000-01-01T${date}Z`;
+          }
+          hasDate = fasttype !== 4;
+          hasTime = fasttype !== 3;
+        }
+      else {
+        let match = date.match(DATE_TIME_RE);
+        if (match) {
+          if (!match[1]) {
+            hasDate = false;
+            date = `0000-01-01T${date}`;
+          }
+          hasTime = !!match[2];
+          hasTime && date[10] === " " && (date = date.replace(" ", "T"));
+          if (match[2] && +match[2] > 23) {
+            date = "";
+          } else {
+            offset = match[3] || null;
+            if (!offset && hasTime)
+              date += "Z";
+          }
+        } else {
+          date = "";
+        }
+      }
+    }
+    super(date);
+    if (!isNaN(this.getTime())) {
+      this.#hasDate = hasDate;
+      this.#hasTime = hasTime;
+      this.#offset = offset;
+    }
+  }
+  isDateTime() {
+    return this.#hasDate && this.#hasTime;
+  }
+  isLocal() {
+    return !this.#hasDate || !this.#hasTime || !this.#offset;
+  }
+  isDate() {
+    return this.#hasDate && !this.#hasTime;
+  }
+  isTime() {
+    return this.#hasTime && !this.#hasDate;
+  }
+  isValid() {
+    return this.#hasDate || this.#hasTime;
+  }
+  toISOString() {
+    let iso = super.toISOString();
+    if (this.isDate())
+      return iso.slice(0, 10);
+    if (this.isTime())
+      return iso.slice(11, 23);
+    if (this.#offset === null)
+      return iso.slice(0, -1);
+    if (this.#offset === "Z" || this.#offset === "z")
+      return iso;
+    let offset = +this.#offset.slice(1, 3) * 60 + +this.#offset.slice(4, 6);
+    offset = this.#offset[0] === "-" ? offset : -offset;
+    let offsetDate = new Date(this.getTime() - offset * 6e4);
+    return offsetDate.toISOString().slice(0, -1) + this.#offset;
+  }
+  static wrapAsOffsetDateTime(jsDate, offset = "Z") {
+    let date = new _TomlDate(jsDate);
+    date.#offset = offset;
+    return date;
+  }
+  static wrapAsLocalDateTime(jsDate) {
+    let date = new _TomlDate(jsDate);
+    date.#offset = null;
+    return date;
+  }
+  static wrapAsLocalDate(jsDate) {
+    let date = new _TomlDate(jsDate);
+    date.#hasTime = false;
+    date.#offset = null;
+    return date;
+  }
+  static wrapAsLocalTime(jsDate) {
+    let date = new _TomlDate(jsDate);
+    date.#hasDate = false;
+    date.#offset = null;
+    return date;
+  }
+};
+
+// node_modules/smol-toml/dist/extract.js
+function isDigit(char, base = 10) {
+  return base === 16 ? char > 47 && char < 58 || char > 64 && char < 71 || char > 96 && char < 103 : char > 47 && char < 48 + base;
+}
+function isEndOfValue(char, delim) {
+  return char === 32 || char === 9 || char === 10 || char === 13 || // Structure end or next value delimiter
+  delim && (char === delim || char === 44) || // Comment
+  char === 35;
+}
+function extractValue(ctx, end) {
+  let errPtr = ctx.p;
+  let c = ctx.s.charCodeAt(ctx.p);
+  if (c === 91 || c === 123) {
+    ctx.d-- || TomlError.x("document contains excessively nested structures. aborting.", ctx);
+    let value = c === 91 ? parseArray(ctx) : parseInlineTable(ctx);
+    ctx.d++;
+    return value;
+  }
+  if (c === 34 || c === 39) {
+    return parseString(ctx);
+  }
+  if (c === 116) {
+    if (ctx.s.charCodeAt(++ctx.p) !== 114 || ctx.s.charCodeAt(++ctx.p) !== 117 || ctx.s.charCodeAt(++ctx.p) !== 101)
+      TomlError.x("invalid value", ctx, errPtr);
+    return ctx.p++, true;
+  }
+  if (c === 102) {
+    if (ctx.s.charCodeAt(++ctx.p) !== 97 || ctx.s.charCodeAt(++ctx.p) !== 108 || ctx.s.charCodeAt(++ctx.p) !== 115 || ctx.s.charCodeAt(++ctx.p) !== 101)
+      TomlError.x("invalid value", ctx, errPtr);
+    return ctx.p++, false;
+  }
+  if (c === 43 || c === 45) {
+    return parseNumber(ctx, ctx.p, ctx.s.charCodeAt(++ctx.p), 44 - c, end);
+  }
+  if (ctx.s.charCodeAt(ctx.p + 4) === 45 && ctx.s.charCodeAt(ctx.p + 7) === 45) {
+    return parseDate(ctx, c, end);
+  }
+  if (ctx.s.charCodeAt(ctx.p + 2) === 58) {
+    return parseTime(ctx, c, end);
+  }
+  return parseNumber(ctx, ctx.p, c, 0, end);
+}
+function parseNumber(ctx, startPtr, startChr, sign, endChr) {
+  let c = startChr;
+  let state = 0;
+  let hasUnderscores = false;
+  if (c === 105) {
+    if (ctx.s.charCodeAt(++ctx.p) !== 110 || ctx.s.charCodeAt(++ctx.p) !== 102)
+      TomlError.x("invalid value", ctx, startPtr);
+    return ctx.p++, (sign || 1) / 0;
+  }
+  if (c === 110) {
+    if (ctx.s.charCodeAt(++ctx.p) !== 97 || ctx.s.charCodeAt(++ctx.p) !== 110)
+      TomlError.x("invalid value", ctx, startPtr);
+    return ctx.p++, NaN;
+  }
+  if (c === 48) {
+    if (++ctx.p >= ctx.s.length || isEndOfValue(c = ctx.s.charCodeAt(ctx.p), endChr))
+      return ctx.bi === true ? 0n : 0;
+    if (!sign) {
+      if (c === 120)
+        return parseIntegerBaseN(ctx, startPtr, 16, endChr);
+      else if (c === 98)
+        return parseIntegerBaseN(ctx, startPtr, 2, endChr);
+      else if (c === 111)
+        return parseIntegerBaseN(ctx, startPtr, 8, endChr);
+    }
+    if (c === 46)
+      state = 2;
+    else if (c === 101 || c === 69)
+      state = 4;
+    else
+      TomlError.x("illegal leading zero", ctx, startPtr);
+  } else if (!isDigit(c))
+    TomlError.x("invalid value", ctx, startPtr);
+  while (++ctx.p < ctx.s.length && (c = ctx.s.charCodeAt(ctx.p), !isEndOfValue(c, endChr))) {
+    if (!state)
+      state = 1;
+    if (c === 95) {
+      if (!(state & 1))
+        TomlError.x("illegal underscore", ctx);
+      state += 11;
+      hasUnderscores = true;
+    } else if (state === 1 && c === 46)
+      state = 2;
+    else if ((state === 1 || state === 3) && (c === 101 || c === 69))
+      state = 4;
+    else if (state === 4 && (c === 43 || c === 45)) {
+    } else if (!isDigit(c))
+      TomlError.x(`illegal character in numeric literal`, ctx);
+    else if (state > 9)
+      state -= 11;
+    else if (!(state & 1))
+      state++;
+  }
+  if (!state) {
+    let val = (startChr - 48) * (sign || 1);
+    return ctx.bi === true ? BigInt(val) : val;
+  }
+  if (!(state & 1))
+    TomlError.x("unfinished numeric value", ctx, startPtr);
+  let str = ctx.s.slice(startPtr, ctx.p);
+  if (hasUnderscores)
+    str = str.replaceAll("_", "");
+  return state > 1 ? parseFloat(str) : parseInteger(ctx, str, 10, startPtr);
+}
+function parseIntegerBaseN(ctx, startPtr, base, endChr) {
+  let c, underscore = 1;
+  while (++ctx.p < ctx.s.length && (c = ctx.s.charCodeAt(ctx.p), !isEndOfValue(c, endChr))) {
+    if (c === 95) {
+      if (underscore & 1)
+        TomlError.x("illegal underscore", ctx);
+      underscore = 3;
+    } else if (!isDigit(c, base))
+      TomlError.x(`illegal character in numeric literal`, ctx);
+    else if (underscore & 1)
+      underscore--;
+  }
+  if (underscore & 1)
+    TomlError.x("unfinished numeric value", ctx);
+  let str = ctx.s.slice(startPtr + 2, ctx.p);
+  if (underscore)
+    str = str.replaceAll("_", "");
+  return parseInteger(ctx, str, base, startPtr);
+}
+function parseInteger(ctx, str, base, startPtr) {
+  if (ctx.bi !== true)
+    int: {
+      let val = parseInt(str, base);
+      if (!Number.isSafeInteger(val)) {
+        if (ctx.bi)
+          break int;
+        TomlError.x("integer value cannot be represented losslessly", ctx, startPtr);
+      }
+      return val;
+    }
+  return base === 10 ? BigInt(str) : BigInt((base === 2 ? "0b" : base === 8 ? "0o" : "0x") + str);
+}
+function parseDate(ctx, c, endChr) {
+  let startPtr = ctx.p++, unsafeSeparator;
+  if (!isDigit(c) || !isDigit(ctx.s.charCodeAt(ctx.p++)) || !isDigit(ctx.s.charCodeAt(ctx.p++)) || !isDigit(ctx.s.charCodeAt(ctx.p++))) {
+    return parseNumber(ctx, ctx.p = startPtr, c, 0, endChr);
+  }
+  ctx.p += 5;
+  if (!isDigit(ctx.s.charCodeAt(ctx.p++)))
+    TomlError.x("invalid date-time: date part is malformed", ctx, startPtr);
+  if (ctx.p >= ctx.s.length || ((c = ctx.s.charCodeAt(ctx.p)) !== 32 || (unsafeSeparator = true, !isDigit(ctx.s.charCodeAt(ctx.p + 1)))) && c !== 84 && c !== 116) {
+    let t2 = ctx.s.slice(startPtr, ctx.p);
+    return readDate(ctx, t2, 3, false, startPtr);
+  }
+  if (ctx.s.charCodeAt(ctx.p += 3) !== 58)
+    TomlError.x("invalid date-time: time part is malformed", ctx, startPtr);
+  if (ctx.s.charCodeAt(ctx.p += 3) === 58)
+    ctx.p += 3;
+  if (ctx.s.charCodeAt(ctx.p) === 46)
+    while (isDigit(ctx.s.charCodeAt(++ctx.p)))
+      ;
+  if (c = ctx.s.charCodeAt(ctx.p)) {
+    if (c === 90 || c === 122) {
+      let t2 = ctx.s.slice(startPtr, ++ctx.p);
+      return readDate(ctx, t2, 1, unsafeSeparator, startPtr, "[+00:00]");
+    }
+    if (c === 43 || c === 45) {
+      let t2 = ctx.s.slice(startPtr, ctx.p += 6);
+      return readDate(ctx, t2, 1, unsafeSeparator, startPtr, !ctx.ld && "[" + ctx.s.slice(ctx.p - 6, ctx.p) + "]");
+    }
+  }
+  let t = ctx.s.slice(startPtr, ctx.p);
+  return readDate(ctx, t, 2, unsafeSeparator, startPtr);
+}
+function parseTime(ctx, c, endChr) {
+  let start = ctx.p;
+  if (!isDigit(c) || !isDigit(ctx.s.charCodeAt(++ctx.p))) {
+    return parseNumber(ctx, --ctx.p, c, 0, endChr);
+  }
+  if (ctx.s.charCodeAt(ctx.p += 4) === 58)
+    ctx.p += 3;
+  if (ctx.s.charCodeAt(ctx.p) === 46)
+    while (isDigit(ctx.s.charCodeAt(++ctx.p)))
+      ;
+  let t = ctx.s.slice(start, ctx.p);
+  return readDate(ctx, t, 4, false, start);
+}
+function readDate(ctx, str, type, unsafeDelim, errPtr, temporalSuffix) {
+  if (ctx.ld) {
+    let date = new TomlDate(str, type, unsafeDelim);
+    if (!date.isValid())
+      TomlError.x("invalid date", ctx, errPtr);
+    return date;
+  }
+  try {
+    if (temporalSuffix)
+      str += temporalSuffix;
+    switch (type) {
+      case 1:
+        return Temporal.ZonedDateTime.from(str);
+      case 2:
+        return Temporal.PlainDateTime.from(str);
+      case 3:
+        return Temporal.PlainDate.from(str);
+      case 4:
+        return Temporal.PlainTime.from(str);
+    }
+  } catch (e) {
+    TomlError.x(e instanceof Error ? e.message : "" + e, ctx, errPtr);
+  }
+}
+
+// node_modules/smol-toml/dist/util.js
+function skipComment(ctx) {
+  for (; ctx.p < ctx.s.length; ctx.p++) {
+    let c = ctx.s.charCodeAt(ctx.p);
+    if (c === 10)
+      break;
+    if (c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10) {
+      ctx.p++;
+      break;
+    }
+    if (c < 32 && c !== 9 || c === 127) {
+      TomlError.x("control characters are not allowed in comments", ctx);
+    }
+  }
+}
+function skipVoid(ctx, banNewLines, banComments) {
+  let c;
+  while (ctx.p < ctx.s.length) {
+    while (ctx.p < ctx.s.length && ((c = ctx.s.charCodeAt(ctx.p)) === 32 || c === 9 || !banNewLines && (c === 10 || c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10)))
+      ctx.p++;
+    if (banComments || c !== 35)
+      break;
+    skipComment(ctx);
+  }
+}
+
+// node_modules/smol-toml/dist/struct.js
+function parseKey(ctx, end = 61) {
+  let startPtr;
+  let state = 0;
+  let parsed = [];
+  let sliceStart;
+  let c = ctx.s.charCodeAt(startPtr = ctx.p);
+  do {
+    if (c === end) {
+      if (!state)
+        TomlError.x("unexpected end of key", ctx);
+      if (state === 1)
+        parsed.push(ctx.s.slice(sliceStart, ctx.p));
+      return ctx.p++, parsed;
+    } else if (c === 46) {
+      if (!state)
+        TomlError.x("illegal empty bare key", ctx);
+      if (state === 1)
+        parsed.push(ctx.s.slice(sliceStart, ctx.p));
+      state = 0;
+    } else if (!state && (c === 34 || c === 39)) {
+      if (c === ctx.s.charCodeAt(ctx.p + 1) && c === ctx.s.charCodeAt(ctx.p + 2))
+        TomlError.x("illegal quoted key: multiline strings are not allowed", ctx);
+      parsed.push(parseString(ctx));
+      state = 2;
+      ctx.p--;
+    } else if (c === 32 || c === 9) {
+      if (state === 1) {
+        parsed.push(ctx.s.slice(sliceStart, ctx.p));
+        state = 2;
+      }
+    } else if (state === 2 || c < 48 && c !== 45 || c > 57 && c < 65 || c > 90 && c < 97 && c !== 95 || c > 122) {
+      TomlError.x("illegal character in key", ctx);
+    } else if (!state) {
+      state = 1;
+      sliceStart = ctx.p;
+    }
+  } while (c = ctx.s.charCodeAt(++ctx.p));
+  TomlError.x("incomplete key-value: cannot find end of key", ctx, startPtr);
+}
+function parseInlineTable(ctx) {
+  let startPtr = ctx.p++;
+  let res = /* @__PURE__ */ Object.create(null);
+  let seen = /* @__PURE__ */ new Set();
+  let c;
+  while (ctx.p < ctx.s.length) {
+    skipVoid(ctx);
+    if ((c = ctx.s.charCodeAt(ctx.p)) === 125) {
+      ctx.p++;
+      return res;
+    }
+    let k;
+    let t = res;
+    let hasOwn = false;
+    let errPtr = ctx.p;
+    let key = parseKey(ctx);
+    for (let i = 0; i < key.length; i++) {
+      if (i)
+        t = hasOwn ? t[k] : t[k] = /* @__PURE__ */ Object.create(null);
+      k = key[i];
+      if ((hasOwn = Object.hasOwn(t, k)) && (typeof t[k] !== "object" || seen.has(t[k]))) {
+        TomlError.x("trying to redefine an already defined value", ctx, errPtr);
+      }
+      let unsafe = k === "__proto__";
+      if (ctx.uk && (unsafe || k === "constructor")) {
+        t = ctx.uk !== 1 && TomlError.x("document contains an unsafe property", ctx, errPtr);
+        break;
+      }
+      if (!hasOwn && unsafe) {
+        Object.defineProperty(t, k, { enumerable: true, configurable: true, writable: true });
+      }
+    }
+    if (hasOwn) {
+      TomlError.x("trying to redefine an already defined value", ctx, errPtr);
+    }
+    skipVoid(ctx, true, true);
+    let value = extractValue(
+      ctx,
+      125
+      /* } */
+    );
+    if (t && typeof (t[k] = value) === "object")
+      seen.add(value);
+    skipVoid(ctx);
+    if ((c = ctx.s.charCodeAt(ctx.p++)) === 125) {
+      return res;
+    }
+    if (c !== 44)
+      TomlError.x("expected comma or end of structure", ctx, ctx.p - 1);
+  }
+  TomlError.x("unfinished table", ctx, startPtr);
+}
+function parseArray(ctx) {
+  let startPtr = ctx.p++;
+  let res = [];
+  let c;
+  while (ctx.p < ctx.s.length) {
+    skipVoid(ctx);
+    if ((c = ctx.s.charCodeAt(ctx.p)) === 93) {
+      ctx.p++;
+      return res;
+    }
+    res.push(extractValue(
+      ctx,
+      93
+      /* ] */
+    ));
+    skipVoid(ctx);
+    if ((c = ctx.s.charCodeAt(ctx.p++)) === 93) {
+      return res;
+    }
+    if (c !== 44)
+      TomlError.x("expected comma or end of structure", ctx, ctx.p - 1);
+  }
+  TomlError.x("unfinished array", ctx, startPtr);
+}
+
+// node_modules/smol-toml/dist/parse.js
+function peekTable(ctx, key, table, meta, type) {
+  let t = table;
+  let m = meta;
+  let k;
+  let hasOwn = false;
+  let state;
+  for (let i = 0; i < key.length; i++) {
+    if (i) {
+      t = hasOwn ? t[k] : t[k] = /* @__PURE__ */ Object.create(null);
+      m = (state = m[k]).c;
+      if (type === 0 && (state.t === 1 || state.t === 2)) {
+        return null;
+      }
+      if (state.t === 2) {
+        let l = t.length - 1;
+        t = t[l];
+        m = m[l].c;
+      }
+    }
+    k = key[i];
+    if ((hasOwn = Object.hasOwn(t, k)) && m[k]?.t === 0 && m[k]?.d) {
+      return null;
+    }
+    if (!hasOwn) {
+      let unsafe = k === "__proto__";
+      if (ctx.uk && (unsafe || k === "constructor"))
+        return false;
+      if (unsafe) {
+        Object.defineProperty(t, k, { enumerable: true, configurable: true, writable: true });
+        Object.defineProperty(m, k, { enumerable: true, configurable: true, writable: true });
+      }
+      m[k] = {
+        t: i < key.length - 1 && type === 2 ? 3 : type,
+        d: false,
+        i: 0,
+        c: /* @__PURE__ */ Object.create(null)
+      };
+    }
+  }
+  state = m[k];
+  if (state.t !== type && !(type === 1 && state.t === 3)) {
+    return null;
+  }
+  if (type === 2) {
+    if (!state.d) {
+      state.d = true;
+      t[k] = [];
+    }
+    t[k].push(t = /* @__PURE__ */ Object.create(null));
+    state.c[state.i++] = state = { t: 1, d: false, i: 0, c: /* @__PURE__ */ Object.create(null) };
+  }
+  if (state.d) {
+    return null;
+  }
+  state.d = true;
+  if (type === 1) {
+    t = hasOwn ? t[k] : t[k] = /* @__PURE__ */ Object.create(null);
+  } else if (type === 0 && hasOwn) {
+    return null;
+  }
+  return [k, t, state.c];
+}
+function validateTablePeek(ctx, peek, ptr) {
+  if (peek === null || ctx.uk === 2)
+    TomlError.x(peek === null ? "trying to redefine an already defined table or value" : "document contains an unsafe property", ctx, ptr);
+}
+function parse(toml, options = {}) {
+  let ctx = {
+    s: toml,
+    p: 0,
+    d: options.maxDepth ?? 1e3,
+    bi: options.integersAsBigInt ?? false,
+    ld: options.useLegacyDate ?? true,
+    uk: options.unsafeKeyBehaviour === "throw" ? 2 : options.unsafeKeyBehaviour === "drop" ? 1 : 0
+  };
+  let res = /* @__PURE__ */ Object.create(null);
+  let meta = /* @__PURE__ */ Object.create(null);
+  let tmp;
+  let skipping = false;
+  let tbl = res;
+  let m = meta;
+  if (toml.charCodeAt(0) === 65279)
+    ctx.p++;
+  skipVoid(ctx);
+  while (ctx.p < toml.length) {
+    if (toml.charCodeAt(ctx.p) === 91) {
+      let isTableArray = toml.charCodeAt(++ctx.p) === 91;
+      tmp = ctx.p += +isTableArray;
+      skipping = false;
+      let k = parseKey(
+        ctx,
+        93
+        /* ] */
+      );
+      if (isTableArray) {
+        if (toml.charCodeAt(ctx.p) !== 93) {
+          TomlError.x("expected end of table array declaration", ctx);
+        }
+        ctx.p++;
+      }
+      let p = peekTable(
+        ctx,
+        k,
+        res,
+        meta,
+        isTableArray ? 2 : 1
+        /* Type.EXPLICIT */
+      );
+      if (!p) {
+        validateTablePeek(ctx, p, tmp);
+        skipping = true;
+      } else {
+        m = p[2];
+        tbl = p[1];
+      }
+    } else {
+      tmp = ctx.p;
+      let k = parseKey(ctx);
+      let p = peekTable(
+        ctx,
+        k,
+        tbl,
+        m,
+        0
+        /* Type.DOTTED */
+      );
+      if (!p && !skipping)
+        validateTablePeek(ctx, p, tmp);
+      skipVoid(ctx, true, true);
+      let v = extractValue(ctx, void 0);
+      if (p && !skipping)
+        p[1][p[0]] = v;
+    }
+    skipVoid(ctx, true);
+    if (ctx.p < toml.length && (tmp = toml.charCodeAt(ctx.p)) !== 10 && (tmp !== 13 || toml.charCodeAt(ctx.p + 1) !== 10)) {
+      TomlError.x("each key-value declaration must be followed by an end-of-line", ctx);
+    }
+    skipVoid(ctx);
+  }
+  return res;
+}
+
+// node_modules/smol-toml/dist/stringify.js
+var HAS_WELLFORMED = !!"".isWellFormed;
+
+// src/native-pets.ts
+var BUILTIN_PET_CATALOG = [
+  { id: "codex", displayName: "Codex", source: "builtin" },
+  { id: "dewey", displayName: "Dewey", source: "builtin" },
+  { id: "fireball", displayName: "Fireball", source: "builtin" },
+  { id: "hoots", displayName: "Hoots", source: "builtin" },
+  { id: "rocky", displayName: "Rocky", source: "builtin" },
+  { id: "seedy", displayName: "Seedy", source: "builtin" },
+  { id: "stacky", displayName: "Stacky", source: "builtin" },
+  { id: "bsod", displayName: "BSOD", source: "builtin" },
+  { id: "null-signal", displayName: "Null Signal", source: "builtin" }
+];
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function selection(value, source) {
+  return { selectedPetId: value, genpetSelected: source === "unavailable" ? null : value === "custom:genpet-companion", source, liveVerified: false };
+}
+async function optionalText(file) {
+  try {
+    return await readFile6(file, "utf8");
+  } catch (error) {
+    if (error.code === "ENOENT") return void 0;
+    throw error;
+  }
+}
+async function readSelection(home, errors) {
+  let config;
+  try {
+    config = await optionalText(path9.join(home, "config.toml"));
+  } catch {
+    errors.push("config.toml: \u65E0\u6CD5\u8BFB\u53D6\u9009\u62E9\u8BBE\u7F6E");
+    return selection(null, "unavailable");
+  }
+  if (config !== void 0) {
+    let parsed;
+    try {
+      parsed = parse(config, { integersAsBigInt: true });
+    } catch {
+      errors.push("config.toml: TOML \u683C\u5F0F\u65E0\u6548\uFF0C\u65E0\u6CD5\u786E\u5B9A\u9009\u62E9\u8BBE\u7F6E");
+      return selection(null, "unavailable");
+    }
+    const desktop = parsed.desktop;
+    if (desktop !== void 0 && !isRecord(desktop)) {
+      errors.push("config.toml: desktop \u5FC5\u987B\u662F\u8868");
+      return selection(null, "unavailable");
+    }
+    if (isRecord(desktop) && Object.hasOwn(desktop, "selected-avatar-id")) {
+      const value = desktop["selected-avatar-id"];
+      if (typeof value !== "string") {
+        errors.push("config.toml: selected-avatar-id \u5FC5\u987B\u662F\u5B57\u7B26\u4E32");
+        return selection(null, "unavailable");
+      }
+      return selection(value, "config");
+    }
+  }
+  let legacy;
+  try {
+    legacy = await optionalText(path9.join(home, ".codex-global-state.json"));
+  } catch {
+    errors.push(".codex-global-state.json: \u65E0\u6CD5\u8BFB\u53D6\u65E7\u9009\u62E9\u8BBE\u7F6E");
+    return selection(null, "unavailable");
+  }
+  if (legacy !== void 0) {
+    try {
+      const state = JSON.parse(legacy);
+      if (!isRecord(state)) throw new Error("Invalid state");
+      const atoms = state["electron-persisted-atom-state"];
+      if (atoms !== void 0 && !isRecord(atoms)) throw new Error("Invalid atoms");
+      if (isRecord(atoms) && Object.hasOwn(atoms, "selected-avatar-id")) {
+        const value = atoms["selected-avatar-id"];
+        if (value !== null && typeof value !== "string") throw new Error("Invalid selection");
+        return selection(value, "legacy");
+      }
+    } catch {
+      errors.push(".codex-global-state.json: \u65E7\u9009\u62E9\u8BBE\u7F6E\u683C\u5F0F\u65E0\u6548");
+      return selection(null, "unavailable");
+    }
+  }
+  return selection("codex", "default");
+}
+async function localPets(home, errors) {
+  const pets = /* @__PURE__ */ new Map();
+  for (const [directory, filename] of [["avatars", "avatar.json"], ["pets", "pet.json"]]) {
+    let entries;
+    try {
+      entries = await readdir3(path9.join(home, directory), { withFileTypes: true });
+    } catch (error) {
+      if (error.code !== "ENOENT") errors.push(`${directory}: \u65E0\u6CD5\u8BFB\u53D6\u5BA0\u7269\u76EE\u5F55`);
+      continue;
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
+      const label = `${directory}/${entry.name}/${filename}`;
+      try {
+        const text = await optionalText(path9.join(home, directory, entry.name, filename));
+        if (text === void 0) continue;
+        const manifest = JSON.parse(text);
+        if (!isRecord(manifest)) throw new Error("Invalid manifest");
+        for (const key of ["id", "displayName"]) {
+          if (manifest[key] !== void 0 && (typeof manifest[key] !== "string" || !manifest[key].trim())) throw new Error("Invalid name");
+        }
+        const id = `custom:${entry.name}`;
+        const displayName = (manifest.displayName ?? manifest.id ?? entry.name).trim();
+        pets.set(id, { id, displayName, source: "local" });
+      } catch {
+        errors.push(`${label}: \u65E0\u6CD5\u8BFB\u53D6\u6709\u6548\u5BA0\u7269\u6E05\u5355`);
+      }
+    }
+  }
+  return [...pets.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
+}
+async function getNativePetCatalog(home = process.env.CODEX_HOME || path9.join(homedir5(), ".codex")) {
+  const errors = [];
+  const selected = await readSelection(home, errors);
+  const local = await localPets(home, errors);
+  return {
+    pets: [...BUILTIN_PET_CATALOG.map((pet) => ({ ...pet })), ...local],
+    selection: selected,
+    activation: { immediate: false, reason: "\u5F53\u524D\u4E3A\u78C1\u76D8\u5FEB\u7167\uFF1B\u5373\u65F6\u5207\u6362\u9700\u8981\u53EF\u7528\u7684 Codex app-tools \u4F1A\u8BDD\u901A\u9053\u3002" },
+    ...errors.length ? { errors } : {}
+  };
+}
+
+// src/native-pet-live.ts
+import { randomUUID as randomUUID5 } from "node:crypto";
+import net2 from "node:net";
+var maxFrameBytes = 8 * 1024 * 1024;
+var selectedKey = "selected-avatar-id";
+function record2(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function connection(options) {
+  const pipePath = (Object.hasOwn(options, "pipePath") ? options.pipePath : process.env.CODEX_APP_TOOLS_PIPE_PATH)?.trim();
+  const threadId = (Object.hasOwn(options, "threadId") ? options.threadId : process.env.CODEX_THREAD_ID)?.trim();
+  if (!pipePath || !threadId) throw new Error("The current Codex app tools pipe and thread ID are unavailable.");
+  if (process.platform === "win32" && !pipePath.startsWith("\\\\.\\pipe\\")) {
+    throw new Error("Expected a local Windows named pipe for Codex app tools.");
+  }
+  const timeoutMs = options.timeoutMs ?? 5e3;
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error("The Codex app tools timeout must be positive.");
+  return { pipePath, threadId, timeoutMs };
+}
+function frame(message) {
+  const payload = Buffer.from(JSON.stringify(message));
+  const header = Buffer.alloc(4);
+  header.writeUInt32LE(payload.length);
+  return Buffer.concat([header, payload]);
+}
+function projectSelection(value) {
+  if (!record2(value) || !record2(value.settings) || !record2(value.effectiveSettings)) {
+    throw new Error("Codex returned an invalid settings response.");
+  }
+  const selectedPetId = value.settings[selectedKey] ?? null;
+  const effectiveSelectedPetId = value.effectiveSettings[selectedKey] ?? null;
+  if (selectedPetId !== null && typeof selectedPetId !== "string" || effectiveSelectedPetId !== null && typeof effectiveSelectedPetId !== "string") {
+    throw new Error("Codex returned an invalid pet selection.");
+  }
+  return { selectedPetId, effectiveSelectedPetId };
+}
+async function requestSelection(options, petId) {
+  const { pipePath, threadId, timeoutMs } = connection(options);
+  const id = 1;
+  const request = {
+    jsonrpc: "2.0",
+    id,
+    method: "tools/call",
+    params: {
+      namespace: "codex_app",
+      tool: petId === void 0 ? "read_settings" : "write_settings",
+      arguments: petId === void 0 ? { include_config: false } : { settings: { [selectedKey]: petId } },
+      callerSource: "codex",
+      threadId,
+      callId: `mcp-call-${randomUUID5()}`,
+      // These fallbacks follow the bundled app-tools MCP's request metadata.
+      turnId: `mcp-turn-${randomUUID5()}`
+    }
+  };
+  return new Promise((resolve, reject) => {
+    const socket = net2.createConnection(pipePath);
+    let pending = Buffer.alloc(0);
+    let settled = false;
+    let sent = false;
+    const finish = (error, result2, cancel = false) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (cancel && sent && !socket.destroyed) {
+        socket.end(frame({ jsonrpc: "2.0", id, method: "tools/cancel" }));
+        socket.destroySoon();
+      } else socket.destroy();
+      if (error) reject(error);
+      else resolve(result2);
+    };
+    const timer = setTimeout(() => finish(new Error("Codex app tools timed out; the current selection is unconfirmed."), void 0, true), timeoutMs);
+    socket.once("connect", () => {
+      sent = true;
+      socket.write(frame(request));
+    });
+    socket.on("error", (error) => finish(new Error(`Codex app tools connection failed (${error.code ?? "socket error"}).`)));
+    socket.on("close", () => finish(new Error("Codex app tools closed before confirming the pet selection.")));
+    socket.on("data", (bytes) => {
+      if (settled) return;
+      pending = Buffer.concat([pending, bytes]);
+      while (pending.length >= 4) {
+        const length = pending.readUInt32LE(0);
+        if (length > maxFrameBytes) return finish(new Error("Codex app tools response exceeded the size limit."));
+        if (pending.length < length + 4) return;
+        let response;
+        try {
+          response = JSON.parse(pending.subarray(4, length + 4).toString("utf8"));
+        } catch {
+          return finish(new Error("Codex app tools returned invalid JSON."));
+        }
+        pending = pending.subarray(length + 4);
+        if (!record2(response) || response.id !== id) continue;
+        if (response.error !== void 0) return finish(new Error("Codex rejected the app tool request."));
+        const result2 = response.result;
+        if (!record2(result2) || result2.success !== true || !Array.isArray(result2.contentItems)) {
+          return finish(new Error("Codex could not complete the pet settings request."));
+        }
+        const item = result2.contentItems.find((item2) => record2(item2) && item2.type === "inputText");
+        if (!record2(item) || typeof item.text !== "string") return finish(new Error("Codex returned no pet settings result."));
+        try {
+          finish(void 0, projectSelection(JSON.parse(item.text)));
+        } catch {
+          finish(new Error("Codex returned an invalid pet settings result."));
+        }
+      }
+    });
+  });
+}
+async function readNativePetLive(options = {}) {
+  try {
+    return { available: true, ...await requestSelection(options) };
+  } catch (error) {
+    return { available: false, reason: error instanceof Error ? error.message : "Live Codex pet selection is unavailable." };
+  }
+}
+async function selectNativePetLive(petId, options = {}) {
+  if (typeof petId !== "string" || petId.trim() !== petId || petId.length === 0 || petId.length > 512 || /[\x00-\x1f\x7f]/.test(petId)) {
+    throw new Error("A valid pet ID is required.");
+  }
+  await requestSelection(options, petId);
+  const result2 = await requestSelection(options);
+  if (result2.selectedPetId !== petId || result2.effectiveSelectedPetId !== petId) {
+    throw new Error("The live Codex selection did not match the requested pet; its current selection is unconfirmed.");
+  }
+  return { ...result2, immediate: true, restartRequired: false, hostStateConfirmed: true, visualVerified: false };
+}
+
 // src/cli.ts
 var argv = process.argv.slice(2);
 var demo = argv[0] === "--demo";
@@ -4652,6 +5666,31 @@ try {
     case "debugger":
       output = await launchDebugger();
       break;
+    case "switch-pet": {
+      if (demo) throw new Error("switch-pet controls the real Codex desktop and cannot run with --demo.");
+      const usage = "Usage: switch-pet [PET_ID|--current|--list|--help]";
+      if (args.length > 1) throw new Error(usage);
+      const target = args[0] ?? "--current";
+      if (target === "--help") {
+        output = { usage, examples: ["switch-pet --list", "switch-pet --current", "switch-pet dewey", "switch-pet custom:genpet-companion"] };
+        break;
+      }
+      if (target === "--current") {
+        const current = await readNativePetLive();
+        if (!current.available) throw new Error(`${current.reason} Run this command from a local Codex desktop chat with its app-tools connection.`);
+        output = current;
+        break;
+      }
+      if (target.startsWith("-") && target !== "--list") throw new Error(usage);
+      const catalog = await getNativePetCatalog();
+      if (target === "--list") {
+        output = { pets: catalog.pets, ...catalog.errors ? { errors: catalog.errors } : {} };
+        break;
+      }
+      if (!catalog.pets.some((pet) => pet.id === target)) throw new Error(`Unknown pet ID: ${target}. Use switch-pet --list to see builtin and local pet IDs.`);
+      output = await selectNativePetLive(target);
+      break;
+    }
     case "status":
       output = await store.current();
       break;
@@ -4708,15 +5747,15 @@ try {
       });
       break;
     case "debug-reset":
-      output = await debugReset(store, args[0] || randomUUID5());
+      output = await debugReset(store, args[0] || randomUUID6());
       break;
     case "debug-grow": {
       const value = args[0] || "next";
-      output = await debugGrow(store, args[1] || randomUUID5(), /^\d+$/.test(value) ? "next" : value, /^\d+$/.test(value) ? Number(value) : void 0);
+      output = await debugGrow(store, args[1] || randomUUID6(), /^\d+$/.test(value) ? "next" : value, /^\d+$/.test(value) ? Number(value) : void 0);
       break;
     }
     case "debug-state":
-      output = await debugState(store, args[1] || randomUUID5(), args[0]);
+      output = await debugState(store, args[1] || randomUUID6(), args[0]);
       break;
     case "accept-art": {
       const [requestId, file, kind, ...provenance] = args;
@@ -4729,16 +5768,55 @@ try {
       break;
     case "refresh-native": {
       const s = await store.current();
-      const destination = path9.join(process.env.CODEX_HOME || path9.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion");
-      const manifest = JSON.parse(await (await import("node:fs/promises")).readFile(path9.join(destination, "pet.json"), "utf8"));
-      output = await refreshNativePet({ expectedSpritePath: path9.join(destination, manifest.spritesheetPath) });
+      const destination = path10.join(process.env.CODEX_HOME || path10.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion");
+      const manifest = JSON.parse(await (await import("node:fs/promises")).readFile(path10.join(destination, "pet.json"), "utf8"));
+      output = await refreshNativePet({ expectedSpritePath: path10.join(destination, manifest.spritesheetPath) });
       break;
     }
     default:
-      throw new Error("Commands: debugger; [--demo] status, tick, adopt [name] [sage|peach|sky|lilac], art-request, configure key=value..., clear-context, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>");
+      throw new Error("Commands: debugger; switch-pet [PET_ID|--current|--list|--help]; [--demo] status, tick, adopt [name] [sage|peach|sky|lilac], art-request, configure key=value..., clear-context, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>");
   }
   console.log(JSON.stringify(output, null, 2));
 } catch (e) {
   console.error(e.message);
   process.exitCode = 1;
 }
+/*! Bundled license information:
+
+smol-toml/dist/error.js:
+smol-toml/dist/primitive.js:
+smol-toml/dist/date.js:
+smol-toml/dist/extract.js:
+smol-toml/dist/util.js:
+smol-toml/dist/struct.js:
+smol-toml/dist/parse.js:
+smol-toml/dist/stringify.js:
+smol-toml/dist/index.js:
+  (*!
+   * Copyright (c) Squirrel Chat et al., All rights reserved.
+   * SPDX-License-Identifier: BSD-3-Clause
+   *
+   * Redistribution and use in source and binary forms, with or without
+   * modification, are permitted provided that the following conditions are met:
+   *
+   * 1. Redistributions of source code must retain the above copyright notice, this
+   *    list of conditions and the following disclaimer.
+   * 2. Redistributions in binary form must reproduce the above copyright notice,
+   *    this list of conditions and the following disclaimer in the
+   *    documentation and/or other materials provided with the distribution.
+   * 3. Neither the name of the copyright holder nor the names of its contributors
+   *    may be used to endorse or promote products derived from this software without
+   *    specific prior written permission.
+   *
+   * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+   * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+   * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+   * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+   * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+   * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+   * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+   * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+   * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+   *)
+*/
