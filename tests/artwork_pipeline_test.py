@@ -181,6 +181,26 @@ class ArtworkPipelineTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Regenerate only jumping"):
             register_frames(images, jump_reference=reference)
 
+    def test_jump_overflow_feedback_matches_the_failed_edges(self):
+        reference = Image.new("RGBA", (192, 208))
+        ImageDraw.Draw(reference).rectangle((56, 10, 135, 199), fill="white")
+        for dx, dy, expected in [(80, 0, "right=26px"), (-80, 0, "left=26px"),
+                                 (0, -30, "top=22px"), (0, 30, "bottom=24px"),
+                                 (80, -30, "right=26px, top=22px")]:
+            with self.subTest(dx=dx, dy=dy):
+                images = []
+                for x, y in [(0, 0), (dx, dy), (dx, dy), (dx, dy), (0, 0)]:
+                    frame = Image.new("RGBA", (500, 500))
+                    ImageDraw.Draw(frame).rectangle((150+x, 150+y, 229+x, 339+y), fill="white")
+                    images.append(frame)
+                with self.assertRaises(ValueError) as raised:
+                    register_frames(images, jump_reference=reference)
+                message = str(raised.exception)
+                self.assertIn(expected, message)
+                self.assertEqual("align poses horizontally" in message, dx != 0)
+                self.assertEqual("reduce upward excursion" in message, dy < 0)
+                self.assertEqual("landing feet" in message, dy > 0)
+
     def test_prepare_stage_profiles(self):
         for flag, profile in (("--egg", "genpet-egg-three"), ("--parallel", "genpet-parallel")):
             directory = self.run / profile

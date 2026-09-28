@@ -267,9 +267,22 @@ def register_frames(images, origins=None, jump_reference=None):
                             ((anchor[0] + anchor[2]) / 2 - left) * scale)
         target_top = round(reference[3] - (anchor[3] - top) * scale)
     size = (max(1, round(width * scale)), max(1, round(height * scale)))
-    if jump_reference is not None and (target_left < 2 or target_top < 2 or
-            target_left + size[0] > CELL_WIDTH - 2 or target_top + size[1] > CELL_HEIGHT - 2):
-        raise ValueError("Jump does not fit at idle size. Regenerate only jumping with a smaller vertical excursion and idle-matching grounded poses; do not shrink idle or the jump body.")
+    if jump_reference is not None:
+        overflow = {"left": max(0, 2 - target_left),
+                    "right": max(0, target_left + size[0] - (CELL_WIDTH - 2)),
+                    "top": max(0, 2 - target_top),
+                    "bottom": max(0, target_top + size[1] - (CELL_HEIGHT - 2))}
+        fixes = []
+        if overflow["left"] or overflow["right"]:
+            fixes.append("align poses horizontally within equal slots and preserve the idle-matching compact grounded width")
+        if overflow["top"]:
+            fixes.append("reduce upward excursion while preserving body size")
+        if overflow["bottom"]:
+            fixes.append("keep landing feet at the initial ground baseline without downward drift")
+        if fixes:
+            details = ", ".join(f"{edge}={pixels}px" for edge, pixels in overflow.items() if pixels)
+            raise ValueError(f"Jump does not fit at idle size ({details}). Regenerate only jumping: "
+                             + "; ".join(fixes) + ". Do not shrink idle or the jump body.")
     frames = []
     for image, (x, y) in zip(images, origins):
         viewport = Image.new("RGBA", (width, height))
