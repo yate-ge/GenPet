@@ -243,7 +243,7 @@ def component_frame_groups(
     return groups
 
 
-def register_frames(images, origins=None):
+def register_frames(images, origins=None, jump_reference=None):
     """One affine transform for the entire row; preserve temporal x/y offsets."""
     origins = origins or [(0, 0)] * len(images)
     boxes = [(bbox[0] + x, bbox[1] + y, bbox[2] + x, bbox[3] + y)
@@ -254,7 +254,22 @@ def register_frames(images, origins=None):
     right, bottom = max(b[2] for b in boxes), max(b[3] for b in boxes)
     width, height = right - left, bottom - top
     scale = min((CELL_WIDTH - 10) / width, (CELL_HEIGHT - 10) / height, 1.0)
+    target_left = target_top = None
+    if jump_reference is not None:
+        reference = jump_reference.getbbox()
+        if reference is None or len(boxes) != len(images):
+            raise ValueError("Jump registration requires a visible idle reference and five complete poses")
+        # The first grounded pose must have the same compact silhouette as idle.
+        # Use its width, not crouch height or the entire airborne trajectory.
+        anchor = boxes[0]
+        scale = (reference[2] - reference[0]) / (anchor[2] - anchor[0])
+        target_left = round((reference[0] + reference[2]) / 2 -
+                            ((anchor[0] + anchor[2]) / 2 - left) * scale)
+        target_top = round(reference[3] - (anchor[3] - top) * scale)
     size = (max(1, round(width * scale)), max(1, round(height * scale)))
+    if jump_reference is not None and (target_left < 2 or target_top < 2 or
+            target_left + size[0] > CELL_WIDTH - 2 or target_top + size[1] > CELL_HEIGHT - 2):
+        raise ValueError("Jump does not fit at idle size. Regenerate only jumping with a smaller vertical excursion and idle-matching grounded poses; do not shrink idle or the jump body.")
     frames = []
     for image, (x, y) in zip(images, origins):
         viewport = Image.new("RGBA", (width, height))
@@ -262,19 +277,22 @@ def register_frames(images, origins=None):
         if viewport.size != size:
             viewport = viewport.resize(size, Image.Resampling.LANCZOS)
         target = Image.new("RGBA", (CELL_WIDTH, CELL_HEIGHT))
-        target.alpha_composite(viewport, ((CELL_WIDTH - size[0]) // 2, (CELL_HEIGHT - size[1]) // 2))
+        position = ((CELL_WIDTH - size[0]) // 2, (CELL_HEIGHT - size[1]) // 2)
+        if jump_reference is not None:
+            position = (target_left, target_top)
+        target.alpha_composite(viewport, position)
         frames.append(target)
     return frames
 
 
-def extract_component_frames(strip: Image.Image, frame_count: int) -> list[Image.Image] | None:
+def extract_component_frames(strip: Image.Image, frame_count: int, jump_reference=None) -> list[Image.Image] | None:
     groups = component_frame_groups(strip, frame_count)
     if groups is None:
         return None
     images = [component_group_image(strip, group, padding=0) for group in groups]
     origins = [(component_bounds(group)[0] - round(i * strip.width / frame_count), component_bounds(group)[1])
                for i, group in enumerate(groups)]
-    return register_frames(images, origins)
+    return register_frames(images, origins, jump_reference)
 
 
 def component_bounds(components: list[dict[str, object]]) -> tuple[int, int, int, int]:
@@ -286,13 +304,13 @@ def component_bounds(components: list[dict[str, object]]) -> tuple[int, int, int
     )
 
 
-def extract_slot_frames(strip: Image.Image, frame_count: int) -> list[Image.Image]:
-    return register_frames(slot_crops(strip, frame_count))
+def extract_slot_frames(strip: Image.Image, frame_count: int, jump_reference=None) -> list[Image.Image]:
+    return register_frames(slot_crops(strip, frame_count), jump_reference=jump_reference)
 
 
-def extract_stable_slot_frames(strip: Image.Image, frame_count: int) -> list[Image.Image]:
-    frames = extract_component_frames(strip, frame_count)
-    return frames if frames is not None else extract_slot_frames(strip, frame_count)
+def extract_stable_slot_frames(strip: Image.Image, frame_count: int, jump_reference=None) -> list[Image.Image]:
+    frames = extract_component_frames(strip, frame_count, jump_reference)
+    return frames if frames is not None else extract_slot_frames(strip, frame_count, jump_reference)
 
 
 def extract_state(
@@ -302,7 +320,10 @@ def extract_state(
     chroma_key: tuple[int, int, int],
     threshold: float,
     method: str,
+    jump_reference=None,
 ) -> dict[str, object]:
+    if jump_reference is not None and state != "jumping":
+        raise ValueError("Idle-reference registration is only supported for jumping")
     frame_count = 8 if state in ("look-row-9", "look-row-10") else ROW_FRAME_COUNTS[state]
     with Image.open(strip_path) as opened:
         strip, cleanup = clean_strip(opened, frame_count)
@@ -314,18 +335,20 @@ def extract_state(
     used_method = method
     if method == "auto":
         crops = slot_crops(strip, frame_count)
-        frames = register_frames(crops)
+        frames = register_frames(crops) if jump_reference is None else None
         # Prefer the declared grid. Uneven layouts fall back deterministically to
         # components only when a slot is empty or a cut intersects visible artwork.
         cuts = [round(i * strip.width / frame_count) for i in range(1, frame_count)]
         split = any(strip.getchannel("A").crop((x, 0, x + 1, strip.height)).getbbox() for x in cuts)
         used_method = "slots"
-        if not usable_frames(frames) or split:
-            alternate = extract_component_frames(strip, frame_count)
+        if split or not usable_frames(crops) or (frames is not None and not usable_frames(frames)):
+            alternate = extract_component_frames(strip, frame_count, jump_reference)
             if alternate is not None and usable_frames(alternate):
                 frames, used_method = alternate, "components"
+        elif jump_reference is not None:
+            frames = register_frames(crops, jump_reference=jump_reference)
     if method == "components":
-        frames = extract_component_frames(strip, frame_count)
+        frames = extract_component_frames(strip, frame_count, jump_reference)
         if frames is None and method == "components":
             raise SystemExit(f"could not find {frame_count} sprite components in {strip_path}")
         if frames is not None:
@@ -333,10 +356,10 @@ def extract_state(
 
     if frames is None:
         if method == "stable-slots":
-            frames = extract_stable_slot_frames(strip, frame_count)
+            frames = extract_stable_slot_frames(strip, frame_count, jump_reference)
             used_method = "stable-slots"
         else:
-            frames = extract_slot_frames(strip, frame_count)
+            frames = extract_slot_frames(strip, frame_count, jump_reference)
             used_method = "slots"
 
     if not usable_frames(frames):
@@ -367,7 +390,9 @@ def extract_state(
         output = state_dir / f"{index:02d}.png"
         frame.save(output)
         outputs.append(str(output))
-    return {"state": state, "frames": outputs, "method": used_method, "registration": "shared-row-transform", "cleanup": cleanup}
+    return {"state": state, "frames": outputs, "method": used_method,
+            "registration": "idle-referenced-jump" if jump_reference is not None else "shared-row-transform",
+            "cleanup": cleanup}
 
 
 def main() -> None:

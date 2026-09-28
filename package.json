@@ -1,6 +1,6 @@
 {
   "name": "genpet",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": true,
   "type": "module",
   "description": "A bounded, personalized companion that grows with you. A GenFaceUI-inspired Codex plugin.",
