@@ -9,15 +9,16 @@ Product rules (grounded design, literal eggs, living creatures, continuity and t
 | context | Provided available context | Facts with source IDs; unknowns | Invented user facts |
 | encounter | A saved context result | Encounter, place, connection, evidence IDs | Generic encounter without meaningful connection |
 | genes | The same context and encounter | Design basis, self-contained creature genes and literal egg-shell appearance | A source name attached to an arbitrary body; no story-based reason for the source |
-| story | Saved context, pet and relevant history | New experience, connection, state and visual intent | State chosen first, then explained by a story |
-| evolution | The saved story, context and current pet | Stage, state, brief basis, special change | Elapsed time treated as evolution evidence |
+| personality | The same context, encounter and genes | Stable temperament, relationship style, state expression and basis | A label that never changes actions; inferred user personality |
+| story | Saved context, pet including personality, and relevant history | New experience, visible connection, personality action, state and visual intent | Connection exists only in internal notes; all temperaments behave identically |
+| evolution | The saved story, context and current pet including personality | Stage, state, sourced basis, special change and personality effect | A state changes without a user event; elapsed time treated as evolution evidence |
 | appearance | Genes, story, change, saved art, host requirements | Reuse/new/unchanged appearance and actual visual requests | Source copied as realistic mature anatomy instead of a cartoon hatchling Avatar |
 | image-review | One visual request and an actual image | Boundary, design, cartoon Avatar and phase observations; accept/repair | Source recognizable but young phase or small-size character design missing |
 | output | Story, actual completion, available media | Story text and actual media references | Unfinished evolution claimed complete |
 
-Initialization: context → encounter → genes → appearance → saved plan → actual visual creation → image-review → host update → completion → output.
+Initialization: context → encounter → genes → personality → appearance → saved plan → actual visual creation → image-review → host update → completion → output.
 
-New story: context → story → evolution → appearance → saved plan → actual visual creation/reuse → image-review → host update if needed → completion → output. When reusing a previously reviewed file, refer to its actual acceptance record; do not invent a new image inspection. Unchanged appearances require no host update.
+New story: context → saved personality (or a one-time legacy backfill) → story → evolution → appearance → saved plan → actual visual creation/reuse → image-review → host update if needed → completion → output → user naming invitation if due. When reusing a previously reviewed file, refer to its actual acceptance record; do not invent a new image inspection. Unchanged appearances require no host update.
 
 Modules are read separately. Initialization is an orchestration prompt, not another creative unit. An Agent may complete several units in one turn, but keeps their results separate. A unit test fixes upstream results and runs only its selected unit; it does not perform the complete lifecycle.
 

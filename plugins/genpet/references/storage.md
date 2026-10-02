@@ -19,10 +19,13 @@ Plan JSON fields (content is chosen by Agent):
   "genes": "Initialization only: self-contained genes text from the genes unit",
   "place": "Initialization only: where the egg was acquired",
   "connection": "Initialization only: why the encounter matters to the user",
+  "personality": "An open description of character, how it relates to the user, state expression and brief creative grounds",
   "appearance": {"description": "Appearance implied by this story"}
 }
 ```
 
-For later stories, omit genes/place/connection. Stage may stay unchanged. Omit appearance when no Avatar change is needed; add `appearance.reuseArtId` to select a saved compatible appearance. `mediaIds` can reuse existing story pictures/artifacts. These fields define references and continuation, not the space of possible identities or stories.
+For later stories, omit genes/place/connection and reuse the persisted personality. Story/state judgments and source references stay in the existing generation steps and brief basis; no new story classifier is required. Stage may stay unchanged. Omit appearance when no Avatar change is needed; add `appearance.reuseArtId` to select a saved compatible appearance. `mediaIds` can reuse existing story pictures/artifacts.
+
+Personality and naming fields are additive. Old v2 records remain readable without being rewritten; an existing name is preserved. Old saved pending plans can finish as saved. A pet lacking personality can supply it in a new story plan and receives it only on successful completion. Later plans cannot replace it. New initialization requires a personality. `name-pet`, `name-asked` and `defer-name` act on an explicit Pet ID; see [naming](naming.md).
 
 Legacy v1 data is not automatically aged, reset or modified. Read the old record and its actual identity images; write a small design file with `genes`, `place`, `connection` reflecting that existing individual, keeping missing origins explicit. `migrate-legacy ABSOLUTE_V1_FILE ABSOLUTE_DESIGN_FILE` preserves the old ID, phase, image files and native binding, backs up the source record and discards time-based growth rules. Missing old images remain missing, not substitutes. Generate any missing/currently required v2 artwork through a new story. If the user explicitly requests a new pet instead, use reset; do not adopt around an existing legacy companion.

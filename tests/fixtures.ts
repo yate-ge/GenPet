@@ -3,7 +3,8 @@ import { PNG } from 'pngjs';
 import { actions } from '../src/art.js';
 import { beginStory, planStory } from '../src/story.js';
 import type { Store } from '../src/store.js';
-export const initialPlan={text:'You found an egg beside the unfinished drawing.',basis:'The user is working on a drawing; the encounter is fictional.',state:'A quiet intact egg.',stage:'egg' as const,genes:'A faceless, low-bodied creature with four short clawed feet, two tactile feelers and a left-curving tail; its back folds develop across stages while these body relationships persist.',place:'Beside an unfinished drawing',connection:'A meaningful encounter around an ongoing creative task',appearance:{description:'A complete conventional pixel egg shell with curved gray-blue markings.'}};
+export const personality='Patient and curious. Offers quiet company without assuming the user needs help. Draws its feelers close when listening and unfolds them when exploring. A fictional individual met beside an unfinished drawing; not a claim about user personality.';
+export const initialPlan={text:'You found an egg beside the unfinished drawing.',basis:'The user is working on a drawing; the encounter is fictional.',state:'A quiet intact egg.',stage:'egg' as const,genes:'A faceless, low-bodied creature with four short clawed feet, two tactile feelers and a left-curving tail; its back folds develop across stages while these body relationships persist.',personality,place:'Beside an unfinished drawing',connection:'A meaningful encounter around an ongoing creative task',appearance:{description:'A complete conventional pixel egg shell with curved gray-blue markings.'}};
 export async function initialization(store:Store,trigger='test:init') {
  const result=await beginStory(store,trigger,'initialization');
  if(result.status!=='pending'||!result.pending)throw new Error('Expected pending initialization');
