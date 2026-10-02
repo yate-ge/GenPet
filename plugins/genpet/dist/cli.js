@@ -2124,490 +2124,103 @@ var require_png = __commonJS({
   }
 });
 
-// src/debugger.ts
-import { spawn } from "node:child_process";
-import path4 from "node:path";
+// src/cli.ts
+import { readFile as readFile8 } from "node:fs/promises";
+import path12 from "node:path";
+import { randomUUID as randomUUID8 } from "node:crypto";
 
 // src/store.ts
-import { mkdir, readFile as readFile2, rename, writeFile, rm, stat as stat2 } from "node:fs/promises";
-import { homedir as homedir2 } from "node:os";
-import path3 from "node:path";
-import { randomUUID } from "node:crypto";
+import { mkdir, readFile, rename, writeFile, rm, stat } from "node:fs/promises";
+import { homedir } from "node:os";
+import path from "node:path";
+import { randomUUID as randomUUID2 } from "node:crypto";
 
 // src/core.ts
-var HOUR = 36e5;
-var DAY = 24 * HOUR;
-var DEFAULT_PROFILE = Object.freeze({
-  name: "GenPet",
-  palette: "sage",
-  interest: "build",
-  temperament: "curious"
-});
-var DEFAULT_POLICY = Object.freeze({
-  hatchHours: 5,
-  growthHours: 24,
-  contextHours: 5,
-  juvenileDays: 7,
-  adultDays: 21,
-  maxEvents: 80,
-  maxContextEntries: 200,
-  contextRetentionDays: 7
-});
-function growthMaturity(days, adultDays) {
-  return Math.sqrt(Math.min(1, Math.max(0, days / adultDays)));
+import { randomUUID } from "node:crypto";
+var stages = ["egg", "hatchling", "juvenile", "adult"];
+function text(value, field) {
+  if (typeof value !== "string" || !value.trim()) throw new Error(`${field} must be nonempty text`);
+  return value.trim();
 }
-var kinds = ["build", "research", "create", "learn", "rest"];
-var temperaments = ["calm", "curious", "playful"];
-var paletteHue = { sage: 145, peach: 24, sky: 204, lilac: 273 };
-var situations = {
-  build: { prop: "tool", scene: "workshop" },
-  research: { prop: "book", scene: "library" },
-  create: { prop: "brush", scene: "studio" },
-  learn: { prop: "star", scene: "garden" },
-  rest: { prop: "pillow", scene: "meadow" }
-};
-var expression = {
-  build: "calm",
-  research: "curious",
-  create: "playful",
-  learn: "curious",
-  rest: "calm"
-};
-function timestamp(value, field) {
-  if (!Number.isFinite(value) || value < 0 || value > 864e13) throw new Error(`${field} must be a valid nonnegative epoch timestamp`);
+function identifier(value, field = "id") {
+  const result = text(value, field);
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$/.test(result)) throw new Error(`Invalid ${field}`);
+  return result;
 }
-function validateProfile(profile) {
-  if (typeof profile.name !== "string" || !profile.name.trim() || [...profile.name].length > 60) throw new Error("Name must contain 1\u201360 characters");
-  if (!Object.hasOwn(paletteHue, profile.palette)) throw new Error("Invalid palette");
-  if (!kinds.slice(0, 4).includes(profile.interest)) throw new Error("Invalid interest");
-  if (!temperaments.includes(profile.temperament)) throw new Error("Invalid temperament");
-}
-function validatePolicy(policy) {
-  for (const [key, value] of Object.entries(policy)) {
-    if (!Number.isFinite(value) || value <= 0) throw new Error(`Invalid policy: ${key}`);
-  }
-  for (const key of ["juvenileDays", "adultDays", "maxEvents", "maxContextEntries"]) {
-    if (!Number.isInteger(policy[key])) throw new Error(`Policy ${key} must be an integer`);
-  }
-  if (policy.adultDays <= policy.juvenileDays) throw new Error("Adult threshold must follow juvenile threshold");
-  if (policy.maxEvents > 1e3 || policy.maxContextEntries > 1e4) throw new Error("History limits are too large");
-}
-function hash(value) {
-  let result2 = 2166136261;
-  for (const character of value) {
-    result2 ^= character.codePointAt(0);
-    result2 = Math.imul(result2, 16777619);
-  }
-  return result2 >>> 0;
-}
-function resolveHatchIdentity(pet) {
-  const resolvedAt = pet.adoptedAt + pet.policy.hatchHours * HOUR;
-  const evidence = pet.context.filter((e) => e.occurredAt >= pet.adoptedAt && e.occurredAt < resolvedAt);
-  const counts = kinds.map((kind) => evidence.filter((e) => e.kind === kind).length);
-  const maximum = Math.max(...counts);
-  const influence = maximum > 0 && counts.filter((count) => count === maximum).length === 1 ? kinds[counts.indexOf(maximum)] : null;
-  const base = hash(`${pet.seed}:birth-shape`);
-  const bias = influence ? (hash(`${pet.seed}:gentle-bias:${influence}`) % 2001 / 1e3 - 1) * 0.06 : 0;
-  const appendageRoll = Math.max(0, Math.min(0.999999, hash(`${pet.seed}:birth-appendage`) / 2 ** 32 + bias));
+function createPet(name = "GenPet", now = Date.now()) {
   return {
-    family: "roundling",
-    bodyShape: ["round", "pear", "bean"][base % 3],
-    appendage: ["buds", "leaflets", "soft-fins"][Math.floor(appendageRoll * 3)],
-    roundness: Math.round((0.88 + (base >>> 8) % 101 / 2e3 + bias / 3) * 1e3) / 1e3,
-    resolvedAt,
-    evidenceCount: evidence.length,
-    influence,
-    identitySeed: hash(`${pet.seed}:egg-first-v1:${counts.join(",")}`),
-    algorithmVersion: "egg-first-v1"
-  };
-}
-function migratePet(original) {
-  const pet = structuredClone(original);
-  const oldDna = pet.dna;
-  pet.dna = { hue: oldDna.hue, pattern: oldDna.pattern, patternSeed: oldDna.patternSeed };
-  if (pet.stage === "egg") pet.hatchIdentity = null;
-  else if (!pet.hatchIdentity) {
-    pet.hatchIdentity = {
-      ...resolveHatchIdentity(pet),
-      algorithmVersion: "legacy-migration-v1",
-      appendage: oldDna.earStyle === "pointed" ? "leaflets" : oldDna.earStyle === "floppy" ? "soft-fins" : "buds"
-    };
-  }
-  return pet;
-}
-function baseline(temperament) {
-  return {
-    calm: temperament === "calm" ? 0.5 : 0.25,
-    curious: temperament === "curious" ? 0.5 : 0.25,
-    playful: temperament === "playful" ? 0.5 : 0.25
-  };
-}
-function event(pet, type, at, message, key = "") {
-  const id = `${type}-${at}-${key}`;
-  if (!pet.events.some((item) => item.id === id)) pet.events.push({ id, type, at, message });
-  pet.events = pet.events.slice(-pet.policy.maxEvents);
-}
-function refreshState(pet, now) {
-  const duration = pet.policy.contextHours * HOUR;
-  const windowIndex = Math.floor((now - pet.adoptedAt) / duration);
-  const end = pet.adoptedAt + windowIndex * duration;
-  const entries = pet.context.filter((entry) => entry.occurredAt >= end - duration && entry.occurredAt < end);
-  const counts = /* @__PURE__ */ new Map();
-  for (const entry of entries) counts.set(entry.kind, (counts.get(entry.kind) ?? 0) + 1);
-  const winner = [...counts.keys()].sort((a, b) => {
-    const count = counts.get(b) - counts.get(a);
-    if (count) return count;
-    const latest = (kind) => Math.max(...entries.filter((e) => e.kind === kind).map((e) => e.occurredAt));
-    return latest(b) - latest(a) || kinds.indexOf(a) - kinds.indexOf(b);
-  })[0] ?? null;
-  pet.state = {
-    windowIndex,
-    kind: winner,
-    ...winner ? situations[winner] : { prop: "none", scene: "nest" },
-    reason: winner ? `${counts.get(winner)} ${winner} observation(s) in the last closed ${pet.policy.contextHours}-hour window.` : windowIndex === 0 ? "Settling into the nest; the first context window is still open." : "No observations in the last closed window; resting comfortably.",
-    updatedAt: end
-  };
-}
-function refreshExpression(pet) {
-  const scores = baseline(pet.profile.temperament);
-  const hatch = pet.adoptedAt + pet.policy.hatchHours * HOUR;
-  const dayLength = pet.policy.growthHours * HOUR;
-  for (let day = Math.max(0, pet.growth.days - 7); day < pet.growth.days; day++) {
-    const start = hatch + day * dayLength;
-    const entries = pet.context.filter((e) => e.occurredAt >= start && e.occurredAt < start + dayLength);
-    if (!entries.length) continue;
-    for (const entry of entries) scores[expression[entry.kind]] += 0.025 / entries.length;
-  }
-  const total = scores.calm + scores.curious + scores.playful;
-  pet.growth.temperament = { calm: scores.calm / total, curious: scores.curious / total, playful: scores.playful / total };
-}
-function createPet(profile = { ...DEFAULT_PROFILE }, nowMs = Date.now(), seed, overrides = {}) {
-  timestamp(nowMs, "nowMs");
-  validateProfile(profile);
-  const policy = { ...DEFAULT_POLICY, ...overrides };
-  validatePolicy(policy);
-  const identity = String(seed ?? globalThis.crypto.randomUUID());
-  if (!identity || identity.length > 200) throw new Error("Seed must contain 1\u2013200 characters");
-  const gene = hash(identity);
-  const pet = {
-    id: `genpet-${hash(`${identity}:${nowMs}`).toString(36)}`,
-    seed: identity,
-    adoptedAt: nowMs,
-    lastEvaluatedAt: nowMs,
-    profile: { ...profile, name: profile.name.trim() },
-    dna: {
-      hue: paletteHue[profile.palette] + gene % 17 - 8,
-      pattern: ["speckles", "stripes", "patches"][gene % 3],
-      patternSeed: gene
-    },
-    hatchIdentity: null,
+    id: `genpet-${randomUUID()}`,
+    name: text(name, "name"),
+    adoptedAt: now,
+    revision: 0,
+    genes: null,
     stage: "egg",
-    ageDays: 0,
-    growth: { days: 0, size: 0.68, temperament: baseline(profile.temperament), milestoneDays: [], decorationLevel: 0 },
-    context: [],
-    state: { windowIndex: 0, kind: null, prop: "none", scene: "nest", reason: "", updatedAt: nowMs },
-    events: [],
-    policy
+    state: { description: "", updatedAt: now }
   };
-  refreshState(pet, nowMs);
-  event(pet, "adopted", nowMs, `${pet.profile.name} was adopted as a unique egg.`);
-  return pet;
 }
-function evolvePet(original, nowMs) {
-  timestamp(nowMs, "nowMs");
-  const pet = migratePet(original);
-  const now = Math.max(nowMs, pet.lastEvaluatedAt, pet.adoptedAt);
-  const hatch = pet.adoptedAt + pet.policy.hatchHours * HOUR;
-  const days = now < hatch ? 0 : Math.floor((now - hatch) / (pet.policy.growthHours * HOUR));
-  const stage = now < hatch ? "egg" : days >= pet.policy.adultDays ? "adult" : days >= pet.policy.juvenileDays ? "juvenile" : "hatchling";
-  if (stage !== "egg" && !pet.hatchIdentity) pet.hatchIdentity = resolveHatchIdentity(pet);
-  if (pet.stage === "egg" && stage !== "egg") event(pet, "hatched", hatch, `${pet.profile.name} hatched.`);
-  for (let day = Math.max(pet.growth.days + 1, days - pet.policy.maxEvents + 1); day <= days; day++) {
-    const at = hatch + day * pet.policy.growthHours * HOUR;
-    event(pet, "growth", at, `Growth day ${day}: a little bigger.`, String(day));
-    if (day === pet.policy.juvenileDays || day === pet.policy.adultDays) event(
-      pet,
-      "stage",
-      at,
-      day === pet.policy.adultDays ? "Reached the adult stage." : "Reached the juvenile stage."
-    );
-  }
-  pet.ageDays = Math.floor((now - pet.adoptedAt) / DAY);
-  pet.growth.days = days;
-  pet.growth.size = stage === "egg" ? 0.68 : 0.74 + 0.51 * growthMaturity(days, pet.policy.adultDays);
-  pet.stage = stage;
-  pet.lastEvaluatedAt = now;
-  pet.context = pet.context.filter((e) => e.occurredAt >= now - pet.policy.contextRetentionDays * DAY).slice(-pet.policy.maxContextEntries);
-  refreshState(pet, now);
-  refreshExpression(pet);
-  return pet;
-}
-function insertContext(pet, input, nowMs) {
-  timestamp(nowMs, "nowMs");
-  if (!kinds.includes(input.kind)) throw new Error("Invalid context kind");
-  if (!["user", "codex-summary", "codex-local"].includes(input.source)) throw new Error("Invalid context source");
-  if (input.summary !== void 0 && typeof input.summary !== "string") throw new Error("Summary must be text");
-  if ([...input.summary ?? ""].length > 240) throw new Error("Summary must not exceed 240 characters");
-  if (input.milestone !== void 0 && typeof input.milestone !== "boolean") throw new Error("Milestone must be boolean");
-  const occurredAt = input.occurredAt ?? nowMs;
-  timestamp(occurredAt, "occurredAt");
-  if (occurredAt > nowMs) throw new Error("Context cannot be in the future");
-  if (occurredAt < pet.adoptedAt || occurredAt < Math.max(nowMs, pet.lastEvaluatedAt) - pet.policy.contextRetentionDays * DAY)
-    throw new Error("Context is expired or predates adoption");
-  const summary = (input.summary ?? "").trim();
-  const id = `ctx-${hash(JSON.stringify([pet.id, input.source, input.kind, occurredAt, summary, !!input.milestone])).toString(36)}`;
-  if (pet.context.some((entry) => entry.id === id)) return;
-  pet.context.push({
-    id,
-    kind: input.kind,
-    source: input.source,
-    summary,
-    occurredAt,
-    submittedAt: nowMs,
-    milestone: input.milestone ?? false
-  });
-  pet.context.sort((a, b) => a.occurredAt - b.occurredAt || a.id.localeCompare(b.id));
-  event(pet, "context", nowMs, `Recorded a ${input.kind} activity tag.`, id);
-  if (input.milestone) {
-    const day = Math.floor((occurredAt - pet.adoptedAt) / DAY);
-    if (!pet.growth.milestoneDays.includes(day)) {
-      pet.growth.milestoneDays = [...pet.growth.milestoneDays, day].sort((a, b) => a - b).slice(-90);
-      pet.growth.decorationLevel = Math.min(3, pet.growth.milestoneDays.length);
-      event(pet, "milestone", nowMs, "A meaningful day added a small keepsake.", String(day));
-    }
-  }
-}
-function addContextBatch(original, inputs, nowMs) {
-  timestamp(nowMs, "nowMs");
-  const pet = migratePet(original);
-  for (const input of inputs) insertContext(pet, input, nowMs);
-  return evolvePet(pet, nowMs);
-}
-function removeContext(original, id, nowMs) {
-  const pet = evolvePet(original, nowMs);
-  const removed = pet.context.find((entry) => entry.id === id);
-  if (!removed) return pet;
-  pet.context = pet.context.filter((entry) => entry.id !== id);
-  pet.events = pet.events.filter((entry) => !entry.id.endsWith(`-${id}`));
-  if (removed.milestone) {
-    const day = Math.floor((removed.occurredAt - pet.adoptedAt) / DAY);
-    if (!pet.context.some((entry) => entry.milestone && Math.floor((entry.occurredAt - pet.adoptedAt) / DAY) === day)) {
-      pet.growth.milestoneDays = pet.growth.milestoneDays.filter((value) => value !== day);
-      pet.growth.decorationLevel = Math.min(3, pet.growth.milestoneDays.length);
-      pet.events = pet.events.filter((entry) => !(entry.type === "milestone" && entry.id.endsWith(`-${day}`)));
-    }
-  }
-  refreshState(pet, pet.lastEvaluatedAt);
-  refreshExpression(pet);
-  return pet;
-}
-function updateProfile(original, patch) {
-  const pet = migratePet(original);
-  pet.profile = { ...pet.profile, ...patch };
-  validateProfile(pet.profile);
-  pet.profile.name = pet.profile.name.trim();
-  refreshExpression(pet);
-  return pet;
-}
-
-// src/context.ts
-import { createHash } from "node:crypto";
-import { homedir } from "node:os";
-import { join } from "node:path";
-import { open, readdir, stat } from "node:fs/promises";
-var MAX_FILE_BYTES = 2 * 1024 * 1024;
-var MAX_FILES = 200;
-var LABELS = { build: "\u6784\u5EFA", research: "\u7814\u7A76", create: "\u521B\u4F5C", learn: "\u5B66\u4E60", rest: "\u4F11\u606F" };
-var RULES = {
-  build: [/\b(?:implement|debug|bug|compile|deploy|refactor|repository|typescript|javascript|coding)\b/i, /开发|编程|代码|修复|构建|部署|调试|测试|仓库/],
-  research: [/\b(?:research|paper|papers|literature|experiment|hypothesis|citation|citations|study)\b/i, /论文|文献|研究|实验|假设|引文|学术|调研/],
-  create: [/\b(?:illustration|poster|artwork|story|poem|logo|animation|creative|drawing|design)\b/i, /插画|海报|绘画|创作|作曲|故事|诗歌|设计|生成图片|画一/],
-  learn: [/\b(?:learn|teach|explain|tutorial|understand|lesson|practice)\b/i, /学习|教我|解释|教程|练习|理解|讲解/],
-  rest: [/\b(?:rest|break|relax|sleep|pause)\b/i, /休息|放松|睡觉|暂停|休假/]
-};
-var digest = (value) => createHash("sha256").update(value).digest("hex");
-function classify(text) {
-  const scores = Object.entries(RULES).map(([kind, rules]) => ({ kind, score: rules.filter((rule) => rule.test(text)).length }));
-  scores.sort((a, b) => b.score - a.score);
-  return scores[0].score > 0 && scores[0].score > scores[1].score ? scores[0].kind : null;
-}
-function userText(record3) {
-  if (record3?.type === "event_msg" && record3.payload?.type === "user_message") return typeof record3.payload.message === "string" ? record3.payload.message : null;
-  if (record3?.type !== "response_item" || record3.payload?.type !== "message" || record3.payload.role !== "user") return null;
-  if (!Array.isArray(record3.payload.content)) return null;
-  return record3.payload.content.filter((part) => part?.type === "input_text" || part?.type === "text").map((part) => typeof part.text === "string" ? part.text : "").join("\n");
-}
-function cleanText(text) {
-  return text.replace(/<(environment_context|recommended_plugins|send_user_message_question_reply)\b[^>]*>[\s\S]*?<\/\1>/gi, "").replace(/<\/?(?:environment_context|recommended_plugins|send_user_message_question_reply)\b[^>]*>[\s\S]*$/gi, "").replace(/\s+/g, " ").trim().slice(0, 16e3);
-}
-async function scanCodexContext(options = {}) {
-  const nowMs = options.nowMs ?? Date.now();
-  const hours = options.hours ?? 5;
-  if (!Number.isFinite(nowMs) || !Number.isFinite(hours) || hours <= 0 || hours > 168) throw new Error("Context window must be between 0 and 168 hours with a finite clock.");
-  const startMs = nowMs - hours * 36e5;
-  const root = options.codexHome ?? process.env.CODEX_HOME ?? join(homedir(), ".codex");
-  const result2 = { entries: [], stats: { files: 0, messages: 0 }, warnings: [] };
-  const warnings = /* @__PURE__ */ new Set();
-  const candidates = [];
-  try {
-    const all = (await readdir(join(root, "sessions"), { recursive: true, withFileTypes: true })).filter((f) => f.isFile() && f.name.endsWith(".jsonl"));
-    for (let i = 0; i < all.length; i += 32) {
-      const batch = await Promise.all(all.slice(i, i + 32).map(async (f) => {
-        const file = join(f.parentPath, f.name);
-        const info = await stat(file).catch(() => null);
-        return info && info.mtimeMs >= startMs ? { file, mtime: info.mtimeMs } : null;
-      }));
-      candidates.push(...batch.filter((v) => v !== null));
-    }
-    candidates.sort((a, b) => b.mtime - a.mtime);
-  } catch (error) {
-    if (error.code !== "ENOENT") warnings.add("\u90E8\u5206\u672C\u5730\u4F1A\u8BDD\u76EE\u5F55\u65E0\u6CD5\u8BFB\u53D6\u3002");
-  }
-  for (const candidate of candidates) {
-    if (result2.stats.files >= MAX_FILES) {
-      warnings.add("\u5DF2\u8FBE\u5230 200 \u4E2A\u4F1A\u8BDD\u6587\u4EF6\u4E0A\u9650\uFF1B\u672C\u6B21\u7ED3\u679C\u53EF\u80FD\u4E0D\u5B8C\u6574\u3002");
-      break;
-    }
-    result2.stats.files++;
-    let text;
-    let handle;
-    try {
-      handle = await open(candidate.file, "r");
-      const stat3 = await handle.stat();
-      const headerBuffer = Buffer.alloc(Math.min(stat3.size, 128 * 1024));
-      const headerRead = await handle.read(headerBuffer, 0, headerBuffer.length, 0);
-      const header = headerBuffer.subarray(0, headerRead.bytesRead).toString("utf8");
-      let metadata;
-      try {
-        metadata = JSON.parse(header.split("\n")[0]);
-      } catch {
-      }
-      const source = metadata?.type === "session_meta" ? metadata.payload?.source : null;
-      if (source && typeof source === "object" && "subagent" in source || typeof source === "string" && source.includes("subagent")) continue;
-      const count = Math.min(stat3.size, MAX_FILE_BYTES);
-      const start = Math.max(0, stat3.size - count);
-      const buffer = Buffer.alloc(count);
-      const read = await handle.read(buffer, 0, count, start);
-      text = buffer.subarray(0, read.bytesRead).toString("utf8");
-      if (start > 0) {
-        text = header.slice(0, header.lastIndexOf("\n")) + "\n" + text.slice(text.indexOf("\n") + 1);
-        warnings.add("\u8F83\u5927\u4F1A\u8BDD\u4EC5\u68C0\u67E5\u524D 128 KiB \u548C\u6700\u540E 2 MiB\uFF1B\u4E2D\u95F4\u7EBF\u7D22\u53EF\u80FD\u88AB\u7701\u7565\u3002");
-      }
-    } catch {
-      warnings.add("\u90E8\u5206\u672C\u5730\u4F1A\u8BDD\u6587\u4EF6\u65E0\u6CD5\u8BFB\u53D6\u3002");
-      continue;
-    } finally {
-      await handle?.close();
-    }
-    const seen = /* @__PURE__ */ new Set();
-    const matches = /* @__PURE__ */ new Map();
-    for (const line of text.split("\n")) {
-      if (!line.trim()) continue;
-      let record3;
-      try {
-        record3 = JSON.parse(line);
-      } catch {
-        warnings.add("\u90E8\u5206\u4F1A\u8BDD\u5305\u542B\u672A\u5B8C\u6210\u6216\u65E0\u6548\u8BB0\u5F55\uFF0C\u5DF2\u8DF3\u8FC7\u3002");
-        continue;
-      }
-      const at = typeof record3.timestamp === "number" ? record3.timestamp : Date.parse(record3.timestamp);
-      if (!Number.isFinite(at) || at < startMs || at > nowMs) continue;
-      const raw = userText(record3);
-      if (!raw) continue;
-      if (raw.includes("<heartbeat>") || /^\s*[/\$](?:genpet:)?genpet-(?:start|reset|grow|state)\b/.test(raw)) continue;
-      const prompt = cleanText(raw);
-      if (!prompt || prompt.startsWith("# AGENTS.md instructions") || prompt.startsWith("<permissions instructions>")) continue;
-      const promptId = digest(prompt);
-      if (seen.has(promptId)) continue;
-      seen.add(promptId);
-      result2.stats.messages++;
-      const kind2 = classify(prompt);
-      if (!kind2) continue;
-      const group = matches.get(kind2) ?? { count: 0, at, ids: [] };
-      group.count = Math.min(3, group.count + 1);
-      group.at = Math.max(group.at, at);
-      group.ids.push(promptId);
-      matches.set(kind2, group);
-    }
-    const ranked = [...matches.entries()].sort((a, b) => b[1].count - a[1].count);
-    if (!ranked.length || ranked[1] && ranked[0][1].count === ranked[1][1].count) continue;
-    const [kind, evidence] = ranked[0];
-    const externalId = `codex-local:${digest(`${candidate.file}:${kind}:${Math.floor(evidence.at / 18e6)}`).slice(0, 24)}`;
-    result2.entries.push({ kind, summary: `\u672C\u5730 Codex \xB7 ${LABELS[kind]} \xB7 ${evidence.count} \u6761\u4EFB\u52A1\u7EBF\u7D22`, source: "codex-local", occurredAt: evidence.at, externalId });
-  }
-  result2.entries.sort((a, b) => a.occurredAt - b.occurredAt || a.externalId.localeCompare(b.externalId));
-  result2.warnings = [...warnings];
-  return result2;
-}
-function summarizeInitialActivity(scan) {
-  const counts = { build: 0, research: 0, create: 0, learn: 0, rest: 0 };
-  for (const entry of scan.entries) counts[entry.kind]++;
-  const ranked = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-  const selected = counts[ranked[0]] > 0 && counts[ranked[0]] > counts[ranked[1]] ? ranked[0] : null;
-  return { counts, selected, classifiedTaskCount: scan.entries.length };
-}
-function deriveInitialProfile(scan) {
-  const { selected } = summarizeInitialActivity(scan);
-  if (!selected) return {};
-  switch (selected) {
-    case "build":
-      return { interest: "build", palette: "sage", temperament: "calm" };
-    case "research":
-      return { interest: "research", palette: "sky", temperament: "curious" };
-    case "create":
-      return { interest: "create", palette: "peach", temperament: "playful" };
-    case "learn":
-      return { interest: "learn", palette: "lilac", temperament: "curious" };
-    case "rest":
-      return { palette: "sage", temperament: "calm" };
-  }
-}
-
-// src/config.ts
-import { readFile } from "node:fs/promises";
-import path2 from "node:path";
-
-// src/plugin-root.ts
-import { existsSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-function pluginRoot() {
-  const moduleDirectory = path.dirname(fileURLToPath(import.meta.url));
-  const candidates = [
-    path.resolve(moduleDirectory, ".."),
-    path.resolve(moduleDirectory, "..", "plugins", "genpet")
-  ];
-  return candidates.find((candidate) => existsSync(path.join(candidate, ".codex-plugin", "plugin.json"))) ?? candidates[0];
-}
-
-// src/config.ts
-async function adoptionConfig() {
-  const file = process.env.GENPET_POLICY_FILE || path2.join(pluginRoot(), "config", "policy.json");
-  const config = JSON.parse(await readFile(file, "utf8"));
-  if (!config || typeof config !== "object" || !config.defaultProfile || !config.timing) throw new Error("Invalid GenPet adoption policy");
-  return config;
+function validateStage(current, target) {
+  if (!stages.includes(target)) throw new Error("Invalid stage");
+  if (stages.indexOf(target) < stages.indexOf(current)) throw new Error("Evolution cannot reverse the current stage");
+  return target;
 }
 
 // src/store.ts
-var dataRoot = () => process.env.GENPET_DATA_DIR || path3.join(homedir2(), ".genpet");
-var fresh = () => ({ version: 1, pet: null, clockOffset: 0, settings: { autoContext: true, freezeOutfit: false, autoArt: true }, importedIds: [], lastScanAt: 0, scanInfo: { messages: 0, files: 0, warnings: [] }, art: [] });
-function configureState(s, input) {
-  if (input.freezeOutfit === true && !s.settings.freezeOutfit) s.settings.lockedOutfit = { prop: s.pet?.state.prop || "none", scene: s.pet?.state.scene || "nest" };
-  if (input.freezeOutfit === false) delete s.settings.lockedOutfit;
-  for (const key of ["autoContext", "freezeOutfit", "autoArt"]) if (typeof input[key] === "boolean") s.settings[key] = input[key];
-  return s.settings;
+var dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), ".genpet");
+var fresh = (host) => ({ version: 2, host, pet: null, stories: [], art: [], pending: null });
+async function atomicJson(file, value) {
+  await mkdir(path.dirname(file), { recursive: true, mode: 448 });
+  const tmp = `${file}.${randomUUID2()}.tmp`;
+  try {
+    await writeFile(tmp, JSON.stringify(value, null, 2) + "\n", { mode: 384, flag: "wx" });
+    await rename(tmp, file);
+  } finally {
+    await rm(tmp, { force: true });
+  }
 }
 var Store = class {
-  constructor(root = dataRoot(), demo2 = false) {
-    this.root = root;
+  constructor(root = dataRoot(), demo2 = false, host = "desktop") {
     this.demo = demo2;
-    this.file = path3.join(root, demo2 ? "demo.json" : "state.json");
+    this.host = host;
+    this.base = path.resolve(root);
+    this.root = path.resolve(this.base, host, ...demo2 ? ["demo"] : []);
+    this.file = path.join(this.root, "state.json");
   }
-  root;
   demo;
+  host;
+  base;
+  root;
   file;
-  now(state) {
-    return Date.now() + (this.demo ? state.clockOffset : 0) + (state.debug?.growthOffsetMs || 0);
+  now() {
+    return Date.now();
+  }
+  async peek() {
+    try {
+      const state = JSON.parse(await readFile(this.file, "utf8"));
+      if (state.version !== 2 || state.host !== this.host) throw new Error("Unsupported or mismatched pet record");
+      if (state.pet) {
+        identifier(state.pet.id, "petId");
+        validateStage("egg", state.pet.stage);
+      }
+      return state;
+    } catch (error) {
+      if (error.code === "ENOENT") return fresh(this.host);
+      throw error;
+    }
+  }
+  /** Read-only; elapsed time never evolves a pet. */
+  current() {
+    return this.peek();
+  }
+  async legacyCandidate() {
+    if (this.host !== "desktop" || this.demo) return null;
+    const file = path.join(this.base, "state.json");
+    try {
+      const old = JSON.parse(await readFile(file, "utf8"));
+      return old.version === 1 && old.pet ? file : null;
+    } catch (error) {
+      if (error.code === "ENOENT") return null;
+      throw error;
+    }
   }
   async transaction(fn) {
     await mkdir(this.root, { recursive: true, mode: 448 });
@@ -2618,150 +2231,37 @@ var Store = class {
         await mkdir(lock);
         acquired = true;
         break;
-      } catch (e) {
-        if (e.code !== "EEXIST") throw e;
-        const age = await stat2(lock).then((s) => Date.now() - s.mtimeMs).catch(() => 0);
+      } catch (error) {
+        if (error.code !== "EEXIST") throw error;
+        const age = await stat(lock).then((info) => Date.now() - info.mtimeMs).catch(() => 0);
         if (age > 12e4) await rm(lock, { recursive: true, force: true });
-        else await new Promise((r) => setTimeout(r, 50));
+        else await new Promise((resolve) => setTimeout(resolve, 50));
       }
     }
-    if (!acquired) throw new Error("GenPet is busy; retry shortly.");
+    if (!acquired) throw new Error("Another pet operation is running; resume it before starting another");
     try {
-      let state;
-      try {
-        state = JSON.parse(await readFile2(this.file, "utf8"));
-      } catch (e) {
-        if (e.code !== "ENOENT") throw new Error("State file cannot be read. It has been preserved; restore a backup instead of resetting it.");
-        state = fresh();
-      }
-      if (state.version !== 1) throw new Error("Unsupported state version");
-      if (state.pet) {
-        state.pet = migratePet(state.pet);
-        if (state.pet.stage === "egg" && state.identityReference) {
-          state.eggReference ||= state.identityReference;
-          delete state.identityReference;
-        }
-      }
-      const result2 = await fn(state);
-      const tmp = this.file + "." + randomUUID() + ".tmp";
-      await writeFile(tmp, JSON.stringify(state, null, 2), { mode: 384 });
-      await rename(tmp, this.file);
-      return result2;
+      const state = await this.peek();
+      const result = await fn(state);
+      await atomicJson(this.file, state);
+      if (state.pet) await atomicJson(path.join(this.root, "pets", state.pet.id, "record.json"), state);
+      return result;
     } finally {
       await rm(lock, { recursive: true, force: true });
     }
   }
-  async sync(s, force = false) {
-    const now = this.now(s);
-    const birthDue = s.pet && !s.pet.hatchIdentity && now >= s.pet.adoptedAt + s.pet.policy.hatchHours * HOUR;
-    if (this.demo || !s.settings.autoContext || !force && !birthDue && Date.now() - s.lastScanAt < 6e4) return;
-    const hours = birthDue ? Math.min(168, Math.max(5, (now - s.pet.adoptedAt) / HOUR)) : 5;
-    const scan = await scanCodexContext({ nowMs: Date.now(), hours });
-    s.scanInfo = { ...scan.stats, warnings: scan.warnings };
-    s.lastScanAt = Date.now();
-    if (s.pet) {
-      const batch = [];
-      for (const entry of scan.entries) {
-        if (s.importedIds.includes(entry.externalId)) continue;
-        const logicalAt = entry.occurredAt + (s.debug?.growthOffsetMs || 0);
-        if (entry.occurredAt >= s.pet.adoptedAt && logicalAt >= now - s.pet.policy.contextRetentionDays * 24 * HOUR) batch.push({ ...entry, occurredAt: logicalAt });
-        s.importedIds.push(entry.externalId);
-      }
-      s.pet = addContextBatch(s.pet, batch, now);
-      s.importedIds = s.importedIds.slice(-3e3);
-    }
-  }
-  async adopt(s, profile = {}) {
-    if (s.pet) throw new Error("You already have a pet. Adoption never overwrites an existing companion.");
-    let inferred = {};
-    let activity = null;
-    if (!this.demo && s.settings.autoContext) {
-      const scan = await scanCodexContext({ nowMs: Date.now(), hours: 5 });
-      inferred = deriveInitialProfile(scan);
-      activity = summarizeInitialActivity(scan);
-      s.scanInfo = { ...scan.stats, warnings: scan.warnings };
-    }
-    const config = await adoptionConfig();
-    s.pet = createPet({ ...DEFAULT_PROFILE, ...config.defaultProfile, ...inferred, ...profile }, this.now(s), this.demo ? "genpet-demo-egg" : void 0, config.timing);
-    s.pet.adoptionTrace = {
-      algorithmVersion: "adoption-map-v1",
-      mode: activity ? activity.selected ? "automatic" : "no-dominant-activity" : "disabled",
-      selectedActivity: activity?.selected ?? null,
-      activityCounts: activity?.counts ?? { build: 0, research: 0, create: 0, learn: 0, rest: 0 },
-      explicitFields: ["name", "palette", "interest", "temperament"].filter((field) => Object.hasOwn(profile, field)),
-      capturedAt: s.pet.adoptedAt
-    };
-    await this.sync(s, true);
-    return s.pet;
-  }
-  /** Read persisted state without scanning, evolving, migrating or writing. */
-  async peek() {
-    try {
-      const state = JSON.parse(await readFile2(this.file, "utf8"));
-      if (state.version !== 1) throw new Error("Unsupported state version");
-      return state;
-    } catch (error) {
-      if (error.code === "ENOENT") return fresh();
-      throw error;
-    }
-  }
-  async current() {
-    return this.transaction(async (s) => {
-      await this.sync(s);
-      if (s.pet) s.pet = evolvePet(s.pet, this.now(s));
-      return s;
-    });
-  }
 };
 
-// src/debugger.ts
-async function launchDebugger(port = Number(process.env.GENPET_PORT || 47831)) {
-  if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("GENPET_PORT must be an integer between 1024 and 65535");
-  const url = `http://127.0.0.1:${port}`;
-  const root = path4.resolve(dataRoot());
-  async function inspect() {
-    let response;
-    try {
-      response = await fetch(url + "/api/health", { signal: AbortSignal.timeout(500) });
-    } catch {
-      return false;
-    }
-    const state = await response.json().catch(() => null);
-    if (state?.service !== "genpet-debugger" || state.root !== root) throw new Error("Debugger port is occupied by another service or data directory. Set GENPET_PORT to a different port.");
-    return true;
-  }
-  if (await inspect()) return { url, reused: true };
-  const child = spawn(process.execPath, [path4.join(import.meta.dirname, "debugger-server.js")], {
-    detached: true,
-    windowsHide: true,
-    stdio: "ignore",
-    env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: root }
-  });
-  let failure;
-  child.once("error", (error) => {
-    failure = error;
-  });
-  child.unref();
-  for (let i = 0; i < 50; i++) {
-    if (failure) throw failure;
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    if (await inspect()) return { url, reused: false };
-    if (child.exitCode !== null) throw new Error("Debugger failed to start; check whether the port is occupied.");
-  }
-  throw new Error("Debugger startup timed out.");
-}
-
 // src/art.ts
-import { mkdir as mkdir2, readFile as readFile5, copyFile, writeFile as writeFile2, rename as rename2 } from "node:fs/promises";
+import { mkdir as mkdir2, readFile as readFile4, copyFile, writeFile as writeFile2, rename as rename2, stat as stat2 } from "node:fs/promises";
 import path7 from "node:path";
-import { createHash as createHash3, randomUUID as randomUUID3 } from "node:crypto";
+import { createHash as createHash3, randomUUID as randomUUID6 } from "node:crypto";
 
 // src/image.ts
 var import_pngjs = __toESM(require_png(), 1);
-import { readFile as readFile3 } from "node:fs/promises";
-import { existsSync as existsSync2, readFileSync } from "node:fs";
+import { readFile as readFile2 } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { fileURLToPath as fileURLToPath2 } from "node:url";
+import { fileURLToPath } from "node:url";
 
 // node_modules/@jsquash/webp/codec/dec/webp_dec.js
 var Module = (() => {
@@ -2803,11 +2303,11 @@ var Module = (() => {
     var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
     var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions == "object" && typeof process.versions.node == "string";
     var scriptDirectory = "";
-    function locateFile(path11) {
+    function locateFile(path13) {
       if (Module2["locateFile"]) {
-        return Module2["locateFile"](path11, scriptDirectory);
+        return Module2["locateFile"](path13, scriptDirectory);
       }
-      return scriptDirectory + path11;
+      return scriptDirectory + path13;
     }
     var read_, readAsync, readBinary, setWindowTitle;
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -3103,8 +2603,8 @@ var Module = (() => {
     function instantiateAsync(binary, binaryFile, imports, callback) {
       if (!binary && typeof WebAssembly.instantiateStreaming == "function" && !isDataURI(binaryFile) && typeof fetch == "function") {
         return fetch(binaryFile, { credentials: "same-origin" }).then(function(response) {
-          var result2 = WebAssembly.instantiateStreaming(response, imports);
-          return result2.then(callback, function(reason) {
+          var result = WebAssembly.instantiateStreaming(response, imports);
+          return result.then(callback, function(reason) {
             err("wasm streaming compile failed: " + reason);
             err("falling back to ArrayBuffer instantiation");
             return instantiateArrayBuffer(binaryFile, imports, callback);
@@ -3127,8 +2627,8 @@ var Module = (() => {
         return exports;
       }
       addRunDependency("wasm-instantiate");
-      function receiveInstantiationResult(result2) {
-        receiveInstance(result2["instance"]);
+      function receiveInstantiationResult(result) {
+        receiveInstance(result["instance"]);
       }
       if (Module2["instantiateWasm"]) {
         try {
@@ -4155,10 +3655,10 @@ async function decode(buffer) {
   if (!emscriptenModule)
     init();
   const module = await emscriptenModule;
-  const result2 = module.decode(buffer);
-  if (!result2)
+  const result = module.decode(buffer);
+  if (!result)
     throw new Error("Decoding error");
-  return result2;
+  return result;
 }
 
 // src/image.ts
@@ -4186,15 +3686,15 @@ function imageInfo(buf) {
   throw new Error("Use a PNG or WebP image");
 }
 async function readImageInfo(file) {
-  return imageInfo(await readFile3(file));
+  return imageInfo(await readFile2(file));
 }
 var webpReady;
 function webpWasm() {
-  const bundled = fileURLToPath2(new URL("./webp_dec.wasm", import.meta.url));
-  return existsSync2(bundled) ? bundled : createRequire(import.meta.url).resolve("@jsquash/webp/codec/dec/webp_dec.wasm");
+  const bundled = fileURLToPath(new URL("./webp_dec.wasm", import.meta.url));
+  return existsSync(bundled) ? bundled : createRequire(import.meta.url).resolve("@jsquash/webp/codec/dec/webp_dec.wasm");
 }
 async function decodeRgba(file) {
-  const buf = await readFile3(file);
+  const buf = await readFile2(file);
   const info = imageInfo(buf);
   if (info.format === "png") return { ...info, data: import_pngjs.PNG.sync.read(buf).data };
   globalThis.ImageData ??= class {
@@ -4213,20 +3713,220 @@ async function decodeRgba(file) {
   return { ...info, data: new Uint8Array(decoded.data.buffer, decoded.data.byteOffset, decoded.data.byteLength) };
 }
 
+// src/story.ts
+import { randomUUID as randomUUID3, createHash } from "node:crypto";
+import { access } from "node:fs/promises";
+import path2 from "node:path";
+function pendingFor(state, id) {
+  const pending = state.pending;
+  if (!pending || pending.id !== id || !state.pet || pending.petId !== state.pet.id || pending.baseRevision !== state.pet.revision)
+    throw new Error("Stale story operation; read the persisted record before continuing");
+  return pending;
+}
+async function beginStory(store2, triggerId, mode = "story", name) {
+  identifier(triggerId, "triggerId");
+  if (!["initialization", "story", "grow"].includes(mode)) throw new Error("Invalid story mode");
+  return store2.transaction(async (state) => {
+    const completed = state.stories.find((story) => story.triggerId === triggerId);
+    if (completed) return { status: "completed", story: completed };
+    if (state.pending) {
+      if (state.pending.triggerId !== triggerId) throw new Error(`Unfinished story ${state.pending.id}; resume it first`);
+      return { status: "pending", pending: state.pending, pet: state.pet };
+    }
+    if (!state.pet && await store2.legacyCandidate()) throw new Error("Existing legacy pet found; migrate it before creating a new identity");
+    state.pet ??= createPet(name);
+    state.pending = {
+      id: `story-${randomUUID3()}`,
+      triggerId,
+      petId: state.pet.id,
+      baseRevision: state.pet.revision,
+      startedAt: Date.now(),
+      mode: state.pet.genes ? mode : "initialization"
+    };
+    return { status: "pending", pending: state.pending, pet: state.pet };
+  });
+}
+async function resetPet(store2, operationId) {
+  const triggerId = `reset:${identifier(operationId, "reset operationId")}`;
+  return store2.transaction(async (state) => {
+    const completed = state.stories.find((story) => story.triggerId === triggerId);
+    if (completed) return { status: "completed", story: completed };
+    if (state.pending?.triggerId === triggerId) return { status: "pending", pending: state.pending, pet: state.pet };
+    if (state.pending) throw new Error("Resume or cancel the unfinished story before an explicit reset");
+    if (!state.pet && await store2.legacyCandidate()) throw new Error("Migrate the existing legacy pet before resetting its identity");
+    const backup = path2.join(store2.root, "backups", `reset-${Date.now()}-${randomUUID3()}.json`);
+    await atomicJson(backup, state);
+    const previous = state.pet, binding = previous?.binding, schedule = state.schedule;
+    for (const key of Object.keys(state)) delete state[key];
+    Object.assign(state, fresh(store2.host), { pet: createPet(previous?.name), ...schedule ? { schedule } : {} });
+    if (binding) state.pet.binding = binding;
+    if (previous) state.replacesPetId = previous.id;
+    state.pending = {
+      id: `story-${randomUUID3()}`,
+      petId: state.pet.id,
+      triggerId,
+      baseRevision: 0,
+      startedAt: Date.now(),
+      mode: "initialization"
+    };
+    return { status: "pending", pending: state.pending, pet: state.pet, backup };
+  });
+}
+function appearanceFor(state, stage, id) {
+  const kind = state.host === "desktop" ? "atlas" : "avatar";
+  const art = state.art.find((art2) => art2.id === id && art2.petId === state.pet.id && art2.kind === kind && art2.stage === stage);
+  if (!art) throw new Error("Reusable appearance is missing, belongs to another pet, or is incompatible with this host/stage");
+  return art;
+}
+function validatePlan(state, input) {
+  const pet = state.pet;
+  const plan = { text: text(input.text, "story text"), basis: text(input.basis, "decision basis"), state: text(input.state, "state") };
+  plan.stage = validateStage(pet.stage, input.stage ?? pet.stage);
+  if (!pet.genes) {
+    if (plan.stage !== "egg") throw new Error("Initialization begins with an egg");
+    plan.genes = text(input.genes, "open gene description");
+    plan.place = text(input.place, "acquisition place");
+    plan.connection = text(input.connection, "user connection");
+    if (!input.appearance) throw new Error("Initialization requires an egg appearance");
+  } else if (input.genes !== void 0 && input.genes !== pet.genes) throw new Error("An existing pet retains its genes");
+  if (input.appearance) plan.appearance = {
+    description: text(input.appearance.description, "appearance description"),
+    ...input.appearance.reuseArtId ? { reuseArtId: identifier(input.appearance.reuseArtId, "reuseArtId") } : {}
+  };
+  if (plan.stage !== pet.stage && !plan.appearance) throw new Error("Evolution requires an appearance for the new stage");
+  if (input.mediaIds !== void 0) {
+    if (!Array.isArray(input.mediaIds)) throw new Error("mediaIds must be an array");
+    plan.mediaIds = input.mediaIds.map((id) => identifier(id, "mediaId"));
+    for (const id of plan.mediaIds) if (!state.art.some((art) => art.id === id && art.petId === pet.id)) throw new Error("Media belongs to another pet or is missing");
+  }
+  if (plan.appearance?.reuseArtId) appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
+  return plan;
+}
+async function planStory(store2, id, input) {
+  return store2.transaction((state) => {
+    const pending = pendingFor(state, id), plan = validatePlan(state, input);
+    if (pending.plan && JSON.stringify(pending.plan) !== JSON.stringify(plan)) throw new Error("The story plan is saved; resume it or cancel explicitly before redesigning");
+    pending.plan = plan;
+    return pending;
+  });
+}
+function requestId(state) {
+  const pending = state.pending;
+  return pending?.plan ? createHash("sha256").update(JSON.stringify([pending.id, pending.petId, pending.baseRevision, pending.plan])).digest("hex").slice(0, 24) : null;
+}
+function desiredAppearance(state) {
+  const plan = state.pending?.plan;
+  if (!plan?.appearance) return state.art.find((art) => art.id === state.pet?.state.appearanceId);
+  if (plan.appearance.reuseArtId) return appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
+  const kind = state.host === "desktop" ? "atlas" : "avatar";
+  return [...state.art].reverse().find((art) => art.petId === state.pet?.id && art.requestId === requestId(state) && art.kind === kind);
+}
+function validateHostResult(state, id, input) {
+  const pending = pendingFor(state, id);
+  if (state.host === "dots" && !state.pet?.binding) throw new Error("Bind the actual Dots Avatar before recording an update");
+  if (input.petId !== pending.petId || input.operationId !== id) throw new Error("Host result belongs to another pet or operation");
+  if (input.appearanceId !== desiredAppearance(state)?.id) throw new Error("Host result belongs to a different appearance");
+  const avatarId = text(input.avatarId, "avatarId");
+  if (state.pet?.binding && state.pet.binding.avatarId !== avatarId) throw new Error("Host updated a different Avatar from the persisted target");
+  if (typeof input.updated !== "boolean" || ![true, false, null].includes(input.active) || typeof input.refreshRequested !== "boolean" || !["confirmed", "unconfirmed"].includes(input.displayStatus)) throw new Error("Invalid host result");
+  if (input.displayStatus === "confirmed" && !input.evidence?.trim()) throw new Error("Confirmed display requires evidence");
+  return {
+    petId: input.petId,
+    operationId: id,
+    appearanceId: input.appearanceId,
+    avatarId,
+    updated: input.updated,
+    active: input.active,
+    refreshRequested: input.refreshRequested,
+    displayStatus: input.displayStatus,
+    ...input.evidence ? { evidence: text(input.evidence, "evidence") } : {},
+    ...input.error ? { error: text(input.error, "error") } : {}
+  };
+}
+async function recordHostResult(store2, id, input) {
+  if (store2.demo) throw new Error("Demo records cannot update a host Avatar");
+  return store2.transaction((state) => {
+    const pending = pendingFor(state, id);
+    if (!pending.plan?.appearance) throw new Error("No planned appearance update");
+    if (!desiredAppearance(state)) throw new Error("Complete or select appearance artwork first");
+    const result = validateHostResult(state, id, input);
+    if (result.updated) state.pet.binding ??= { host: state.host, avatarId: result.avatarId };
+    pending.hostResult = result;
+    return result;
+  });
+}
+async function finishStory(store2, id) {
+  return store2.transaction(async (state) => {
+    const previous = state.stories.find((story2) => story2.id === id);
+    if (previous) return previous;
+    const pending = pendingFor(state, id), plan = pending.plan;
+    if (!plan) throw new Error("Save a story plan before completing it");
+    const pet = state.pet, appearance = desiredAppearance(state);
+    if (plan.appearance) {
+      if (!appearance) throw new Error("Appearance artwork is unfinished");
+      await access(appearance.file);
+      if (!store2.demo) {
+        const result = pending.hostResult;
+        if (!result?.updated || result.appearanceId !== appearance.id || result.error || result.active !== false && !result.refreshRequested && result.displayStatus !== "confirmed")
+          throw new Error("Host update or active Avatar refresh is unfinished; resume it");
+      }
+    }
+    const mediaIds = [.../* @__PURE__ */ new Set([...plan.mediaIds ?? [], ...state.art.filter((art) => art.requestId === requestId(state) && ["story", "artifact"].includes(art.kind)).map((art) => art.id)])];
+    for (const mediaId of mediaIds) await access(state.art.find((art) => art.id === mediaId && art.petId === pet.id).file);
+    const story = {
+      id,
+      triggerId: pending.triggerId,
+      petId: pet.id,
+      at: Date.now(),
+      text: plan.text,
+      basis: plan.basis,
+      stage: plan.stage,
+      state: plan.state,
+      ...appearance ? { appearanceId: appearance.id } : {},
+      mediaIds,
+      ...pending.steps?.length ? { steps: pending.steps } : {},
+      ...pending.hostResult ? { hostResult: pending.hostResult } : {}
+    };
+    if (!pet.genes) {
+      pet.genes = plan.genes;
+      pet.acquisition = { place: plan.place, connection: plan.connection, storyId: id };
+    }
+    pet.stage = plan.stage;
+    pet.revision++;
+    pet.state = {
+      description: plan.state,
+      storyId: id,
+      updatedAt: story.at,
+      ...appearance ? { appearanceId: appearance.id } : {}
+    };
+    state.stories.push(story);
+    state.pending = null;
+    return story;
+  });
+}
+function dueStory(state, now = Date.now(), timezone = state.schedule?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone) {
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(now);
+  const get = (key) => parts.find((part) => part.type === key).value;
+  const date = `${get("year")}-${get("month")}-${get("day")}`, time = `${get("hour")}:${get("minute")}`;
+  const times = state.schedule?.times ?? ["07:00", "12:00", "16:00", "21:00"], slot = times.filter((slot2) => slot2 <= time).at(-1);
+  const triggerId = slot ? `daily:${date}:${slot}:${timezone.replace(/\//g, ".")}` : null;
+  return { timezone, times, triggerId, due: !!triggerId && !state.stories.some((story) => story.triggerId === triggerId), pending: state.pending?.id ?? null };
+}
+
 // src/native-ipc.ts
 import net from "node:net";
 import { lstat } from "node:fs/promises";
-import { randomUUID as randomUUID2 } from "node:crypto";
-import path5 from "node:path";
-import { homedir as homedir3 } from "node:os";
+import { randomUUID as randomUUID4 } from "node:crypto";
+import path3 from "node:path";
+import { homedir as homedir2 } from "node:os";
 function desktopIpcPath() {
-  return process.platform === "win32" ? "\\\\.\\pipe\\codex-ipc" : path5.join(process.env.CODEX_HOME || path5.join(homedir3(), ".codex"), "ipc", "ipc.sock");
+  return process.platform === "win32" ? "\\\\.\\pipe\\codex-ipc" : path3.join(process.env.CODEX_HOME || path3.join(homedir2(), ".codex"), "ipc", "ipc.sock");
 }
 async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
   if (process.platform === "win32") {
     if (!socketPath.startsWith("\\\\.\\pipe\\")) throw Error("Expected a local Windows named pipe");
   } else {
-    const [file, directory] = await Promise.all([lstat(socketPath), lstat(path5.dirname(socketPath))]);
+    const [file, directory] = await Promise.all([lstat(socketPath), lstat(path3.dirname(socketPath))]);
     const uid = process.getuid?.();
     if (uid == null || file.uid !== uid || directory.uid !== uid || !file.isSocket() || !directory.isDirectory() || directory.mode & 18) {
       throw Error("IPC socket must belong to the current user in a protected directory");
@@ -4246,7 +3946,7 @@ async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
       pending.add(reject);
       const socket = net.createConnection(socketPath);
       sockets.add(socket);
-      const requestId = randomUUID2();
+      const requestId2 = randomUUID4();
       let buffer = Buffer.alloc(0);
       let listener;
       const send = (message) => {
@@ -4258,7 +3958,7 @@ async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
       };
       socket.on("error", fail);
       socket.on("close", () => fail(Error("IPC connection closed")));
-      socket.on("connect", () => send({ type: "request", requestId, sourceClientId: "genpet", version: 0, method: "initialize", params: { clientType: "genpet" } }));
+      socket.on("connect", () => send({ type: "request", requestId: requestId2, sourceClientId: "genpet", version: 0, method: "initialize", params: { clientType: "genpet" } }));
       socket.on("data", (chunk) => {
         buffer = Buffer.concat([buffer, chunk]);
         while (buffer.length >= 4) {
@@ -4280,7 +3980,7 @@ async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
             fail(Error("Invalid IPC message"));
             return;
           }
-          if (message.type === "response" && message.requestId === requestId) {
+          if (message.type === "response" && message.requestId === requestId2) {
             if (message.resultType !== "success" || typeof message.result?.clientId !== "string") {
               fail(Error("IPC initialization rejected"));
               return;
@@ -4321,13 +4021,13 @@ async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
 
 // src/native-refresh.ts
 import { createHash as createHash2 } from "node:crypto";
-import { readFile as readFile4, readdir as readdir2 } from "node:fs/promises";
-import { homedir as homedir4, tmpdir } from "node:os";
-import path6 from "node:path";
+import { readFile as readFile3, readdir } from "node:fs/promises";
+import { homedir as homedir3, tmpdir } from "node:os";
+import path4 from "node:path";
 async function refreshNativePet(options) {
-  const expectedSpriteSha256 = createHash2("sha256").update(await readFile4(options.expectedSpritePath)).digest("hex");
+  const expectedSpriteSha256 = createHash2("sha256").update(await readFile3(options.expectedSpritePath)).digest("hex");
   const errors = [];
-  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || isLiveNativeDestination(path6.dirname(options.expectedSpritePath)));
+  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || isLiveNativeDestination(path4.dirname(options.expectedSpritePath)));
   if (useIpc) {
     try {
       const ipc = await refreshViaIpc(options.ipcSocketPath ?? void 0, options.timeoutMs ?? 2e3);
@@ -4356,15 +4056,186 @@ async function refreshNativePet(options) {
 }
 function isLiveNativeDestination(destination) {
   if (process.env.GENPET_SKIP_NATIVE_REFRESH === "1") return false;
-  const live = path6.join(homedir4(), ".codex", "pets", "genpet-companion");
-  if (path6.resolve(destination) === path6.resolve(live)) return true;
+  const belongs = (home) => {
+    const relative = path4.relative(path4.resolve(home, "pets"), path4.resolve(destination));
+    return !!relative && !relative.includes(path4.sep) && /^genpet-[a-zA-Z0-9_-]+$/.test(relative);
+  };
+  if (!process.env.CODEX_HOME && belongs(path4.join(homedir3(), ".codex"))) return true;
   const configured = process.env.CODEX_HOME;
   if (!configured) return false;
-  const resolved = path6.resolve(configured);
-  const temp = path6.resolve(tmpdir());
-  const relativeToTemp = path6.relative(temp, resolved);
-  if (configured.startsWith("/var/folders/") || configured.includes("/tmp/") || relativeToTemp === "" || relativeToTemp !== ".." && !relativeToTemp.startsWith(`..${path6.sep}`) && !path6.isAbsolute(relativeToTemp)) return false;
-  return path6.resolve(destination) === path6.resolve(path6.join(resolved, "pets", "genpet-companion"));
+  const resolved = path4.resolve(configured);
+  const temp = path4.resolve(tmpdir());
+  const relativeToTemp = path4.relative(temp, resolved);
+  if (configured.startsWith("/var/folders/") || configured.includes("/tmp/") || relativeToTemp === "" || relativeToTemp !== ".." && !relativeToTemp.startsWith(`..${path4.sep}`) && !path4.isAbsolute(relativeToTemp)) return false;
+  return belongs(resolved);
+}
+
+// src/native-pet-live.ts
+import { randomUUID as randomUUID5 } from "node:crypto";
+import net2 from "node:net";
+var maxFrameBytes = 8 * 1024 * 1024;
+var selectedKey = "selected-avatar-id";
+function record(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function connection(options) {
+  const pipePath = (Object.hasOwn(options, "pipePath") ? options.pipePath : process.env.CODEX_APP_TOOLS_PIPE_PATH)?.trim();
+  const threadId = (Object.hasOwn(options, "threadId") ? options.threadId : process.env.CODEX_THREAD_ID)?.trim();
+  if (!pipePath || !threadId) throw new Error("The current Codex app tools pipe and thread ID are unavailable.");
+  if (process.platform === "win32" && !pipePath.startsWith("\\\\.\\pipe\\")) {
+    throw new Error("Expected a local Windows named pipe for Codex app tools.");
+  }
+  const timeoutMs = options.timeoutMs ?? 5e3;
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error("The Codex app tools timeout must be positive.");
+  return { pipePath, threadId, timeoutMs };
+}
+function frame(message) {
+  const payload = Buffer.from(JSON.stringify(message));
+  const header = Buffer.alloc(4);
+  header.writeUInt32LE(payload.length);
+  return Buffer.concat([header, payload]);
+}
+function projectSelection(value) {
+  if (!record(value) || !record(value.settings) || !record(value.effectiveSettings)) {
+    throw new Error("Codex returned an invalid settings response.");
+  }
+  const selectedPetId = value.settings[selectedKey] ?? null;
+  const effectiveSelectedPetId = value.effectiveSettings[selectedKey] ?? null;
+  if (selectedPetId !== null && typeof selectedPetId !== "string" || effectiveSelectedPetId !== null && typeof effectiveSelectedPetId !== "string") {
+    throw new Error("Codex returned an invalid pet selection.");
+  }
+  return { selectedPetId, effectiveSelectedPetId };
+}
+async function requestSelection(options, petId) {
+  const { pipePath, threadId, timeoutMs } = connection(options);
+  const id = 1;
+  const request = {
+    jsonrpc: "2.0",
+    id,
+    method: "tools/call",
+    params: {
+      namespace: "codex_app",
+      tool: petId === void 0 ? "read_settings" : "write_settings",
+      arguments: petId === void 0 ? { include_config: false } : { settings: { [selectedKey]: petId } },
+      callerSource: "codex",
+      threadId,
+      callId: `mcp-call-${randomUUID5()}`,
+      // These fallbacks follow the bundled app-tools MCP's request metadata.
+      turnId: `mcp-turn-${randomUUID5()}`
+    }
+  };
+  return new Promise((resolve, reject) => {
+    const socket = net2.createConnection(pipePath);
+    let pending = Buffer.alloc(0);
+    let settled = false;
+    let sent = false;
+    const finish = (error, result, cancel = false) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (cancel && sent && !socket.destroyed) {
+        socket.end(frame({ jsonrpc: "2.0", id, method: "tools/cancel" }));
+        socket.destroySoon();
+      } else socket.destroy();
+      if (error) reject(error);
+      else resolve(result);
+    };
+    const timer = setTimeout(() => finish(new Error("Codex app tools timed out; the current selection is unconfirmed."), void 0, true), timeoutMs);
+    socket.once("connect", () => {
+      sent = true;
+      socket.write(frame(request));
+    });
+    socket.on("error", (error) => finish(new Error(`Codex app tools connection failed (${error.code ?? "socket error"}).`)));
+    socket.on("close", () => finish(new Error("Codex app tools closed before confirming the pet selection.")));
+    socket.on("data", (bytes) => {
+      if (settled) return;
+      pending = Buffer.concat([pending, bytes]);
+      while (pending.length >= 4) {
+        const length = pending.readUInt32LE(0);
+        if (length > maxFrameBytes) return finish(new Error("Codex app tools response exceeded the size limit."));
+        if (pending.length < length + 4) return;
+        let response;
+        try {
+          response = JSON.parse(pending.subarray(4, length + 4).toString("utf8"));
+        } catch {
+          return finish(new Error("Codex app tools returned invalid JSON."));
+        }
+        pending = pending.subarray(length + 4);
+        if (!record(response) || response.id !== id) continue;
+        if (response.error !== void 0) return finish(new Error("Codex rejected the app tool request."));
+        const result = response.result;
+        if (!record(result) || result.success !== true || !Array.isArray(result.contentItems)) {
+          return finish(new Error("Codex could not complete the pet settings request."));
+        }
+        const item = result.contentItems.find((item2) => record(item2) && item2.type === "inputText");
+        if (!record(item) || typeof item.text !== "string") return finish(new Error("Codex returned no pet settings result."));
+        try {
+          finish(void 0, projectSelection(JSON.parse(item.text)));
+        } catch {
+          finish(new Error("Codex returned an invalid pet settings result."));
+        }
+      }
+    });
+  });
+}
+async function readNativePetLive(options = {}) {
+  try {
+    return { available: true, ...await requestSelection(options) };
+  } catch (error) {
+    return { available: false, reason: error instanceof Error ? error.message : "Live Codex pet selection is unavailable." };
+  }
+}
+async function selectNativePetLive(petId, options = {}) {
+  if (typeof petId !== "string" || petId.trim() !== petId || petId.length === 0 || petId.length > 512 || /[\x00-\x1f\x7f]/.test(petId)) {
+    throw new Error("A valid pet ID is required.");
+  }
+  await requestSelection(options, petId);
+  const result = await requestSelection(options);
+  if (result.selectedPetId !== petId || result.effectiveSelectedPetId !== petId) {
+    throw new Error("The live Codex selection did not match the requested pet; its current selection is unconfirmed.");
+  }
+  return { ...result, immediate: true, restartRequired: false, hostStateConfirmed: true, visualVerified: false };
+}
+
+// src/art.ts
+import { homedir as homedir4 } from "node:os";
+
+// src/prompts.ts
+import { existsSync as existsSync3, readFileSync as readFileSync2 } from "node:fs";
+import path6 from "node:path";
+
+// src/plugin-root.ts
+import { existsSync as existsSync2 } from "node:fs";
+import path5 from "node:path";
+import { fileURLToPath as fileURLToPath2 } from "node:url";
+function pluginRoot() {
+  const moduleDirectory = path5.dirname(fileURLToPath2(import.meta.url));
+  const candidates = [
+    path5.resolve(moduleDirectory, ".."),
+    path5.resolve(moduleDirectory, "..", "plugins", "genpet")
+  ];
+  return candidates.find((candidate) => existsSync2(path5.join(candidate, ".codex-plugin", "plugin.json"))) ?? candidates[0];
+}
+
+// src/prompts.ts
+function packageHost() {
+  const file = path6.join(pluginRoot(), "config", "host.json");
+  const host = existsSync3(file) ? JSON.parse(readFileSync2(file, "utf8")).host : "desktop";
+  if (!["desktop", "dots"].includes(host)) throw new Error("Invalid package host");
+  return host;
+}
+function readPromptFile(fileName) {
+  const candidates = [path6.resolve(import.meta.dirname, "..", "framework", "prompts", fileName), path6.join(pluginRoot(), "prompts", fileName)];
+  const file = candidates.find(existsSync3);
+  if (!file) throw new Error(`Missing prompt file: ${fileName}`);
+  return readFileSync2(file, "utf8");
+}
+function readPrompt(name) {
+  if (!/^[a-z][a-z0-9-]*$/.test(name)) throw new Error("Invalid prompt module");
+  return readPromptFile(`${name}.md`);
+}
+function readUnits() {
+  return JSON.parse(readPromptFile("units.json")).units;
 }
 
 // src/art.ts
@@ -4379,66 +4250,45 @@ var actions = [
   { name: "running", row: 7, count: 6, durations: [120, 120, 120, 120, 120, 220] },
   { name: "review", row: 8, count: 6, durations: [150, 150, 150, 150, 150, 280] }
 ];
-function artRequest(s) {
-  const p = s.pet;
-  if (!p) return null;
-  const isEgg = p.stage === "egg";
-  const maturity = growthMaturity(p.growth.days, p.policy.adultDays);
-  const proportions = { torsoLengthRelativeToBirth: Number((1 + 0.4 * maturity).toFixed(3)), limbLengthRelativeToBirth: Number((1 + 0.3 * maturity).toFixed(3)), headShape: "preserve-canonical" };
-  const forced = s.debug?.stateOverride;
-  const outfit = forced ? forced.kind === "none" ? { prop: "none", scene: "nest" } : situations[forced.kind] : s.settings.freezeOutfit && s.settings.lockedOutfit ? s.settings.lockedOutfit : p.state;
-  const visual = {
-    id: p.id,
-    seed: p.seed,
-    stage: p.stage,
-    day: p.growth.days,
-    palette: p.profile.palette,
-    dna: p.dna,
-    hatchIdentity: isEgg ? null : p.hatchIdentity,
-    growth: isEgg ? null : { size: p.growth.size, expression: p.growth.temperament, decorationLevel: p.growth.decorationLevel, proportions },
-    prop: isEgg ? "none" : outfit.prop,
-    scene: isEgg ? "nest" : outfit.scene
-  };
-  const id = createHash3("sha256").update(JSON.stringify(visual)).digest("hex").slice(0, 20);
-  const current = s.art.find((a) => a.id === id && a.kind === "atlas");
-  const latestPortrait = [...s.art].reverse().find((a) => a.kind === "portrait" && a.stage !== "egg")?.file;
-  const references = isEgg ? [s.eggReference] : s.identityReference ? [s.identityReference, latestPortrait] : [s.eggReference];
-  const birthMarkZone = ["lower left belly", "upper right shoulder", "low central belly", "lower right belly"][p.dna.patternSeed % 4];
-  const birthMark = `At first birth, carry exactly one restrained asymmetrical identity mark: echo 1\u20133 tiny abstract ${p.dna.pattern} fragments on the ${birthMarkZone}. This is a seed-derived permanent marking, not the changing task prop. It must not depict a face, symbol, species or outfit. After the first approved portrait, preserve the realized mark rather than recomputing it.`;
-  const bodyInstruction = { round: "a compact near-circular torso", pear: "a tapered upper torso visibly fuller at the lower belly", bean: "a soft bean-like asymmetric torso with a gentle side curve" }[p.hatchIdentity?.bodyShape || "round"];
-  const appendageInstruction = {
-    buds: "one pair of small rounded buds attached to the lower side contours of the HEAD",
-    leaflets: "one pair of short soft leaflets attached to the sides of the HEAD",
-    "soft-fins": "one pair of small fleshy lateral fins attached to the sides of the HEAD"
-  }[p.hatchIdentity?.appendage || "buds"];
-  const birthGeometry = `The selected seed-derived morphology for THIS newborn is ${bodyInstruction} and ${appendageInstruction}. Render these exact targets visibly at 192x208 size; do not substitute another torso shape or appendage type. The two normal arms are separate from the head appendages.`;
-  const coverage = isEgg ? "Use the GenPet egg-three profile: one canonical shell and three AI-generated eight-frame loops (egg-calm, egg-stir, egg-settle). Reuse these generated frames across native state rows and one neutral calm frame across all sixteen look slots. No separate character actions or directional gaze exist before birth. Record frame selection and reuse honestly; never synthesize motion in code." : "Generate base first, then all nine state rows and both eight-pose look rows independently from base with imagegen. Each action row must show consecutive time frames of ONE continuous looping action with fixed props, camera and body orientation, not a collection of alternative expressions. Look rows allow natural head and body turns, tilts and bends toward the screen-space target, preserving identity, body size and continuity between neighboring directions. Never synthesize missing animation in code.";
-  const common = "Use the GenPet artwork execution path and native Codex Pet visual language: crisp low-resolution pixel art, stepped dark outlines, a limited palette with two or three shade levels. NOT plush, felt, fur, clay, painterly or 3D rendering. Private task text must never appear in the image or prompt. " + coverage + " Assemble and validate a transparent 8x11 v2 atlas. Use any contrasting uniform solid background; no exact color code, separator lines, borders or grids. Visually review each generated source against its action requirements, then process deterministically and validate structure. Before installation, inspect the final idle-jump and idle-look previews for size consistency, cardinal directions and continuity.";
-  const concept = isEgg ? `EGG FIRST: create an ordinary intact egg, not a disguised animal. No future creature has been selected or generated. The egg's silhouette is a simple ovate shell in warm ivory/gray. At most 5\u201310% of its surface carries extremely faint ${p.profile.palette} tint and sparse abstract ${p.dna.pattern} hints, variant ${p.dna.patternSeed}. No eyes, mouth, face, ears, limbs, leaves, recognizable creature pattern, or heraldic symbol. The hints must not reveal a species. Do not reference any hatchling or reverse-engineer an egg from one. The Pet is not born yet. Motion is limited to calm shell wobble, stronger stirring and a brief disturbed tilt that settles. No jumping, cracking, blinking, exposed creature, gaze following, working, reviewing or detached effects.` : `${s.identityReference ? "CONTINUE THE SAME REVEALED INDIVIDUAL. Preserve its approved face, palette, anatomy and identity marks exactly; change proportions and small accessories within the existing character." : `FORWARD HATCHING: this is the first time the creature is designed. The egg reference supplies only a subtle color echo and one abstract pattern echo; do not turn the egg silhouette or markings into a face. Design a distinct organism silhouette and head construction; the shell outline is not a head template. There is no predetermined adult to reverse-engineer. Create an organic fantasy creature within the shared rounded pixel family: a broad horizontal oval head with a blunt top, separate compact torso, tiny square eyes without bright highlights, a tiny mouth, two short arms and two short feet. Do not use a pointed egg-shaped head or shell-like ivory surface. ${birthGeometry} Keep buds under 10% of head width, leaflets under 15%, and fins similarly small. ${birthMark} Use the newly resolved birth identity below.`} Birth identity: ${JSON.stringify(p.hatchIdentity)}. Stage ${p.stage}, growth day ${p.growth.days}, normalized size ${p.growth.size.toFixed(2)} (adult maximum 1.25; keep native cell margins), expression weights ${JSON.stringify(p.growth.temperament)}, keepsake level ${p.growth.decorationLevel}/3. Aim for gradual growth within native cell fitting; subtle differences in a single update are acceptable. Relative to the first approved hatchling, target torso length multiplier ${proportions.torsoLengthRelativeToBirth} and limb length multiplier ${proportions.limbLengthRelativeToBirth}; keep canonical head outline, facial features, palette and marks. Show maturity through torso-to-head and limb proportions, not merely enlarging the whole sprite. Do not shrink or recolor a prop to fake body growth. These are character design parameters, not a diagnosis of the user. Current prop: ${visual.prop}. Scene cue ${visual.scene} belongs in the habitat, not the transparent sprite. The approved realized character takes precedence over approximate initial targets; record deviations in provenance and never redraw identity to repair an old target.`;
+function artRequest(state) {
+  if (!state.pet || !state.pending?.plan) return null;
+  const plan = state.pending.plan, existing = desiredAppearance(state), id = requestId(state);
+  const references2 = state.art.filter((art) => art.petId === state.pet.id && (art.kind === "portrait" || state.host === "dots" && art.kind === "avatar"));
   return {
     id,
-    status: current ? "ready" : s.settings.autoArt ? "pending" : "paused",
-    phase: isEgg ? "incubating" : "revealed",
-    visual,
-    adoptionTrace: p.adoptionTrace ?? null,
-    referenceFiles: [...new Set(references.filter((f) => !!f))],
-    prompt: common + " " + concept,
-    reason: isEgg ? "Only an abstract shell identity exists. The creature will be resolved at the five-hour hatch boundary." : forced ? `Explicit debug state: ${forced.kind}; not observed user activity. Use debug-state auto to resume activity-based appearance.` : p.state.reason,
-    contract: { columns: 8, cellWidth: 192, cellHeight: 208, rows: 11, spriteVersionNumber: 2 },
-    note: "Image synthesis runs in Codex through the GenPet skill. State hatching and completion of new artwork are separate. Preserve the last approved native atlas until its successor passes structural validation."
+    operationId: state.pending.id,
+    petId: state.pet.id,
+    host: state.host,
+    status: !plan.appearance ? "unchanged" : existing ? "ready" : "pending",
+    stage: plan.stage,
+    genes: state.pet.genes ?? plan.genes,
+    story: plan.text,
+    appearance: plan.appearance,
+    reusableAppearances: state.art.filter((art) => art.petId === state.pet.id && ["atlas", "avatar"].includes(art.kind)),
+    referenceFiles: [...new Set([
+      references2.find((art) => art.stage === "egg")?.file,
+      references2.find((art) => art.stage !== "egg")?.file,
+      references2.at(-1)?.file
+    ].filter((file) => !!file))],
+    prompt: readPrompt("meta") + "\n" + readPrompt("appearance"),
+    contract: state.host === "desktop" ? { columns: 8, cellWidth: 192, cellHeight: 208, rows: 11, spriteVersionNumber: 2 } : null,
+    target: state.pet.binding ?? null
   };
 }
 async function validateImage(file, kind) {
+  const info = await stat2(file);
+  if (!info.isFile() || info.size > 64 * 1024 * 1024) throw new Error("Artifact must be a regular file below 64 MiB");
+  if (kind === "artifact") return { format: "artifact", width: 0, height: 0, hasAlpha: false };
   const meta = await readImageInfo(file);
-  if (!meta.hasAlpha) throw new Error("The image must have an alpha channel");
-  if (kind === "atlas" && (meta.width !== 1536 || ![1872, 2288].includes(meta.height || 0))) throw new Error("Atlas must be 1536 \xD7 1872 (v1) or 1536 \xD7 2288 (v2)");
-  if ((meta.width || 0) * (meta.height || 0) > 16e6) throw new Error("Image exceeds size limit");
+  if (["portrait", "atlas"].includes(kind) && !meta.hasAlpha) throw new Error("Pet images must have an alpha channel");
+  if (meta.width * meta.height > 16e6) throw new Error("Image exceeds size limit");
+  if (kind === "atlas" && (meta.width !== 1536 || meta.height !== 2288)) throw new Error("Atlas must be 1536 \xD7 2288 (v2)");
+  const decoded = await decodeRgba(file);
   if (kind === "atlas") {
-    const { data, width } = await decodeRgba(file);
-    for (let row = 0; row < (meta.height === 2288 ? 11 : 9); row++) for (let col = 0; col < 8; col++) {
+    const { data, width } = decoded;
+    for (let row = 0; row < 11; row++) for (let col = 0; col < 8; col++) {
       let visible = 0;
-      const count = row < 9 ? actions[row].count : 8;
-      const used = col < count || meta.height === 2288 && row === 0 && col === 6;
+      const used = col < (row < 9 ? actions[row].count : 8) || row === 0 && col === 6;
       for (let y = row * 208; y < (row + 1) * 208; y++) for (let x = col * 192; x < (col + 1) * 192; x++) if (data[(y * width + x) * 4 + 3] > 0) visible++;
       if (used && visible < 30) throw new Error(`Empty animation cell ${row},${col}`);
       if (!used && visible > 0) throw new Error(`Unused cell ${row},${col} must be transparent`);
@@ -4448,198 +4298,306 @@ async function validateImage(file, kind) {
 }
 async function acceptArt(store2, input) {
   if (!path7.isAbsolute(input.file)) throw new Error("Artifact file must be an absolute local path");
-  if (input.provenance.length < 12) throw new Error("Record generation method and structural validation in provenance");
+  if (!["portrait", "atlas", "avatar", "story", "artifact"].includes(input.kind)) throw new Error("Unknown artifact kind");
+  if (!input.provenance?.trim()) throw new Error("Record generation and validation provenance");
   await validateImage(input.file, input.kind);
-  return store2.transaction(async (s) => {
-    await store2.sync(s);
-    if (s.pet) s.pet = evolvePet(s.pet, store2.now(s));
-    const request = artRequest(s);
-    if (!request || request.id !== input.requestId) throw new Error("Stale design request; read the current request before committing an image");
-    const dir = path7.join(store2.root, "art");
-    await mkdir2(dir, { recursive: true });
-    const ext = path7.extname(input.file).toLowerCase();
-    const file = path7.join(dir, `${request.id}-${input.kind}-${randomUUID3()}${ext}`);
-    await copyFile(input.file, file);
-    const record3 = { id: request.id, stage: s.pet.stage, growthDay: s.pet.growth.days, windowIndex: s.pet.state.windowIndex, file, kind: input.kind, createdAt: Date.now(), provenance: input.provenance };
-    if (input.kind === "portrait") {
-      if (s.pet.stage === "egg" && !s.eggReference) s.eggReference = file;
-      if (s.pet.stage !== "egg" && !s.identityReference) s.identityReference = file;
+  const bytes = await readFile4(input.file);
+  return store2.transaction(async (state) => {
+    if (requestId(state) !== input.requestId) throw new Error("Stale design request");
+    if (state.host === "dots" && input.kind === "atlas" || state.host === "desktop" && input.kind === "avatar") throw new Error("Artwork uses the other host format");
+    const id = `art-${createHash3("sha256").update(state.pet.id + input.requestId + input.kind).update(bytes).digest("hex").slice(0, 24)}`;
+    const previous = state.art.find((art) => art.id === id);
+    if (previous) {
+      await stat2(previous.file);
+      return previous;
     }
-    s.art = s.art.filter((a) => !(a.id === record3.id && a.kind === record3.kind)).concat(record3).slice(-79);
-    return record3;
+    const dir = path7.join(store2.root, "pets", state.pet.id, "assets");
+    await mkdir2(dir, { recursive: true, mode: 448 });
+    const ext = path7.extname(input.file).toLowerCase(), file = path7.join(dir, id + ext);
+    const tmp = file + "." + randomUUID6() + ".tmp";
+    try {
+      await writeFile2(tmp, bytes, { mode: 384, flag: "wx" });
+      await rename2(tmp, file);
+    } finally {
+      await (await import("node:fs/promises")).rm(tmp, { force: true });
+    }
+    const record2 = {
+      id,
+      petId: state.pet.id,
+      requestId: input.requestId,
+      stage: state.pending.plan.stage,
+      description: input.description?.trim() || state.pending.plan.appearance?.description || state.pending.plan.state,
+      file,
+      kind: input.kind,
+      createdAt: Date.now(),
+      provenance: input.provenance
+    };
+    state.art.push(record2);
+    return record2;
   });
 }
-async function exportNative(s, destination) {
-  if (!s.pet) throw new Error("Adopt a pet first");
-  const request = artRequest(s);
-  const art = [...s.art].reverse().find((a) => a.kind === "atlas" && a.id === request.id);
-  if (!art) throw new Error("No approved atlas for this current design yet. Run the GenPet image-generation skill first.");
-  const meta = await validateImage(art.file, "atlas");
-  await mkdir2(destination, { recursive: true });
-  const ext = path7.extname(art.file);
-  const hash2 = createHash3("sha256").update(await readFile5(art.file)).digest("hex").slice(0, 16);
-  const spriteName = `spritesheet-${hash2}${ext}`;
-  const sprite = path7.join(destination, spriteName);
-  const temporary = path7.join(destination, `.pending-${randomUUID3()}${ext}`);
-  await copyFile(art.file, temporary);
-  await rename2(temporary, sprite);
-  const manifest = { id: path7.basename(destination), displayName: s.pet.profile.name, description: "GenPet \xB7 a growing image-generated companion", spriteVersionNumber: meta.height === 2288 ? 2 : 1, spritesheetPath: spriteName };
-  await copyFile(path7.join(destination, "pet.json"), path7.join(destination, "previous-pet.json")).catch((e) => {
-    if (e.code !== "ENOENT") throw e;
-  });
-  const manifestTemporary = path7.join(destination, `.pet-${randomUUID3()}.json`);
-  await writeFile2(manifestTemporary, JSON.stringify(manifest, null, 2));
-  await rename2(manifestTemporary, path7.join(destination, "pet.json"));
-  return {
-    destination,
-    manifest,
-    artId: art.id,
-    artCreatedAt: art.createdAt,
-    filesCommitted: true,
-    automaticRefresh: false,
-    displayStatus: "unconfirmed",
-    refreshRequired: true,
-    notice: "Files committed to the same GenPet entry. Host display refresh has not run yet; call install-native to trigger automatic refresh, or use the refresh adapter."
-  };
+function desktopDestination(state) {
+  if (!state.pet) throw new Error("No pet");
+  const home = process.env.CODEX_HOME || path7.join(homedir4(), ".codex");
+  const destination = state.pet.binding?.destination ?? path7.join(home, "pets", state.pet.id);
+  const relative = path7.relative(path7.resolve(home, "pets"), path7.resolve(destination));
+  if (!relative || relative.startsWith("..") || path7.isAbsolute(relative) || relative.includes(path7.sep)) throw new Error("Target must be one entry in this Codex home");
+  if (state.pet.binding && state.pet.binding.avatarId !== `custom:${path7.basename(destination)}`) throw new Error("Avatar binding does not match its destination");
+  return destination;
 }
-async function installNative(store2, options) {
-  if (store2.demo) throw new Error("Demo state cannot install a native Pet. Use isolated file exports for developer tests; the live companion is updated in place.");
-  const s = await store2.current();
-  const result2 = await exportNative(s, path7.join(process.env.CODEX_HOME || path7.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion"));
-  let refresh;
-  const injected = typeof options?.refresh === "function";
-  const skip = !injected && process.env.GENPET_SKIP_NATIVE_REFRESH === "1";
-  const shouldRefresh = injected || !skip && isLiveNativeDestination(result2.destination);
-  if (shouldRefresh) {
-    const spritePath = path7.join(result2.destination, result2.manifest.spritesheetPath);
-    refresh = await (options?.refresh ?? refreshNativePet)({ expectedSpritePath: spritePath });
+async function exportNative(state, destination) {
+  if (!state.pet || state.host !== "desktop") throw new Error("Native export requires a desktop pet");
+  const art = desiredAppearance(state);
+  if (!art || art.kind !== "atlas") throw new Error("Complete or select a validated atlas first");
+  await validateImage(art.file, "atlas");
+  let previous;
+  try {
+    previous = await readFile4(path7.join(destination, "pet.json"), "utf8");
+    const old = JSON.parse(previous);
+    const transferred = state.replacesPetId && old.genpetId === state.replacesPetId && state.pet.binding?.destination === destination;
+    if (old.genpetId !== state.pet.id && !transferred && !(state.legacy && state.pet.binding?.destination === destination && !old.genpetId)) throw new Error("Target entry belongs to another pet; it was preserved");
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
   }
-  const automaticRefresh = refresh?.automaticRefresh ?? false;
-  const displayStatus = refresh?.displayStatus ?? "unconfirmed";
-  const notice = refresh?.notice ?? "Files committed to the same GenPet entry. Host refresh was skipped for this non-live destination; visible update remains unconfirmed.";
-  await store2.transaction((state) => {
-    state.nativeExport = { artId: result2.artId, artCreatedAt: result2.artCreatedAt, at: Date.now(), destination: result2.destination, refreshRequired: !automaticRefresh };
+  await mkdir2(destination, { recursive: true });
+  const hash = createHash3("sha256").update(await readFile4(art.file)).digest("hex").slice(0, 16);
+  const spritesheetPath = `spritesheet-${hash}${path7.extname(art.file)}`;
+  const tmp = path7.join(destination, `.pending-${randomUUID6()}`);
+  await copyFile(art.file, tmp);
+  await rename2(tmp, path7.join(destination, spritesheetPath));
+  const manifest = {
+    id: path7.basename(destination),
+    genpetId: state.pet.id,
+    displayName: state.pet.name,
+    description: "GenPet \xB7 a companion with its own stories",
+    spriteVersionNumber: 2,
+    spritesheetPath
+  };
+  if (previous) await writeFile2(path7.join(destination, "previous-pet.json"), previous);
+  const manifestTmp = path7.join(destination, `.pet-${randomUUID6()}.json`);
+  await writeFile2(manifestTmp, JSON.stringify(manifest, null, 2));
+  await rename2(manifestTmp, path7.join(destination, "pet.json"));
+  return { destination, manifest, artId: art.id, filesCommitted: true };
+}
+async function installNative(store2, options = {}) {
+  if (store2.demo) throw new Error("Demo state cannot install a native Pet");
+  if (store2.host !== "desktop") throw new Error("Dots uses its own Avatar adapter");
+  return store2.transaction(async (state) => {
+    if (!state.pending?.plan?.appearance) throw new Error("No planned appearance update");
+    const operationId = state.pending.id, destination = desktopDestination(state), avatarId = `custom:${path7.basename(destination)}`;
+    const result = await exportNative(state, destination);
+    state.pet.binding = { host: "desktop", avatarId, destination };
+    const selection2 = await (options.selection ?? readNativePetLive)();
+    const active = selection2.available ? selection2.effectiveSelectedPetId === avatarId : null;
+    const refresh = await (options.refresh ?? refreshNativePet)({ expectedSpritePath: path7.join(destination, result.manifest.spritesheetPath) });
+    const hostResult = validateHostResult(state, operationId, {
+      petId: state.pet.id,
+      operationId,
+      appearanceId: result.artId,
+      avatarId,
+      updated: true,
+      active,
+      refreshRequested: refresh.refreshRequested === true,
+      displayStatus: refresh.displayStatus,
+      ...!refresh.automaticRefresh && (active === true || active === null && isLiveNativeDestination(destination)) ? { error: "Active Avatar refresh did not complete" } : {}
+    });
+    state.pending.hostResult = hostResult;
+    return { ...result, ...hostResult, refresh };
   });
-  return { ...result2, automaticRefresh, displayStatus, refreshRequired: !automaticRefresh, notice, refresh };
-}
-async function nativeTick(store2) {
-  const s = await store2.current();
-  if (!s.nativeExport || !s.pet) return;
-  const ready = [...s.art].reverse().find((a) => a.kind === "atlas" && a.id === artRequest(s)?.id);
-  if (ready && (ready.id !== s.nativeExport.artId || ready.createdAt !== s.nativeExport.artCreatedAt || s.nativeExport.refreshRequired)) await installNative(store2);
 }
 
-// src/cli.ts
-import path10 from "node:path";
-import { randomUUID as randomUUID6 } from "node:crypto";
-
-// src/debug.ts
-import { mkdir as mkdir3, writeFile as writeFile3 } from "node:fs/promises";
+// src/hosts.ts
+import { spawn } from "node:child_process";
+import { readFile as readFile5, stat as stat3 } from "node:fs/promises";
 import path8 from "node:path";
-import { randomUUID as randomUUID4 } from "node:crypto";
-function operation(s, id, key) {
-  if (!/^[a-zA-Z0-9_-]{1,100}$/.test(id)) throw new Error("operationId must contain 1\u2013100 letters, digits, underscores or hyphens. Reuse it only when retrying the same operation.");
-  const previous = s.debug?.operations.find((o) => o.id === id);
-  if (previous && previous.key !== key) throw new Error("operationId already belongs to a different operation.");
-  return previous;
-}
-function record(s, id, key, backup2) {
-  s.debug ??= { growthOffsetMs: 0, operations: [] };
-  s.debug.operations = [...s.debug.operations, { id, key, at: Date.now(), ...backup2 ? { backup: backup2 } : {} }].slice(-50);
-}
-function result(s, action, alreadyApplied = false, backup2) {
+function hostRequest(state) {
+  if (state.host !== "dots") throw new Error("This handoff is for Dots Avatar updates");
+  if (!state.pending?.plan?.appearance) throw new Error("No planned Avatar update");
+  if (!state.pet?.binding) throw new Error("Bind the actual Dots Avatar before requesting an update");
+  const pending = pendingFor(state, state.pending.id), art = desiredAppearance(state);
+  if (!art || art.kind !== "avatar") throw new Error("Complete or select Dots Avatar artwork first");
   return {
-    action,
-    alreadyApplied,
-    backup: backup2,
-    state: s,
-    artRequest: artRequest(s),
-    nativePetId: "genpet-companion",
-    displayStatus: "unconfirmed",
-    notice: "Design state only. Generate/validate any pending artwork, then run install-native even when the requested atlas is already ready. Only its confirmed result proves visible completion."
+    operation: "update-avatar",
+    petId: pending.petId,
+    operationId: pending.id,
+    target: state.pet.binding,
+    file: art.file,
+    appearanceId: art.id,
+    description: state.pending.plan.appearance.description,
+    stage: state.pending.plan.stage,
+    refreshWhenActive: true,
+    preserveCurrentSelection: true
   };
 }
-async function backup(store2, s, action) {
-  const dir = path8.join(store2.root, "backups");
-  await mkdir3(dir, { recursive: true, mode: 448 });
-  const file = path8.join(dir, `${action}-${Date.now()}-${randomUUID4()}.json`);
-  await writeFile3(file, JSON.stringify(s, null, 2), { mode: 384, flag: "wx" });
-  return file;
+async function bindAvatar(store2, avatarId) {
+  if (store2.demo || store2.host !== "dots") throw new Error("bind-avatar is for a real Dots pet");
+  return store2.transaction((state) => {
+    if (!state.pet) throw new Error("Allocate the pet identity first");
+    const id = text(avatarId, "avatarId");
+    if (state.pet.binding && state.pet.binding.avatarId !== id) throw new Error("Target is already bound; preserve the existing Avatar");
+    return state.pet.binding ??= { host: "dots", avatarId: id };
+  });
 }
-async function debugReset(store2, operationId) {
-  return store2.transaction(async (s) => {
-    const prior = operation(s, operationId, "reset");
-    if (prior) return result(s, "reset", true, prior.backup);
-    const saved = await backup(store2, s, "reset");
-    const settings = { ...s.settings, freezeOutfit: false };
-    delete settings.lockedOutfit;
-    const history = s.debug?.operations || [];
-    for (const key of Object.keys(s)) delete s[key];
-    Object.assign(s, {
-      version: 1,
-      pet: null,
-      clockOffset: 0,
-      settings,
-      importedIds: [],
-      lastScanAt: 0,
-      scanInfo: { messages: 0, files: 0, warnings: [] },
-      art: [],
-      debug: { growthOffsetMs: 0, operations: history }
+async function configureAdapter(store2, adapter) {
+  if (store2.host !== "dots") throw new Error("Desktop has its own native adapter");
+  if (!path8.isAbsolute(adapter.command) || !(await stat3(adapter.command)).isFile() || !Array.isArray(adapter.args) || !adapter.args.every((arg) => typeof arg === "string")) throw new Error("Adapter needs an absolute executable and string arguments");
+  await atomicJson(path8.join(store2.root, "avatar-adapter.json"), adapter);
+  return adapter;
+}
+async function invoke(adapter, request) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(adapter.command, adapter.args, { shell: false, stdio: ["pipe", "pipe", "pipe"] });
+    let output = "", error = "", settled = false;
+    const timer = setTimeout(() => {
+      child.kill();
+      finish(new Error("Dots Avatar adapter timed out; resume this operation"));
+    }, 2e4);
+    function finish(failure, value) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (failure) reject(failure);
+      else resolve(value);
+    }
+    child.once("error", (error2) => finish(error2));
+    child.stdin.on("error", (error2) => finish(error2));
+    child.stdout.on("data", (chunk) => {
+      output += chunk;
+      if (output.length > 1024 * 1024) {
+        child.kill();
+        finish(new Error("Avatar adapter response is too large"));
+      }
     });
-    await store2.adopt(s);
-    record(s, operationId, "reset", saved);
-    return result(s, "reset", false, saved);
+    child.stderr.on("data", (chunk) => {
+      if (error.length < 4096) error += chunk;
+    });
+    child.once("close", (code) => {
+      if (code !== 0) return finish(new Error(`Avatar adapter failed (${code}): ${error}`));
+      try {
+        finish(void 0, JSON.parse(output));
+      } catch {
+        finish(new Error("Avatar adapter must return one JSON result"));
+      }
+    });
+    child.stdin.end(JSON.stringify(request));
   });
 }
-async function debugGrow(store2, operationId, target = "next", days) {
-  if (!["next", "hatch", "juvenile", "adult"].includes(target)) throw new Error("Unknown growth target.");
-  if (days !== void 0 && (!Number.isInteger(days) || days < 1 || days > 90)) throw new Error("days must be an integer between 1 and 90.");
-  if (days !== void 0 && target !== "next") throw new Error("Choose either days or a stage target.");
-  return store2.transaction(async (s) => {
-    const key = `grow:${target}:${days ?? ""}`;
-    const prior = operation(s, operationId, key);
-    if (prior) return result(s, "grow", true, prior.backup);
-    if (!s.pet) throw new Error("Adopt an egg first.");
-    await store2.sync(s, true);
-    s.pet = evolvePet(s.pet, store2.now(s));
-    const p = s.pet, now = store2.now(s), hatch = p.adoptedAt + p.policy.hatchHours * HOUR;
-    if (p.stage === "egg" && (!s.eggReference || artRequest(s)?.status !== "ready")) throw new Error("Generate and approve this egg portrait and atlas before hatching.");
-    if (p.stage === "egg" && (days !== void 0 || !["next", "hatch"].includes(target))) throw new Error("Hatch and approve the birth identity first; later growth must reference that individual.");
-    if (p.stage !== "egg" && !s.identityReference) throw new Error("Generate and approve the first hatchling portrait before further growth.");
-    let destination;
-    if (target === "hatch" || p.stage === "egg") destination = hatch;
-    else if (target === "juvenile" || target === "adult") destination = hatch + p.policy[target === "juvenile" ? "juvenileDays" : "adultDays"] * p.policy.growthHours * HOUR;
-    else destination = hatch + (p.growth.days + (days ?? 1)) * p.policy.growthHours * HOUR;
-    if (destination <= now) throw new Error("This growth target is already reached. Choose a later target; debug growth never reverses age.");
-    const saved = await backup(store2, s, "grow");
-    s.debug ??= { growthOffsetMs: 0, operations: [] };
-    s.debug.growthOffsetMs += destination - now;
-    s.pet = evolvePet(p, store2.now(s));
-    record(s, operationId, key, saved);
-    return result(s, "grow", false, saved);
+async function publishDots(store2) {
+  if (store2.demo) throw new Error("Demo records cannot update a host Avatar");
+  const request = hostRequest(await store2.peek());
+  const adapter = JSON.parse(await readFile5(path8.join(store2.root, "avatar-adapter.json"), "utf8"));
+  const result = await invoke(adapter, request);
+  return recordHostResult(store2, request.operationId, result);
+}
+
+// src/generation.ts
+import { createHash as createHash4 } from "node:crypto";
+var object = (value) => !!value && typeof value === "object" && !Array.isArray(value);
+function definition(unit) {
+  const units = readUnits();
+  if (!Object.hasOwn(units, unit)) throw new Error(`Unknown generation unit: ${unit}`);
+  return units[unit];
+}
+function references(value) {
+  if (!Array.isArray(value)) throw new Error("inputRefs must be an array");
+  return value.map((ref) => text(ref, "input reference"));
+}
+function validateUnitResult(unit, input) {
+  const contract = definition(unit);
+  if (!object(input) || !object(input.result)) throw new Error("A unit result requires an object envelope and result");
+  const inputRefs = references(input.inputRefs), result = input.result;
+  for (const [field, type] of Object.entries(contract.result)) {
+    const value = result[field];
+    const valid = type === "string" ? typeof value === "string" && !!value.trim() : type === "array" ? Array.isArray(value) : type === "object" ? object(value) : type === "nullable-string" ? value === null || typeof value === "string" && !!value.trim() : type === "nullable-object" ? value === null || object(value) : false;
+    if (!Object.hasOwn(result, field) || !valid) throw new Error(`${unit}.${field} requires ${type}`);
+  }
+  for (const [field, choices] of Object.entries(contract.choices ?? {}))
+    if (!choices.includes(result[field])) throw new Error(`Invalid ${unit}.${field}`);
+  return { inputRefs, result };
+}
+function unitRequest(unit, fixture) {
+  const contract = definition(unit);
+  if (!object(fixture) || !object(fixture.inputs)) throw new Error("A unit fixture requires inputs");
+  for (const field of contract.inputs) if (!Object.hasOwn(fixture.inputs, field)) throw new Error(`Missing ${unit} input: ${field}`);
+  const inputRefs = references(fixture.inputRefs ?? []);
+  const prompt = [
+    `\u8FD9\u662F\u72EC\u7ACB\u5355\u5143\u6D4B\u8BD5\uFF0C\u53EA\u6267\u884C ${unit}\u3002\u4E0B\u6E38\u6D41\u7A0B\u53EA\u4F5C\u80CC\u666F\uFF0C\u4E0D\u6267\u884C\u5176\u4ED6\u5355\u5143\u3002\u53EA\u4F7F\u7528\u4E0B\u9762\u63D0\u4F9B\u7684\u8F93\u5165\u4E0E\u771F\u5B9E\u6587\u4EF6\uFF1B\u4E0D\u5F97\u8865\u67E5\u771F\u5B9E\u7528\u6237\u8D44\u6599\u3001\u64CD\u4F5C Pet/Avatar\u3001\u521B\u5EFA\u8C03\u5EA6\u6216\u6267\u884C\u5B8C\u6574\u751F\u547D\u5468\u671F\u3002\u9700\u8981\u56FE\u50CF\u68C0\u67E5\u65F6\u5B9E\u9645\u67E5\u770B\u8F93\u5165\u6587\u4EF6\u3002`,
+    readPrompt("meta"),
+    readPrompt(unit),
+    `\u8FD4\u56DE\u4E00\u4E2A JSON \u5BF9\u8C61\uFF1AinputRefs \u4E3A\u8F93\u5165\u5F15\u7528\u5217\u8868\uFF0Cresult \u4E3A\u672C\u5355\u5143\u7ED3\u679C\u3002\u6240\u9700\u5B57\u6BB5\u4E0E\u7C7B\u578B\uFF1A${JSON.stringify(contract.result)}\u3002${contract.choices ? `\u5DE5\u7A0B\u53D6\u503C\uFF1A${JSON.stringify(contract.choices)}\u3002` : ""}\u53EF\u589E\u52A0\u5B57\u6BB5\uFF0C\u5185\u5BB9\u4FDD\u6301\u5F00\u653E\u3002\u4E0D\u8981\u8F93\u51FA\u989D\u5916\u7684\u6D41\u7A0B\u8BF4\u660E\u3002`,
+    `\u56FA\u5B9A\u8F93\u5165\uFF1A${JSON.stringify({ inputRefs, inputs: fixture.inputs }, null, 2)}`
+  ].join("\n\n");
+  return { unit, inputRefs, prompt, promptHash: createHash4("sha256").update(prompt).digest("hex") };
+}
+function canonical(value) {
+  return JSON.stringify(value, (_, item) => object(item) ? Object.fromEntries(Object.keys(item).sort().map((key) => [key, item[key]])) : item);
+}
+async function recordStep(store2, operationId, unit, input) {
+  const output = validateUnitResult(unit, input);
+  return store2.transaction((state) => {
+    const owner = state.pending?.id === operationId ? pendingFor(state, operationId) : state.stories.find((story) => story.id === operationId && story.petId === state.pet?.id);
+    if (!owner) throw new Error("Generation step belongs to another or missing story");
+    const id = `step-${createHash4("sha256").update(canonical([operationId, unit, output])).digest("hex").slice(0, 24)}`;
+    const steps = owner.steps ??= [], previous = steps.find((step2) => step2.id === id);
+    if (previous) return previous;
+    const step = { id, unit, at: Date.now(), ...output };
+    steps.push(step);
+    return step;
   });
 }
-async function debugState(store2, operationId, kind) {
-  if (!["build", "research", "create", "learn", "rest", "none", "auto"].includes(kind)) throw new Error("Unknown debug state.");
-  return store2.transaction(async (s) => {
-    const key = `state:${kind}`, prior = operation(s, operationId, key);
-    if (prior) return result(s, "state", true);
-    if (!s.pet) throw new Error("Adopt an egg first.");
-    await store2.sync(s);
-    s.pet = evolvePet(s.pet, store2.now(s));
-    if (s.pet.stage === "egg" && kind !== "auto") throw new Error("Eggs have no props. Hatch first; do not reveal a creature during incubation.");
-    s.debug ??= { growthOffsetMs: 0, operations: [] };
-    if (kind === "auto") delete s.debug.stateOverride;
-    else s.debug.stateOverride = { kind, at: Date.now() };
-    record(s, operationId, key);
-    return result(s, "state");
+
+// src/migration.ts
+import { readFile as readFile6, copyFile as copyFile2, mkdir as mkdir3 } from "node:fs/promises";
+import path9 from "node:path";
+import { randomUUID as randomUUID7 } from "node:crypto";
+async function migrateLegacy(store2, file, design) {
+  if (store2.host !== "desktop" || store2.demo) throw new Error("Legacy migration is for desktop records");
+  if (!path9.isAbsolute(file)) throw new Error("Legacy file must be absolute");
+  const legacy = JSON.parse(await readFile6(file, "utf8"));
+  if (legacy.version !== 1 || !legacy.pet) throw new Error("No v1 pet to migrate");
+  const genes = text(design.genes, "observed legacy identity"), place = text(design.place, "origin"), connection2 = text(design.connection, "connection");
+  return store2.transaction(async (state) => {
+    if (state.legacy && state.pet?.id === legacy.pet.id) return state;
+    if (state.pet) throw new Error("Migration never replaces an existing v2 pet");
+    const petId = identifier(legacy.pet.id, "legacy petId");
+    const stage = validateStage("egg", legacy.pet.stage);
+    const backup = path9.join(store2.root, "backups", `legacy-${randomUUID7()}.json`);
+    await atomicJson(backup, legacy);
+    state.pet = {
+      id: petId,
+      name: text(legacy.pet.profile?.name ?? "GenPet", "name"),
+      adoptedAt: legacy.pet.adoptedAt,
+      revision: 1,
+      genes,
+      stage,
+      acquisition: { place, connection: connection2, storyId: "legacy" },
+      state: { description: legacy.pet.state?.reason || "Continuing the existing companion", updatedAt: Date.now() }
+    };
+    state.legacy = { backup, importedAt: Date.now() };
+    const destination = legacy.nativeExport?.destination;
+    if (destination) state.pet.binding = { host: "desktop", avatarId: `custom:${path9.basename(destination)}`, destination };
+    const dir = path9.join(store2.root, "pets", petId, "assets");
+    await mkdir3(dir, { recursive: true });
+    for (const art of legacy.art ?? []) {
+      if (!["portrait", "atlas"].includes(art.kind) || !path9.isAbsolute(art.file)) continue;
+      const id = `art-${randomUUID7()}`, target = path9.join(dir, id + path9.extname(art.file));
+      try {
+        await copyFile2(art.file, target);
+      } catch (error) {
+        if (error.code === "ENOENT") continue;
+        throw error;
+      }
+      state.art.push({ id, petId, requestId: "legacy", stage: validateStage("egg", art.stage), description: "Imported existing artwork", file: target, kind: art.kind, createdAt: art.createdAt, provenance: art.provenance || "Preserved v1 artwork" });
+      if (art.kind === "atlas" && art.stage === stage) state.pet.state.appearanceId = id;
+    }
+    return state;
   });
 }
 
 // src/native-pets.ts
-import { readFile as readFile6, readdir as readdir3 } from "node:fs/promises";
+import { readFile as readFile7, readdir as readdir2 } from "node:fs/promises";
 import { homedir as homedir5 } from "node:os";
-import path9 from "node:path";
+import path10 from "node:path";
 
 // node_modules/smol-toml/dist/error.js
 function getLineColFromPtr(string, ptr) {
@@ -5418,7 +5376,7 @@ function selection(value, source) {
 }
 async function optionalText(file) {
   try {
-    return await readFile6(file, "utf8");
+    return await readFile7(file, "utf8");
   } catch (error) {
     if (error.code === "ENOENT") return void 0;
     throw error;
@@ -5427,7 +5385,7 @@ async function optionalText(file) {
 async function readSelection(home, errors) {
   let config;
   try {
-    config = await optionalText(path9.join(home, "config.toml"));
+    config = await optionalText(path10.join(home, "config.toml"));
   } catch {
     errors.push("config.toml: \u65E0\u6CD5\u8BFB\u53D6\u9009\u62E9\u8BBE\u7F6E");
     return selection(null, "unavailable");
@@ -5456,7 +5414,7 @@ async function readSelection(home, errors) {
   }
   let legacy;
   try {
-    legacy = await optionalText(path9.join(home, ".codex-global-state.json"));
+    legacy = await optionalText(path10.join(home, ".codex-global-state.json"));
   } catch {
     errors.push(".codex-global-state.json: \u65E0\u6CD5\u8BFB\u53D6\u65E7\u9009\u62E9\u8BBE\u7F6E");
     return selection(null, "unavailable");
@@ -5484,7 +5442,7 @@ async function localPets(home, errors) {
   for (const [directory, filename] of [["avatars", "avatar.json"], ["pets", "pet.json"]]) {
     let entries;
     try {
-      entries = await readdir3(path9.join(home, directory), { withFileTypes: true });
+      entries = await readdir2(path10.join(home, directory), { withFileTypes: true });
     } catch (error) {
       if (error.code !== "ENOENT") errors.push(`${directory}: \u65E0\u6CD5\u8BFB\u53D6\u5BA0\u7269\u76EE\u5F55`);
       continue;
@@ -5493,9 +5451,9 @@ async function localPets(home, errors) {
       if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
       const label = `${directory}/${entry.name}/${filename}`;
       try {
-        const text = await optionalText(path9.join(home, directory, entry.name, filename));
-        if (text === void 0) continue;
-        const manifest = JSON.parse(text);
+        const text2 = await optionalText(path10.join(home, directory, entry.name, filename));
+        if (text2 === void 0) continue;
+        const manifest = JSON.parse(text2);
         if (!isRecord(manifest)) throw new Error("Invalid manifest");
         for (const key of ["id", "displayName"]) {
           if (manifest[key] !== void 0 && (typeof manifest[key] !== "string" || !manifest[key].trim())) throw new Error("Invalid name");
@@ -5510,7 +5468,7 @@ async function localPets(home, errors) {
   }
   return [...pets.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
-async function getNativePetCatalog(home = process.env.CODEX_HOME || path9.join(homedir5(), ".codex")) {
+async function getNativePetCatalog(home = process.env.CODEX_HOME || path10.join(homedir5(), ".codex")) {
   const errors = [];
   const selected = await readSelection(home, errors);
   const local = await localPets(home, errors);
@@ -5522,131 +5480,37 @@ async function getNativePetCatalog(home = process.env.CODEX_HOME || path9.join(h
   };
 }
 
-// src/native-pet-live.ts
-import { randomUUID as randomUUID5 } from "node:crypto";
-import net2 from "node:net";
-var maxFrameBytes = 8 * 1024 * 1024;
-var selectedKey = "selected-avatar-id";
-function record2(value) {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-function connection(options) {
-  const pipePath = (Object.hasOwn(options, "pipePath") ? options.pipePath : process.env.CODEX_APP_TOOLS_PIPE_PATH)?.trim();
-  const threadId = (Object.hasOwn(options, "threadId") ? options.threadId : process.env.CODEX_THREAD_ID)?.trim();
-  if (!pipePath || !threadId) throw new Error("The current Codex app tools pipe and thread ID are unavailable.");
-  if (process.platform === "win32" && !pipePath.startsWith("\\\\.\\pipe\\")) {
-    throw new Error("Expected a local Windows named pipe for Codex app tools.");
-  }
-  const timeoutMs = options.timeoutMs ?? 5e3;
-  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error("The Codex app tools timeout must be positive.");
-  return { pipePath, threadId, timeoutMs };
-}
-function frame(message) {
-  const payload = Buffer.from(JSON.stringify(message));
-  const header = Buffer.alloc(4);
-  header.writeUInt32LE(payload.length);
-  return Buffer.concat([header, payload]);
-}
-function projectSelection(value) {
-  if (!record2(value) || !record2(value.settings) || !record2(value.effectiveSettings)) {
-    throw new Error("Codex returned an invalid settings response.");
-  }
-  const selectedPetId = value.settings[selectedKey] ?? null;
-  const effectiveSelectedPetId = value.effectiveSettings[selectedKey] ?? null;
-  if (selectedPetId !== null && typeof selectedPetId !== "string" || effectiveSelectedPetId !== null && typeof effectiveSelectedPetId !== "string") {
-    throw new Error("Codex returned an invalid pet selection.");
-  }
-  return { selectedPetId, effectiveSelectedPetId };
-}
-async function requestSelection(options, petId) {
-  const { pipePath, threadId, timeoutMs } = connection(options);
-  const id = 1;
-  const request = {
-    jsonrpc: "2.0",
-    id,
-    method: "tools/call",
-    params: {
-      namespace: "codex_app",
-      tool: petId === void 0 ? "read_settings" : "write_settings",
-      arguments: petId === void 0 ? { include_config: false } : { settings: { [selectedKey]: petId } },
-      callerSource: "codex",
-      threadId,
-      callId: `mcp-call-${randomUUID5()}`,
-      // These fallbacks follow the bundled app-tools MCP's request metadata.
-      turnId: `mcp-turn-${randomUUID5()}`
+// src/debugger.ts
+import { spawn as spawn2 } from "node:child_process";
+import path11 from "node:path";
+async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageHost() === "dots" ? 47832 : 47831))) {
+  if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("Invalid debugger port");
+  const url = `http://127.0.0.1:${port}`, root = new Store(void 0, false, packageHost()).root;
+  async function inspect() {
+    let response;
+    try {
+      response = await fetch(url + "/api/health", { signal: AbortSignal.timeout(500) });
+    } catch {
+      return false;
     }
-  };
-  return new Promise((resolve, reject) => {
-    const socket = net2.createConnection(pipePath);
-    let pending = Buffer.alloc(0);
-    let settled = false;
-    let sent = false;
-    const finish = (error, result2, cancel = false) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      if (cancel && sent && !socket.destroyed) {
-        socket.end(frame({ jsonrpc: "2.0", id, method: "tools/cancel" }));
-        socket.destroySoon();
-      } else socket.destroy();
-      if (error) reject(error);
-      else resolve(result2);
-    };
-    const timer = setTimeout(() => finish(new Error("Codex app tools timed out; the current selection is unconfirmed."), void 0, true), timeoutMs);
-    socket.once("connect", () => {
-      sent = true;
-      socket.write(frame(request));
-    });
-    socket.on("error", (error) => finish(new Error(`Codex app tools connection failed (${error.code ?? "socket error"}).`)));
-    socket.on("close", () => finish(new Error("Codex app tools closed before confirming the pet selection.")));
-    socket.on("data", (bytes) => {
-      if (settled) return;
-      pending = Buffer.concat([pending, bytes]);
-      while (pending.length >= 4) {
-        const length = pending.readUInt32LE(0);
-        if (length > maxFrameBytes) return finish(new Error("Codex app tools response exceeded the size limit."));
-        if (pending.length < length + 4) return;
-        let response;
-        try {
-          response = JSON.parse(pending.subarray(4, length + 4).toString("utf8"));
-        } catch {
-          return finish(new Error("Codex app tools returned invalid JSON."));
-        }
-        pending = pending.subarray(length + 4);
-        if (!record2(response) || response.id !== id) continue;
-        if (response.error !== void 0) return finish(new Error("Codex rejected the app tool request."));
-        const result2 = response.result;
-        if (!record2(result2) || result2.success !== true || !Array.isArray(result2.contentItems)) {
-          return finish(new Error("Codex could not complete the pet settings request."));
-        }
-        const item = result2.contentItems.find((item2) => record2(item2) && item2.type === "inputText");
-        if (!record2(item) || typeof item.text !== "string") return finish(new Error("Codex returned no pet settings result."));
-        try {
-          finish(void 0, projectSelection(JSON.parse(item.text)));
-        } catch {
-          finish(new Error("Codex returned an invalid pet settings result."));
-        }
-      }
-    });
+    const value = await response.json().catch(() => null);
+    if (value?.service !== "genpet-debugger" || value.root !== root) throw new Error("Debugger port belongs to another service or data directory");
+    return true;
+  }
+  if (await inspect()) return { url, reused: true };
+  const child = spawn2(process.execPath, [path11.join(import.meta.dirname, "debugger-server.js")], { detached: true, stdio: "ignore", env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: path11.resolve(dataRoot()) } });
+  let failure;
+  child.once("error", (error) => {
+    failure = error;
   });
-}
-async function readNativePetLive(options = {}) {
-  try {
-    return { available: true, ...await requestSelection(options) };
-  } catch (error) {
-    return { available: false, reason: error instanceof Error ? error.message : "Live Codex pet selection is unavailable." };
+  child.unref();
+  for (let i = 0; i < 50; i++) {
+    if (failure) throw failure;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    if (await inspect()) return { url, reused: false };
+    if (child.exitCode !== null) throw new Error("Debugger failed to start");
   }
-}
-async function selectNativePetLive(petId, options = {}) {
-  if (typeof petId !== "string" || petId.trim() !== petId || petId.length === 0 || petId.length > 512 || /[\x00-\x1f\x7f]/.test(petId)) {
-    throw new Error("A valid pet ID is required.");
-  }
-  await requestSelection(options, petId);
-  const result2 = await requestSelection(options);
-  if (result2.selectedPetId !== petId || result2.effectiveSelectedPetId !== petId) {
-    throw new Error("The live Codex selection did not match the requested pet; its current selection is unconfirmed.");
-  }
-  return { ...result2, immediate: true, restartRequired: false, hostStateConfirmed: true, visualVerified: false };
+  throw new Error("Debugger startup timed out");
 }
 
 // src/cli.ts
@@ -5654,30 +5518,109 @@ var argv = process.argv.slice(2);
 var demo = argv[0] === "--demo";
 if (demo) argv.shift();
 var [command, ...args] = argv;
-var store = new Store(void 0, demo);
-var boolean = (value, key) => {
-  if (value === "true") return true;
-  if (value === "false") return false;
-  throw new Error(`${key} must be true or false.`);
+var store = new Store(void 0, demo, packageHost());
+var jsonFile = async (file) => {
+  if (!path12.isAbsolute(file ?? "")) throw new Error("JSON input requires an absolute file");
+  return JSON.parse(await readFile8(file, "utf8"));
 };
 try {
   let output;
   switch (command) {
+    case "status": {
+      const state = await store.peek(), legacyFile = !state.pet ? await store.legacyCandidate() : null;
+      output = { ...state, dataDirectory: store.root, ...legacyFile ? { legacyFile } : {} };
+      break;
+    }
+    case "begin-story":
+      output = await beginStory(store, args[0] || `manual:${randomUUID8()}`, args[1] || "story", args[2]);
+      break;
+    case "plan-story":
+      output = await planStory(store, args[0], await jsonFile(args[1]));
+      break;
+    case "finish-story":
+      output = await finishStory(store, args[0]);
+      break;
+    case "cancel-story":
+      output = await store.transaction((state) => {
+        const pending = pendingFor(state, args[0]);
+        if (pending.mode === "initialization" && pending.plan) throw new Error("Initialization genes are saved; resume it or explicitly reset the pet");
+        state.pending = null;
+        return { cancelled: pending.id };
+      });
+      break;
+    case "art-request":
+      output = artRequest(await store.peek());
+      break;
+    case "accept-art":
+      output = await acceptArt(store, { requestId: args[0], file: args[1], kind: args[2], provenance: args[3], description: args[4] });
+      break;
+    case "install-native":
+    case "refresh-native":
+      output = await installNative(store);
+      break;
+    case "host-request":
+      output = hostRequest(await store.peek());
+      break;
+    case "host-result":
+      output = await recordHostResult(store, args[0], await jsonFile(args[1]));
+      break;
+    case "bind-avatar":
+      output = await bindAvatar(store, args[0]);
+      break;
+    case "configure-host":
+      output = await configureAdapter(store, await jsonFile(args[0]));
+      break;
+    case "publish":
+      output = store.host === "desktop" ? await installNative(store) : await publishDots(store);
+      break;
+    case "prompt":
+      output = { prompt: readPrompt(args[0]) };
+      break;
+    case "unit-request":
+      output = unitRequest(args[0], await jsonFile(args[1]));
+      break;
+    case "verify-unit":
+      output = { unit: args[0], contractValid: true, ...validateUnitResult(args[0], await jsonFile(args[1])) };
+      break;
+    case "record-step":
+      output = await recordStep(store, args[0], args[1], await jsonFile(args[2]));
+      break;
+    case "due":
+      output = dueStory(await store.peek(), Date.now(), args[0]);
+      break;
+    case "schedule": {
+      const timezone = text(args[0], "timezone"), reference = text(args[1], "schedule reference");
+      new Intl.DateTimeFormat("en", { timeZone: timezone });
+      output = await store.transaction((state) => state.schedule = { timezone, reference, times: ["07:00", "12:00", "16:00", "21:00"] });
+      break;
+    }
+    case "story-output": {
+      const state = await store.peek(), story = args[0] ? state.stories.find((story2) => story2.id === args[0]) : state.stories.at(-1);
+      if (!story) throw new Error("No completed story");
+      output = { text: story.text, media: state.art.filter((art) => story.mediaIds.includes(art.id)), appearance: state.art.find((art) => art.id === story.appearanceId), prompt: readPrompt("output") };
+      break;
+    }
+    case "migrate-legacy":
+      output = await migrateLegacy(store, args[0], await jsonFile(args[1]));
+      break;
+    case "reset":
+      output = await resetPet(store, args[0] || randomUUID8());
+      break;
     case "debugger":
       output = await launchDebugger();
       break;
     case "switch-pet": {
-      if (demo) throw new Error("switch-pet controls the real Codex desktop and cannot run with --demo.");
+      if (demo || store.host !== "desktop") throw new Error("switch-pet requires the desktop package and cannot run with --demo");
       const usage = "Usage: switch-pet [PET_ID|--current|--list|--help]";
       if (args.length > 1) throw new Error(usage);
       const target = args[0] ?? "--current";
       if (target === "--help") {
-        output = { usage, examples: ["switch-pet --list", "switch-pet --current", "switch-pet dewey", "switch-pet custom:genpet-companion"] };
+        output = { usage, examples: ["switch-pet --list", "switch-pet --current", "switch-pet dewey"] };
         break;
       }
       if (target === "--current") {
         const current = await readNativePetLive();
-        if (!current.available) throw new Error(`${current.reason} Run this command from a local Codex desktop chat with its app-tools connection.`);
+        if (!current.available) throw new Error(current.reason);
         output = current;
         break;
       }
@@ -5687,98 +5630,16 @@ try {
         output = { pets: catalog.pets, ...catalog.errors ? { errors: catalog.errors } : {} };
         break;
       }
-      if (!catalog.pets.some((pet) => pet.id === target)) throw new Error(`Unknown pet ID: ${target}. Use switch-pet --list to see builtin and local pet IDs.`);
+      if (!catalog.pets.some((pet) => pet.id === target)) throw new Error(`Unknown pet ID: ${target}. Use switch-pet --list.`);
       output = await selectNativePetLive(target);
       break;
     }
-    case "status":
-      output = await store.current();
-      break;
-    case "tick":
-      await nativeTick(store);
-      output = await store.current();
-      break;
-    case "adopt": {
-      const [name, palette] = args;
-      if (palette && !["sage", "peach", "sky", "lilac"].includes(palette)) throw new Error("Palette must be sage, peach, sky, or lilac.");
-      const profile = {};
-      if (name) profile.name = name;
-      else if (demo) profile.name = "GenPet Demo";
-      if (palette) profile.palette = palette;
-      output = await store.transaction((s) => store.adopt(s, profile));
-      break;
-    }
-    case "advance": {
-      if (!demo) throw new Error("Time travel requires --demo; the real adoption clock is immutable.");
-      const hours = Number(args[0]);
-      if (!Number.isFinite(hours) || hours <= 0 || hours > 24 * 90) throw new Error("Use a positive demo time jump of at most 90 days.");
-      output = await store.transaction((s) => {
-        if (!s.pet) throw new Error("Adopt a demo egg first.");
-        s.clockOffset += hours * HOUR;
-        s.pet = evolvePet(s.pet, store.now(s));
-        return s.pet;
-      });
-      break;
-    }
-    case "art-request":
-      output = artRequest(await store.current());
-      break;
-    case "configure": {
-      const input = {};
-      for (const argument of args) {
-        const split = argument.indexOf("=");
-        if (split < 1) throw new Error("Configure values use key=value.");
-        const key = argument.slice(0, split), value = argument.slice(split + 1);
-        if (["autoContext", "freezeOutfit", "autoArt"].includes(key)) input[key] = boolean(value, key);
-        else if (key === "name") input.name = value;
-        else throw new Error(`Unknown setting: ${key}`);
-      }
-      output = await store.transaction((s) => {
-        configureState(s, input);
-        if (typeof input.name === "string" && s.pet) s.pet = updateProfile(s.pet, { name: input.name });
-        return s;
-      });
-      break;
-    }
-    case "clear-context":
-      output = await store.transaction((s) => {
-        if (s.pet) for (const entry of [...s.pet.context]) s.pet = removeContext(s.pet, entry.id, store.now(s));
-        return { cleared: true, state: s };
-      });
-      break;
-    case "debug-reset":
-      output = await debugReset(store, args[0] || randomUUID6());
-      break;
-    case "debug-grow": {
-      const value = args[0] || "next";
-      output = await debugGrow(store, args[1] || randomUUID6(), /^\d+$/.test(value) ? "next" : value, /^\d+$/.test(value) ? Number(value) : void 0);
-      break;
-    }
-    case "debug-state":
-      output = await debugState(store, args[1] || randomUUID6(), args[0]);
-      break;
-    case "accept-art": {
-      const [requestId, file, kind, ...provenance] = args;
-      if (kind !== "portrait" && kind !== "atlas") throw new Error('Usage: accept-art REQUEST_ID /absolute/image.png portrait|atlas "Imagegen provenance and QA"');
-      output = await acceptArt(store, { requestId, file, kind, provenance: provenance.join(" ") });
-      break;
-    }
-    case "install-native":
-      output = await installNative(store);
-      break;
-    case "refresh-native": {
-      const s = await store.current();
-      const destination = path10.join(process.env.CODEX_HOME || path10.join((await import("node:os")).homedir(), ".codex"), "pets", "genpet-companion");
-      const manifest = JSON.parse(await (await import("node:fs/promises")).readFile(path10.join(destination, "pet.json"), "utf8"));
-      output = await refreshNativePet({ expectedSpritePath: path10.join(destination, manifest.spritesheetPath) });
-      break;
-    }
     default:
-      throw new Error("Commands: debugger; switch-pet [PET_ID|--current|--list|--help]; [--demo] status, tick, adopt [name] [sage|peach|sky|lilac], art-request, configure key=value..., clear-context, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>");
+      throw new Error("Commands: status, begin-story [TRIGGER_ID] [initialization|story|grow], plan-story OPERATION_ID PLAN_JSON, art-request, accept-art REQUEST_ID FILE portrait|atlas|avatar|story|artifact PROVENANCE [DESCRIPTION], publish, host-request, host-result OPERATION_ID RESULT_JSON, bind-avatar AVATAR_ID, configure-host ADAPTER_JSON, finish-story OPERATION_ID, story-output [STORY_ID], due [TIMEZONE], schedule TIMEZONE REFERENCE, prompt MODULE, unit-request UNIT INPUT_JSON, verify-unit UNIT RESULT_JSON, record-step OPERATION_ID UNIT RESULT_JSON, migrate-legacy V1_FILE DESIGN_JSON, cancel-story OPERATION_ID, reset [OPERATION_ID], debugger, switch-pet [PET_ID|--current|--list|--help]");
   }
   console.log(JSON.stringify(output, null, 2));
-} catch (e) {
-  console.error(e.message);
+} catch (error) {
+  console.error(error.message);
   process.exitCode = 1;
 }
 /*! Bundled license information:

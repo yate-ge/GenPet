@@ -1,9 +1,9 @@
 {
   "name": "genpet",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
-  "description": "A bounded, personalized companion that grows with you. A GenFaceUI-inspired Codex plugin.",
+  "description": "A lightweight story-driven Pet framework for Codex Dots and native Codex Pets.",
   "license": "MIT",
   "engines": {
     "node": ">=22"

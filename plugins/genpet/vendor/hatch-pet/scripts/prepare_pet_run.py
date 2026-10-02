@@ -124,7 +124,7 @@ NON_DERIVABLE_STATES = {
 
 PET_SAFE_STYLE = (
     "Pet-safe sprite: compact full-body mascot, readable in a 192x208 cell, "
-    "clear silhouette, simple face, stable palette/materials, and crisp edges "
+    "distinct readable construction, optional or absent facial features, stable materials, and crisp edges "
     "for chroma-key extraction."
 )
 
@@ -777,7 +777,7 @@ def make_egg_jobs(run_dir, copied_refs):
 
 def egg_row_prompt(args, state):
     return f"""Generate one horizontal strip of exactly eight complete frames of the SAME intact egg.
-Use the canonical egg reference for its individual shell shape, palette and faint abstract markings.
+Use the canonical egg reference for its individual egg construction, materials and identity features.
 Use the eight-slot guide only for spacing. Keep each shell wholly within its own slot, with generous margins,
 the same scale and baseline throughout. Flat pure {args.chroma_key['hex']} background, no guide lines or labels.
 Motion: {EGG_ANIMATIONS[state]} First and last frames should join naturally as a loop.
@@ -807,22 +807,22 @@ def make_parallel_jobs(run_dir, copied_refs):
 
 
 MOTION_SEQUENCES = {
-    "idle": "Breathe gently: resting, slightly inhale, fullest inhale with a blink, begin exhaling, finish exhaling, return near resting.",
-    "running-right": "One complete in-place rightward walk cycle: contact, recoil, passing, high point, opposite contact, opposite recoil, opposite passing, opposite high point. Keep facing screen-right throughout; no travel across slots.",
-    "running-left": "One complete in-place leftward walk cycle: contact, recoil, passing, high point, opposite contact, opposite recoil, opposite passing, opposite high point. Keep facing screen-left throughout; no travel across slots.",
-    "waving": "One gentle wave using the SAME hand throughout: hand raised near cheek, tilt hand outward, tilt hand inward, return near the initial raised-hand pose. The other hand and torso remain still.",
-    "jumping": "One small jump: slight crouch on the ground, ascending, airborne apex, descending, soft landing near the initial ground pose. The first and last grounded poses must keep the base pet's compact front silhouette width, head size and arms close to its sides; crouching changes leg posture, not body scale. Keep the jump low enough to fit at resting body size. Preserve actual vertical displacement inside fixed slots; do not recenter each airborne pose or shrink the character to make space.",
-    "failed": "One small disappointed head-dip cycle while standing: neutral, begin lowering head, lower slightly, lowest head pose, hold with a blink, begin lifting, nearly restored, return near neutral. Never sit, lie down or turn around.",
-    "waiting": "Keep both hands together at chest level for one patient loop: upright, lean forward slightly, finish the small lean, blink while holding, ease back, return near upright. No waving, shrugging or new symbols.",
-    "running": "One focused thinking loop while standing, one hand resting under the chin throughout: neutral, small head dip, slightly deeper dip, blink, begin recovering, return near neutral. Keep the same stance and hand placement; do not switch tasks or add a laptop, paper or magnifier.",
-    "review": "One attentive inspection loop with arms held still: neutral, slight head tilt, finish that tilt, small squint, ease back, return near neutral. No celebration, waving or pose changes.",
+    "idle": "A quiet resting loop using this individual's own small changes; breathing or blinking only if those features exist.",
+    "running-right": "A continuous in-place rightward movement cycle using this individual's own locomotion. Keep its directional reading consistent; do not invent feet.",
+    "running-left": "A continuous in-place leftward movement cycle using this individual's own locomotion. Keep its directional reading consistent; do not invent feet.",
+    "waving": "A continuous friendly greeting expressed through the existing design, with a clear rise and return of the gesture. No required hands or arms.",
+    "jumping": "One small rise from the resting baseline, apex, descent and soft return, using this individual's own movement. Preserve scale and actual vertical motion; no required legs or body posture.",
+    "failed": "One subdued reaction and recovery expressed through this individual's own existing construction, without adding facial features or new symbols.",
+    "waiting": "One patient anticipation loop that fits this individual's existing design; a small progressive motion and return without replacing its identity.",
+    "running": "One focused activity loop expressed through this individual's own existing construction, without requiring a hand, chin, face or task prop.",
+    "review": "One attentive inspection loop expressed through existing features or relationships, with continuous motion and recovery. No required eyes or arms.",
 }
 
 
 def parallel_row_prompt(args, state, count, action):
     motion = state in MOTION_SEQUENCES
-    contract = ("These are consecutive time samples of ONE continuous cyclic action, NOT alternative poses, expression stickers or a storyboard. Read left-to-right in time. Adjacent frames differ only by a small motion increment; the last frame transitions naturally into the first. Include visible motion, not identical copies. Fixed camera, body orientation and ground line. Keep the same props present in every frame; never introduce or swap props, symbols or detached effects. Adapt the described hand/foot gesture to the base pet's existing anatomy without adding limbs."
-                if motion else "These are ordered screen-space gaze samples. Allow natural head and body turns, tilts and bends to clearly aim toward each target. Keep character identity, apparent body size and ground position consistent. Neighboring directions must form a continuous arc, including the transition to the other look row. Preserve the original eye design; do not add extra eye dots or substitute eye distortion for a readable direction.")
+    contract = ("These are consecutive time samples of ONE continuous cyclic action, NOT alternative poses, expression stickers or a storyboard. Read left-to-right in time. Adjacent frames differ only by a small motion increment; the last frame transitions naturally into the first. Include visible motion, not identical copies. Fixed camera, body orientation and ground line. Keep the same props present in every frame; never introduce or swap props, symbols or detached effects. Use only this individual's existing construction; facial features and limbs are optional, never add them to satisfy an action name."
+                if motion else "These are ordered screen-space attention samples. Use whatever existing features or relationships this individual has to indicate each target, including a design with no face, eyes, head or limbs. Keep character identity, apparent body size and ground position consistent. Neighboring directions must form a continuous arc, including the transition to the other look row. Preserve this individual's construction; do not add eyes or facial features to express direction.")
     return f"""Generate {state}: exactly {count} full-body {'animation frames of one continuous action' if motion else 'gaze samples'} in one horizontal strip.
 Use only the canonical base for character identity, proportions, palette, markings and props.
 Keep apparent scale consistent across the row. Keep the ground baseline fixed; jumping intentionally
@@ -1248,7 +1248,7 @@ def main() -> None:
                 write_text(row_prompt_dir / f"{state}.md", parallel_row_prompt(args, state, count, STATE_PROMPTS[state]))
             for state, _row, directions, _purpose in LOOK_ROWS:
                 action = "Look directions in this exact left-to-right order: " + ", ".join(directions)
-                action += ". Angles run clockwise in screen coordinates: 0 up, 90 viewer-right, 180 down, 270 viewer-left. Move eyes/head naturally; keep the body upright. This row is independent; do not wait for any other row or cardinal image."
+                action += ". Angles run clockwise in screen coordinates: 0 up, 90 viewer-right, 180 down, 270 viewer-left. Express direction through this individual's own existing features and preserve its identity and scale. This row is independent; do not wait for any other row or cardinal image."
                 write_text(row_prompt_dir / f"{state}.md", parallel_row_prompt(args, state, 8, action))
     jobs = {
         "schema_version": 1,

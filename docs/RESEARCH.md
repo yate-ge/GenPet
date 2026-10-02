@@ -1,5 +1,7 @@
 # Research foundation
 
+> The theoretical background is retained below; its implementation mapping describes the pre-0.5.0 design. Current product boundaries and runtime mechanisms are defined in [product design](PRODUCT_DESIGN.zh-CN.md) and [the shared meta rules](../framework/prompts/meta.md): literal eggs, recognizable biological Pets, open individual bodies and story-driven development.
+
 GenPet takes theoretical inspiration from **GenFaceUI: Meta-Design of Generative Personalized Facial Expression Interfaces for Intelligent Agents** and its Generative Personalized Facial Expression Interface (GPFEI) framework. It is a native Codex Pet plugin, not a replication of GenFaceUI. It applies bounded personalization and contextual expression to a companion that persists and changes over time.
 
 ## What comes from GenFaceUI

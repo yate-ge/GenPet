@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "units": {
+    "context": {
+      "inputs": ["availableContext"],
+      "result": {"facts": "array", "unknowns": "array"}
+    },
+    "encounter": {
+      "inputs": ["context"],
+      "result": {"text": "string", "place": "string", "connection": "string", "evidenceIds": "array"}
+    },
+    "genes": {
+      "inputs": ["context", "encounter"],
+      "result": {"genes": "string", "eggAppearance": "string", "designBasis": "string"}
+    },
+    "story": {
+      "inputs": ["context", "pet"],
+      "result": {"text": "string", "connection": "string", "evidenceIds": "array", "stateIntent": "string", "visualIntent": "string"}
+    },
+    "evolution": {
+      "inputs": ["context", "pet", "story"],
+      "result": {"stage": "string", "state": "string", "basis": "string", "specialChange": "nullable-string"},
+      "choices": {"stage": ["egg", "hatchling", "juvenile", "adult"]}
+    },
+    "appearance": {
+      "inputs": ["genes", "story", "change", "savedArt", "hostRequirements"],
+      "result": {"appearance": "nullable-object", "visuals": "array"}
+    },
+    "image-review": {
+      "inputs": ["visual", "actualFile"],
+      "result": {"file": "string", "verdict": "string", "observations": "array", "repair": "nullable-string"},
+      "choices": {"verdict": ["accept", "repair"]}
+    },
+    "output": {
+      "inputs": ["story", "completed", "availableMedia"],
+      "result": {"text": "string", "mediaRefs": "array"}
+    }
+  }
+}

@@ -49,8 +49,11 @@ export async function refreshNativePet(options: RefreshOptions): Promise<Refresh
 
 export function isLiveNativeDestination(destination: string) {
   if (process.env.GENPET_SKIP_NATIVE_REFRESH === '1') return false;
-  const live = path.join(homedir(), '.codex', 'pets', 'genpet-companion');
-  if (path.resolve(destination) === path.resolve(live)) return true;
+  const belongs = (home: string) => {
+    const relative = path.relative(path.resolve(home, 'pets'), path.resolve(destination));
+    return !!relative && !relative.includes(path.sep) && /^genpet-[a-zA-Z0-9_-]+$/.test(relative);
+  };
+  if (!process.env.CODEX_HOME && belongs(path.join(homedir(), '.codex'))) return true;
   const configured = process.env.CODEX_HOME;
   if (!configured) return false;
   const resolved = path.resolve(configured);
@@ -59,7 +62,7 @@ export function isLiveNativeDestination(destination: string) {
   const relativeToTemp = path.relative(temp, resolved);
   if (configured.startsWith('/var/folders/') || configured.includes('/tmp/') ||
       relativeToTemp === '' || (relativeToTemp !== '..' && !relativeToTemp.startsWith(`..${path.sep}`) && !path.isAbsolute(relativeToTemp))) return false;
-  return path.resolve(destination) === path.resolve(path.join(resolved, 'pets', 'genpet-companion'));
+  return belongs(resolved);
 }
 
 export async function listInstalledSprites(destination: string) {
