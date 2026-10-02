@@ -11,6 +11,6 @@
 | `/genpet-switch` | 普通 Pet 的读取、列出与激活切换，不改变个体阶段或生成形象。 |
 | `/genpet-debugger` | 明确请求时启动本地检查页；打开页面不会领养、进化或切换宠物。 |
 
-`/genpet-state` 已被 `/genpet-story` 替换。成长不按天数推进，也不再接受增加日龄的参数；正常进化由 Agent 根据近期工作内容变化判断。`grow` 的依据明确记为用户请求的调试操作。
+`/genpet-state` 已被 `/genpet-story` 替换。成长不按天数推进，也不再接受增加日龄的参数；正常进化由 Agent 根据用户近期有意义的变化（不限于工作）判断。`grow` 的依据明确记为用户请求的调试操作。
 
 工程 CLI 与数据合同见 `references/workflow.md` 和 `references/storage.md`。同一调用使用稳定 trigger ID；生成失败继续已有计划和基因，不用 reset 重试。开发中的临时记录使用隔离的 `GENPET_DATA_DIR` 与 `CODEX_HOME`，不操作用户真实宠物。

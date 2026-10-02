@@ -12,24 +12,24 @@ import { readNativePetLive, selectNativePetLive } from './native-pet-live.js';
 
 /** Explicitly launched, local, read-only pet inspection. Switching requires an explicit action. */
 export async function startServer(port=Number(process.env.GENPET_PORT||47831), root?:string) {
- const real=new Store(root,false,packageHost()), demo=new Store(root,true,packageHost()), token=randomBytes(24).toString('hex');
+ const store=new Store(root,packageHost()), token=randomBytes(24).toString('hex');
  const server=http.createServer(async(req,res)=>{
   const json=(value:unknown,status=200)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(value));};
   try {
    const host=req.headers.host||'';if(!/^(127\.0\.0\.1|localhost)(:\d+)?$/.test(host))return json({error:'Local access only'},403);
    if(req.headers.origin&&req.headers.origin!==`http://${host}`)return json({error:'Origin rejected'},403);
-   const url=new URL(req.url||'/','http://'+host), store=url.searchParams.get('demo')==='1'?demo:real;
-   if(req.method==='GET'&&url.pathname==='/api/health')return json({service:'genpet-debugger',root:real.root});
-   if(req.method==='GET'&&url.pathname==='/api/state')return json({state:await store.peek(),token,demo:store.demo});
+   const url=new URL(req.url||'/','http://'+host);
+   if(req.method==='GET'&&url.pathname==='/api/health')return json({service:'genpet-debugger',root:store.root});
+   if(req.method==='GET'&&url.pathname==='/api/state')return json({state:await store.peek(),token});
    if(req.method==='GET'&&url.pathname==='/api/art-request')return json(artRequest(await store.peek()));
-   if(req.method==='GET'&&url.pathname==='/api/native-pets')return json(real.host==='desktop'?{...await getNativePetCatalog(),live:await readNativePetLive()}:null);
+   if(req.method==='GET'&&url.pathname==='/api/native-pets')return json(store.host==='desktop'?{...await getNativePetCatalog(),live:await readNativePetLive()}:null);
    if(req.method==='POST'&&url.pathname==='/api/action') {
     if(req.headers['x-genpet-token']!==token)return json({error:'Invalid request token'},403);
     let body='';for await(const chunk of req){body+=chunk;if(body.length>16_384)throw new Error('Request too large');}
     const input=JSON.parse(body);
     if(input.action==='stop'){json({ok:true,result:{stopped:true}});server.close();server.closeIdleConnections();return;}
     if(input.action==='switch-pet') {
-     if(store.demo||store.host!=='desktop')throw new Error('Demo/Dots cannot switch the desktop Pet');
+     if(store.host!=='desktop')throw new Error('Dots cannot switch the desktop Pet');
      const catalog=await getNativePetCatalog();if(!catalog.pets.some(pet=>pet.id===input.petId))throw new Error('Unknown pet ID');
      return json({ok:true,result:await selectNativePetLive(input.petId)});
     }

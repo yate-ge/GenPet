@@ -9,18 +9,18 @@ import { Store } from '../src/store.js';
 import { beginStory, planStory, finishStory, resetPet } from '../src/story.js';
 import { unitRequest, validateUnitResult } from '../src/generation.js';
 import { artRequest, acceptArt } from '../src/art.js';
-import { namingDue, markNameAsked, namePet, deferName } from '../src/naming.js';
-import { initialPlan, initialization, image, personality } from './fixtures.js';
+import { namingDue, markNameAsked, namePet } from '../src/naming.js';
+import { initialPlan, initialization, image, personality, hostDone } from './fixtures.js';
 
 async function isolated(run: (store: Store, root: string) => Promise<void>) {
  const root=await mkdtemp(path.join(tmpdir(),'genpet-companion-'));
- try { await run(new Store(root,true,'dots'),root); }
+ try { await run(new Store(root,'dots'),root); }
  finally { await rm(root,{recursive:true,force:true}); }
 }
 async function completeAppearance(store:Store,root:string,op:string) {
  const file=path.join(root,'avatar.png');await image(file);
  await acceptArt(store,{requestId:artRequest(await store.peek())!.id,file,kind:'avatar',provenance:'Synthetic engineering fixture, not generated visual evidence'});
- return finishStory(store,op);
+ await hostDone(store,op);return finishStory(store,op);
 }
 
 test('new personalities use an open text unit and commit only with successful adoption',async()=>isolated(async(store,root)=>{
@@ -76,7 +76,6 @@ test('the completed hatch invites naming once and an unanswered invitation does 
  const next=(await beginStory(store,'naming:no-answer')).pending!.id;
  await planStory(store,next,{text:'The companion went on with its own life.',basis:'No new user event',state:'Listening'});await finishStory(store,next);
  assert.equal(namingDue(await store.peek()),false);assert.equal((await store.peek()).pet!.naming!.status,'asked');
- await deferName(store,petId);assert.equal((await store.peek()).pet!.naming!.status,'deferred');assert.equal(namingDue(await store.peek()),false);
 }));
 
 test('a user name is idempotent and preserves the individual; a stale reply cannot name a reset pet',async()=>isolated(async(store,root)=>{
@@ -84,7 +83,7 @@ test('a user name is idempotent and preserves the individual; a stale reply cann
  const before=await store.peek(),id=before.pet!.id;
  await namePet(store,id,'  薄荷 ☘️  ');const after=await store.peek();
  assert.equal(after.pet!.name,'薄荷 ☘️');assert.equal(after.pet!.id,id);assert.equal(after.pet!.genes,before.pet!.genes);assert.equal(after.pet!.personality,before.pet!.personality);assert.deepEqual(after.pet!.state,before.pet!.state);assert.deepEqual(after.art,before.art);assert.deepEqual(after.stories,before.stories);
- const saved=await readFile(store.file,'utf8');await namePet(new Store(store.base,true,'dots'),id,'薄荷 ☘️');assert.equal(await readFile(store.file,'utf8'),saved);
+ const saved=await readFile(store.file,'utf8');await namePet(new Store(store.base,'dots'),id,'薄荷 ☘️');assert.equal(await readFile(store.file,'utf8'),saved);
  await assert.rejects(()=>namePet(store,id,'two\nlines'),/one line/);assert.equal(await readFile(store.file,'utf8'),saved);
  const reset=await resetPet(store,'new-individual');assert.equal(reset.pet!.naming!.status,'unasked');assert.equal(reset.pet!.personality,undefined);assert.equal(reset.pet!.name,'GenPet');
  const resetFile=await readFile(store.file,'utf8');await assert.rejects(()=>namePet(store,id,'late answer'),/another or missing pet/);assert.equal(await readFile(store.file,'utf8'),resetFile);
@@ -92,11 +91,11 @@ test('a user name is idempotent and preserves the individual; a stale reply cann
 }));
 
 test('CLI naming and status persist an explicit name in isolated data without invoking a host',async()=>isolated(async(_store,root)=>{
- const data=path.join(root,'cli-data'),store=new Store(data,true,'desktop');
+ const data=path.join(root,'cli-data'),store=new Store(data,'desktop');
  await store.transaction(state=>{state.pet=createPet();state.pet.genes='Synthetic genome';state.pet.stage='hatchling';state.pet.personality=personality;});
  const id=(await store.peek()).pet!.id;
  const env={...process.env,GENPET_DATA_DIR:data,CODEX_HOME:path.join(root,'no-host-home'),CODEX_APP_TOOLS_PIPE_PATH:'',CODEX_THREAD_ID:''};
- const call=(...args:string[])=>JSON.parse(execFileSync(process.execPath,['--import','tsx',path.resolve('src/cli.ts'),'--demo',...args],{env,encoding:'utf8'}));
+ const call=(...args:string[])=>JSON.parse(execFileSync(process.execPath,['--import','tsx',path.resolve('src/cli.ts'),...args],{env,encoding:'utf8'}));
  assert.equal(call('status').namingDue,true);assert.equal(call('name-asked',id).asked,true);assert.equal(call('status').namingDue,false);
  assert.equal(call('name-pet',id,'小薄荷').name,'小薄荷');assert.equal(call('status').pet.name,'小薄荷');
 }));

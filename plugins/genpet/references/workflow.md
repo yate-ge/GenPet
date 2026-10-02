@@ -15,4 +15,4 @@ Resolve this installed plugin's root from the skill directory (`../..`). Run `no
 
 Imagegen creates pixels; scripts only validate, extract and assemble them. Incomplete generation is not a new adoption. Keep already completed assets when tools fail. Only report display confirmation when actual host evidence exists; delivery of a refresh request is a separate result.
 
-The start command sets up [scheduling](scheduling.md) after the first completed story. Installation alone does not run adoption, imagegen or schedules. Developer tests use an isolated `GENPET_DATA_DIR` and `CODEX_HOME`; `--demo` records cannot publish to any real host.
+The start command sets up [scheduling](scheduling.md) after the first completed story. Installation alone does not run adoption, imagegen or schedules. Developer tests use an isolated `GENPET_DATA_DIR` and `CODEX_HOME`.

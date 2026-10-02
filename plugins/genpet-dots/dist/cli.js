@@ -2125,8 +2125,8 @@ var require_png = __commonJS({
 });
 
 // src/cli.ts
-import { readFile as readFile8 } from "node:fs/promises";
-import path12 from "node:path";
+import { readFile as readFile7 } from "node:fs/promises";
+import path11 from "node:path";
 import { randomUUID as randomUUID8 } from "node:crypto";
 
 // src/store.ts
@@ -2179,14 +2179,12 @@ async function atomicJson(file, value) {
   }
 }
 var Store = class {
-  constructor(root = dataRoot(), demo2 = false, host = "desktop") {
-    this.demo = demo2;
+  constructor(root = dataRoot(), host = "desktop") {
     this.host = host;
     this.base = path.resolve(root);
-    this.root = path.resolve(this.base, host, ...demo2 ? ["demo"] : []);
+    this.root = path.resolve(this.base, host);
     this.file = path.join(this.root, "state.json");
   }
-  demo;
   host;
   base;
   root;
@@ -2202,7 +2200,8 @@ var Store = class {
         identifier(state.pet.id, "petId");
         validateStage("egg", state.pet.stage);
         if (state.pet.personality !== void 0 && (typeof state.pet.personality !== "string" || !state.pet.personality.trim())) throw new Error("Invalid personality");
-        if (state.pet.naming && !["unasked", "asked", "named", "deferred"].includes(state.pet.naming.status)) throw new Error("Invalid naming status");
+        if (state.pet.naming?.status === "deferred") state.pet.naming.status = "asked";
+        if (state.pet.naming && !["unasked", "asked", "named"].includes(state.pet.naming.status)) throw new Error("Invalid naming status");
       }
       return state;
     } catch (error) {
@@ -2210,12 +2209,8 @@ var Store = class {
       throw error;
     }
   }
-  /** Read-only; elapsed time never evolves a pet. */
-  current() {
-    return this.peek();
-  }
   async legacyCandidate() {
-    if (this.host !== "desktop" || this.demo) return null;
+    if (this.host !== "desktop") return null;
     const file = path.join(this.base, "state.json");
     try {
       const old = JSON.parse(await readFile(file, "utf8"));
@@ -2246,7 +2241,6 @@ var Store = class {
       const state = await this.peek();
       const result = await fn(state);
       await atomicJson(this.file, state);
-      if (state.pet) await atomicJson(path.join(this.root, "pets", state.pet.id, "record.json"), state);
       return result;
     } finally {
       await rm(lock, { recursive: true, force: true });
@@ -2306,11 +2300,11 @@ var Module = (() => {
     var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
     var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions == "object" && typeof process.versions.node == "string";
     var scriptDirectory = "";
-    function locateFile(path13) {
+    function locateFile(path12) {
       if (Module2["locateFile"]) {
-        return Module2["locateFile"](path13, scriptDirectory);
+        return Module2["locateFile"](path12, scriptDirectory);
       }
-      return scriptDirectory + path13;
+      return scriptDirectory + path12;
     }
     var read_, readAsync, readBinary, setWindowTitle;
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -3854,7 +3848,6 @@ function validateHostResult(state, id, input) {
   };
 }
 async function recordHostResult(store2, id, input) {
-  if (store2.demo) throw new Error("Demo records cannot update a host Avatar");
   return store2.transaction((state) => {
     const pending = pendingFor(state, id);
     if (!pending.plan?.appearance) throw new Error("No planned appearance update");
@@ -3875,11 +3868,9 @@ async function finishStory(store2, id) {
     if (plan.appearance) {
       if (!appearance) throw new Error("Appearance artwork is unfinished");
       await access(appearance.file);
-      if (!store2.demo) {
-        const result = pending.hostResult;
-        if (!result?.updated || result.appearanceId !== appearance.id || result.error || result.active !== false && !result.refreshRequested && result.displayStatus !== "confirmed")
-          throw new Error("Host update or active Avatar refresh is unfinished; resume it");
-      }
+      const result = pending.hostResult;
+      if (!result?.updated || result.appearanceId !== appearance.id || result.error || result.active !== false && !result.refreshRequested && result.displayStatus !== "confirmed")
+        throw new Error("Host update or active Avatar refresh is unfinished; resume it");
     }
     const mediaIds = [.../* @__PURE__ */ new Set([...plan.mediaIds ?? [], ...state.art.filter((art) => art.requestId === requestId(state) && ["story", "artifact"].includes(art.kind)).map((art) => art.id)])];
     for (const mediaId of mediaIds) await access(state.art.find((art) => art.id === mediaId && art.petId === pet.id).file);
@@ -3915,11 +3906,12 @@ async function finishStory(store2, id) {
     return story;
   });
 }
+var DAILY_TIMES = ["07:00", "12:00", "16:00", "21:00"];
 function dueStory(state, now = Date.now(), timezone = state.schedule?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone) {
   const parts = new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(now);
   const get = (key) => parts.find((part) => part.type === key).value;
   const date = `${get("year")}-${get("month")}-${get("day")}`, time = `${get("hour")}:${get("minute")}`;
-  const times = state.schedule?.times ?? ["07:00", "12:00", "16:00", "21:00"], slot = times.filter((slot2) => slot2 <= time).at(-1);
+  const times = state.schedule?.times ?? DAILY_TIMES, slot = times.filter((slot2) => slot2 <= time).at(-1);
   const triggerId = slot ? `daily:${date}:${slot}:${timezone.replace(/\//g, ".")}` : null;
   return { timezone, times, triggerId, due: !!triggerId && !state.stories.some((story) => story.triggerId === triggerId), pending: state.pending?.id ?? null };
 }
@@ -4032,7 +4024,7 @@ async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
 
 // src/native-refresh.ts
 import { createHash as createHash2 } from "node:crypto";
-import { readFile as readFile3, readdir } from "node:fs/promises";
+import { readFile as readFile3 } from "node:fs/promises";
 import { homedir as homedir3, tmpdir } from "node:os";
 import path4 from "node:path";
 async function refreshNativePet(options) {
@@ -4394,7 +4386,6 @@ async function exportNative(state, destination) {
   return { destination, manifest, artId: art.id, filesCommitted: true };
 }
 async function installNative(store2, options = {}) {
-  if (store2.demo) throw new Error("Demo state cannot install a native Pet");
   if (store2.host !== "desktop") throw new Error("Dots uses its own Avatar adapter");
   return store2.transaction(async (state) => {
     if (!state.pending?.plan?.appearance) throw new Error("No planned appearance update");
@@ -4421,9 +4412,6 @@ async function installNative(store2, options = {}) {
 }
 
 // src/hosts.ts
-import { spawn } from "node:child_process";
-import { readFile as readFile5, stat as stat3 } from "node:fs/promises";
-import path8 from "node:path";
 function hostRequest(state) {
   if (state.host !== "dots") throw new Error("This handoff is for Dots Avatar updates");
   if (!state.pending?.plan?.appearance) throw new Error("No planned Avatar update");
@@ -4445,64 +4433,13 @@ function hostRequest(state) {
   };
 }
 async function bindAvatar(store2, avatarId) {
-  if (store2.demo || store2.host !== "dots") throw new Error("bind-avatar is for a real Dots pet");
+  if (store2.host !== "dots") throw new Error("bind-avatar is for a real Dots pet");
   return store2.transaction((state) => {
     if (!state.pet) throw new Error("Allocate the pet identity first");
     const id = text(avatarId, "avatarId");
     if (state.pet.binding && state.pet.binding.avatarId !== id) throw new Error("Target is already bound; preserve the existing Avatar");
     return state.pet.binding ??= { host: "dots", avatarId: id };
   });
-}
-async function configureAdapter(store2, adapter) {
-  if (store2.host !== "dots") throw new Error("Desktop has its own native adapter");
-  if (!path8.isAbsolute(adapter.command) || !(await stat3(adapter.command)).isFile() || !Array.isArray(adapter.args) || !adapter.args.every((arg) => typeof arg === "string")) throw new Error("Adapter needs an absolute executable and string arguments");
-  await atomicJson(path8.join(store2.root, "avatar-adapter.json"), adapter);
-  return adapter;
-}
-async function invoke(adapter, request) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(adapter.command, adapter.args, { shell: false, stdio: ["pipe", "pipe", "pipe"] });
-    let output = "", error = "", settled = false;
-    const timer = setTimeout(() => {
-      child.kill();
-      finish(new Error("Dots Avatar adapter timed out; resume this operation"));
-    }, 2e4);
-    function finish(failure, value) {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      if (failure) reject(failure);
-      else resolve(value);
-    }
-    child.once("error", (error2) => finish(error2));
-    child.stdin.on("error", (error2) => finish(error2));
-    child.stdout.on("data", (chunk) => {
-      output += chunk;
-      if (output.length > 1024 * 1024) {
-        child.kill();
-        finish(new Error("Avatar adapter response is too large"));
-      }
-    });
-    child.stderr.on("data", (chunk) => {
-      if (error.length < 4096) error += chunk;
-    });
-    child.once("close", (code) => {
-      if (code !== 0) return finish(new Error(`Avatar adapter failed (${code}): ${error}`));
-      try {
-        finish(void 0, JSON.parse(output));
-      } catch {
-        finish(new Error("Avatar adapter must return one JSON result"));
-      }
-    });
-    child.stdin.end(JSON.stringify(request));
-  });
-}
-async function publishDots(store2) {
-  if (store2.demo) throw new Error("Demo records cannot update a host Avatar");
-  const request = hostRequest(await store2.peek());
-  const adapter = JSON.parse(await readFile5(path8.join(store2.root, "avatar-adapter.json"), "utf8"));
-  const result = await invoke(adapter, request);
-  return recordHostResult(store2, request.operationId, result);
 }
 
 // src/generation.ts
@@ -4562,13 +4499,13 @@ async function recordStep(store2, operationId, unit, input) {
 }
 
 // src/migration.ts
-import { readFile as readFile6, copyFile as copyFile2, mkdir as mkdir3 } from "node:fs/promises";
-import path9 from "node:path";
+import { readFile as readFile5, copyFile as copyFile2, mkdir as mkdir3 } from "node:fs/promises";
+import path8 from "node:path";
 import { randomUUID as randomUUID7 } from "node:crypto";
 async function migrateLegacy(store2, file, design) {
-  if (store2.host !== "desktop" || store2.demo) throw new Error("Legacy migration is for desktop records");
-  if (!path9.isAbsolute(file)) throw new Error("Legacy file must be absolute");
-  const legacy = JSON.parse(await readFile6(file, "utf8"));
+  if (store2.host !== "desktop") throw new Error("Legacy migration is for desktop records");
+  if (!path8.isAbsolute(file)) throw new Error("Legacy file must be absolute");
+  const legacy = JSON.parse(await readFile5(file, "utf8"));
   if (legacy.version !== 1 || !legacy.pet) throw new Error("No v1 pet to migrate");
   const genes = text(design.genes, "observed legacy identity"), place = text(design.place, "origin"), connection2 = text(design.connection, "connection");
   return store2.transaction(async (state) => {
@@ -4576,7 +4513,7 @@ async function migrateLegacy(store2, file, design) {
     if (state.pet) throw new Error("Migration never replaces an existing v2 pet");
     const petId = identifier(legacy.pet.id, "legacy petId");
     const stage = validateStage("egg", legacy.pet.stage);
-    const backup = path9.join(store2.root, "backups", `legacy-${randomUUID7()}.json`);
+    const backup = path8.join(store2.root, "backups", `legacy-${randomUUID7()}.json`);
     await atomicJson(backup, legacy);
     state.pet = {
       id: petId,
@@ -4590,12 +4527,12 @@ async function migrateLegacy(store2, file, design) {
     };
     state.legacy = { backup, importedAt: Date.now() };
     const destination = legacy.nativeExport?.destination;
-    if (destination) state.pet.binding = { host: "desktop", avatarId: `custom:${path9.basename(destination)}`, destination };
-    const dir = path9.join(store2.root, "pets", petId, "assets");
+    if (destination) state.pet.binding = { host: "desktop", avatarId: `custom:${path8.basename(destination)}`, destination };
+    const dir = path8.join(store2.root, "pets", petId, "assets");
     await mkdir3(dir, { recursive: true });
     for (const art of legacy.art ?? []) {
-      if (!["portrait", "atlas"].includes(art.kind) || !path9.isAbsolute(art.file)) continue;
-      const id = `art-${randomUUID7()}`, target2 = path9.join(dir, id + path9.extname(art.file));
+      if (!["portrait", "atlas"].includes(art.kind) || !path8.isAbsolute(art.file)) continue;
+      const id = `art-${randomUUID7()}`, target2 = path8.join(dir, id + path8.extname(art.file));
       try {
         await copyFile2(art.file, target2);
       } catch (error) {
@@ -4610,9 +4547,9 @@ async function migrateLegacy(store2, file, design) {
 }
 
 // src/native-pets.ts
-import { readFile as readFile7, readdir as readdir2 } from "node:fs/promises";
+import { readFile as readFile6, readdir } from "node:fs/promises";
 import { homedir as homedir5 } from "node:os";
-import path10 from "node:path";
+import path9 from "node:path";
 
 // node_modules/smol-toml/dist/error.js
 function getLineColFromPtr(string, ptr) {
@@ -5391,7 +5328,7 @@ function selection(value, source) {
 }
 async function optionalText(file) {
   try {
-    return await readFile7(file, "utf8");
+    return await readFile6(file, "utf8");
   } catch (error) {
     if (error.code === "ENOENT") return void 0;
     throw error;
@@ -5400,7 +5337,7 @@ async function optionalText(file) {
 async function readSelection(home, errors) {
   let config;
   try {
-    config = await optionalText(path10.join(home, "config.toml"));
+    config = await optionalText(path9.join(home, "config.toml"));
   } catch {
     errors.push("config.toml: \u65E0\u6CD5\u8BFB\u53D6\u9009\u62E9\u8BBE\u7F6E");
     return selection(null, "unavailable");
@@ -5429,7 +5366,7 @@ async function readSelection(home, errors) {
   }
   let legacy;
   try {
-    legacy = await optionalText(path10.join(home, ".codex-global-state.json"));
+    legacy = await optionalText(path9.join(home, ".codex-global-state.json"));
   } catch {
     errors.push(".codex-global-state.json: \u65E0\u6CD5\u8BFB\u53D6\u65E7\u9009\u62E9\u8BBE\u7F6E");
     return selection(null, "unavailable");
@@ -5457,7 +5394,7 @@ async function localPets(home, errors) {
   for (const [directory, filename] of [["avatars", "avatar.json"], ["pets", "pet.json"]]) {
     let entries;
     try {
-      entries = await readdir2(path10.join(home, directory), { withFileTypes: true });
+      entries = await readdir(path9.join(home, directory), { withFileTypes: true });
     } catch (error) {
       if (error.code !== "ENOENT") errors.push(`${directory}: \u65E0\u6CD5\u8BFB\u53D6\u5BA0\u7269\u76EE\u5F55`);
       continue;
@@ -5466,7 +5403,7 @@ async function localPets(home, errors) {
       if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
       const label = `${directory}/${entry.name}/${filename}`;
       try {
-        const text2 = await optionalText(path10.join(home, directory, entry.name, filename));
+        const text2 = await optionalText(path9.join(home, directory, entry.name, filename));
         if (text2 === void 0) continue;
         const manifest = JSON.parse(text2);
         if (!isRecord(manifest)) throw new Error("Invalid manifest");
@@ -5483,7 +5420,7 @@ async function localPets(home, errors) {
   }
   return [...pets.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
-async function getNativePetCatalog(home = process.env.CODEX_HOME || path10.join(homedir5(), ".codex")) {
+async function getNativePetCatalog(home = process.env.CODEX_HOME || path9.join(homedir5(), ".codex")) {
   const errors = [];
   const selected = await readSelection(home, errors);
   const local = await localPets(home, errors);
@@ -5496,11 +5433,11 @@ async function getNativePetCatalog(home = process.env.CODEX_HOME || path10.join(
 }
 
 // src/debugger.ts
-import { spawn as spawn2 } from "node:child_process";
-import path11 from "node:path";
+import { spawn } from "node:child_process";
+import path10 from "node:path";
 async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageHost() === "dots" ? 47832 : 47831))) {
   if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("Invalid debugger port");
-  const url = `http://127.0.0.1:${port}`, root = new Store(void 0, false, packageHost()).root;
+  const url = `http://127.0.0.1:${port}`, root = new Store(void 0, packageHost()).root;
   async function inspect() {
     let response;
     try {
@@ -5513,7 +5450,7 @@ async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageH
     return true;
   }
   if (await inspect()) return { url, reused: true };
-  const child = spawn2(process.execPath, [path11.join(import.meta.dirname, "debugger-server.js")], { detached: true, stdio: "ignore", env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: path11.resolve(dataRoot()) } });
+  const child = spawn(process.execPath, [path10.join(import.meta.dirname, "debugger-server.js")], { detached: true, stdio: "ignore", env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: path10.resolve(dataRoot()) } });
   let failure;
   child.once("error", (error) => {
     failure = error;
@@ -5558,25 +5495,13 @@ async function namePet(store2, petId, userName) {
     return pet;
   });
 }
-async function deferName(store2, petId) {
-  return store2.transaction((state) => {
-    const pet = target(state, petId);
-    if (pet.stage === "egg") throw new Error("The automatic naming invitation follows a completed hatch");
-    if (pet.naming?.status === "named" || !pet.naming) throw new Error("This pet already has a saved name");
-    pet.naming = { ...pet.naming, status: "deferred" };
-    return { petId, status: pet.naming.status };
-  });
-}
 
 // src/cli.ts
-var argv = process.argv.slice(2);
-var demo = argv[0] === "--demo";
-if (demo) argv.shift();
-var [command, ...args] = argv;
-var store = new Store(void 0, demo, packageHost());
+var [command, ...args] = process.argv.slice(2);
+var store = new Store(void 0, packageHost());
 var jsonFile = async (file) => {
-  if (!path12.isAbsolute(file ?? "")) throw new Error("JSON input requires an absolute file");
-  return JSON.parse(await readFile8(file, "utf8"));
+  if (!path11.isAbsolute(file ?? "")) throw new Error("JSON input requires an absolute file");
+  return JSON.parse(await readFile7(file, "utf8"));
 };
 try {
   let output;
@@ -5601,9 +5526,6 @@ try {
     case "name-asked":
       output = await markNameAsked(store, args[0]);
       break;
-    case "defer-name":
-      output = await deferName(store, args[0]);
-      break;
     case "cancel-story":
       output = await store.transaction((state) => {
         const pending = pendingFor(state, args[0]);
@@ -5618,10 +5540,6 @@ try {
     case "accept-art":
       output = await acceptArt(store, { requestId: args[0], file: args[1], kind: args[2], provenance: args[3], description: args[4] });
       break;
-    case "install-native":
-    case "refresh-native":
-      output = await installNative(store);
-      break;
     case "host-request":
       output = hostRequest(await store.peek());
       break;
@@ -5631,11 +5549,9 @@ try {
     case "bind-avatar":
       output = await bindAvatar(store, args[0]);
       break;
-    case "configure-host":
-      output = await configureAdapter(store, await jsonFile(args[0]));
-      break;
     case "publish":
-      output = store.host === "desktop" ? await installNative(store) : await publishDots(store);
+      if (store.host !== "desktop") throw new Error("Dots: use host-request, update the Avatar with Dots tools, then host-result");
+      output = await installNative(store);
       break;
     case "prompt":
       output = { prompt: readPrompt(args[0]) };
@@ -5655,7 +5571,7 @@ try {
     case "schedule": {
       const timezone = text(args[0], "timezone"), reference = text(args[1], "schedule reference");
       new Intl.DateTimeFormat("en", { timeZone: timezone });
-      output = await store.transaction((state) => state.schedule = { timezone, reference, times: ["07:00", "12:00", "16:00", "21:00"] });
+      output = await store.transaction((state) => state.schedule = { timezone, reference, times: DAILY_TIMES });
       break;
     }
     case "story-output": {
@@ -5674,7 +5590,7 @@ try {
       output = await launchDebugger();
       break;
     case "switch-pet": {
-      if (demo || store.host !== "desktop") throw new Error("switch-pet requires the desktop package and cannot run with --demo");
+      if (store.host !== "desktop") throw new Error("switch-pet requires the desktop package");
       const usage = "Usage: switch-pet [PET_ID|--current|--list|--help]";
       if (args.length > 1) throw new Error(usage);
       const target2 = args[0] ?? "--current";
@@ -5699,7 +5615,7 @@ try {
       break;
     }
     default:
-      throw new Error("Commands: status, begin-story [TRIGGER_ID] [initialization|story|grow], plan-story OPERATION_ID PLAN_JSON, art-request, accept-art REQUEST_ID FILE portrait|atlas|avatar|story|artifact PROVENANCE [DESCRIPTION], publish, host-request, host-result OPERATION_ID RESULT_JSON, bind-avatar AVATAR_ID, configure-host ADAPTER_JSON, finish-story OPERATION_ID, story-output [STORY_ID], name-pet PET_ID USER_NAME, name-asked PET_ID, defer-name PET_ID, due [TIMEZONE], schedule TIMEZONE REFERENCE, prompt MODULE, unit-request UNIT INPUT_JSON, verify-unit UNIT RESULT_JSON, record-step OPERATION_ID UNIT RESULT_JSON, migrate-legacy V1_FILE DESIGN_JSON, cancel-story OPERATION_ID, reset [OPERATION_ID], debugger, switch-pet [PET_ID|--current|--list|--help]");
+      throw new Error("Commands: status, begin-story [TRIGGER_ID] [initialization|story|grow], plan-story OPERATION_ID PLAN_JSON, art-request, accept-art REQUEST_ID FILE portrait|atlas|avatar|story|artifact PROVENANCE [DESCRIPTION], publish (desktop), host-request, host-result OPERATION_ID RESULT_JSON, bind-avatar AVATAR_ID, finish-story OPERATION_ID, story-output [STORY_ID], name-pet PET_ID USER_NAME, name-asked PET_ID, due [TIMEZONE], schedule TIMEZONE REFERENCE, prompt MODULE, unit-request UNIT INPUT_JSON, verify-unit UNIT RESULT_JSON, record-step OPERATION_ID UNIT RESULT_JSON, migrate-legacy V1_FILE DESIGN_JSON, cancel-story OPERATION_ID, reset [OPERATION_ID], debugger, switch-pet [PET_ID|--current|--list|--help]");
   }
   console.log(JSON.stringify(output, null, 2));
 } catch (error) {

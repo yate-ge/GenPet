@@ -4,7 +4,7 @@ import { Store, dataRoot } from './store.js';
 import { packageHost } from './prompts.js';
 export async function launchDebugger(port=Number(process.env.GENPET_PORT||(packageHost()==='dots'?47832:47831))) {
  if(!Number.isInteger(port)||port<1024||port>65535)throw new Error('Invalid debugger port');
- const url=`http://127.0.0.1:${port}`, root=new Store(undefined,false,packageHost()).root;
+ const url=`http://127.0.0.1:${port}`, root=new Store(undefined,packageHost()).root;
  async function inspect() {
   let response:Response;try{response=await fetch(url+'/api/health',{signal:AbortSignal.timeout(500)});}catch{return false;}
   const value=await response.json().catch(()=>null);

@@ -117,7 +117,6 @@ export async function exportNative(state: State, destination: string) {
   return {destination,manifest,artId:art.id,filesCommitted:true};
 }
 export async function installNative(store: Store, options: {refresh?:typeof refreshNativePet;selection?:typeof readNativePetLive} = {}) {
-  if (store.demo) throw new Error('Demo state cannot install a native Pet');
   if (store.host !== 'desktop') throw new Error('Dots uses its own Avatar adapter');
   return store.transaction(async state => {
     if (!state.pending?.plan?.appearance) throw new Error('No planned appearance update');
