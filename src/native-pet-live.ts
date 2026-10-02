@@ -13,9 +13,7 @@ interface PetSelection {
   effectiveSelectedPetId: string | null;
 }
 
-export type NativePetLiveRead =
-  | ({ available: true } & PetSelection)
-  | { available: false; reason: string };
+export type NativePetLiveRead = ({ available: true } & PetSelection) | { available: false; reason: string };
 
 export interface NativePetLiveSelection extends PetSelection {
   immediate: true;
@@ -32,7 +30,9 @@ function record(value: unknown): value is Record<string, unknown> {
 }
 
 function connection(options: NativePetLiveOptions) {
-  const pipePath = (Object.hasOwn(options, 'pipePath') ? options.pipePath : process.env.CODEX_APP_TOOLS_PIPE_PATH)?.trim();
+  const pipePath = (
+    Object.hasOwn(options, 'pipePath') ? options.pipePath : process.env.CODEX_APP_TOOLS_PIPE_PATH
+  )?.trim();
   const threadId = (Object.hasOwn(options, 'threadId') ? options.threadId : process.env.CODEX_THREAD_ID)?.trim();
   if (!pipePath || !threadId) throw new Error('The current Codex app tools pipe and thread ID are unavailable.');
   if (process.platform === 'win32' && !pipePath.startsWith('\\\\.\\pipe\\')) {
@@ -56,8 +56,10 @@ function projectSelection(value: unknown): PetSelection {
   }
   const selectedPetId = value.settings[selectedKey] ?? null;
   const effectiveSelectedPetId = value.effectiveSettings[selectedKey] ?? null;
-  if ((selectedPetId !== null && typeof selectedPetId !== 'string') ||
-      (effectiveSelectedPetId !== null && typeof effectiveSelectedPetId !== 'string')) {
+  if (
+    (selectedPetId !== null && typeof selectedPetId !== 'string') ||
+    (effectiveSelectedPetId !== null && typeof effectiveSelectedPetId !== 'string')
+  ) {
     throw new Error('Codex returned an invalid pet selection.');
   }
   return { selectedPetId, effectiveSelectedPetId };
@@ -68,12 +70,15 @@ async function requestSelection(options: NativePetLiveOptions, petId?: string): 
   const { pipePath, threadId, timeoutMs } = connection(options);
   const id = 1;
   const request = {
-    jsonrpc: '2.0', id, method: 'tools/call',
+    jsonrpc: '2.0',
+    id,
+    method: 'tools/call',
     params: {
       namespace: 'codex_app',
       tool: petId === undefined ? 'read_settings' : 'write_settings',
       arguments: petId === undefined ? { include_config: false } : { settings: { [selectedKey]: petId } },
-      callerSource: 'codex', threadId,
+      callerSource: 'codex',
+      threadId,
       callId: `mcp-call-${randomUUID()}`,
       // These fallbacks follow the bundled app-tools MCP's request metadata.
       turnId: `mcp-turn-${randomUUID()}`,
@@ -95,9 +100,19 @@ async function requestSelection(options: NativePetLiveOptions, petId?: string): 
       if (error) reject(error);
       else resolve(result!);
     };
-    const timer = setTimeout(() => finish(new Error('Codex app tools timed out; the current selection is unconfirmed.'), undefined, true), timeoutMs);
-    socket.once('connect', () => { sent = true; socket.write(frame(request)); });
-    socket.on('error', error => finish(new Error(`Codex app tools connection failed (${(error as NodeJS.ErrnoException).code ?? 'socket error'}).`)));
+    const timer = setTimeout(
+      () => finish(new Error('Codex app tools timed out; the current selection is unconfirmed.'), undefined, true),
+      timeoutMs,
+    );
+    socket.once('connect', () => {
+      sent = true;
+      socket.write(frame(request));
+    });
+    socket.on('error', error =>
+      finish(
+        new Error(`Codex app tools connection failed (${(error as NodeJS.ErrnoException).code ?? 'socket error'}).`),
+      ),
+    );
     socket.on('close', () => finish(new Error('Codex app tools closed before confirming the pet selection.')));
     socket.on('data', bytes => {
       if (settled) return;
@@ -107,8 +122,11 @@ async function requestSelection(options: NativePetLiveOptions, petId?: string): 
         if (length > maxFrameBytes) return finish(new Error('Codex app tools response exceeded the size limit.'));
         if (pending.length < length + 4) return;
         let response: unknown;
-        try { response = JSON.parse(pending.subarray(4, length + 4).toString('utf8')); }
-        catch { return finish(new Error('Codex app tools returned invalid JSON.')); }
+        try {
+          response = JSON.parse(pending.subarray(4, length + 4).toString('utf8'));
+        } catch {
+          return finish(new Error('Codex app tools returned invalid JSON.'));
+        }
         pending = pending.subarray(length + 4);
         if (!record(response) || response.id !== id) continue;
         if (response.error !== undefined) return finish(new Error('Codex rejected the app tool request.'));
@@ -117,9 +135,13 @@ async function requestSelection(options: NativePetLiveOptions, petId?: string): 
           return finish(new Error('Codex could not complete the pet settings request.'));
         }
         const item = result.contentItems.find(item => record(item) && item.type === 'inputText');
-        if (!record(item) || typeof item.text !== 'string') return finish(new Error('Codex returned no pet settings result.'));
-        try { finish(undefined, projectSelection(JSON.parse(item.text))); }
-        catch { finish(new Error('Codex returned an invalid pet settings result.')); }
+        if (!record(item) || typeof item.text !== 'string')
+          return finish(new Error('Codex returned no pet settings result.'));
+        try {
+          finish(undefined, projectSelection(JSON.parse(item.text)));
+        } catch {
+          finish(new Error('Codex returned an invalid pet settings result.'));
+        }
       }
     });
   });
@@ -127,13 +149,28 @@ async function requestSelection(options: NativePetLiveOptions, petId?: string): 
 
 /** Read the running host's selection, returning no unrelated app settings. */
 export async function readNativePetLive(options: NativePetLiveOptions = {}): Promise<NativePetLiveRead> {
-  try { return { available: true, ...await requestSelection(options) }; }
-  catch (error) { return { available: false, reason: error instanceof Error ? error.message : 'Live Codex pet selection is unavailable.' }; }
+  try {
+    return { available: true, ...(await requestSelection(options)) };
+  } catch (error) {
+    return {
+      available: false,
+      reason: error instanceof Error ? error.message : 'Live Codex pet selection is unavailable.',
+    };
+  }
 }
 
 /** The host persists this choice and notifies its windows; no restart is used. */
-export async function selectNativePetLive(petId: string, options: NativePetLiveOptions = {}): Promise<NativePetLiveSelection> {
-  if (typeof petId !== 'string' || petId.trim() !== petId || petId.length === 0 || petId.length > 512 || /[\x00-\x1f\x7f]/.test(petId)) {
+export async function selectNativePetLive(
+  petId: string,
+  options: NativePetLiveOptions = {},
+): Promise<NativePetLiveSelection> {
+  if (
+    typeof petId !== 'string' ||
+    petId.trim() !== petId ||
+    petId.length === 0 ||
+    petId.length > 512 ||
+    /[\x00-\x1f\x7f]/.test(petId)
+  ) {
     throw new Error('A valid pet ID is required.');
   }
   await requestSelection(options, petId);
