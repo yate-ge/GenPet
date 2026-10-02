@@ -27,7 +27,8 @@ export function artRequest(state: State) {
     (art.kind === 'portrait' || state.host === 'dots' && art.kind === 'avatar'));
   return { id, operationId: state.pending.id, petId: state.pet.id, host: state.host,
     status: !plan.appearance ? 'unchanged' : existing ? 'ready' : 'pending',
-    stage: plan.stage, genes: state.pet.genes ?? plan.genes, story: plan.text, appearance: plan.appearance,
+    stage: plan.stage, name: state.pet.name, naming: state.pet.naming, personality: state.pet.personality ?? plan.personality,
+    genes: state.pet.genes ?? plan.genes, story: plan.text, appearance: plan.appearance,
     reusableAppearances: state.art.filter(art => art.petId === state.pet!.id && ['atlas','avatar'].includes(art.kind)),
     referenceFiles: [...new Set([
       references.find(art=>art.stage==='egg')?.file,

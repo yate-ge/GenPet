@@ -39,7 +39,7 @@ export async function resetPet(store: Store, operationId: string) {
     await atomicJson(backup, state);
     const previous = state.pet, binding = previous?.binding, schedule = state.schedule;
     for (const key of Object.keys(state)) delete (state as unknown as Record<string, unknown>)[key];
-    Object.assign(state, fresh(store.host), { pet: createPet(previous?.name), ...(schedule ? { schedule } : {}) });
+    Object.assign(state, fresh(store.host), { pet: createPet(), ...(schedule ? { schedule } : {}) });
     if (binding) state.pet!.binding = binding;
     if (previous) state.replacesPetId = previous.id;
     state.pending = { id: `story-${randomUUID()}`, petId: state.pet!.id, triggerId, baseRevision: 0,
@@ -57,10 +57,15 @@ function validatePlan(state: State, input: StoryPlan): StoryPlan {
   const pet = state.pet!;
   const plan: StoryPlan = { text: text(input.text, 'story text'), basis: text(input.basis, 'decision basis'), state: text(input.state, 'state') };
   plan.stage = validateStage(pet.stage, input.stage ?? pet.stage);
+  if (input.personality !== undefined) {
+    plan.personality = text(input.personality, 'personality');
+    if (pet.personality && pet.personality !== plan.personality) throw new Error('An existing pet retains its personality');
+  } else if (pet.personality) plan.personality = pet.personality;
   if (!pet.genes) {
     if (plan.stage !== 'egg') throw new Error('Initialization begins with an egg');
     plan.genes = text(input.genes, 'open gene description');
     plan.place = text(input.place, 'acquisition place'); plan.connection = text(input.connection, 'user connection');
+    if (!plan.personality) throw new Error('Initialization requires an individual personality');
     if (!input.appearance) throw new Error('Initialization requires an egg appearance');
   } else if (input.genes !== undefined && input.genes !== pet.genes) throw new Error('An existing pet retains its genes');
   if (input.appearance) plan.appearance = { description: text(input.appearance.description, 'appearance description'),
@@ -76,7 +81,9 @@ function validatePlan(state: State, input: StoryPlan): StoryPlan {
 }
 export async function planStory(store: Store, id: string, input: StoryPlan) {
   return store.transaction(state => {
-    const pending = pendingFor(state, id), plan = validatePlan(state, input);
+    const pending = pendingFor(state, id);
+    if (pending.plan && JSON.stringify(input) === JSON.stringify(pending.plan)) return pending;
+    const plan = validatePlan(state, input);
     if (pending.plan && JSON.stringify(pending.plan) !== JSON.stringify(plan)) throw new Error('The story plan is saved; resume it or cancel explicitly before redesigning');
     pending.plan = plan; return pending;
   });
@@ -137,6 +144,7 @@ export async function finishStory(store: Store, id: string) {
       ...(pending.steps?.length ? { steps: pending.steps } : {}),
       ...(pending.hostResult ? { hostResult: pending.hostResult } : {}) };
     if (!pet.genes) { pet.genes = plan.genes!; pet.acquisition = { place: plan.place!, connection: plan.connection!, storyId: id }; }
+    if (plan.personality) pet.personality ??= plan.personality;
     pet.stage = plan.stage!; pet.revision++; pet.state = { description: plan.state, storyId: id, updatedAt: story.at,
       ...(appearance ? { appearanceId: appearance.id } : {}) };
     state.stories.push(story); state.pending = null; return story;

@@ -7,9 +7,10 @@
 1. **context**：从实际可用资料形成 facts 与 unknowns，保留来源。
 2. **encounter**：使用 context，形成有意义的获得故事、地点与 connection；用户事实通过 evidenceIds 关联。
 3. **genes**：使用同一 context 与 encounter，先形成 designBasis，再形成自包含的 genes 与 eggAppearance。
-4. **appearance**：以获得故事、genes 和 eggAppearance、egg 阶段、已保存素材及实际宿主要求，决定蛋的视觉方案和故事图文配合方式。
-5. **计划**：把上述产物组装成现有 StoryPlan，保存后完成图像生成、image-review 与宿主更新。
-6. **output**：基于实际完成的结果与可用素材表达获得故事。
+4. **personality**：使用同一 context、encounter 与 genes 形成该个体的长期性格，单独保存，不放入身体基因。
+5. **appearance**：以获得故事、genes 和 eggAppearance、egg 阶段、已保存素材及实际宿主要求，决定蛋的视觉方案和故事图文配合方式。
+6. **计划**：把上述产物组装成 StoryPlan，保存后完成图像生成、image-review 与宿主更新。
+7. **output**：基于实际完成的结果与可用素材表达获得故事；用户命名时机见 meta.md「用户命名」。
 
 每步使用前一步已经形成的结果；相遇地点和身份在图像阶段保持不变。已有中间结果时继续使用；有问题可在计划保存前修订对应单元，并重新核对下游关系。计划保存后的图像修正继续同一份基因与故事。
 
@@ -17,6 +18,7 @@
 
 - text、place、connection 来自 encounter。
 - genes 来自 genes 单元，stage 为 egg。designBasis 与单元结果作为内部步骤保存。
+- personality 来自 personality 单元，事实引用保留在 encounter 步骤中。初始化不由 Agent 起专名。
 - state、appearance 根据获得故事和 eggAppearance 形成；appearance 单元决定复用或生成方式。初始化必须有当前蛋的形象。
 - basis 摘要记录采用的 context 依据与不足，只保存相关摘要。
 

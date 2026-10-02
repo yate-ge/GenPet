@@ -27,12 +27,12 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
   // If the importer is in node compatibility mode or this is not an ESM
   // file that has been converted to a CommonJS file using a Babel-
   // compatible transform (i.e. "__esModule" has not been set), then set
   // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target2, "default", { value: mod, enumerable: true }) : target2,
   mod
 ));
 
@@ -2147,21 +2147,22 @@ function identifier(value, field = "id") {
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$/.test(result)) throw new Error(`Invalid ${field}`);
   return result;
 }
-function createPet(name = "GenPet", now = Date.now()) {
+function createPet(name, now = Date.now()) {
   return {
     id: `genpet-${randomUUID()}`,
-    name: text(name, "name"),
+    name: name === void 0 ? "GenPet" : text(name, "name"),
     adoptedAt: now,
     revision: 0,
+    naming: name === void 0 ? { status: "unasked" } : { status: "named", namedAt: now },
     genes: null,
     stage: "egg",
     state: { description: "", updatedAt: now }
   };
 }
-function validateStage(current, target) {
-  if (!stages.includes(target)) throw new Error("Invalid stage");
-  if (stages.indexOf(target) < stages.indexOf(current)) throw new Error("Evolution cannot reverse the current stage");
-  return target;
+function validateStage(current, target2) {
+  if (!stages.includes(target2)) throw new Error("Invalid stage");
+  if (stages.indexOf(target2) < stages.indexOf(current)) throw new Error("Evolution cannot reverse the current stage");
+  return target2;
 }
 
 // src/store.ts
@@ -2200,6 +2201,8 @@ var Store = class {
       if (state.pet) {
         identifier(state.pet.id, "petId");
         validateStage("egg", state.pet.stage);
+        if (state.pet.personality !== void 0 && (typeof state.pet.personality !== "string" || !state.pet.personality.trim())) throw new Error("Invalid personality");
+        if (state.pet.naming && !["unasked", "asked", "named", "deferred"].includes(state.pet.naming.status)) throw new Error("Invalid naming status");
       }
       return state;
     } catch (error) {
@@ -3758,7 +3761,7 @@ async function resetPet(store2, operationId) {
     await atomicJson(backup, state);
     const previous = state.pet, binding = previous?.binding, schedule = state.schedule;
     for (const key of Object.keys(state)) delete state[key];
-    Object.assign(state, fresh(store2.host), { pet: createPet(previous?.name), ...schedule ? { schedule } : {} });
+    Object.assign(state, fresh(store2.host), { pet: createPet(), ...schedule ? { schedule } : {} });
     if (binding) state.pet.binding = binding;
     if (previous) state.replacesPetId = previous.id;
     state.pending = {
@@ -3782,11 +3785,16 @@ function validatePlan(state, input) {
   const pet = state.pet;
   const plan = { text: text(input.text, "story text"), basis: text(input.basis, "decision basis"), state: text(input.state, "state") };
   plan.stage = validateStage(pet.stage, input.stage ?? pet.stage);
+  if (input.personality !== void 0) {
+    plan.personality = text(input.personality, "personality");
+    if (pet.personality && pet.personality !== plan.personality) throw new Error("An existing pet retains its personality");
+  } else if (pet.personality) plan.personality = pet.personality;
   if (!pet.genes) {
     if (plan.stage !== "egg") throw new Error("Initialization begins with an egg");
     plan.genes = text(input.genes, "open gene description");
     plan.place = text(input.place, "acquisition place");
     plan.connection = text(input.connection, "user connection");
+    if (!plan.personality) throw new Error("Initialization requires an individual personality");
     if (!input.appearance) throw new Error("Initialization requires an egg appearance");
   } else if (input.genes !== void 0 && input.genes !== pet.genes) throw new Error("An existing pet retains its genes");
   if (input.appearance) plan.appearance = {
@@ -3804,7 +3812,9 @@ function validatePlan(state, input) {
 }
 async function planStory(store2, id, input) {
   return store2.transaction((state) => {
-    const pending = pendingFor(state, id), plan = validatePlan(state, input);
+    const pending = pendingFor(state, id);
+    if (pending.plan && JSON.stringify(input) === JSON.stringify(pending.plan)) return pending;
+    const plan = validatePlan(state, input);
     if (pending.plan && JSON.stringify(pending.plan) !== JSON.stringify(plan)) throw new Error("The story plan is saved; resume it or cancel explicitly before redesigning");
     pending.plan = plan;
     return pending;
@@ -3891,6 +3901,7 @@ async function finishStory(store2, id) {
       pet.genes = plan.genes;
       pet.acquisition = { place: plan.place, connection: plan.connection, storyId: id };
     }
+    if (plan.personality) pet.personality ??= plan.personality;
     pet.stage = plan.stage;
     pet.revision++;
     pet.state = {
@@ -4261,6 +4272,9 @@ function artRequest(state) {
     host: state.host,
     status: !plan.appearance ? "unchanged" : existing ? "ready" : "pending",
     stage: plan.stage,
+    name: state.pet.name,
+    naming: state.pet.naming,
+    personality: state.pet.personality ?? plan.personality,
     genes: state.pet.genes ?? plan.genes,
     story: plan.text,
     appearance: plan.appearance,
@@ -4420,6 +4434,7 @@ function hostRequest(state) {
     operation: "update-avatar",
     petId: pending.petId,
     operationId: pending.id,
+    name: state.pet.name,
     target: state.pet.binding,
     file: art.file,
     appearanceId: art.id,
@@ -4580,14 +4595,14 @@ async function migrateLegacy(store2, file, design) {
     await mkdir3(dir, { recursive: true });
     for (const art of legacy.art ?? []) {
       if (!["portrait", "atlas"].includes(art.kind) || !path9.isAbsolute(art.file)) continue;
-      const id = `art-${randomUUID7()}`, target = path9.join(dir, id + path9.extname(art.file));
+      const id = `art-${randomUUID7()}`, target2 = path9.join(dir, id + path9.extname(art.file));
       try {
-        await copyFile2(art.file, target);
+        await copyFile2(art.file, target2);
       } catch (error) {
         if (error.code === "ENOENT") continue;
         throw error;
       }
-      state.art.push({ id, petId, requestId: "legacy", stage: validateStage("egg", art.stage), description: "Imported existing artwork", file: target, kind: art.kind, createdAt: art.createdAt, provenance: art.provenance || "Preserved v1 artwork" });
+      state.art.push({ id, petId, requestId: "legacy", stage: validateStage("egg", art.stage), description: "Imported existing artwork", file: target2, kind: art.kind, createdAt: art.createdAt, provenance: art.provenance || "Preserved v1 artwork" });
       if (art.kind === "atlas" && art.stage === stage) state.pet.state.appearanceId = id;
     }
     return state;
@@ -5513,6 +5528,46 @@ async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageH
   throw new Error("Debugger startup timed out");
 }
 
+// src/naming.ts
+function namingDue(state) {
+  return !state.pending && !!state.pet && state.pet.stage !== "egg" && state.pet.naming?.status === "unasked";
+}
+function target(state, petId) {
+  identifier(petId, "petId");
+  if (!state.pet || state.pet.id !== petId) throw new Error("Naming reply belongs to another or missing pet");
+  if (state.pending) throw new Error("Finish the unfinished story before naming this pet");
+  return state.pet;
+}
+async function markNameAsked(store2, petId) {
+  return store2.transaction((state) => {
+    const pet = target(state, petId);
+    if (!namingDue(state)) return { petId, asked: false, status: pet.naming?.status ?? "named" };
+    pet.naming = { status: "asked", askedAt: Date.now() };
+    return { petId, asked: true, status: pet.naming.status };
+  });
+}
+async function namePet(store2, petId, userName) {
+  const name = text(userName, "user supplied name");
+  if (name.length > 100 || /[\u0000-\u001f\u007f]/.test(name)) throw new Error("Name must be one line of at most 100 characters");
+  return store2.transaction((state) => {
+    const pet = target(state, petId);
+    if (pet.name === name && pet.naming?.status === "named") return pet;
+    pet.name = name;
+    pet.naming = { status: "named", namedAt: Date.now(), ...pet.naming?.askedAt ? { askedAt: pet.naming.askedAt } : {} };
+    pet.revision++;
+    return pet;
+  });
+}
+async function deferName(store2, petId) {
+  return store2.transaction((state) => {
+    const pet = target(state, petId);
+    if (pet.stage === "egg") throw new Error("The automatic naming invitation follows a completed hatch");
+    if (pet.naming?.status === "named" || !pet.naming) throw new Error("This pet already has a saved name");
+    pet.naming = { ...pet.naming, status: "deferred" };
+    return { petId, status: pet.naming.status };
+  });
+}
+
 // src/cli.ts
 var argv = process.argv.slice(2);
 var demo = argv[0] === "--demo";
@@ -5528,7 +5583,7 @@ try {
   switch (command) {
     case "status": {
       const state = await store.peek(), legacyFile = !state.pet ? await store.legacyCandidate() : null;
-      output = { ...state, dataDirectory: store.root, ...legacyFile ? { legacyFile } : {} };
+      output = { ...state, namingDue: namingDue(state), dataDirectory: store.root, ...legacyFile ? { legacyFile } : {} };
       break;
     }
     case "begin-story":
@@ -5539,6 +5594,15 @@ try {
       break;
     case "finish-story":
       output = await finishStory(store, args[0]);
+      break;
+    case "name-pet":
+      output = await namePet(store, args[0], args[1]);
+      break;
+    case "name-asked":
+      output = await markNameAsked(store, args[0]);
+      break;
+    case "defer-name":
+      output = await deferName(store, args[0]);
       break;
     case "cancel-story":
       output = await store.transaction((state) => {
@@ -5597,7 +5661,7 @@ try {
     case "story-output": {
       const state = await store.peek(), story = args[0] ? state.stories.find((story2) => story2.id === args[0]) : state.stories.at(-1);
       if (!story) throw new Error("No completed story");
-      output = { text: story.text, media: state.art.filter((art) => story.mediaIds.includes(art.id)), appearance: state.art.find((art) => art.id === story.appearanceId), prompt: readPrompt("output") };
+      output = { text: story.text, media: state.art.filter((art) => story.mediaIds.includes(art.id)), appearance: state.art.find((art) => art.id === story.appearanceId), naming: { due: namingDue(state), petId: state.pet?.id, status: state.pet?.naming?.status ?? "named" }, prompt: readPrompt("output") };
       break;
     }
     case "migrate-legacy":
@@ -5613,29 +5677,29 @@ try {
       if (demo || store.host !== "desktop") throw new Error("switch-pet requires the desktop package and cannot run with --demo");
       const usage = "Usage: switch-pet [PET_ID|--current|--list|--help]";
       if (args.length > 1) throw new Error(usage);
-      const target = args[0] ?? "--current";
-      if (target === "--help") {
+      const target2 = args[0] ?? "--current";
+      if (target2 === "--help") {
         output = { usage, examples: ["switch-pet --list", "switch-pet --current", "switch-pet dewey"] };
         break;
       }
-      if (target === "--current") {
+      if (target2 === "--current") {
         const current = await readNativePetLive();
         if (!current.available) throw new Error(current.reason);
         output = current;
         break;
       }
-      if (target.startsWith("-") && target !== "--list") throw new Error(usage);
+      if (target2.startsWith("-") && target2 !== "--list") throw new Error(usage);
       const catalog = await getNativePetCatalog();
-      if (target === "--list") {
+      if (target2 === "--list") {
         output = { pets: catalog.pets, ...catalog.errors ? { errors: catalog.errors } : {} };
         break;
       }
-      if (!catalog.pets.some((pet) => pet.id === target)) throw new Error(`Unknown pet ID: ${target}. Use switch-pet --list.`);
-      output = await selectNativePetLive(target);
+      if (!catalog.pets.some((pet) => pet.id === target2)) throw new Error(`Unknown pet ID: ${target2}. Use switch-pet --list.`);
+      output = await selectNativePetLive(target2);
       break;
     }
     default:
-      throw new Error("Commands: status, begin-story [TRIGGER_ID] [initialization|story|grow], plan-story OPERATION_ID PLAN_JSON, art-request, accept-art REQUEST_ID FILE portrait|atlas|avatar|story|artifact PROVENANCE [DESCRIPTION], publish, host-request, host-result OPERATION_ID RESULT_JSON, bind-avatar AVATAR_ID, configure-host ADAPTER_JSON, finish-story OPERATION_ID, story-output [STORY_ID], due [TIMEZONE], schedule TIMEZONE REFERENCE, prompt MODULE, unit-request UNIT INPUT_JSON, verify-unit UNIT RESULT_JSON, record-step OPERATION_ID UNIT RESULT_JSON, migrate-legacy V1_FILE DESIGN_JSON, cancel-story OPERATION_ID, reset [OPERATION_ID], debugger, switch-pet [PET_ID|--current|--list|--help]");
+      throw new Error("Commands: status, begin-story [TRIGGER_ID] [initialization|story|grow], plan-story OPERATION_ID PLAN_JSON, art-request, accept-art REQUEST_ID FILE portrait|atlas|avatar|story|artifact PROVENANCE [DESCRIPTION], publish, host-request, host-result OPERATION_ID RESULT_JSON, bind-avatar AVATAR_ID, configure-host ADAPTER_JSON, finish-story OPERATION_ID, story-output [STORY_ID], name-pet PET_ID USER_NAME, name-asked PET_ID, defer-name PET_ID, due [TIMEZONE], schedule TIMEZONE REFERENCE, prompt MODULE, unit-request UNIT INPUT_JSON, verify-unit UNIT RESULT_JSON, record-step OPERATION_ID UNIT RESULT_JSON, migrate-legacy V1_FILE DESIGN_JSON, cancel-story OPERATION_ID, reset [OPERATION_ID], debugger, switch-pet [PET_ID|--current|--list|--help]");
   }
   console.log(JSON.stringify(output, null, 2));
 } catch (error) {

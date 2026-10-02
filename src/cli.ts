@@ -13,6 +13,7 @@ import { migrateLegacy } from './migration.js';
 import { getNativePetCatalog } from './native-pets.js';
 import { readNativePetLive, selectNativePetLive } from './native-pet-live.js';
 import { launchDebugger } from './debugger.js';
+import { namingDue, markNameAsked, namePet, deferName } from './naming.js';
 
 const argv=process.argv.slice(2), demo=argv[0]==='--demo';if(demo)argv.shift();
 const [command,...args]=argv, store=new Store(undefined,demo,packageHost());
@@ -22,11 +23,14 @@ try {
  switch(command) {
   case 'status': {
    const state=await store.peek(),legacyFile=!state.pet?await store.legacyCandidate():null;
-   output={...state,dataDirectory:store.root,...(legacyFile?{legacyFile}:{})};break;
+   output={...state,namingDue:namingDue(state),dataDirectory:store.root,...(legacyFile?{legacyFile}:{})};break;
   }
   case 'begin-story':output=await beginStory(store,args[0]||`manual:${randomUUID()}`,(args[1]||'story') as Pending['mode'],args[2]);break;
   case 'plan-story':output=await planStory(store,args[0],await jsonFile(args[1]));break;
   case 'finish-story':output=await finishStory(store,args[0]);break;
+  case 'name-pet':output=await namePet(store,args[0],args[1]);break;
+  case 'name-asked':output=await markNameAsked(store,args[0]);break;
+  case 'defer-name':output=await deferName(store,args[0]);break;
   case 'cancel-story':output=await store.transaction(state=>{
    const pending=pendingFor(state,args[0]);
    if(pending.mode==='initialization'&&pending.plan)throw new Error('Initialization genes are saved; resume it or explicitly reset the pet');
@@ -52,7 +56,7 @@ try {
   case 'story-output': {
    const state=await store.peek(), story=args[0]?state.stories.find(story=>story.id===args[0]):state.stories.at(-1);
    if(!story)throw new Error('No completed story');
-   output={text:story.text,media:state.art.filter(art=>story.mediaIds.includes(art.id)),appearance:state.art.find(art=>art.id===story.appearanceId),prompt:readPrompt('output')};break;
+   output={text:story.text,media:state.art.filter(art=>story.mediaIds.includes(art.id)),appearance:state.art.find(art=>art.id===story.appearanceId),naming:{due:namingDue(state),petId:state.pet?.id,status:state.pet?.naming?.status??'named'},prompt:readPrompt('output')};break;
   }
   case 'migrate-legacy':output=await migrateLegacy(store,args[0],await jsonFile(args[1]));break;
   case 'reset':output=await resetPet(store,args[0]||randomUUID());break;
@@ -69,7 +73,7 @@ try {
    if(!catalog.pets.some(pet=>pet.id===target))throw new Error(`Unknown pet ID: ${target}. Use switch-pet --list.`);
    output=await selectNativePetLive(target);break;
   }
-  default:throw new Error('Commands: status, begin-story [TRIGGER_ID] [initialization|story|grow], plan-story OPERATION_ID PLAN_JSON, art-request, accept-art REQUEST_ID FILE portrait|atlas|avatar|story|artifact PROVENANCE [DESCRIPTION], publish, host-request, host-result OPERATION_ID RESULT_JSON, bind-avatar AVATAR_ID, configure-host ADAPTER_JSON, finish-story OPERATION_ID, story-output [STORY_ID], due [TIMEZONE], schedule TIMEZONE REFERENCE, prompt MODULE, unit-request UNIT INPUT_JSON, verify-unit UNIT RESULT_JSON, record-step OPERATION_ID UNIT RESULT_JSON, migrate-legacy V1_FILE DESIGN_JSON, cancel-story OPERATION_ID, reset [OPERATION_ID], debugger, switch-pet [PET_ID|--current|--list|--help]');
+  default:throw new Error('Commands: status, begin-story [TRIGGER_ID] [initialization|story|grow], plan-story OPERATION_ID PLAN_JSON, art-request, accept-art REQUEST_ID FILE portrait|atlas|avatar|story|artifact PROVENANCE [DESCRIPTION], publish, host-request, host-result OPERATION_ID RESULT_JSON, bind-avatar AVATAR_ID, configure-host ADAPTER_JSON, finish-story OPERATION_ID, story-output [STORY_ID], name-pet PET_ID USER_NAME, name-asked PET_ID, defer-name PET_ID, due [TIMEZONE], schedule TIMEZONE REFERENCE, prompt MODULE, unit-request UNIT INPUT_JSON, verify-unit UNIT RESULT_JSON, record-step OPERATION_ID UNIT RESULT_JSON, migrate-legacy V1_FILE DESIGN_JSON, cancel-story OPERATION_ID, reset [OPERATION_ID], debugger, switch-pet [PET_ID|--current|--list|--help]');
  }
  console.log(JSON.stringify(output,null,2));
 }catch(error){console.error((error as Error).message);process.exitCode=1;}

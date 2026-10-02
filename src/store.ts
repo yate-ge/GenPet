@@ -11,6 +11,7 @@ export interface ArtRecord {
 export interface StoryPlan {
   text: string; basis: string; state: string; stage?: Stage;
   genes?: string; place?: string; connection?: string;
+  personality?: string;
   appearance?: { description: string; reuseArtId?: string }; mediaIds?: string[];
 }
 export interface HostResult {
@@ -55,7 +56,11 @@ export class Store {
     try {
       const state = JSON.parse(await readFile(this.file, 'utf8')) as State;
       if (state.version !== 2 || state.host !== this.host) throw new Error('Unsupported or mismatched pet record');
-      if (state.pet) { identifier(state.pet.id, 'petId'); validateStage('egg',state.pet.stage); }
+      if (state.pet) {
+        identifier(state.pet.id, 'petId'); validateStage('egg',state.pet.stage);
+        if (state.pet.personality !== undefined && (typeof state.pet.personality !== 'string' || !state.pet.personality.trim())) throw new Error('Invalid personality');
+        if (state.pet.naming && !['unasked','asked','named','deferred'].includes(state.pet.naming.status)) throw new Error('Invalid naming status');
+      }
       return state;
     } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return fresh(this.host); throw error; }
   }
