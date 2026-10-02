@@ -6,6 +6,7 @@
 - When installing from an existing marketplace, refresh it even if the plugin is currently uninstalled. `marketplace add` returning already-added does not establish freshness.
 - Verify installed manifest versions and file hashes against the refreshed marketplace source using scripts/verify-install.mjs. Report the marketplace commit, installed version and installed path. Directory names and installed/enabled status alone are insufficient.
 - Do not reset, adopt, age or regenerate a user's Pet as part of installation verification. Use an isolated CODEX_HOME for release tests. New chats load updated skills and tools; do not promise an active chat has discarded its old instructions.
+- For "log and git push" in this project, keep the log in this repository. Do not read or modify Obsidian or its Daily Note unless the user explicitly includes that vault in the task.
 
 # GenPet framework design rules
 
