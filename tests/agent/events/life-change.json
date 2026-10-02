@@ -1,0 +1,13 @@
+{
+  "fictional": true,
+  "inputRefs": [
+    "fixture:event-life-change"
+  ],
+  "note": "有意义的非工作变化。",
+  "availableContext": [
+    {
+      "source": "fictional:chat",
+      "text": "虚构用户这周搬进了新住处，开始每天自己做晚饭。"
+    }
+  ]
+}

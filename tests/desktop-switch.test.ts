@@ -1,77 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import net from 'node:net';
-import { randomUUID } from 'node:crypto';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
 import { readSelectedPet, selectPet } from '../src/hosts/desktop/switch.js';
 
-type Request = {
-  id: number;
-  method: string;
-  params?: { tool: string; arguments: unknown; threadId: string; callerSource: string; callId: string; turnId: string };
-};
+import { frame, settingsResponse, withAppTools, type AppToolsRequest } from './fake-app-tools.js';
 
-function frame(value: unknown) {
-  const bytes = Buffer.from(JSON.stringify(value));
-  const header = Buffer.alloc(4);
-  header.writeUInt32LE(bytes.length);
-  return Buffer.concat([header, bytes]);
-}
+const response = (id: number, selection: string | null) => settingsResponse(id, selection);
 
-function response(id: number, selection: string | null) {
-  return {
-    jsonrpc: '2.0',
-    id,
-    result: {
-      success: true,
-      contentItems: [
-        {
-          type: 'inputText',
-          text: JSON.stringify({
-            settings: { 'selected-avatar-id': selection, private: 'must not escape' },
-            effectiveSettings: { 'selected-avatar-id': selection, other: 42 },
-          }),
-        },
-      ],
-    },
-  };
-}
-
-async function withHost(
-  handler: (request: Request, socket: net.Socket) => void,
+function withHost(
+  handler: (request: AppToolsRequest, socket: net.Socket) => void,
   run: (options: { pipePath: string; threadId: string; timeoutMs: number }) => Promise<void>,
 ) {
-  const pipePath =
-    process.platform === 'win32'
-      ? `\\\\.\\pipe\\genpet-live-test-${randomUUID()}`
-      : path.join(tmpdir(), `genpet-live-${randomUUID()}.sock`);
-  const sockets = new Set<net.Socket>();
-  const server = net.createServer(socket => {
-    sockets.add(socket);
-    socket.on('close', () => sockets.delete(socket));
-    socket.on('error', () => {});
-    let pending = Buffer.alloc(0);
-    socket.on('data', bytes => {
-      pending = Buffer.concat([pending, bytes]);
-      while (pending.length >= 4 && pending.length >= pending.readUInt32LE(0) + 4) {
-        const length = pending.readUInt32LE(0);
-        const request = JSON.parse(pending.subarray(4, length + 4).toString('utf8')) as Request;
-        pending = pending.subarray(length + 4);
-        handler(request, socket);
-      }
-    });
-  });
-  await new Promise<void>((resolve, reject) => {
-    server.once('error', reject);
-    server.listen(pipePath, resolve);
-  });
-  try {
-    await run({ pipePath, threadId: 'isolated-test-thread', timeoutMs: 1000 });
-  } finally {
-    for (const socket of sockets) socket.destroy();
-    await new Promise<void>(resolve => server.close(() => resolve()));
-  }
+  return withAppTools(handler, ({ pipePath }) => run({ pipePath, threadId: 'isolated-test-thread', timeoutMs: 1000 }));
 }
 
 test('read projects only pet fields and handles fragmented native pipe frames', async () => {

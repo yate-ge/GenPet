@@ -1,0 +1,13 @@
+{
+  "fictional": true,
+  "inputRefs": [
+    "fixture:event-work-change"
+  ],
+  "note": "有意义的工作变化。",
+  "availableContext": [
+    {
+      "source": "fictional:calendar",
+      "text": "虚构用户从整理项目文档转为第一次在团队会议上做技术分享。"
+    }
+  ]
+}

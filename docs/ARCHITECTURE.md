@@ -64,4 +64,4 @@ Dependencies point one way: `cli` → feature modules → `appearance`/`lifecycl
 
 ## Checks
 
-`npm run verify:fast` runs type-checking, formatting and unit tests. `npm run verify:release` additionally builds, installs both packages into a temporary Codex home and runs the installed CLI and debugger. Contract checks prove engineering behavior only. Whether a story or image is right is judged separately, as described in `framework/references/generation-units.md`.
+`npm run verify:fast` runs type-checking, formatting and unit tests. `npm run verify:release` additionally builds, installs both packages into a temporary Codex home and runs the installed CLI and debugger. Contract checks prove engineering behavior only. Whether a story or image is right is judged separately with the Codex-run suite in `tests/agent/README.zh-CN.md`.
