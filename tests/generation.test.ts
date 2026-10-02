@@ -5,8 +5,9 @@ import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Store } from '../src/store.js';
-import { createPet } from '../src/core.js';
-import { beginStory, planStory, requestId, finishStory } from '../src/story.js';
+import { createPet } from '../src/model.js';
+import { requestId } from '../src/appearance.js';
+import { beginStory, planStory, finishStory } from '../src/lifecycle.js';
 import { unitRequest, validateUnitResult, recordStep } from '../src/generation.js';
 import { initialPlan } from './fixtures.js';
 

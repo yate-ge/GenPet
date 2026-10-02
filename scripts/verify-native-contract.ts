@@ -4,7 +4,7 @@
 import { open, readFile, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-import { actions } from '../src/art.js';
+import { actions } from '../src/hosts/desktop/atlas.js';
 const app = process.env.GENPET_CODEX_APP || '/Applications/ChatGPT.app';
 const file = await open(path.join(app, 'Contents/Resources/app.asar'), 'r');
 const prefix = Buffer.alloc(16);
