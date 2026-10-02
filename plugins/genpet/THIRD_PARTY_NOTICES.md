@@ -1,6 +1,6 @@
 # Third-party notices
 
-- `vendor/hatch-pet/`: OpenAI's bundled Hatch Pet workflow and deterministic image utilities, copied from the locally installed ChatGPT desktop application on 2026-09-24. Licensed under Apache License 2.0; the complete license is in `vendor/hatch-pet/LICENSE.txt`. No built-in Codex pet artwork is distributed.
+- `vendor/hatch-pet/`: OpenAI's bundled Hatch Pet workflow and deterministic image utilities, copied from the locally installed ChatGPT desktop application on 2026-09-24. GenPet's additions and modifications are listed in `vendor/hatch-pet/GENPET.md`. Licensed under Apache License 2.0; the complete license is in `vendor/hatch-pet/LICENSE.txt`. No built-in Codex pet artwork is distributed.
 - The installed plugin's `dist/` bundles these npm packages (esbuild keeps any `@license` comments at the end of each file):
   - `zod`: MIT license.
   - `pngjs`: MIT license. Reads PNG artwork for validation.
