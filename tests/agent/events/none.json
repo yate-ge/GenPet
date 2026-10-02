@@ -1,0 +1,8 @@
+{
+  "fictional": true,
+  "inputRefs": [
+    "fixture:event-none"
+  ],
+  "note": "本次没有新的用户资料。",
+  "availableContext": []
+}
