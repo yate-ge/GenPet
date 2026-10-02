@@ -22,12 +22,17 @@ export async function markNameAsked(store: Store, petId: string) {
 }
 export async function namePet(store: Store, petId: string, userName: string) {
   const name = text(userName, 'user supplied name');
-  if (name.length > 100 || /[\u0000-\u001f\u007f]/.test(name)) throw new Error('Name must be one line of at most 100 characters');
+  if (name.length > 100 || /[\u0000-\u001f\u007f]/.test(name))
+    throw new Error('Name must be one line of at most 100 characters');
   return store.transaction(state => {
     const pet = target(state, petId);
     if (pet.name === name && pet.naming?.status === 'named') return pet;
     pet.name = name;
-    pet.naming = { status: 'named', namedAt: Date.now(), ...(pet.naming?.askedAt ? { askedAt: pet.naming.askedAt } : {}) };
+    pet.naming = {
+      status: 'named',
+      namedAt: Date.now(),
+      ...(pet.naming?.askedAt ? { askedAt: pet.naming.askedAt } : {}),
+    };
     pet.revision++;
     return pet;
   });
