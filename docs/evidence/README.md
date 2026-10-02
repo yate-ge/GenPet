@@ -2,6 +2,16 @@
 
 生成单元测试与开发交付的简短记录。原始报告、请求、结果和图像保存在本地 `output/`（不纳入版本控制），路径列在每节末尾，用于有本地副本时追溯。所有样本使用虚构上下文，不是真实领养；少量样本不代表成功率，也不替代用户对意义、形象与宿主显示的判断。
 
+## 2026-10-03 0.7.0 框架重构
+
+代码框架按职责重组，结构见 [ARCHITECTURE.md](../ARCHITECTURE.md)。产品规则与生成提示词内容不变，进化依据放宽为用户近期有意义的变化（不限于工作）。
+
+- 宿主差异集中到 `src/hosts/` 的适配接口；Dots 只经 `host-request`／`host-result` 更新 Avatar，移除外部适配器、`--demo`、`configure-host`、`defer-name`、`install-native`／`refresh-native` 与磁盘选择解析。
+- 共享 skill 由 `framework/skills/` 构建到两个包，Dots 由此获得 reset、grow、start 的禁止隐式调用设置。
+- 引入 Prettier，`verify:fast` 检查格式；vendor `hatch-pet` 的 GenPet 改动记录在其 `GENPET.md`。
+- `npm run verify:release` 通过：类型、格式、53 项单元测试、版本门槛，两个包在隔离 Codex home 中安装为 0.7.0 并核对文件哈希（72 与 40 个文件），已安装 CLI 与调试器检查通过。本机 PATH 上的 codex 安装缺少原生二进制，检查使用 `CODEX_BIN` 指向桌面应用自带的 CLI。
+- 没有操作真实 Pet、Avatar、调度或用户已安装插件；生成效果与宿主实际显示未在本轮验证。
+
 ## 2026-10-03 命名、用户联系与性格模块
 
 交付 0.6.0 开发版源码与两个重建的独立运行包，具体设计及实现边界见 [COMPANION_0_6.zh-CN.md](../COMPANION_0_6.zh-CN.md)。
