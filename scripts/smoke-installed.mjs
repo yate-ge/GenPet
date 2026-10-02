@@ -12,7 +12,7 @@ try{
  const status=call('status'),host=status.host;assert.equal(status.pet,null);
  const op=call('begin-story','smoke:init','initialization'),petId=op.pet.id;
  assert.equal(call('begin-story','smoke:init').pet.id,petId);
- const plan={text:'A synthetic smoke-test adoption story.',basis:'Test fixture only',state:'A folded test egg',stage:'egg',genes:'A distinct faceless folded construction; layers unfold through development.',place:'A fictional test location',connection:'Isolated engineering fixture',appearance:{description:'A folded pixel egg'}};
+ const plan={text:'A synthetic smoke-test adoption story.',basis:'Test fixture only',state:'A folded test egg',stage:'egg',genes:'A distinct faceless folded construction; layers unfold through development.',personality:'A patient, curious test companion; it listens beside the user and folds its feelers while resting. Synthetic character fixture, not a user personality inference.',place:'A fictional test location',connection:'Isolated engineering fixture',appearance:{description:'A folded pixel egg'}};
  call('plan-story',op.pending.id,await file('plan.json',plan));
  const request=call('art-request'),fixture=path.join(source,'assets/pets/mystery-egg/spritesheet.webp');
  call('accept-art',request.id,fixture,'portrait','Isolated existing fixture; not generated visual evidence');
@@ -47,6 +47,8 @@ try{
   assert.equal(await readFile(path.join(env.CODEX_HOME,'config.toml'),'utf8'),'[desktop]\nselected-avatar-id = "dewey"\n');
  }else assert.deepEqual(await readFile(path.join(temp,'host-avatar.webp')),await readFile(fixture));
  call('finish-story',op.pending.id);assert.equal(call('begin-story','smoke:init').status,'completed');
+ assert.equal(call('status').pet.personality,plan.personality);assert.equal(call('status').namingDue,false);
+ call('name-pet',petId,'User fixture name');assert.equal(call('status').pet.name,'User fixture name');
  const next=call('begin-story','smoke:reuse').pending.id;
  call('plan-story',next,await file('reuse.json',{text:'The synthetic pet revisited its folded resting state.',basis:'Existing state fits',state:'Resting',appearance:{description:'Reuse',reuseArtId:art.id}}));
  assert.equal(call('art-request').status,'ready');await publishFixture();call('finish-story',next);

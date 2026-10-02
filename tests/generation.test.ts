@@ -28,7 +28,7 @@ test('contract checks allow open design and extra fields while rejecting missing
  assert.throws(()=>validateUnitResult('genes',{inputRefs:[],result:withoutBasis}),/designBasis/);
  assert.throws(()=>validateUnitResult('genes',{...genes,result:{...genes.result,designBasis:' '}}),/designBasis/);
  assert.throws(()=>validateUnitResult('context',{...context,result:{facts:'Not an array',unknowns:[]}}),/facts/);
- assert.throws(()=>validateUnitResult('evolution',{inputRefs:[],result:{stage:'ancient',state:'Resting',basis:'Test',specialChange:null}}),/Invalid evolution.stage/);
+ assert.throws(()=>validateUnitResult('evolution',{inputRefs:[],result:{stage:'ancient',state:'Resting',basis:'Test',specialChange:null,personalityEffect:'Keeps its own expression'}}),/Invalid evolution.stage/);
  assert.throws(()=>validateUnitResult('image-review',{inputRefs:[],result:{file:'/fixture.png',verdict:'maybe',observations:[],repair:null}}),/Invalid image-review.verdict/);
  assert.deepEqual(validateUnitResult('appearance',{inputRefs:[],result:{appearance:null,visuals:[]}}).result,{appearance:null,visuals:[]});
 });

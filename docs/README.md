@@ -2,11 +2,12 @@
 
 运行时的产品规则只有一个来源：[framework/prompts/meta.md](../framework/prompts/meta.md)。各单元提示词在 [framework/prompts](../framework/prompts/)，运行合同与宿主接入说明在 [framework/references](../framework/references/)。
 
-## 当前文档（0.5.0）
+## 当前文档
 
 | 文档 | 内容 |
 | --- | --- |
 | [产品设计](PRODUCT_DESIGN.zh-CN.md) | 产品目标、基因、进化、新故事与输出范围 |
+| [0.6.0 命名、用户联系与性格](COMPANION_0_6.zh-CN.md) | 提示词主导的实现、必要代码与验证边界 |
 | [工程设计与待决问题](ENGINEERING.zh-CN.md) | 待决问题状态表、宿主接入、持久记录、宠物编号与 0.5.0 实现 |
 | [新版验证说明](NEW_VERSION_VALIDATION.zh-CN.md) | 用户验证入口、本轮工程检查与当前证据（安装脚本引用此路径） |
 | [生成证据摘要](evidence/README.md) | 各轮生成单元测试的结论与状态；原始文件在本地 `output/` |

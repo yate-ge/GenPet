@@ -2189,6 +2189,8 @@ var Store = class {
       if (state.pet) {
         identifier(state.pet.id, "petId");
         validateStage("egg", state.pet.stage);
+        if (state.pet.personality !== void 0 && (typeof state.pet.personality !== "string" || !state.pet.personality.trim())) throw new Error("Invalid personality");
+        if (state.pet.naming && !["unasked", "asked", "named", "deferred"].includes(state.pet.naming.status)) throw new Error("Invalid naming status");
       }
       return state;
     } catch (error) {
@@ -2437,6 +2439,9 @@ function artRequest(state) {
     host: state.host,
     status: !plan.appearance ? "unchanged" : existing ? "ready" : "pending",
     stage: plan.stage,
+    name: state.pet.name,
+    naming: state.pet.naming,
+    personality: state.pet.personality ?? plan.personality,
     genes: state.pet.genes ?? plan.genes,
     story: plan.text,
     appearance: plan.appearance,
