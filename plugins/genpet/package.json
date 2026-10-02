@@ -1,19 +1,17 @@
 {
-  "bin": {
-    "genpet": "dist/cli.js"
-  },
   "name": "genpet",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "license": "MIT",
-  "description": "A bounded, personalized companion that grows with you. A GenFaceUI-inspired Codex plugin.",
+  "description": "A lightweight story-driven Pet framework for Codex Dots and native Codex Pets.",
   "engines": {
     "node": ">=22"
   },
+  "bin": {
+    "genpet": "dist/cli.js"
+  },
   "scripts": {
-    "pet:status": "node dist/cli.js status",
-    "pet:adopt": "node dist/cli.js adopt",
-    "pet:install": "node dist/cli.js install-native"
+    "pet:status": "node dist/cli.js status"
   }
 }
