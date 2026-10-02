@@ -12,6 +12,7 @@ export function hostRequest(state: State) {
   const pending=pendingFor(state,state.pending.id), art=desiredAppearance(state);
   if (!art || art.kind!=='avatar') throw new Error('Complete or select Dots Avatar artwork first');
   return { operation:'update-avatar', petId:pending.petId, operationId:pending.id,
+    name:state.pet!.name,
     target:state.pet!.binding, file:art.file, appearanceId:art.id,
     description:state.pending.plan.appearance.description, stage:state.pending.plan.stage,
     refreshWhenActive:true, preserveCurrentSelection:true };

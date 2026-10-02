@@ -5,6 +5,8 @@ export type Host = 'desktop' | 'dots';
 export interface Binding { host: Host; avatarId: string; destination?: string; }
 export interface Pet {
   id: string; name: string; adoptedAt: number; revision: number; genes: string | null;
+  personality?: string;
+  naming?: { status: 'unasked' | 'asked' | 'named' | 'deferred'; askedAt?: number; namedAt?: number };
   acquisition?: { place: string; connection: string; storyId: string };
   stage: Stage;
   state: { description: string; appearanceId?: string; storyId?: string; updatedAt: number };
@@ -19,8 +21,9 @@ export function identifier(value: unknown, field = 'id'): string {
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$/.test(result)) throw new Error(`Invalid ${field}`);
   return result;
 }
-export function createPet(name = 'GenPet', now = Date.now()): Pet {
-  return { id: `genpet-${randomUUID()}`, name: text(name, 'name'), adoptedAt: now, revision: 0,
+export function createPet(name?: string, now = Date.now()): Pet {
+  return { id: `genpet-${randomUUID()}`, name: name === undefined ? 'GenPet' : text(name, 'name'), adoptedAt: now, revision: 0,
+    naming: name === undefined ? { status: 'unasked' } : { status: 'named', namedAt: now },
     genes: null, stage: 'egg', state: { description: '', updatedAt: now } };
 }
 export function validateStage(current: Stage, target: unknown): Stage {
