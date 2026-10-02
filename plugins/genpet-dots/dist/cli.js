@@ -569,9 +569,9 @@ var require_parser = __commonJS({
     Parser.prototype._parseChunkBegin = function(data) {
       let length = data.readUInt32BE(0);
       let type = data.readUInt32BE(4);
-      let name = "";
+      let name2 = "";
       for (let i = 4; i < 8; i++) {
-        name += String.fromCharCode(data[i]);
+        name2 += String.fromCharCode(data[i]);
       }
       let ancillary = Boolean(data[4] & 32);
       if (!this._hasIHDR && type !== constants.TYPE_IHDR) {
@@ -579,12 +579,12 @@ var require_parser = __commonJS({
         return;
       }
       this._crc = new CrcCalculator();
-      this._crc.write(Buffer.from(name));
+      this._crc.write(Buffer.from(name2));
       if (this._chunks[type]) {
         return this._chunks[type](length);
       }
       if (!ancillary) {
-        this.error(new Error("Unsupported critical chunk type " + name));
+        this.error(new Error("Unsupported critical chunk type " + name2));
         return;
       }
       this.read(length + 4, this._skipChunk.bind(this));
@@ -1976,10 +1976,10 @@ var require_packer_sync = __commonJS({
 var require_png_sync = __commonJS({
   "node_modules/pngjs/lib/png-sync.js"(exports) {
     "use strict";
-    var parse2 = require_parser_sync();
+    var parse = require_parser_sync();
     var pack = require_packer_sync();
     exports.read = function(buffer, options) {
-      return parse2(buffer, options || {});
+      return parse(buffer, options || {});
     };
     exports.write = function(png, options) {
       return pack(png, options);
@@ -2125,19 +2125,119 @@ var require_png = __commonJS({
 });
 
 // src/cli.ts
-import { readFile as readFile7 } from "node:fs/promises";
-import path11 from "node:path";
-import { randomUUID as randomUUID8 } from "node:crypto";
+import { readFile as readFile8 } from "node:fs/promises";
+import path10 from "node:path";
+import { randomUUID as randomUUID9 } from "node:crypto";
 
-// src/store.ts
-import { mkdir, readFile, rename, writeFile, rm, stat } from "node:fs/promises";
+// src/art.ts
+import { mkdir as mkdir4, readFile as readFile7, rename as rename3, rm as rm2, stat as stat2, writeFile as writeFile3 } from "node:fs/promises";
+import { createHash as createHash4, randomUUID as randomUUID8 } from "node:crypto";
+import path8 from "node:path";
+
+// src/appearance.ts
+import { createHash as createHash3 } from "node:crypto";
+
+// src/hosts/desktop/atlas.ts
+var ATLAS = { width: 1536, height: 2288, columns: 8, rows: 11, cellWidth: 192, cellHeight: 208 };
+var ATLAS_CONTRACT = {
+  columns: ATLAS.columns,
+  cellWidth: ATLAS.cellWidth,
+  cellHeight: ATLAS.cellHeight,
+  rows: ATLAS.rows,
+  spriteVersionNumber: 2
+};
+var actions = [
+  { name: "idle", row: 0, count: 6, durations: [280, 110, 110, 140, 140, 320] },
+  { name: "running-right", row: 1, count: 8, durations: [120, 120, 120, 120, 120, 120, 120, 220] },
+  { name: "running-left", row: 2, count: 8, durations: [120, 120, 120, 120, 120, 120, 120, 220] },
+  { name: "waving", row: 3, count: 4, durations: [140, 140, 140, 280] },
+  { name: "jumping", row: 4, count: 5, durations: [140, 140, 140, 140, 280] },
+  { name: "failed", row: 5, count: 8, durations: [140, 140, 140, 140, 140, 140, 140, 240] },
+  { name: "waiting", row: 6, count: 6, durations: [150, 150, 150, 150, 150, 260] },
+  { name: "running", row: 7, count: 6, durations: [120, 120, 120, 120, 120, 220] },
+  { name: "review", row: 8, count: 6, durations: [150, 150, 150, 150, 150, 280] }
+];
+function checkAtlas(image) {
+  if (image.width !== ATLAS.width || image.height !== ATLAS.height) throw new Error("Atlas must be 1536 \xD7 2288 (v2)");
+  const { cellWidth: w, cellHeight: h } = ATLAS;
+  for (let row = 0; row < ATLAS.rows; row++)
+    for (let col = 0; col < ATLAS.columns; col++) {
+      const used = col < (row < actions.length ? actions[row].count : ATLAS.columns) || row === 0 && col === 6;
+      let visible = 0;
+      for (let y = row * h; y < (row + 1) * h; y++)
+        for (let x = col * w; x < (col + 1) * w; x++) if (image.data[(y * image.width + x) * 4 + 3] > 0) visible++;
+      if (used && visible < 30) throw new Error(`Empty animation cell ${row},${col}`);
+      if (!used && visible > 0) throw new Error(`Unused cell ${row},${col} must be transparent`);
+    }
+}
+
+// src/hosts/desktop/publish.ts
+import { copyFile as copyFile2, mkdir as mkdir3, readFile as readFile5, rename as rename2, writeFile as writeFile2 } from "node:fs/promises";
+import { createHash as createHash2, randomUUID as randomUUID7 } from "node:crypto";
+import path7 from "node:path";
+
+// src/config.ts
+import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
-import { randomUUID as randomUUID2 } from "node:crypto";
+import { fileURLToPath } from "node:url";
+var here = path.dirname(fileURLToPath(import.meta.url));
+function pluginRoot() {
+  const candidates = [path.resolve(here, ".."), path.resolve(here, "..", "plugins", "genpet")];
+  return candidates.find((dir) => existsSync(path.join(dir, ".codex-plugin", "plugin.json"))) ?? candidates[0];
+}
+function packageHost() {
+  const file = path.join(pluginRoot(), "config", "host.json");
+  const host = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")).host : "desktop";
+  if (!["desktop", "dots"].includes(host)) throw new Error("Invalid package host");
+  return host;
+}
+var dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), ".genpet");
+var codexHome = () => process.env.CODEX_HOME || path.join(homedir(), ".codex");
+function readPromptFile(fileName) {
+  const candidates = [
+    path.resolve(here, "..", "framework", "prompts", fileName),
+    path.join(pluginRoot(), "prompts", fileName)
+  ];
+  const file = candidates.find(existsSync);
+  if (!file) throw new Error(`Missing prompt file: ${fileName}`);
+  return readFileSync(file, "utf8");
+}
+function readPrompt(name2) {
+  if (!/^[a-z][a-z0-9-]*$/.test(name2)) throw new Error("Invalid prompt module");
+  return readPromptFile(`${name2}.md`);
+}
+function readUnits() {
+  return JSON.parse(readPromptFile("units.json")).units;
+}
 
-// src/core.ts
+// src/lifecycle.ts
+import { randomUUID as randomUUID4 } from "node:crypto";
+import { access } from "node:fs/promises";
+import path4 from "node:path";
+
+// src/migration.ts
+import { readFile as readFile2, copyFile, mkdir as mkdir2 } from "node:fs/promises";
+import path3 from "node:path";
+import { randomUUID as randomUUID3 } from "node:crypto";
+
+// src/model.ts
 import { randomUUID } from "node:crypto";
 var stages = ["egg", "hatchling", "juvenile", "adult"];
+var artKinds = ["portrait", "atlas", "avatar", "story", "artifact"];
+var fresh = (host) => ({ version: 2, host, pet: null, stories: [], art: [], pending: null });
+function createPet(name2, now = Date.now()) {
+  return {
+    id: `genpet-${randomUUID()}`,
+    name: name2 === void 0 ? "GenPet" : text(name2, "name"),
+    adoptedAt: now,
+    revision: 0,
+    naming: name2 === void 0 ? { status: "unasked" } : { status: "named", namedAt: now },
+    genes: null,
+    stage: "egg",
+    state: { description: "", updatedAt: now }
+  };
+}
 function text(value, field) {
   if (typeof value !== "string" || !value.trim()) throw new Error(`${field} must be nonempty text`);
   return value.trim();
@@ -2147,18 +2247,6 @@ function identifier(value, field = "id") {
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$/.test(result)) throw new Error(`Invalid ${field}`);
   return result;
 }
-function createPet(name, now = Date.now()) {
-  return {
-    id: `genpet-${randomUUID()}`,
-    name: name === void 0 ? "GenPet" : text(name, "name"),
-    adoptedAt: now,
-    revision: 0,
-    naming: name === void 0 ? { status: "unasked" } : { status: "named", namedAt: now },
-    genes: null,
-    stage: "egg",
-    state: { description: "", updatedAt: now }
-  };
-}
 function validateStage(current, target2) {
   if (!stages.includes(target2)) throw new Error("Invalid stage");
   if (stages.indexOf(target2) < stages.indexOf(current))
@@ -2167,10 +2255,11 @@ function validateStage(current, target2) {
 }
 
 // src/store.ts
-var dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), ".genpet");
-var fresh = (host) => ({ version: 2, host, pet: null, stories: [], art: [], pending: null });
+import { mkdir, readFile, rename, writeFile, rm, stat } from "node:fs/promises";
+import path2 from "node:path";
+import { randomUUID as randomUUID2 } from "node:crypto";
 async function atomicJson(file, value) {
-  await mkdir(path.dirname(file), { recursive: true, mode: 448 });
+  await mkdir(path2.dirname(file), { recursive: true, mode: 448 });
   const tmp = `${file}.${randomUUID2()}.tmp`;
   try {
     await writeFile(tmp, JSON.stringify(value, null, 2) + "\n", { mode: 384, flag: "wx" });
@@ -2182,28 +2271,27 @@ async function atomicJson(file, value) {
 var Store = class {
   constructor(root = dataRoot(), host = "desktop") {
     this.host = host;
-    this.base = path.resolve(root);
-    this.root = path.resolve(this.base, host);
-    this.file = path.join(this.root, "state.json");
+    this.base = path2.resolve(root);
+    this.root = path2.resolve(this.base, host);
+    this.file = path2.join(this.root, "state.json");
   }
   host;
   base;
   root;
   file;
-  now() {
-    return Date.now();
-  }
+  /** Read-only; a missing file is an empty record, and elapsed time never changes a pet. */
   async peek() {
     try {
       const state = JSON.parse(await readFile(this.file, "utf8"));
       if (state.version !== 2 || state.host !== this.host) throw new Error("Unsupported or mismatched pet record");
-      if (state.pet) {
-        identifier(state.pet.id, "petId");
-        validateStage("egg", state.pet.stage);
-        if (state.pet.personality !== void 0 && (typeof state.pet.personality !== "string" || !state.pet.personality.trim()))
+      const pet = state.pet;
+      if (pet) {
+        identifier(pet.id, "petId");
+        validateStage("egg", pet.stage);
+        if (pet.personality !== void 0 && (typeof pet.personality !== "string" || !pet.personality.trim()))
           throw new Error("Invalid personality");
-        if (state.pet.naming?.status === "deferred") state.pet.naming.status = "asked";
-        if (state.pet.naming && !["unasked", "asked", "named"].includes(state.pet.naming.status))
+        if (pet.naming?.status === "deferred") pet.naming.status = "asked";
+        if (pet.naming && !["unasked", "asked", "named"].includes(pet.naming.status))
           throw new Error("Invalid naming status");
       }
       return state;
@@ -2212,29 +2300,21 @@ var Store = class {
       throw error;
     }
   }
-  async legacyCandidate() {
-    if (this.host !== "desktop") return null;
-    const file = path.join(this.base, "state.json");
-    try {
-      const old = JSON.parse(await readFile(file, "utf8"));
-      return old.version === 1 && old.pet ? file : null;
-    } catch (error) {
-      if (error.code === "ENOENT") return null;
-      throw error;
-    }
-  }
+  /** Serializes changes across processes; the record is written only if `fn` succeeds. */
   async transaction(fn) {
     await mkdir(this.root, { recursive: true, mode: 448 });
     const lock = this.file + ".lock";
     let acquired = false;
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 100 && !acquired; i++) {
       try {
         await mkdir(lock);
         acquired = true;
-        break;
       } catch (error) {
         if (error.code !== "EEXIST") throw error;
-        const age = await stat(lock).then((info) => Date.now() - info.mtimeMs).catch(() => 0);
+        const age = await stat(lock).then(
+          (info) => Date.now() - info.mtimeMs,
+          () => 0
+        );
         if (age > 12e4) await rm(lock, { recursive: true, force: true });
         else await new Promise((resolve) => setTimeout(resolve, 50));
       }
@@ -2251,17 +2331,871 @@ var Store = class {
   }
 };
 
-// src/art.ts
-import { mkdir as mkdir2, readFile as readFile4, copyFile, writeFile as writeFile2, rename as rename2, stat as stat2 } from "node:fs/promises";
-import path7 from "node:path";
-import { createHash as createHash3, randomUUID as randomUUID6 } from "node:crypto";
+// src/migration.ts
+async function findLegacyRecord(store2) {
+  if (store2.host !== "desktop") return null;
+  const file = path3.join(store2.base, "state.json");
+  try {
+    const old = JSON.parse(await readFile2(file, "utf8"));
+    return old.version === 1 && old.pet ? file : null;
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  }
+}
+async function migrateLegacy(store2, file, design) {
+  if (store2.host !== "desktop") throw new Error("Legacy migration is for desktop records");
+  if (!path3.isAbsolute(file)) throw new Error("Legacy file must be absolute");
+  const legacy = JSON.parse(await readFile2(file, "utf8"));
+  if (legacy.version !== 1 || !legacy.pet) throw new Error("No v1 pet to migrate");
+  const genes = text(design.genes, "observed legacy identity"), place = text(design.place, "origin"), connection = text(design.connection, "connection");
+  return store2.transaction(async (state) => {
+    if (state.legacy && state.pet?.id === legacy.pet.id) return state;
+    if (state.pet) throw new Error("Migration never replaces an existing v2 pet");
+    const petId = identifier(legacy.pet.id, "legacy petId");
+    const stage = validateStage("egg", legacy.pet.stage);
+    const backup = path3.join(store2.root, "backups", `legacy-${randomUUID3()}.json`);
+    await atomicJson(backup, legacy);
+    state.pet = {
+      id: petId,
+      name: text(legacy.pet.profile?.name ?? "GenPet", "name"),
+      adoptedAt: legacy.pet.adoptedAt,
+      revision: 1,
+      genes,
+      stage,
+      acquisition: { place, connection, storyId: "legacy" },
+      state: { description: legacy.pet.state?.reason || "Continuing the existing companion", updatedAt: Date.now() }
+    };
+    state.legacy = { backup, importedAt: Date.now() };
+    const destination = legacy.nativeExport?.destination;
+    if (destination)
+      state.pet.binding = { host: "desktop", avatarId: `custom:${path3.basename(destination)}`, destination };
+    const dir = path3.join(store2.root, "pets", petId, "assets");
+    await mkdir2(dir, { recursive: true });
+    for (const art of legacy.art ?? []) {
+      if (!["portrait", "atlas"].includes(art.kind) || !path3.isAbsolute(art.file)) continue;
+      const id = `art-${randomUUID3()}`, target2 = path3.join(dir, id + path3.extname(art.file));
+      try {
+        await copyFile(art.file, target2);
+      } catch (error) {
+        if (error.code === "ENOENT") continue;
+        throw error;
+      }
+      state.art.push({
+        id,
+        petId,
+        requestId: "legacy",
+        stage: validateStage("egg", art.stage),
+        description: "Imported existing artwork",
+        file: target2,
+        kind: art.kind,
+        createdAt: art.createdAt,
+        provenance: art.provenance || "Preserved v1 artwork"
+      });
+      if (art.kind === "atlas" && art.stage === stage) state.pet.state.appearanceId = id;
+    }
+    return state;
+  });
+}
+
+// src/naming.ts
+function namingDue(state) {
+  return !state.pending && !!state.pet && state.pet.stage !== "egg" && state.pet.naming?.status === "unasked";
+}
+function target(state, petId) {
+  identifier(petId, "petId");
+  if (!state.pet || state.pet.id !== petId) throw new Error("Naming reply belongs to another or missing pet");
+  if (state.pending) throw new Error("Finish the unfinished story before naming this pet");
+  return state.pet;
+}
+async function markNameAsked(store2, petId) {
+  return store2.transaction((state) => {
+    const pet = target(state, petId);
+    if (!namingDue(state)) return { petId, asked: false, status: pet.naming?.status ?? "named" };
+    pet.naming = { status: "asked", askedAt: Date.now() };
+    return { petId, asked: true, status: pet.naming.status };
+  });
+}
+async function namePet(store2, petId, userName) {
+  const name2 = text(userName, "user supplied name");
+  if (name2.length > 100 || /[\u0000-\u001f\u007f]/.test(name2))
+    throw new Error("Name must be one line of at most 100 characters");
+  return store2.transaction((state) => {
+    const pet = target(state, petId);
+    if (pet.name === name2 && pet.naming?.status === "named") return pet;
+    pet.name = name2;
+    pet.naming = {
+      status: "named",
+      namedAt: Date.now(),
+      ...pet.naming?.askedAt ? { askedAt: pet.naming.askedAt } : {}
+    };
+    pet.revision++;
+    return pet;
+  });
+}
+
+// src/lifecycle.ts
+function pendingFor(state, id) {
+  const pending = state.pending;
+  if (!pending || pending.id !== id || !state.pet || pending.petId !== state.pet.id || pending.baseRevision !== state.pet.revision)
+    throw new Error("Stale story operation; read the persisted record before continuing");
+  return pending;
+}
+function startPending(pet, triggerId, mode) {
+  return {
+    id: `story-${randomUUID4()}`,
+    triggerId,
+    petId: pet.id,
+    baseRevision: pet.revision,
+    startedAt: Date.now(),
+    mode
+  };
+}
+async function beginStory(store2, triggerId, mode = "story", name2) {
+  identifier(triggerId, "triggerId");
+  if (!["initialization", "story", "grow"].includes(mode)) throw new Error("Invalid story mode");
+  return store2.transaction(async (state) => {
+    const completed = state.stories.find((story) => story.triggerId === triggerId);
+    if (completed) return { status: "completed", story: completed };
+    if (state.pending) {
+      if (state.pending.triggerId !== triggerId)
+        throw new Error(`Unfinished story ${state.pending.id}; resume it first`);
+      return { status: "pending", pending: state.pending, pet: state.pet };
+    }
+    if (!state.pet && await findLegacyRecord(store2))
+      throw new Error("Existing legacy pet found; migrate it before creating a new identity");
+    state.pet ??= createPet(name2);
+    state.pending = startPending(state.pet, triggerId, state.pet.genes ? mode : "initialization");
+    return { status: "pending", pending: state.pending, pet: state.pet };
+  });
+}
+function validatePlan(state, input) {
+  const pet = state.pet;
+  const plan = {
+    text: text(input.text, "story text"),
+    basis: text(input.basis, "decision basis"),
+    state: text(input.state, "state"),
+    stage: validateStage(pet.stage, input.stage ?? pet.stage)
+  };
+  if (input.personality !== void 0) {
+    plan.personality = text(input.personality, "personality");
+    if (pet.personality && pet.personality !== plan.personality)
+      throw new Error("An existing pet retains its personality");
+  } else if (pet.personality) plan.personality = pet.personality;
+  if (!pet.genes) {
+    if (plan.stage !== "egg") throw new Error("Initialization begins with an egg");
+    plan.genes = text(input.genes, "open gene description");
+    plan.place = text(input.place, "acquisition place");
+    plan.connection = text(input.connection, "user connection");
+    if (!plan.personality) throw new Error("Initialization requires an individual personality");
+    if (!input.appearance) throw new Error("Initialization requires an egg appearance");
+  } else if (input.genes !== void 0 && input.genes !== pet.genes)
+    throw new Error("An existing pet retains its genes");
+  if (input.appearance)
+    plan.appearance = {
+      description: text(input.appearance.description, "appearance description"),
+      ...input.appearance.reuseArtId ? { reuseArtId: identifier(input.appearance.reuseArtId, "reuseArtId") } : {}
+    };
+  if (plan.stage !== pet.stage && !plan.appearance)
+    throw new Error("Evolution requires an appearance for the new stage");
+  if (plan.appearance?.reuseArtId) appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
+  if (input.mediaIds !== void 0) {
+    if (!Array.isArray(input.mediaIds)) throw new Error("mediaIds must be an array");
+    plan.mediaIds = input.mediaIds.map((id) => identifier(id, "mediaId"));
+    for (const id of plan.mediaIds)
+      if (!state.art.some((art) => art.id === id && art.petId === pet.id))
+        throw new Error("Media belongs to another pet or is missing");
+  }
+  return plan;
+}
+async function planStory(store2, id, input) {
+  return store2.transaction((state) => {
+    const pending = pendingFor(state, id);
+    if (pending.plan && JSON.stringify(input) === JSON.stringify(pending.plan)) return pending;
+    const plan = validatePlan(state, input);
+    if (pending.plan && JSON.stringify(pending.plan) !== JSON.stringify(plan))
+      throw new Error("The story plan is saved; resume it or cancel explicitly before redesigning");
+    pending.plan = plan;
+    return pending;
+  });
+}
+function hostUpdateComplete(result, appearanceId) {
+  if (!result?.updated || result.appearanceId !== appearanceId || result.error) return false;
+  return result.active === false || result.refreshRequested || result.displayStatus === "confirmed";
+}
+async function finishStory(store2, id) {
+  return store2.transaction(async (state) => {
+    const previous = state.stories.find((story2) => story2.id === id);
+    if (previous) return previous;
+    const pending = pendingFor(state, id);
+    const plan = pending.plan;
+    if (!plan) throw new Error("Save a story plan before completing it");
+    const pet = state.pet;
+    const appearance = desiredAppearance(state);
+    if (plan.appearance) {
+      if (!appearance) throw new Error("Appearance artwork is unfinished");
+      await access(appearance.file);
+      if (!hostUpdateComplete(pending.hostResult, appearance.id))
+        throw new Error("Host update or active Avatar refresh is unfinished; resume it");
+    }
+    const current = requestId(state);
+    const storyMedia = state.art.filter(
+      (art) => art.requestId === current && (art.kind === "story" || art.kind === "artifact")
+    );
+    const mediaIds = [.../* @__PURE__ */ new Set([...plan.mediaIds ?? [], ...storyMedia.map((art) => art.id)])];
+    for (const mediaId of mediaIds)
+      await access(state.art.find((art) => art.id === mediaId && art.petId === pet.id).file);
+    const story = {
+      id,
+      triggerId: pending.triggerId,
+      petId: pet.id,
+      at: Date.now(),
+      text: plan.text,
+      basis: plan.basis,
+      stage: plan.stage,
+      state: plan.state,
+      ...appearance ? { appearanceId: appearance.id } : {},
+      mediaIds,
+      ...pending.steps?.length ? { steps: pending.steps } : {},
+      ...pending.hostResult ? { hostResult: pending.hostResult } : {}
+    };
+    if (!pet.genes) {
+      pet.genes = plan.genes;
+      pet.acquisition = { place: plan.place, connection: plan.connection, storyId: id };
+    }
+    if (plan.personality) pet.personality ??= plan.personality;
+    pet.stage = plan.stage;
+    pet.revision++;
+    pet.state = {
+      description: plan.state,
+      storyId: id,
+      updatedAt: story.at,
+      ...appearance ? { appearanceId: appearance.id } : {}
+    };
+    state.stories.push(story);
+    state.pending = null;
+    return story;
+  });
+}
+async function cancelStory(store2, id) {
+  return store2.transaction((state) => {
+    const pending = pendingFor(state, id);
+    if (pending.mode === "initialization" && pending.plan)
+      throw new Error("Initialization genes are saved; resume it or explicitly reset the pet");
+    state.pending = null;
+    return { cancelled: pending.id };
+  });
+}
+async function resetPet(store2, operationId) {
+  const triggerId = `reset:${identifier(operationId, "reset operationId")}`;
+  return store2.transaction(async (state) => {
+    const completed = state.stories.find((story) => story.triggerId === triggerId);
+    if (completed) return { status: "completed", story: completed };
+    if (state.pending?.triggerId === triggerId) return { status: "pending", pending: state.pending, pet: state.pet };
+    if (state.pending) throw new Error("Resume or cancel the unfinished story before an explicit reset");
+    if (!state.pet && await findLegacyRecord(store2))
+      throw new Error("Migrate the existing legacy pet before resetting its identity");
+    const backup = path4.join(store2.root, "backups", `reset-${Date.now()}-${randomUUID4()}.json`);
+    await atomicJson(backup, state);
+    const previous = state.pet;
+    const schedule = state.schedule;
+    for (const key of Object.keys(state)) delete state[key];
+    Object.assign(state, fresh(store2.host), { pet: createPet(), ...schedule ? { schedule } : {} });
+    const pet = state.pet;
+    if (previous?.binding) pet.binding = previous.binding;
+    if (previous) state.replacesPetId = previous.id;
+    state.pending = startPending(pet, triggerId, "initialization");
+    return { status: "pending", pending: state.pending, pet, backup };
+  });
+}
+function storyOutput(state, storyId) {
+  const story = storyId ? state.stories.find((story2) => story2.id === storyId) : state.stories.at(-1);
+  if (!story) throw new Error("No completed story");
+  return {
+    text: story.text,
+    media: state.art.filter((art) => story.mediaIds.includes(art.id)),
+    appearance: state.art.find((art) => art.id === story.appearanceId),
+    naming: { due: namingDue(state), petId: state.pet?.id, status: state.pet?.naming?.status ?? "named" },
+    prompt: readPrompt("output")
+  };
+}
+
+// src/hosts/result.ts
+function validateHostResult(state, operationId, input) {
+  const pending = pendingFor(state, operationId);
+  const binding = state.pet?.binding;
+  if (!binding) throw new Error("Bind the actual host target before recording an update");
+  if (input.petId !== pending.petId || input.operationId !== operationId)
+    throw new Error("Host result belongs to another pet or operation");
+  if (input.appearanceId !== desiredAppearance(state)?.id)
+    throw new Error("Host result belongs to a different appearance");
+  const avatarId = text(input.avatarId, "avatarId");
+  if (binding.avatarId !== avatarId) throw new Error("Host updated a different Avatar from the persisted target");
+  if (typeof input.updated !== "boolean" || ![true, false, null].includes(input.active) || typeof input.refreshRequested !== "boolean" || !["confirmed", "unconfirmed"].includes(input.displayStatus))
+    throw new Error("Invalid host result");
+  if (input.displayStatus === "confirmed" && !input.evidence?.trim())
+    throw new Error("Confirmed display requires evidence");
+  return {
+    petId: input.petId,
+    operationId,
+    appearanceId: input.appearanceId,
+    avatarId,
+    updated: input.updated,
+    active: input.active,
+    refreshRequested: input.refreshRequested,
+    displayStatus: input.displayStatus,
+    ...input.evidence ? { evidence: text(input.evidence, "evidence") } : {},
+    ...input.error ? { error: text(input.error, "error") } : {}
+  };
+}
+async function recordHostResult(store2, operationId, input) {
+  return store2.transaction((state) => {
+    const pending = pendingFor(state, operationId);
+    if (!pending.plan?.appearance) throw new Error("No planned appearance update");
+    if (!desiredAppearance(state)) throw new Error("Complete or select appearance artwork first");
+    return pending.hostResult = validateHostResult(state, operationId, input);
+  });
+}
+
+// src/hosts/desktop/refresh.ts
+import net from "node:net";
+import { lstat, readFile as readFile3 } from "node:fs/promises";
+import { createHash, randomUUID as randomUUID5 } from "node:crypto";
+import path5 from "node:path";
+
+// src/hosts/desktop/frames.ts
+function encodeFrame(message) {
+  const body = Buffer.from(JSON.stringify(message));
+  const header = Buffer.alloc(4);
+  header.writeUInt32LE(body.length);
+  return Buffer.concat([header, body]);
+}
+function readFrames(maxBytes, onMessage, onError) {
+  let buffer = Buffer.alloc(0);
+  let failed = false;
+  return (chunk) => {
+    if (failed) return;
+    buffer = Buffer.concat([buffer, chunk]);
+    while (buffer.length >= 4) {
+      const length = buffer.readUInt32LE(0);
+      if (length > maxBytes) {
+        failed = true;
+        return onError("too-large");
+      }
+      if (buffer.length < length + 4) return;
+      const body = buffer.subarray(4, length + 4);
+      buffer = buffer.subarray(length + 4);
+      let message;
+      try {
+        message = JSON.parse(body.toString("utf8"));
+      } catch {
+        failed = true;
+        return onError("invalid-json");
+      }
+      onMessage(message);
+    }
+  };
+}
+
+// src/hosts/desktop/refresh.ts
+var INVALIDATE = { queryKey: ["custom-avatars"], reset: false };
+function desktopIpcPath() {
+  return process.platform === "win32" ? "\\\\.\\pipe\\codex-ipc" : path5.join(codexHome(), "ipc", "ipc.sock");
+}
+function isLiveDestination(destination) {
+  if (process.env.GENPET_SKIP_NATIVE_REFRESH === "1") return false;
+  const relative = path5.relative(path5.resolve(codexHome(), "pets"), path5.resolve(destination));
+  return /^genpet-[a-zA-Z0-9_-]+$/.test(relative);
+}
+async function refreshNativePet(options) {
+  const expectedSpriteSha256 = createHash("sha256").update(await readFile3(options.expectedSpritePath)).digest("hex");
+  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || isLiveDestination(path5.dirname(options.expectedSpritePath)));
+  const errors = [];
+  if (useIpc) {
+    try {
+      const ipc = await refreshViaIpc(options.ipcSocketPath ?? void 0, options.timeoutMs ?? 2e3);
+      return {
+        automaticRefresh: true,
+        refreshRequested: true,
+        displayStatus: "unconfirmed",
+        strategy: "ipc-query-invalidate",
+        ipc,
+        expectedSpriteSha256,
+        notice: "Automatic refresh requested through the existing desktop IPC channel. Router relay confirmed; the displayed sprite hash was not measured."
+      };
+    } catch (error) {
+      errors.push(`ipc: ${error.message}`);
+    }
+  }
+  return {
+    automaticRefresh: false,
+    refreshRequested: false,
+    displayStatus: "unconfirmed",
+    strategy: "none",
+    expectedSpriteSha256,
+    notice: useIpc ? "Files committed to the same GenPet entry. IPC refresh failed; retry when the desktop is running and ready. Visible update remains unconfirmed." : "Files committed to the same GenPet entry. IPC refresh was skipped for this destination. Visible update remains unconfirmed.",
+    ...errors.length ? { errors } : {}
+  };
+}
+async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
+  await assertPrivateSocket(socketPath);
+  const sockets = /* @__PURE__ */ new Set();
+  const waiting = /* @__PURE__ */ new Set();
+  let failure;
+  const fail = (error) => {
+    failure ??= error;
+    for (const reject of [...waiting]) reject(error);
+  };
+  const deadline = setTimeout(() => fail(Error("IPC refresh timed out")), timeoutMs);
+  const connect = () => new Promise((resolve, reject) => {
+    if (failure) return reject(failure);
+    waiting.add(reject);
+    const socket = net.createConnection(socketPath);
+    sockets.add(socket);
+    const requestId2 = randomUUID5();
+    let listener;
+    const send = (message) => {
+      if (failure) throw failure;
+      socket.write(encodeFrame(message));
+    };
+    socket.on("error", fail);
+    socket.on("close", () => fail(Error("IPC connection closed")));
+    socket.on(
+      "connect",
+      () => send({
+        type: "request",
+        requestId: requestId2,
+        sourceClientId: "genpet",
+        version: 0,
+        method: "initialize",
+        params: { clientType: "genpet" }
+      })
+    );
+    socket.on(
+      "data",
+      readFrames(
+        16 * 1024 * 1024,
+        (value) => {
+          if (!value || typeof value !== "object") return fail(Error("Invalid IPC message"));
+          const message = value;
+          if (message.type === "response" && message.requestId === requestId2) {
+            if (message.resultType !== "success" || typeof message.result?.clientId !== "string")
+              return fail(Error("IPC initialization rejected"));
+            waiting.delete(reject);
+            resolve({ id: message.result.clientId, send, onMessage: (fn) => listener = fn });
+          }
+          listener?.(message);
+        },
+        (problem) => fail(Error(problem === "too-large" ? "IPC frame too large" : "Invalid IPC JSON"))
+      )
+    );
+  });
+  try {
+    const observer = await connect();
+    const sender = await connect();
+    await new Promise((resolve, reject) => {
+      if (failure) return reject(failure);
+      waiting.add(reject);
+      observer.onMessage((message) => {
+        if (message.type === "broadcast" && message.method === "query-cache-invalidate" && message.version === 0 && message.sourceClientId === sender.id && JSON.stringify(message.params) === JSON.stringify(INVALIDATE)) {
+          waiting.delete(reject);
+          resolve();
+        }
+      });
+      sender.send({
+        type: "broadcast",
+        method: "query-cache-invalidate",
+        version: 0,
+        sourceClientId: sender.id,
+        params: INVALIDATE
+      });
+    });
+    return { socketPath, handshakeConfirmed: true, relayConfirmed: true, hostRefreshRequested: true };
+  } finally {
+    clearTimeout(deadline);
+    for (const socket of sockets) {
+      socket.removeAllListeners("close");
+      socket.destroy();
+    }
+  }
+}
+async function assertPrivateSocket(socketPath) {
+  if (process.platform === "win32") {
+    if (!socketPath.startsWith("\\\\.\\pipe\\")) throw Error("Expected a local Windows named pipe");
+    return;
+  }
+  const [file, directory] = await Promise.all([lstat(socketPath), lstat(path5.dirname(socketPath))]);
+  const uid = process.getuid?.();
+  if (uid == null || file.uid !== uid || directory.uid !== uid || !file.isSocket() || !directory.isDirectory() || directory.mode & 18)
+    throw Error("IPC socket must belong to the current user in a protected directory");
+}
+
+// src/hosts/desktop/switch.ts
+import { readFile as readFile4, readdir } from "node:fs/promises";
+import { randomUUID as randomUUID6 } from "node:crypto";
+import net2 from "node:net";
+import path6 from "node:path";
+var BUILTIN_PETS = [
+  ["codex", "Codex"],
+  ["dewey", "Dewey"],
+  ["fireball", "Fireball"],
+  ["hoots", "Hoots"],
+  ["rocky", "Rocky"],
+  ["seedy", "Seedy"],
+  ["stacky", "Stacky"],
+  ["bsod", "BSOD"],
+  ["null-signal", "Null Signal"]
+].map(([id, displayName]) => ({ id, displayName, source: "builtin" }));
+var isRecord = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
+async function listPets(home = codexHome()) {
+  const errors = [];
+  const local = /* @__PURE__ */ new Map();
+  for (const [directory, filename] of [
+    ["avatars", "avatar.json"],
+    ["pets", "pet.json"]
+  ]) {
+    let entries;
+    try {
+      entries = await readdir(path6.join(home, directory), { withFileTypes: true });
+    } catch (error) {
+      if (error.code !== "ENOENT") errors.push(`${directory}: \u65E0\u6CD5\u8BFB\u53D6\u5BA0\u7269\u76EE\u5F55`);
+      continue;
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
+      let text2;
+      try {
+        text2 = await readFile4(path6.join(home, directory, entry.name, filename), "utf8");
+      } catch (error) {
+        if (error.code === "ENOENT") continue;
+        errors.push(`${directory}/${entry.name}/${filename}: \u65E0\u6CD5\u8BFB\u53D6\u6709\u6548\u5BA0\u7269\u6E05\u5355`);
+        continue;
+      }
+      try {
+        const manifest = JSON.parse(text2);
+        if (!isRecord(manifest)) throw new Error("Invalid manifest");
+        for (const key of ["id", "displayName"])
+          if (manifest[key] !== void 0 && (typeof manifest[key] !== "string" || !manifest[key].trim()))
+            throw new Error("Invalid name");
+        const id = `custom:${entry.name}`;
+        const displayName = (manifest.displayName ?? manifest.id ?? entry.name).trim();
+        local.set(id, { id, displayName, source: "local" });
+      } catch {
+        errors.push(`${directory}/${entry.name}/${filename}: \u65E0\u6CD5\u8BFB\u53D6\u6709\u6548\u5BA0\u7269\u6E05\u5355`);
+      }
+    }
+  }
+  const sorted = [...local.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
+  return { pets: [...BUILTIN_PETS.map((pet) => ({ ...pet })), ...sorted], ...errors.length ? { errors } : {} };
+}
+async function readSelectedPet(options = {}) {
+  try {
+    return { available: true, ...await callSettings(options) };
+  } catch (error) {
+    return {
+      available: false,
+      reason: error instanceof Error ? error.message : "Live Codex pet selection is unavailable."
+    };
+  }
+}
+async function selectPet(petId, options = {}) {
+  if (typeof petId !== "string" || petId.trim() !== petId || petId.length === 0 || petId.length > 512 || /[\x00-\x1f\x7f]/.test(petId))
+    throw new Error("A valid pet ID is required.");
+  await callSettings(options, petId);
+  const result = await callSettings(options);
+  if (result.selectedPetId !== petId || result.effectiveSelectedPetId !== petId)
+    throw new Error("The live Codex selection did not match the requested pet; its current selection is unconfirmed.");
+  return {
+    ...result,
+    immediate: true,
+    restartRequired: false,
+    hostStateConfirmed: true,
+    visualVerified: false
+  };
+}
+var SWITCH_USAGE = "Usage: switch-pet [PET_ID|--current|--list|--help]";
+async function switchPet(args2) {
+  if (args2.length > 1) throw new Error(SWITCH_USAGE);
+  const target2 = args2[0] ?? "--current";
+  if (target2 === "--help")
+    return { usage: SWITCH_USAGE, examples: ["switch-pet --list", "switch-pet --current", "switch-pet dewey"] };
+  if (target2 === "--current") {
+    const current = await readSelectedPet();
+    if (!current.available) throw new Error(current.reason);
+    return current;
+  }
+  if (target2.startsWith("-") && target2 !== "--list") throw new Error(SWITCH_USAGE);
+  const catalog = await listPets();
+  if (target2 === "--list") return catalog;
+  if (!catalog.pets.some((pet) => pet.id === target2))
+    throw new Error(`Unknown pet ID: ${target2}. Use switch-pet --list.`);
+  return selectPet(target2);
+}
+var SELECTED_KEY = "selected-avatar-id";
+function appToolsConnection(options) {
+  const pick = (key, env) => (Object.hasOwn(options, key) ? options[key] : env)?.trim();
+  const pipePath = pick("pipePath", process.env.CODEX_APP_TOOLS_PIPE_PATH);
+  const threadId = pick("threadId", process.env.CODEX_THREAD_ID);
+  if (!pipePath || !threadId) throw new Error("The current Codex app tools pipe and thread ID are unavailable.");
+  if (process.platform === "win32" && !pipePath.startsWith("\\\\.\\pipe\\"))
+    throw new Error("Expected a local Windows named pipe for Codex app tools.");
+  const timeoutMs = options.timeoutMs ?? 5e3;
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error("The Codex app tools timeout must be positive.");
+  return { pipePath, threadId, timeoutMs };
+}
+function projectSelection(value) {
+  if (!isRecord(value) || !isRecord(value.settings) || !isRecord(value.effectiveSettings))
+    throw new Error("Codex returned an invalid settings response.");
+  const selectedPetId = value.settings[SELECTED_KEY] ?? null;
+  const effectiveSelectedPetId = value.effectiveSettings[SELECTED_KEY] ?? null;
+  if (selectedPetId !== null && typeof selectedPetId !== "string" || effectiveSelectedPetId !== null && typeof effectiveSelectedPetId !== "string")
+    throw new Error("Codex returned an invalid pet selection.");
+  return { selectedPetId, effectiveSelectedPetId };
+}
+async function callSettings(options, petId) {
+  const { pipePath, threadId, timeoutMs } = appToolsConnection(options);
+  const id = 1;
+  const request = {
+    jsonrpc: "2.0",
+    id,
+    method: "tools/call",
+    params: {
+      namespace: "codex_app",
+      tool: petId === void 0 ? "read_settings" : "write_settings",
+      arguments: petId === void 0 ? { include_config: false } : { settings: { [SELECTED_KEY]: petId } },
+      callerSource: "codex",
+      threadId,
+      callId: `mcp-call-${randomUUID6()}`,
+      // These fallbacks follow the bundled app-tools MCP's request metadata.
+      turnId: `mcp-turn-${randomUUID6()}`
+    }
+  };
+  return new Promise((resolve, reject) => {
+    const socket = net2.createConnection(pipePath);
+    let settled = false;
+    let sent = false;
+    const finish = (error, result, cancel = false) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (cancel && sent && !socket.destroyed) {
+        socket.end(encodeFrame({ jsonrpc: "2.0", id, method: "tools/cancel" }));
+        socket.destroySoon();
+      } else socket.destroy();
+      if (error) reject(error);
+      else resolve(result);
+    };
+    const timer = setTimeout(
+      () => finish(new Error("Codex app tools timed out; the current selection is unconfirmed."), void 0, true),
+      timeoutMs
+    );
+    socket.once("connect", () => {
+      sent = true;
+      socket.write(encodeFrame(request));
+    });
+    socket.on(
+      "error",
+      (error) => finish(
+        new Error(`Codex app tools connection failed (${error.code ?? "socket error"}).`)
+      )
+    );
+    socket.on("close", () => finish(new Error("Codex app tools closed before confirming the pet selection.")));
+    socket.on(
+      "data",
+      readFrames(
+        8 * 1024 * 1024,
+        (response) => {
+          if (settled || !isRecord(response) || response.id !== id) return;
+          if (response.error !== void 0) return finish(new Error("Codex rejected the app tool request."));
+          const result = response.result;
+          if (!isRecord(result) || result.success !== true || !Array.isArray(result.contentItems))
+            return finish(new Error("Codex could not complete the pet settings request."));
+          const item = result.contentItems.find((item2) => isRecord(item2) && item2.type === "inputText");
+          if (!isRecord(item) || typeof item.text !== "string")
+            return finish(new Error("Codex returned no pet settings result."));
+          try {
+            finish(void 0, projectSelection(JSON.parse(item.text)));
+          } catch {
+            finish(new Error("Codex returned an invalid pet settings result."));
+          }
+        },
+        (problem) => finish(
+          new Error(
+            problem === "too-large" ? "Codex app tools response exceeded the size limit." : "Codex app tools returned invalid JSON."
+          )
+        )
+      )
+    );
+  });
+}
+
+// src/hosts/desktop/publish.ts
+function desktopDestination(state) {
+  if (!state.pet) throw new Error("No pet");
+  const pets = path7.resolve(codexHome(), "pets");
+  const destination = state.pet.binding?.destination ?? path7.join(pets, state.pet.id);
+  const relative = path7.relative(pets, path7.resolve(destination));
+  if (!relative || relative.startsWith("..") || path7.isAbsolute(relative) || relative.includes(path7.sep))
+    throw new Error("Target must be one entry in this Codex home");
+  if (state.pet.binding && state.pet.binding.avatarId !== `custom:${path7.basename(destination)}`)
+    throw new Error("Avatar binding does not match its destination");
+  return destination;
+}
+async function exportNative(state, destination) {
+  if (!state.pet || state.host !== "desktop") throw new Error("Native export requires a desktop pet");
+  const art = desiredAppearance(state);
+  if (!art || art.kind !== "atlas") throw new Error("Complete or select a validated atlas first");
+  await validateImage(art.file, "atlas");
+  let previous;
+  try {
+    previous = await readFile5(path7.join(destination, "pet.json"), "utf8");
+    const old = JSON.parse(previous);
+    const boundHere = state.pet.binding?.destination === destination;
+    const ours = old.genpetId === state.pet.id || boundHere && state.replacesPetId && old.genpetId === state.replacesPetId || // explicit reset
+    boundHere && state.legacy && !old.genpetId;
+    if (!ours) throw new Error("Target entry belongs to another pet; it was preserved");
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  await mkdir3(destination, { recursive: true });
+  const bytes = await readFile5(art.file);
+  const spritesheetPath = `spritesheet-${createHash2("sha256").update(bytes).digest("hex").slice(0, 16)}${path7.extname(art.file)}`;
+  const tmp = path7.join(destination, `.pending-${randomUUID7()}`);
+  await copyFile2(art.file, tmp);
+  await rename2(tmp, path7.join(destination, spritesheetPath));
+  const manifest = {
+    id: path7.basename(destination),
+    genpetId: state.pet.id,
+    displayName: state.pet.name,
+    description: "GenPet \xB7 a companion with its own stories",
+    spriteVersionNumber: 2,
+    spritesheetPath
+  };
+  if (previous) await writeFile2(path7.join(destination, "previous-pet.json"), previous);
+  const manifestTmp = path7.join(destination, `.pet-${randomUUID7()}.json`);
+  await writeFile2(manifestTmp, JSON.stringify(manifest, null, 2));
+  await rename2(manifestTmp, path7.join(destination, "pet.json"));
+  return { destination, manifest, artId: art.id, filesCommitted: true };
+}
+async function installNative(store2, options = {}) {
+  if (store2.host !== "desktop") throw new Error("Dots updates its own Avatar through host-request and host-result");
+  return store2.transaction(async (state) => {
+    if (!state.pending?.plan?.appearance) throw new Error("No planned appearance update");
+    const operationId = state.pending.id;
+    const destination = desktopDestination(state);
+    const avatarId = `custom:${path7.basename(destination)}`;
+    const result = await exportNative(state, destination);
+    state.pet.binding = { host: "desktop", avatarId, destination };
+    const selection = await (options.selection ?? readSelectedPet)();
+    const active = selection.available ? selection.effectiveSelectedPetId === avatarId : null;
+    const refresh = await (options.refresh ?? refreshNativePet)({
+      expectedSpritePath: path7.join(destination, result.manifest.spritesheetPath)
+    });
+    const mustRefresh = active === true || active === null && isLiveDestination(destination);
+    const hostResult = validateHostResult(state, operationId, {
+      petId: state.pet.id,
+      operationId,
+      appearanceId: result.artId,
+      avatarId,
+      updated: true,
+      active,
+      refreshRequested: refresh.refreshRequested,
+      displayStatus: refresh.displayStatus,
+      ...mustRefresh && !refresh.automaticRefresh ? { error: "Active Avatar refresh did not complete" } : {}
+    });
+    state.pending.hostResult = hostResult;
+    return { ...result, ...hostResult, refresh };
+  });
+}
+
+// src/hosts/desktop/index.ts
+var desktop = {
+  appearanceKind: "atlas",
+  referenceKinds: ["portrait"],
+  artContract: ATLAS_CONTRACT,
+  commands: {
+    publish: { usage: "publish", run: (_, store2) => installNative(store2) },
+    "switch-pet": { usage: "switch-pet [PET_ID|--current|--list|--help]", run: (args2) => switchPet(args2) }
+  }
+};
+
+// src/hosts/dots.ts
+async function bindAvatar(store2, avatarId) {
+  if (store2.host !== "dots") throw new Error("bind-avatar is for a real Dots pet");
+  return store2.transaction((state) => {
+    if (!state.pet) throw new Error("Allocate the pet identity first");
+    const id = text(avatarId, "avatarId");
+    if (state.pet.binding && state.pet.binding.avatarId !== id)
+      throw new Error("Target is already bound; preserve the existing Avatar");
+    return state.pet.binding ??= { host: "dots", avatarId: id };
+  });
+}
+function hostRequest(state) {
+  if (state.host !== "dots") throw new Error("This handoff is for Dots Avatar updates");
+  if (!state.pending?.plan?.appearance) throw new Error("No planned Avatar update");
+  if (!state.pet?.binding) throw new Error("Bind the actual Dots Avatar before requesting an update");
+  const pending = pendingFor(state, state.pending.id);
+  const art = desiredAppearance(state);
+  if (!art || art.kind !== "avatar") throw new Error("Complete or select Dots Avatar artwork first");
+  return {
+    operation: "update-avatar",
+    petId: pending.petId,
+    operationId: pending.id,
+    name: state.pet.name,
+    target: state.pet.binding,
+    file: art.file,
+    appearanceId: art.id,
+    description: state.pending.plan.appearance.description,
+    stage: state.pending.plan.stage,
+    refreshWhenActive: true,
+    preserveCurrentSelection: true
+  };
+}
+var dots = {
+  appearanceKind: "avatar",
+  referenceKinds: ["portrait", "avatar"],
+  artContract: null,
+  commands: {
+    "bind-avatar": { usage: "bind-avatar AVATAR_ID", run: (args2, store2) => bindAvatar(store2, args2[0]) },
+    "host-request": { usage: "host-request", run: async (_, store2) => hostRequest(await store2.peek()) }
+  }
+};
+
+// src/hosts/index.ts
+function hostFor(host) {
+  return { desktop, dots }[host];
+}
+
+// src/appearance.ts
+function requestId(state) {
+  const pending = state.pending;
+  if (!pending?.plan) return null;
+  return createHash3("sha256").update(JSON.stringify([pending.id, pending.petId, pending.baseRevision, pending.plan])).digest("hex").slice(0, 24);
+}
+function appearanceFor(state, stage, id) {
+  const kind = hostFor(state.host).appearanceKind;
+  const art = state.art.find(
+    (art2) => art2.id === id && art2.petId === state.pet.id && art2.kind === kind && art2.stage === stage
+  );
+  if (!art)
+    throw new Error("Reusable appearance is missing, belongs to another pet, or is incompatible with this host/stage");
+  return art;
+}
+function desiredAppearance(state) {
+  const plan = state.pending?.plan;
+  if (!plan?.appearance) return state.art.find((art) => art.id === state.pet?.state.appearanceId);
+  if (plan.appearance.reuseArtId) return appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
+  const kind = hostFor(state.host).appearanceKind;
+  const current = requestId(state);
+  return state.art.findLast((art) => art.petId === state.pet?.id && art.requestId === current && art.kind === kind);
+}
 
 // src/image.ts
 var import_pngjs = __toESM(require_png(), 1);
-import { readFile as readFile2 } from "node:fs/promises";
-import { existsSync, readFileSync } from "node:fs";
+import { readFile as readFile6 } from "node:fs/promises";
+import { existsSync as existsSync2, readFileSync as readFileSync2 } from "node:fs";
 import { createRequire } from "node:module";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath as fileURLToPath2 } from "node:url";
 
 // node_modules/@jsquash/webp/codec/dec/webp_dec.js
 var Module = (() => {
@@ -2303,11 +3237,11 @@ var Module = (() => {
     var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
     var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions == "object" && typeof process.versions.node == "string";
     var scriptDirectory = "";
-    function locateFile(path12) {
+    function locateFile(path11) {
       if (Module2["locateFile"]) {
-        return Module2["locateFile"](path12, scriptDirectory);
+        return Module2["locateFile"](path11, scriptDirectory);
       }
-      return scriptDirectory + path12;
+      return scriptDirectory + path11;
     }
     var read_, readAsync, readBinary, setWindowTitle;
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -2720,7 +3654,7 @@ var Module = (() => {
       uncaughtExceptionCount++;
       throw ptr;
     }
-    function __embind_register_bigint(primitiveType, name, size, minRange, maxRange) {
+    function __embind_register_bigint(primitiveType, name2, size, minRange, maxRange) {
     }
     function getShiftFromSize(size) {
       switch (size) {
@@ -2757,22 +3691,22 @@ var Module = (() => {
     var typeDependencies = {};
     var char_0 = 48;
     var char_9 = 57;
-    function makeLegalFunctionName(name) {
-      if (void 0 === name) {
+    function makeLegalFunctionName(name2) {
+      if (void 0 === name2) {
         return "_unknown";
       }
-      name = name.replace(/[^a-zA-Z0-9_]/g, "$");
-      var f = name.charCodeAt(0);
+      name2 = name2.replace(/[^a-zA-Z0-9_]/g, "$");
+      var f = name2.charCodeAt(0);
       if (f >= char_0 && f <= char_9) {
-        return "_" + name;
+        return "_" + name2;
       }
-      return name;
+      return name2;
     }
-    function createNamedFunction(name, body) {
-      name = makeLegalFunctionName(name);
-      return { [name]: function() {
+    function createNamedFunction(name2, body) {
+      name2 = makeLegalFunctionName(name2);
+      return { [name2]: function() {
         return body.apply(this, arguments);
-      } }[name];
+      } }[name2];
     }
     function extendError(baseErrorType, errorName) {
       var errorClass = createNamedFunction(errorName, function(message) {
@@ -2843,15 +3777,15 @@ var Module = (() => {
       if (!("argPackAdvance" in registeredInstance)) {
         throw new TypeError("registerType registeredInstance requires argPackAdvance");
       }
-      var name = registeredInstance.name;
+      var name2 = registeredInstance.name;
       if (!rawType) {
-        throwBindingError('type "' + name + '" must have a positive integer typeid pointer');
+        throwBindingError('type "' + name2 + '" must have a positive integer typeid pointer');
       }
       if (registeredTypes.hasOwnProperty(rawType)) {
         if (options.ignoreDuplicateRegistrations) {
           return;
         } else {
-          throwBindingError("Cannot register type '" + name + "' twice");
+          throwBindingError("Cannot register type '" + name2 + "' twice");
         }
       }
       registeredTypes[rawType] = registeredInstance;
@@ -2862,10 +3796,10 @@ var Module = (() => {
         callbacks.forEach((cb) => cb());
       }
     }
-    function __embind_register_bool(rawType, name, size, trueValue, falseValue) {
+    function __embind_register_bool(rawType, name2, size, trueValue, falseValue) {
       var shift = getShiftFromSize(size);
-      name = readLatin1String(name);
-      registerType(rawType, { name, "fromWireType": function(wt) {
+      name2 = readLatin1String(name2);
+      registerType(rawType, { name: name2, "fromWireType": function(wt) {
         return !!wt;
       }, "toWireType": function(destructors, o) {
         return o ? trueValue : falseValue;
@@ -2878,7 +3812,7 @@ var Module = (() => {
         } else if (size === 4) {
           heap = HEAP32;
         } else {
-          throw new TypeError("Unknown boolean type size: " + name);
+          throw new TypeError("Unknown boolean type size: " + name2);
         }
         return this["fromWireType"](heap[pointer >> shift]);
       }, destructorFunction: null });
@@ -2937,9 +3871,9 @@ var Module = (() => {
     function simpleReadValueFromPointer(pointer) {
       return this["fromWireType"](HEAP32[pointer >> 2]);
     }
-    function __embind_register_emval(rawType, name) {
-      name = readLatin1String(name);
-      registerType(rawType, { name, "fromWireType": function(handle) {
+    function __embind_register_emval(rawType, name2) {
+      name2 = readLatin1String(name2);
+      registerType(rawType, { name: name2, "fromWireType": function(handle) {
         var rv = Emval.toValue(handle);
         __emval_decref(handle);
         return rv;
@@ -2947,7 +3881,7 @@ var Module = (() => {
         return Emval.toHandle(value);
       }, "argPackAdvance": 8, "readValueFromPointer": simpleReadValueFromPointer, destructorFunction: null });
     }
-    function floatReadValueFromPointer(name, shift) {
+    function floatReadValueFromPointer(name2, shift) {
       switch (shift) {
         case 2:
           return function(pointer) {
@@ -2958,17 +3892,17 @@ var Module = (() => {
             return this["fromWireType"](HEAPF64[pointer >> 3]);
           };
         default:
-          throw new TypeError("Unknown float type: " + name);
+          throw new TypeError("Unknown float type: " + name2);
       }
     }
-    function __embind_register_float(rawType, name, size) {
+    function __embind_register_float(rawType, name2, size) {
       var shift = getShiftFromSize(size);
-      name = readLatin1String(name);
-      registerType(rawType, { name, "fromWireType": function(value) {
+      name2 = readLatin1String(name2);
+      registerType(rawType, { name: name2, "fromWireType": function(value) {
         return value;
       }, "toWireType": function(destructors, value) {
         return value;
-      }, "argPackAdvance": 8, "readValueFromPointer": floatReadValueFromPointer(name, shift), destructorFunction: null });
+      }, "argPackAdvance": 8, "readValueFromPointer": floatReadValueFromPointer(name2, shift), destructorFunction: null });
     }
     function runDestructors(destructors) {
       while (destructors.length) {
@@ -3043,20 +3977,20 @@ var Module = (() => {
         proto[methodName].overloadTable[prevFunc.argCount] = prevFunc;
       }
     }
-    function exposePublicSymbol(name, value, numArguments) {
-      if (Module2.hasOwnProperty(name)) {
-        if (void 0 === numArguments || void 0 !== Module2[name].overloadTable && void 0 !== Module2[name].overloadTable[numArguments]) {
-          throwBindingError("Cannot register public name '" + name + "' twice");
+    function exposePublicSymbol(name2, value, numArguments) {
+      if (Module2.hasOwnProperty(name2)) {
+        if (void 0 === numArguments || void 0 !== Module2[name2].overloadTable && void 0 !== Module2[name2].overloadTable[numArguments]) {
+          throwBindingError("Cannot register public name '" + name2 + "' twice");
         }
-        ensureOverloadTable(Module2, name, name);
+        ensureOverloadTable(Module2, name2, name2);
         if (Module2.hasOwnProperty(numArguments)) {
           throwBindingError("Cannot register multiple overloads of a function with the same number of arguments (" + numArguments + ")!");
         }
-        Module2[name].overloadTable[numArguments] = value;
+        Module2[name2].overloadTable[numArguments] = value;
       } else {
-        Module2[name] = value;
+        Module2[name2] = value;
         if (void 0 !== numArguments) {
-          Module2[name].numArguments = numArguments;
+          Module2[name2].numArguments = numArguments;
         }
       }
     }
@@ -3067,15 +4001,15 @@ var Module = (() => {
       }
       return array;
     }
-    function replacePublicSymbol(name, value, numArguments) {
-      if (!Module2.hasOwnProperty(name)) {
+    function replacePublicSymbol(name2, value, numArguments) {
+      if (!Module2.hasOwnProperty(name2)) {
         throwInternalError("Replacing nonexistant public symbol");
       }
-      if (void 0 !== Module2[name].overloadTable && void 0 !== numArguments) {
-        Module2[name].overloadTable[numArguments] = value;
+      if (void 0 !== Module2[name2].overloadTable && void 0 !== numArguments) {
+        Module2[name2].overloadTable[numArguments] = value;
       } else {
-        Module2[name] = value;
-        Module2[name].argCount = numArguments;
+        Module2[name2] = value;
+        Module2[name2].argCount = numArguments;
       }
     }
     function dynCallLegacy(sig, ptr, args2) {
@@ -3147,20 +4081,20 @@ var Module = (() => {
       types.forEach(visit);
       throw new UnboundTypeError(message + ": " + unboundTypes.map(getTypeName).join([", "]));
     }
-    function __embind_register_function(name, argCount, rawArgTypesAddr, signature, rawInvoker, fn, isAsync) {
+    function __embind_register_function(name2, argCount, rawArgTypesAddr, signature, rawInvoker, fn, isAsync) {
       var argTypes = heap32VectorToArray(argCount, rawArgTypesAddr);
-      name = readLatin1String(name);
+      name2 = readLatin1String(name2);
       rawInvoker = embind__requireFunction(signature, rawInvoker);
-      exposePublicSymbol(name, function() {
-        throwUnboundTypeError("Cannot call " + name + " due to unbound types", argTypes);
+      exposePublicSymbol(name2, function() {
+        throwUnboundTypeError("Cannot call " + name2 + " due to unbound types", argTypes);
       }, argCount - 1);
       whenDependentTypesAreResolved([], argTypes, function(argTypes2) {
         var invokerArgsArray = [argTypes2[0], null].concat(argTypes2.slice(1));
-        replacePublicSymbol(name, craftInvokerFunction(name, invokerArgsArray, null, rawInvoker, fn, isAsync), argCount - 1);
+        replacePublicSymbol(name2, craftInvokerFunction(name2, invokerArgsArray, null, rawInvoker, fn, isAsync), argCount - 1);
         return [];
       });
     }
-    function integerReadValueFromPointer(name, shift, signed) {
+    function integerReadValueFromPointer(name2, shift, signed) {
       switch (shift) {
         case 0:
           return signed ? function readS8FromPointer(pointer) {
@@ -3181,11 +4115,11 @@ var Module = (() => {
             return HEAPU32[pointer >> 2];
           };
         default:
-          throw new TypeError("Unknown integer type: " + name);
+          throw new TypeError("Unknown integer type: " + name2);
       }
     }
-    function __embind_register_integer(primitiveType, name, size, minRange, maxRange) {
-      name = readLatin1String(name);
+    function __embind_register_integer(primitiveType, name2, size, minRange, maxRange) {
+      name2 = readLatin1String(name2);
       if (maxRange === -1) {
         maxRange = 4294967295;
       }
@@ -3195,7 +4129,7 @@ var Module = (() => {
         var bitshift = 32 - 8 * size;
         fromWireType = (value) => value << bitshift >>> bitshift;
       }
-      var isUnsignedType = name.includes("unsigned");
+      var isUnsignedType = name2.includes("unsigned");
       var checkAssertions = (value, toTypeName) => {
       };
       var toWireType;
@@ -3210,9 +4144,9 @@ var Module = (() => {
           return value;
         };
       }
-      registerType(primitiveType, { name, "fromWireType": fromWireType, "toWireType": toWireType, "argPackAdvance": 8, "readValueFromPointer": integerReadValueFromPointer(name, shift, minRange !== 0), destructorFunction: null });
+      registerType(primitiveType, { name: name2, "fromWireType": fromWireType, "toWireType": toWireType, "argPackAdvance": 8, "readValueFromPointer": integerReadValueFromPointer(name2, shift, minRange !== 0), destructorFunction: null });
     }
-    function __embind_register_memory_view(rawType, dataTypeIndex, name) {
+    function __embind_register_memory_view(rawType, dataTypeIndex, name2) {
       var typeMapping = [Int8Array, Uint8Array, Int16Array, Uint16Array, Int32Array, Uint32Array, Float32Array, Float64Array];
       var TA = typeMapping[dataTypeIndex];
       function decodeMemoryView(handle) {
@@ -3222,13 +4156,13 @@ var Module = (() => {
         var data = heap[handle + 1];
         return new TA(heap.buffer, data, size);
       }
-      name = readLatin1String(name);
-      registerType(rawType, { name, "fromWireType": decodeMemoryView, "argPackAdvance": 8, "readValueFromPointer": decodeMemoryView }, { ignoreDuplicateRegistrations: true });
+      name2 = readLatin1String(name2);
+      registerType(rawType, { name: name2, "fromWireType": decodeMemoryView, "argPackAdvance": 8, "readValueFromPointer": decodeMemoryView }, { ignoreDuplicateRegistrations: true });
     }
-    function __embind_register_std_string(rawType, name) {
-      name = readLatin1String(name);
-      var stdStringIsUTF8 = name === "std::string";
-      registerType(rawType, { name, "fromWireType": function(value) {
+    function __embind_register_std_string(rawType, name2) {
+      name2 = readLatin1String(name2);
+      var stdStringIsUTF8 = name2 === "std::string";
+      registerType(rawType, { name: name2, "fromWireType": function(value) {
         var length = HEAPU32[value >> 2];
         var payload = value + 4;
         var str;
@@ -3373,8 +4307,8 @@ var Module = (() => {
       }
       return len;
     }
-    function __embind_register_std_wstring(rawType, charSize, name) {
-      name = readLatin1String(name);
+    function __embind_register_std_wstring(rawType, charSize, name2) {
+      name2 = readLatin1String(name2);
       var decodeString, encodeString, getHeap, lengthBytesUTF, shift;
       if (charSize === 2) {
         decodeString = UTF16ToString;
@@ -3389,7 +4323,7 @@ var Module = (() => {
         getHeap = () => HEAPU32;
         shift = 2;
       }
-      registerType(rawType, { name, "fromWireType": function(value) {
+      registerType(rawType, { name: name2, "fromWireType": function(value) {
         var length = HEAPU32[value >> 2];
         var HEAP = getHeap();
         var str;
@@ -3412,7 +4346,7 @@ var Module = (() => {
         return str;
       }, "toWireType": function(destructors, value) {
         if (!(typeof value == "string")) {
-          throwBindingError("Cannot pass non-string to C++ string type " + name);
+          throwBindingError("Cannot pass non-string to C++ string type " + name2);
         }
         var length = lengthBytesUTF(value);
         var ptr = _malloc(4 + length + charSize);
@@ -3426,9 +4360,9 @@ var Module = (() => {
         _free(ptr);
       } });
     }
-    function __embind_register_void(rawType, name) {
-      name = readLatin1String(name);
-      registerType(rawType, { isVoid: true, name, "argPackAdvance": 0, "fromWireType": function() {
+    function __embind_register_void(rawType, name2) {
+      name2 = readLatin1String(name2);
+      registerType(rawType, { isVoid: true, name: name2, "argPackAdvance": 0, "fromWireType": function() {
         return void 0;
       }, "toWireType": function(destructors, o) {
         return void 0;
@@ -3467,12 +4401,12 @@ var Module = (() => {
       }
       throw Error("unable to get global object.");
     }
-    function __emval_get_global(name) {
-      if (name === 0) {
+    function __emval_get_global(name2) {
+      if (name2 === 0) {
         return Emval.toHandle(emval_get_global());
       } else {
-        name = getStringOrSymbol(name);
-        return Emval.toHandle(emval_get_global()[name]);
+        name2 = getStringOrSymbol(name2);
+        return Emval.toHandle(emval_get_global()[name2]);
       }
     }
     function __emval_incref(handle) {
@@ -3703,15 +4637,15 @@ function imageInfo(buf) {
   throw new Error("Use a PNG or WebP image");
 }
 async function readImageInfo(file) {
-  return imageInfo(await readFile2(file));
+  return imageInfo(await readFile6(file));
 }
 var webpReady;
 function webpWasm() {
-  const bundled = fileURLToPath(new URL("./webp_dec.wasm", import.meta.url));
-  return existsSync(bundled) ? bundled : createRequire(import.meta.url).resolve("@jsquash/webp/codec/dec/webp_dec.wasm");
+  const bundled = fileURLToPath2(new URL("./webp_dec.wasm", import.meta.url));
+  return existsSync2(bundled) ? bundled : createRequire(import.meta.url).resolve("@jsquash/webp/codec/dec/webp_dec.wasm");
 }
 async function decodeRgba(file) {
-  const buf = await readFile2(file);
+  const buf = await readFile6(file);
   const info = imageInfo(buf);
   if (info.format === "png") return { ...info, data: import_pngjs.PNG.sync.read(buf).data };
   globalThis.ImageData ??= class {
@@ -3724,7 +4658,7 @@ async function decodeRgba(file) {
     width;
     height;
   };
-  webpReady ??= WebAssembly.compile(readFileSync(webpWasm())).then(
+  webpReady ??= WebAssembly.compile(readFileSync2(webpWasm())).then(
     (module) => init(module)
   );
   await webpReady;
@@ -3732,657 +4666,37 @@ async function decodeRgba(file) {
   return { ...info, data: new Uint8Array(decoded.data.buffer, decoded.data.byteOffset, decoded.data.byteLength) };
 }
 
-// src/story.ts
-import { randomUUID as randomUUID3, createHash } from "node:crypto";
-import { access } from "node:fs/promises";
-import path2 from "node:path";
-function pendingFor(state, id) {
-  const pending = state.pending;
-  if (!pending || pending.id !== id || !state.pet || pending.petId !== state.pet.id || pending.baseRevision !== state.pet.revision)
-    throw new Error("Stale story operation; read the persisted record before continuing");
-  return pending;
-}
-async function beginStory(store2, triggerId, mode = "story", name) {
-  identifier(triggerId, "triggerId");
-  if (!["initialization", "story", "grow"].includes(mode)) throw new Error("Invalid story mode");
-  return store2.transaction(async (state) => {
-    const completed = state.stories.find((story) => story.triggerId === triggerId);
-    if (completed) return { status: "completed", story: completed };
-    if (state.pending) {
-      if (state.pending.triggerId !== triggerId)
-        throw new Error(`Unfinished story ${state.pending.id}; resume it first`);
-      return { status: "pending", pending: state.pending, pet: state.pet };
-    }
-    if (!state.pet && await store2.legacyCandidate())
-      throw new Error("Existing legacy pet found; migrate it before creating a new identity");
-    state.pet ??= createPet(name);
-    state.pending = {
-      id: `story-${randomUUID3()}`,
-      triggerId,
-      petId: state.pet.id,
-      baseRevision: state.pet.revision,
-      startedAt: Date.now(),
-      mode: state.pet.genes ? mode : "initialization"
-    };
-    return { status: "pending", pending: state.pending, pet: state.pet };
-  });
-}
-async function resetPet(store2, operationId) {
-  const triggerId = `reset:${identifier(operationId, "reset operationId")}`;
-  return store2.transaction(async (state) => {
-    const completed = state.stories.find((story) => story.triggerId === triggerId);
-    if (completed) return { status: "completed", story: completed };
-    if (state.pending?.triggerId === triggerId) return { status: "pending", pending: state.pending, pet: state.pet };
-    if (state.pending) throw new Error("Resume or cancel the unfinished story before an explicit reset");
-    if (!state.pet && await store2.legacyCandidate())
-      throw new Error("Migrate the existing legacy pet before resetting its identity");
-    const backup = path2.join(store2.root, "backups", `reset-${Date.now()}-${randomUUID3()}.json`);
-    await atomicJson(backup, state);
-    const previous = state.pet, binding = previous?.binding, schedule = state.schedule;
-    for (const key of Object.keys(state)) delete state[key];
-    Object.assign(state, fresh(store2.host), { pet: createPet(), ...schedule ? { schedule } : {} });
-    if (binding) state.pet.binding = binding;
-    if (previous) state.replacesPetId = previous.id;
-    state.pending = {
-      id: `story-${randomUUID3()}`,
-      petId: state.pet.id,
-      triggerId,
-      baseRevision: 0,
-      startedAt: Date.now(),
-      mode: "initialization"
-    };
-    return { status: "pending", pending: state.pending, pet: state.pet, backup };
-  });
-}
-function appearanceFor(state, stage, id) {
-  const kind = state.host === "desktop" ? "atlas" : "avatar";
-  const art = state.art.find(
-    (art2) => art2.id === id && art2.petId === state.pet.id && art2.kind === kind && art2.stage === stage
-  );
-  if (!art)
-    throw new Error("Reusable appearance is missing, belongs to another pet, or is incompatible with this host/stage");
-  return art;
-}
-function validatePlan(state, input) {
-  const pet = state.pet;
-  const plan = {
-    text: text(input.text, "story text"),
-    basis: text(input.basis, "decision basis"),
-    state: text(input.state, "state")
-  };
-  plan.stage = validateStage(pet.stage, input.stage ?? pet.stage);
-  if (input.personality !== void 0) {
-    plan.personality = text(input.personality, "personality");
-    if (pet.personality && pet.personality !== plan.personality)
-      throw new Error("An existing pet retains its personality");
-  } else if (pet.personality) plan.personality = pet.personality;
-  if (!pet.genes) {
-    if (plan.stage !== "egg") throw new Error("Initialization begins with an egg");
-    plan.genes = text(input.genes, "open gene description");
-    plan.place = text(input.place, "acquisition place");
-    plan.connection = text(input.connection, "user connection");
-    if (!plan.personality) throw new Error("Initialization requires an individual personality");
-    if (!input.appearance) throw new Error("Initialization requires an egg appearance");
-  } else if (input.genes !== void 0 && input.genes !== pet.genes)
-    throw new Error("An existing pet retains its genes");
-  if (input.appearance)
-    plan.appearance = {
-      description: text(input.appearance.description, "appearance description"),
-      ...input.appearance.reuseArtId ? { reuseArtId: identifier(input.appearance.reuseArtId, "reuseArtId") } : {}
-    };
-  if (plan.stage !== pet.stage && !plan.appearance)
-    throw new Error("Evolution requires an appearance for the new stage");
-  if (input.mediaIds !== void 0) {
-    if (!Array.isArray(input.mediaIds)) throw new Error("mediaIds must be an array");
-    plan.mediaIds = input.mediaIds.map((id) => identifier(id, "mediaId"));
-    for (const id of plan.mediaIds)
-      if (!state.art.some((art) => art.id === id && art.petId === pet.id))
-        throw new Error("Media belongs to another pet or is missing");
-  }
-  if (plan.appearance?.reuseArtId) appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
-  return plan;
-}
-async function planStory(store2, id, input) {
-  return store2.transaction((state) => {
-    const pending = pendingFor(state, id);
-    if (pending.plan && JSON.stringify(input) === JSON.stringify(pending.plan)) return pending;
-    const plan = validatePlan(state, input);
-    if (pending.plan && JSON.stringify(pending.plan) !== JSON.stringify(plan))
-      throw new Error("The story plan is saved; resume it or cancel explicitly before redesigning");
-    pending.plan = plan;
-    return pending;
-  });
-}
-function requestId(state) {
-  const pending = state.pending;
-  return pending?.plan ? createHash("sha256").update(JSON.stringify([pending.id, pending.petId, pending.baseRevision, pending.plan])).digest("hex").slice(0, 24) : null;
-}
-function desiredAppearance(state) {
-  const plan = state.pending?.plan;
-  if (!plan?.appearance) return state.art.find((art) => art.id === state.pet?.state.appearanceId);
-  if (plan.appearance.reuseArtId) return appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
-  const kind = state.host === "desktop" ? "atlas" : "avatar";
-  return [...state.art].reverse().find((art) => art.petId === state.pet?.id && art.requestId === requestId(state) && art.kind === kind);
-}
-function validateHostResult(state, id, input) {
-  const pending = pendingFor(state, id);
-  if (state.host === "dots" && !state.pet?.binding)
-    throw new Error("Bind the actual Dots Avatar before recording an update");
-  if (input.petId !== pending.petId || input.operationId !== id)
-    throw new Error("Host result belongs to another pet or operation");
-  if (input.appearanceId !== desiredAppearance(state)?.id)
-    throw new Error("Host result belongs to a different appearance");
-  const avatarId = text(input.avatarId, "avatarId");
-  if (state.pet?.binding && state.pet.binding.avatarId !== avatarId)
-    throw new Error("Host updated a different Avatar from the persisted target");
-  if (typeof input.updated !== "boolean" || ![true, false, null].includes(input.active) || typeof input.refreshRequested !== "boolean" || !["confirmed", "unconfirmed"].includes(input.displayStatus))
-    throw new Error("Invalid host result");
-  if (input.displayStatus === "confirmed" && !input.evidence?.trim())
-    throw new Error("Confirmed display requires evidence");
-  return {
-    petId: input.petId,
-    operationId: id,
-    appearanceId: input.appearanceId,
-    avatarId,
-    updated: input.updated,
-    active: input.active,
-    refreshRequested: input.refreshRequested,
-    displayStatus: input.displayStatus,
-    ...input.evidence ? { evidence: text(input.evidence, "evidence") } : {},
-    ...input.error ? { error: text(input.error, "error") } : {}
-  };
-}
-async function recordHostResult(store2, id, input) {
-  return store2.transaction((state) => {
-    const pending = pendingFor(state, id);
-    if (!pending.plan?.appearance) throw new Error("No planned appearance update");
-    if (!desiredAppearance(state)) throw new Error("Complete or select appearance artwork first");
-    const result = validateHostResult(state, id, input);
-    if (result.updated) state.pet.binding ??= { host: state.host, avatarId: result.avatarId };
-    pending.hostResult = result;
-    return result;
-  });
-}
-async function finishStory(store2, id) {
-  return store2.transaction(async (state) => {
-    const previous = state.stories.find((story2) => story2.id === id);
-    if (previous) return previous;
-    const pending = pendingFor(state, id), plan = pending.plan;
-    if (!plan) throw new Error("Save a story plan before completing it");
-    const pet = state.pet, appearance = desiredAppearance(state);
-    if (plan.appearance) {
-      if (!appearance) throw new Error("Appearance artwork is unfinished");
-      await access(appearance.file);
-      const result = pending.hostResult;
-      if (!result?.updated || result.appearanceId !== appearance.id || result.error || result.active !== false && !result.refreshRequested && result.displayStatus !== "confirmed")
-        throw new Error("Host update or active Avatar refresh is unfinished; resume it");
-    }
-    const mediaIds = [
-      .../* @__PURE__ */ new Set([
-        ...plan.mediaIds ?? [],
-        ...state.art.filter((art) => art.requestId === requestId(state) && ["story", "artifact"].includes(art.kind)).map((art) => art.id)
-      ])
-    ];
-    for (const mediaId of mediaIds)
-      await access(state.art.find((art) => art.id === mediaId && art.petId === pet.id).file);
-    const story = {
-      id,
-      triggerId: pending.triggerId,
-      petId: pet.id,
-      at: Date.now(),
-      text: plan.text,
-      basis: plan.basis,
-      stage: plan.stage,
-      state: plan.state,
-      ...appearance ? { appearanceId: appearance.id } : {},
-      mediaIds,
-      ...pending.steps?.length ? { steps: pending.steps } : {},
-      ...pending.hostResult ? { hostResult: pending.hostResult } : {}
-    };
-    if (!pet.genes) {
-      pet.genes = plan.genes;
-      pet.acquisition = { place: plan.place, connection: plan.connection, storyId: id };
-    }
-    if (plan.personality) pet.personality ??= plan.personality;
-    pet.stage = plan.stage;
-    pet.revision++;
-    pet.state = {
-      description: plan.state,
-      storyId: id,
-      updatedAt: story.at,
-      ...appearance ? { appearanceId: appearance.id } : {}
-    };
-    state.stories.push(story);
-    state.pending = null;
-    return story;
-  });
-}
-var DAILY_TIMES = ["07:00", "12:00", "16:00", "21:00"];
-function dueStory(state, now = Date.now(), timezone = state.schedule?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23"
-  }).formatToParts(now);
-  const get = (key) => parts.find((part) => part.type === key).value;
-  const date = `${get("year")}-${get("month")}-${get("day")}`, time = `${get("hour")}:${get("minute")}`;
-  const times = state.schedule?.times ?? DAILY_TIMES, slot = times.filter((slot2) => slot2 <= time).at(-1);
-  const triggerId = slot ? `daily:${date}:${slot}:${timezone.replace(/\//g, ".")}` : null;
-  return {
-    timezone,
-    times,
-    triggerId,
-    due: !!triggerId && !state.stories.some((story) => story.triggerId === triggerId),
-    pending: state.pending?.id ?? null
-  };
-}
-
-// src/native-ipc.ts
-import net from "node:net";
-import { lstat } from "node:fs/promises";
-import { randomUUID as randomUUID4 } from "node:crypto";
-import path3 from "node:path";
-import { homedir as homedir2 } from "node:os";
-function desktopIpcPath() {
-  return process.platform === "win32" ? "\\\\.\\pipe\\codex-ipc" : path3.join(process.env.CODEX_HOME || path3.join(homedir2(), ".codex"), "ipc", "ipc.sock");
-}
-async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
-  if (process.platform === "win32") {
-    if (!socketPath.startsWith("\\\\.\\pipe\\")) throw Error("Expected a local Windows named pipe");
-  } else {
-    const [file, directory] = await Promise.all([lstat(socketPath), lstat(path3.dirname(socketPath))]);
-    const uid = process.getuid?.();
-    if (uid == null || file.uid !== uid || directory.uid !== uid || !file.isSocket() || !directory.isDirectory() || directory.mode & 18) {
-      throw Error("IPC socket must belong to the current user in a protected directory");
-    }
-  }
-  const sockets = /* @__PURE__ */ new Set();
-  const pending = /* @__PURE__ */ new Set();
-  let failure;
-  const fail = (error) => {
-    failure ??= error;
-    for (const reject of [...pending]) reject(error);
-  };
-  const deadline = setTimeout(() => fail(Error("IPC refresh timed out")), timeoutMs);
-  function connect() {
-    return new Promise((resolve, reject) => {
-      if (failure) return reject(failure);
-      pending.add(reject);
-      const socket = net.createConnection(socketPath);
-      sockets.add(socket);
-      const requestId2 = randomUUID4();
-      let buffer = Buffer.alloc(0);
-      let listener;
-      const send = (message) => {
-        if (failure) throw failure;
-        const body = Buffer.from(JSON.stringify(message));
-        const header = Buffer.alloc(4);
-        header.writeUInt32LE(body.length);
-        socket.write(Buffer.concat([header, body]));
-      };
-      socket.on("error", fail);
-      socket.on("close", () => fail(Error("IPC connection closed")));
-      socket.on(
-        "connect",
-        () => send({
-          type: "request",
-          requestId: requestId2,
-          sourceClientId: "genpet",
-          version: 0,
-          method: "initialize",
-          params: { clientType: "genpet" }
-        })
-      );
-      socket.on("data", (chunk) => {
-        buffer = Buffer.concat([buffer, chunk]);
-        while (buffer.length >= 4) {
-          const length = buffer.readUInt32LE(0);
-          if (length > 16 * 1024 * 1024) {
-            fail(Error("IPC frame too large"));
-            return;
-          }
-          if (buffer.length < length + 4) return;
-          let message;
-          try {
-            message = JSON.parse(buffer.subarray(4, length + 4).toString());
-          } catch {
-            fail(Error("Invalid IPC JSON"));
-            return;
-          }
-          buffer = buffer.subarray(length + 4);
-          if (!message || typeof message !== "object") {
-            fail(Error("Invalid IPC message"));
-            return;
-          }
-          if (message.type === "response" && message.requestId === requestId2) {
-            if (message.resultType !== "success" || typeof message.result?.clientId !== "string") {
-              fail(Error("IPC initialization rejected"));
-              return;
-            }
-            pending.delete(reject);
-            resolve({
-              id: message.result.clientId,
-              send,
-              onMessage: (fn) => {
-                listener = fn;
-              }
-            });
-          }
-          listener?.(message);
-        }
-      });
-    });
-  }
-  try {
-    const observer = await connect();
-    const sender = await connect();
-    await new Promise((resolve, reject) => {
-      if (failure) return reject(failure);
-      pending.add(reject);
-      observer.onMessage((message) => {
-        if (message.type === "broadcast" && message.method === "query-cache-invalidate" && message.version === 0 && message.sourceClientId === sender.id && JSON.stringify(message.params) === JSON.stringify({ queryKey: ["custom-avatars"], reset: false })) {
-          pending.delete(reject);
-          resolve();
-        }
-      });
-      sender.send({
-        type: "broadcast",
-        method: "query-cache-invalidate",
-        version: 0,
-        sourceClientId: sender.id,
-        params: { queryKey: ["custom-avatars"], reset: false }
-      });
-    });
-    return { socketPath, handshakeConfirmed: true, relayConfirmed: true, hostRefreshRequested: true };
-  } finally {
-    clearTimeout(deadline);
-    for (const socket of sockets) {
-      socket.removeAllListeners("close");
-      socket.destroy();
-    }
-  }
-}
-
-// src/native-refresh.ts
-import { createHash as createHash2 } from "node:crypto";
-import { readFile as readFile3 } from "node:fs/promises";
-import { homedir as homedir3, tmpdir } from "node:os";
-import path4 from "node:path";
-async function refreshNativePet(options) {
-  const expectedSpriteSha256 = createHash2("sha256").update(await readFile3(options.expectedSpritePath)).digest("hex");
-  const errors = [];
-  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || isLiveNativeDestination(path4.dirname(options.expectedSpritePath)));
-  if (useIpc) {
-    try {
-      const ipc = await refreshViaIpc(options.ipcSocketPath ?? void 0, options.timeoutMs ?? 2e3);
-      return {
-        automaticRefresh: true,
-        refreshRequested: true,
-        displayStatus: "unconfirmed",
-        strategy: "ipc-query-invalidate",
-        ipc,
-        expectedSpriteSha256,
-        notice: "Automatic refresh requested through the existing desktop IPC channel. Router relay confirmed; the displayed sprite hash was not measured."
-      };
-    } catch (error) {
-      errors.push(`ipc: ${error.message}`);
-    }
-  }
-  return {
-    automaticRefresh: false,
-    refreshRequested: false,
-    displayStatus: "unconfirmed",
-    strategy: "none",
-    expectedSpriteSha256,
-    notice: useIpc ? "Files committed to the same GenPet entry. IPC refresh failed; retry when the desktop is running and ready. Visible update remains unconfirmed." : "Files committed to the same GenPet entry. IPC refresh was skipped for this destination. Visible update remains unconfirmed.",
-    errors: errors.length ? errors : void 0
-  };
-}
-function isLiveNativeDestination(destination) {
-  if (process.env.GENPET_SKIP_NATIVE_REFRESH === "1") return false;
-  const belongs = (home) => {
-    const relative = path4.relative(path4.resolve(home, "pets"), path4.resolve(destination));
-    return !!relative && !relative.includes(path4.sep) && /^genpet-[a-zA-Z0-9_-]+$/.test(relative);
-  };
-  if (!process.env.CODEX_HOME && belongs(path4.join(homedir3(), ".codex"))) return true;
-  const configured = process.env.CODEX_HOME;
-  if (!configured) return false;
-  const resolved = path4.resolve(configured);
-  const temp = path4.resolve(tmpdir());
-  const relativeToTemp = path4.relative(temp, resolved);
-  if (configured.startsWith("/var/folders/") || configured.includes("/tmp/") || relativeToTemp === "" || relativeToTemp !== ".." && !relativeToTemp.startsWith(`..${path4.sep}`) && !path4.isAbsolute(relativeToTemp))
-    return false;
-  return belongs(resolved);
-}
-
-// src/native-pet-live.ts
-import { randomUUID as randomUUID5 } from "node:crypto";
-import net2 from "node:net";
-var maxFrameBytes = 8 * 1024 * 1024;
-var selectedKey = "selected-avatar-id";
-function record(value) {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-function connection(options) {
-  const pipePath = (Object.hasOwn(options, "pipePath") ? options.pipePath : process.env.CODEX_APP_TOOLS_PIPE_PATH)?.trim();
-  const threadId = (Object.hasOwn(options, "threadId") ? options.threadId : process.env.CODEX_THREAD_ID)?.trim();
-  if (!pipePath || !threadId) throw new Error("The current Codex app tools pipe and thread ID are unavailable.");
-  if (process.platform === "win32" && !pipePath.startsWith("\\\\.\\pipe\\")) {
-    throw new Error("Expected a local Windows named pipe for Codex app tools.");
-  }
-  const timeoutMs = options.timeoutMs ?? 5e3;
-  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error("The Codex app tools timeout must be positive.");
-  return { pipePath, threadId, timeoutMs };
-}
-function frame(message) {
-  const payload = Buffer.from(JSON.stringify(message));
-  const header = Buffer.alloc(4);
-  header.writeUInt32LE(payload.length);
-  return Buffer.concat([header, payload]);
-}
-function projectSelection(value) {
-  if (!record(value) || !record(value.settings) || !record(value.effectiveSettings)) {
-    throw new Error("Codex returned an invalid settings response.");
-  }
-  const selectedPetId = value.settings[selectedKey] ?? null;
-  const effectiveSelectedPetId = value.effectiveSettings[selectedKey] ?? null;
-  if (selectedPetId !== null && typeof selectedPetId !== "string" || effectiveSelectedPetId !== null && typeof effectiveSelectedPetId !== "string") {
-    throw new Error("Codex returned an invalid pet selection.");
-  }
-  return { selectedPetId, effectiveSelectedPetId };
-}
-async function requestSelection(options, petId) {
-  const { pipePath, threadId, timeoutMs } = connection(options);
-  const id = 1;
-  const request = {
-    jsonrpc: "2.0",
-    id,
-    method: "tools/call",
-    params: {
-      namespace: "codex_app",
-      tool: petId === void 0 ? "read_settings" : "write_settings",
-      arguments: petId === void 0 ? { include_config: false } : { settings: { [selectedKey]: petId } },
-      callerSource: "codex",
-      threadId,
-      callId: `mcp-call-${randomUUID5()}`,
-      // These fallbacks follow the bundled app-tools MCP's request metadata.
-      turnId: `mcp-turn-${randomUUID5()}`
-    }
-  };
-  return new Promise((resolve, reject) => {
-    const socket = net2.createConnection(pipePath);
-    let pending = Buffer.alloc(0);
-    let settled = false;
-    let sent = false;
-    const finish = (error, result, cancel = false) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      if (cancel && sent && !socket.destroyed) {
-        socket.end(frame({ jsonrpc: "2.0", id, method: "tools/cancel" }));
-        socket.destroySoon();
-      } else socket.destroy();
-      if (error) reject(error);
-      else resolve(result);
-    };
-    const timer = setTimeout(
-      () => finish(new Error("Codex app tools timed out; the current selection is unconfirmed."), void 0, true),
-      timeoutMs
-    );
-    socket.once("connect", () => {
-      sent = true;
-      socket.write(frame(request));
-    });
-    socket.on(
-      "error",
-      (error) => finish(
-        new Error(`Codex app tools connection failed (${error.code ?? "socket error"}).`)
-      )
-    );
-    socket.on("close", () => finish(new Error("Codex app tools closed before confirming the pet selection.")));
-    socket.on("data", (bytes) => {
-      if (settled) return;
-      pending = Buffer.concat([pending, bytes]);
-      while (pending.length >= 4) {
-        const length = pending.readUInt32LE(0);
-        if (length > maxFrameBytes) return finish(new Error("Codex app tools response exceeded the size limit."));
-        if (pending.length < length + 4) return;
-        let response;
-        try {
-          response = JSON.parse(pending.subarray(4, length + 4).toString("utf8"));
-        } catch {
-          return finish(new Error("Codex app tools returned invalid JSON."));
-        }
-        pending = pending.subarray(length + 4);
-        if (!record(response) || response.id !== id) continue;
-        if (response.error !== void 0) return finish(new Error("Codex rejected the app tool request."));
-        const result = response.result;
-        if (!record(result) || result.success !== true || !Array.isArray(result.contentItems)) {
-          return finish(new Error("Codex could not complete the pet settings request."));
-        }
-        const item = result.contentItems.find((item2) => record(item2) && item2.type === "inputText");
-        if (!record(item) || typeof item.text !== "string")
-          return finish(new Error("Codex returned no pet settings result."));
-        try {
-          finish(void 0, projectSelection(JSON.parse(item.text)));
-        } catch {
-          finish(new Error("Codex returned an invalid pet settings result."));
-        }
-      }
-    });
-  });
-}
-async function readNativePetLive(options = {}) {
-  try {
-    return { available: true, ...await requestSelection(options) };
-  } catch (error) {
-    return {
-      available: false,
-      reason: error instanceof Error ? error.message : "Live Codex pet selection is unavailable."
-    };
-  }
-}
-async function selectNativePetLive(petId, options = {}) {
-  if (typeof petId !== "string" || petId.trim() !== petId || petId.length === 0 || petId.length > 512 || /[\x00-\x1f\x7f]/.test(petId)) {
-    throw new Error("A valid pet ID is required.");
-  }
-  await requestSelection(options, petId);
-  const result = await requestSelection(options);
-  if (result.selectedPetId !== petId || result.effectiveSelectedPetId !== petId) {
-    throw new Error("The live Codex selection did not match the requested pet; its current selection is unconfirmed.");
-  }
-  return { ...result, immediate: true, restartRequired: false, hostStateConfirmed: true, visualVerified: false };
-}
-
 // src/art.ts
-import { homedir as homedir4 } from "node:os";
-
-// src/prompts.ts
-import { existsSync as existsSync3, readFileSync as readFileSync2 } from "node:fs";
-import path6 from "node:path";
-
-// src/plugin-root.ts
-import { existsSync as existsSync2 } from "node:fs";
-import path5 from "node:path";
-import { fileURLToPath as fileURLToPath2 } from "node:url";
-function pluginRoot() {
-  const moduleDirectory = path5.dirname(fileURLToPath2(import.meta.url));
-  const candidates = [path5.resolve(moduleDirectory, ".."), path5.resolve(moduleDirectory, "..", "plugins", "genpet")];
-  return candidates.find((candidate) => existsSync2(path5.join(candidate, ".codex-plugin", "plugin.json"))) ?? candidates[0];
-}
-
-// src/prompts.ts
-function packageHost() {
-  const file = path6.join(pluginRoot(), "config", "host.json");
-  const host = existsSync3(file) ? JSON.parse(readFileSync2(file, "utf8")).host : "desktop";
-  if (!["desktop", "dots"].includes(host)) throw new Error("Invalid package host");
-  return host;
-}
-function readPromptFile(fileName) {
-  const candidates = [
-    path6.resolve(import.meta.dirname, "..", "framework", "prompts", fileName),
-    path6.join(pluginRoot(), "prompts", fileName)
-  ];
-  const file = candidates.find(existsSync3);
-  if (!file) throw new Error(`Missing prompt file: ${fileName}`);
-  return readFileSync2(file, "utf8");
-}
-function readPrompt(name) {
-  if (!/^[a-z][a-z0-9-]*$/.test(name)) throw new Error("Invalid prompt module");
-  return readPromptFile(`${name}.md`);
-}
-function readUnits() {
-  return JSON.parse(readPromptFile("units.json")).units;
-}
-
-// src/art.ts
-var actions = [
-  { name: "idle", row: 0, count: 6, durations: [280, 110, 110, 140, 140, 320] },
-  { name: "running-right", row: 1, count: 8, durations: [120, 120, 120, 120, 120, 120, 120, 220] },
-  { name: "running-left", row: 2, count: 8, durations: [120, 120, 120, 120, 120, 120, 120, 220] },
-  { name: "waving", row: 3, count: 4, durations: [140, 140, 140, 280] },
-  { name: "jumping", row: 4, count: 5, durations: [140, 140, 140, 140, 280] },
-  { name: "failed", row: 5, count: 8, durations: [140, 140, 140, 140, 140, 140, 140, 240] },
-  { name: "waiting", row: 6, count: 6, durations: [150, 150, 150, 150, 150, 260] },
-  { name: "running", row: 7, count: 6, durations: [120, 120, 120, 120, 120, 220] },
-  { name: "review", row: 8, count: 6, durations: [150, 150, 150, 150, 150, 280] }
-];
 function artRequest(state) {
   if (!state.pet || !state.pending?.plan) return null;
-  const plan = state.pending.plan, existing = desiredAppearance(state), id = requestId(state);
-  const references2 = state.art.filter(
-    (art) => art.petId === state.pet.id && (art.kind === "portrait" || state.host === "dots" && art.kind === "avatar")
-  );
+  const pet = state.pet;
+  const plan = state.pending.plan;
+  const host = hostFor(state.host);
+  const own = state.art.filter((art) => art.petId === pet.id);
+  const references2 = own.filter((art) => host.referenceKinds.includes(art.kind));
+  const referenceFiles = [
+    references2.find((art) => art.stage === "egg")?.file,
+    references2.find((art) => art.stage !== "egg")?.file,
+    references2.at(-1)?.file
+  ].filter((file) => !!file);
   return {
-    id,
+    id: requestId(state),
     operationId: state.pending.id,
-    petId: state.pet.id,
+    petId: pet.id,
     host: state.host,
-    status: !plan.appearance ? "unchanged" : existing ? "ready" : "pending",
+    status: !plan.appearance ? "unchanged" : desiredAppearance(state) ? "ready" : "pending",
     stage: plan.stage,
-    name: state.pet.name,
-    naming: state.pet.naming,
-    personality: state.pet.personality ?? plan.personality,
-    genes: state.pet.genes ?? plan.genes,
+    name: pet.name,
+    naming: pet.naming,
+    personality: pet.personality ?? plan.personality,
+    genes: pet.genes ?? plan.genes,
     story: plan.text,
     appearance: plan.appearance,
-    reusableAppearances: state.art.filter((art) => art.petId === state.pet.id && ["atlas", "avatar"].includes(art.kind)),
-    referenceFiles: [
-      ...new Set(
-        [
-          references2.find((art) => art.stage === "egg")?.file,
-          references2.find((art) => art.stage !== "egg")?.file,
-          references2.at(-1)?.file
-        ].filter((file) => !!file)
-      )
-    ],
+    reusableAppearances: own.filter((art) => art.kind === "atlas" || art.kind === "avatar"),
+    referenceFiles: [...new Set(referenceFiles)],
     prompt: readPrompt("meta") + "\n" + readPrompt("appearance"),
-    contract: state.host === "desktop" ? { columns: 8, cellWidth: 192, cellHeight: 208, rows: 11, spriteVersionNumber: 2 } : null,
-    target: state.pet.binding ?? null
+    contract: host.artContract,
+    target: pet.binding ?? null
   };
 }
 async function validateImage(file, kind) {
@@ -4390,175 +4704,98 @@ async function validateImage(file, kind) {
   if (!info.isFile() || info.size > 64 * 1024 * 1024) throw new Error("Artifact must be a regular file below 64 MiB");
   if (kind === "artifact") return { format: "artifact", width: 0, height: 0, hasAlpha: false };
   const meta = await readImageInfo(file);
-  if (["portrait", "atlas"].includes(kind) && !meta.hasAlpha) throw new Error("Pet images must have an alpha channel");
+  if ((kind === "portrait" || kind === "atlas") && !meta.hasAlpha)
+    throw new Error("Pet images must have an alpha channel");
   if (meta.width * meta.height > 16e6) throw new Error("Image exceeds size limit");
-  if (kind === "atlas" && (meta.width !== 1536 || meta.height !== 2288))
-    throw new Error("Atlas must be 1536 \xD7 2288 (v2)");
   const decoded = await decodeRgba(file);
-  if (kind === "atlas") {
-    const { data, width } = decoded;
-    for (let row = 0; row < 11; row++)
-      for (let col = 0; col < 8; col++) {
-        let visible = 0;
-        const used = col < (row < 9 ? actions[row].count : 8) || row === 0 && col === 6;
-        for (let y = row * 208; y < (row + 1) * 208; y++)
-          for (let x = col * 192; x < (col + 1) * 192; x++) if (data[(y * width + x) * 4 + 3] > 0) visible++;
-        if (used && visible < 30) throw new Error(`Empty animation cell ${row},${col}`);
-        if (!used && visible > 0) throw new Error(`Unused cell ${row},${col} must be transparent`);
-      }
-  }
+  if (kind === "atlas") checkAtlas(decoded);
   return meta;
 }
 async function acceptArt(store2, input) {
-  if (!path7.isAbsolute(input.file)) throw new Error("Artifact file must be an absolute local path");
-  if (!["portrait", "atlas", "avatar", "story", "artifact"].includes(input.kind))
-    throw new Error("Unknown artifact kind");
+  if (!path8.isAbsolute(input.file)) throw new Error("Artifact file must be an absolute local path");
+  if (!artKinds.includes(input.kind)) throw new Error("Unknown artifact kind");
   if (!input.provenance?.trim()) throw new Error("Record generation and validation provenance");
   await validateImage(input.file, input.kind);
-  const bytes = await readFile4(input.file);
+  const bytes = await readFile7(input.file);
   return store2.transaction(async (state) => {
     if (requestId(state) !== input.requestId) throw new Error("Stale design request");
-    if (state.host === "dots" && input.kind === "atlas" || state.host === "desktop" && input.kind === "avatar")
+    const appearanceKind = hostFor(state.host).appearanceKind;
+    if ((input.kind === "atlas" || input.kind === "avatar") && input.kind !== appearanceKind)
       throw new Error("Artwork uses the other host format");
-    const id = `art-${createHash3("sha256").update(state.pet.id + input.requestId + input.kind).update(bytes).digest("hex").slice(0, 24)}`;
+    const pet = state.pet;
+    const plan = state.pending.plan;
+    const id = `art-${createHash4("sha256").update(pet.id + input.requestId + input.kind).update(bytes).digest("hex").slice(0, 24)}`;
     const previous = state.art.find((art) => art.id === id);
     if (previous) {
       await stat2(previous.file);
       return previous;
     }
-    const dir = path7.join(store2.root, "pets", state.pet.id, "assets");
-    await mkdir2(dir, { recursive: true, mode: 448 });
-    const ext = path7.extname(input.file).toLowerCase(), file = path7.join(dir, id + ext);
-    const tmp = file + "." + randomUUID6() + ".tmp";
+    const dir = path8.join(store2.root, "pets", pet.id, "assets");
+    await mkdir4(dir, { recursive: true, mode: 448 });
+    const file = path8.join(dir, id + path8.extname(input.file).toLowerCase());
+    const tmp = `${file}.${randomUUID8()}.tmp`;
     try {
-      await writeFile2(tmp, bytes, { mode: 384, flag: "wx" });
-      await rename2(tmp, file);
+      await writeFile3(tmp, bytes, { mode: 384, flag: "wx" });
+      await rename3(tmp, file);
     } finally {
-      await (await import("node:fs/promises")).rm(tmp, { force: true });
+      await rm2(tmp, { force: true });
     }
-    const record2 = {
+    const record = {
       id,
-      petId: state.pet.id,
+      petId: pet.id,
       requestId: input.requestId,
-      stage: state.pending.plan.stage,
-      description: input.description?.trim() || state.pending.plan.appearance?.description || state.pending.plan.state,
+      stage: plan.stage,
+      description: input.description?.trim() || plan.appearance?.description || plan.state,
       file,
       kind: input.kind,
       createdAt: Date.now(),
       provenance: input.provenance
     };
-    state.art.push(record2);
-    return record2;
-  });
-}
-function desktopDestination(state) {
-  if (!state.pet) throw new Error("No pet");
-  const home = process.env.CODEX_HOME || path7.join(homedir4(), ".codex");
-  const destination = state.pet.binding?.destination ?? path7.join(home, "pets", state.pet.id);
-  const relative = path7.relative(path7.resolve(home, "pets"), path7.resolve(destination));
-  if (!relative || relative.startsWith("..") || path7.isAbsolute(relative) || relative.includes(path7.sep))
-    throw new Error("Target must be one entry in this Codex home");
-  if (state.pet.binding && state.pet.binding.avatarId !== `custom:${path7.basename(destination)}`)
-    throw new Error("Avatar binding does not match its destination");
-  return destination;
-}
-async function exportNative(state, destination) {
-  if (!state.pet || state.host !== "desktop") throw new Error("Native export requires a desktop pet");
-  const art = desiredAppearance(state);
-  if (!art || art.kind !== "atlas") throw new Error("Complete or select a validated atlas first");
-  await validateImage(art.file, "atlas");
-  let previous;
-  try {
-    previous = await readFile4(path7.join(destination, "pet.json"), "utf8");
-    const old = JSON.parse(previous);
-    const transferred = state.replacesPetId && old.genpetId === state.replacesPetId && state.pet.binding?.destination === destination;
-    if (old.genpetId !== state.pet.id && !transferred && !(state.legacy && state.pet.binding?.destination === destination && !old.genpetId))
-      throw new Error("Target entry belongs to another pet; it was preserved");
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
-  }
-  await mkdir2(destination, { recursive: true });
-  const hash = createHash3("sha256").update(await readFile4(art.file)).digest("hex").slice(0, 16);
-  const spritesheetPath = `spritesheet-${hash}${path7.extname(art.file)}`;
-  const tmp = path7.join(destination, `.pending-${randomUUID6()}`);
-  await copyFile(art.file, tmp);
-  await rename2(tmp, path7.join(destination, spritesheetPath));
-  const manifest = {
-    id: path7.basename(destination),
-    genpetId: state.pet.id,
-    displayName: state.pet.name,
-    description: "GenPet \xB7 a companion with its own stories",
-    spriteVersionNumber: 2,
-    spritesheetPath
-  };
-  if (previous) await writeFile2(path7.join(destination, "previous-pet.json"), previous);
-  const manifestTmp = path7.join(destination, `.pet-${randomUUID6()}.json`);
-  await writeFile2(manifestTmp, JSON.stringify(manifest, null, 2));
-  await rename2(manifestTmp, path7.join(destination, "pet.json"));
-  return { destination, manifest, artId: art.id, filesCommitted: true };
-}
-async function installNative(store2, options = {}) {
-  if (store2.host !== "desktop") throw new Error("Dots uses its own Avatar adapter");
-  return store2.transaction(async (state) => {
-    if (!state.pending?.plan?.appearance) throw new Error("No planned appearance update");
-    const operationId = state.pending.id, destination = desktopDestination(state), avatarId = `custom:${path7.basename(destination)}`;
-    const result = await exportNative(state, destination);
-    state.pet.binding = { host: "desktop", avatarId, destination };
-    const selection2 = await (options.selection ?? readNativePetLive)();
-    const active = selection2.available ? selection2.effectiveSelectedPetId === avatarId : null;
-    const refresh = await (options.refresh ?? refreshNativePet)({
-      expectedSpritePath: path7.join(destination, result.manifest.spritesheetPath)
-    });
-    const hostResult = validateHostResult(state, operationId, {
-      petId: state.pet.id,
-      operationId,
-      appearanceId: result.artId,
-      avatarId,
-      updated: true,
-      active,
-      refreshRequested: refresh.refreshRequested === true,
-      displayStatus: refresh.displayStatus,
-      ...!refresh.automaticRefresh && (active === true || active === null && isLiveNativeDestination(destination)) ? { error: "Active Avatar refresh did not complete" } : {}
-    });
-    state.pending.hostResult = hostResult;
-    return { ...result, ...hostResult, refresh };
+    state.art.push(record);
+    return record;
   });
 }
 
-// src/hosts.ts
-function hostRequest(state) {
-  if (state.host !== "dots") throw new Error("This handoff is for Dots Avatar updates");
-  if (!state.pending?.plan?.appearance) throw new Error("No planned Avatar update");
-  if (!state.pet?.binding) throw new Error("Bind the actual Dots Avatar before requesting an update");
-  const pending = pendingFor(state, state.pending.id), art = desiredAppearance(state);
-  if (!art || art.kind !== "avatar") throw new Error("Complete or select Dots Avatar artwork first");
-  return {
-    operation: "update-avatar",
-    petId: pending.petId,
-    operationId: pending.id,
-    name: state.pet.name,
-    target: state.pet.binding,
-    file: art.file,
-    appearanceId: art.id,
-    description: state.pending.plan.appearance.description,
-    stage: state.pending.plan.stage,
-    refreshWhenActive: true,
-    preserveCurrentSelection: true
-  };
-}
-async function bindAvatar(store2, avatarId) {
-  if (store2.host !== "dots") throw new Error("bind-avatar is for a real Dots pet");
-  return store2.transaction((state) => {
-    if (!state.pet) throw new Error("Allocate the pet identity first");
-    const id = text(avatarId, "avatarId");
-    if (state.pet.binding && state.pet.binding.avatarId !== id)
-      throw new Error("Target is already bound; preserve the existing Avatar");
-    return state.pet.binding ??= { host: "dots", avatarId: id };
+// src/debugger.ts
+import { spawn } from "node:child_process";
+import path9 from "node:path";
+async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageHost() === "dots" ? 47832 : 47831))) {
+  if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("Invalid debugger port");
+  const url = `http://127.0.0.1:${port}`, root = new Store(void 0, packageHost()).root;
+  async function inspect() {
+    let response;
+    try {
+      response = await fetch(url + "/api/health", { signal: AbortSignal.timeout(500) });
+    } catch {
+      return false;
+    }
+    const value = await response.json().catch(() => null);
+    if (value?.service !== "genpet-debugger" || value.root !== root)
+      throw new Error("Debugger port belongs to another service or data directory");
+    return true;
+  }
+  if (await inspect()) return { url, reused: true };
+  const child = spawn(process.execPath, [path9.join(import.meta.dirname, "debugger-server.js")], {
+    detached: true,
+    stdio: "ignore",
+    env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: path9.resolve(dataRoot()) }
   });
+  let failure;
+  child.once("error", (error) => {
+    failure = error;
+  });
+  child.unref();
+  for (let i = 0; i < 50; i++) {
+    if (failure) throw failure;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    if (await inspect()) return { url, reused: false };
+    if (child.exitCode !== null) throw new Error("Debugger failed to start");
+  }
+  throw new Error("Debugger startup timed out");
 }
 
 // src/generation.ts
-import { createHash as createHash4 } from "node:crypto";
+import { createHash as createHash5 } from "node:crypto";
 var object = (value) => !!value && typeof value === "object" && !Array.isArray(value);
 function definition(unit) {
   const units = readUnits();
@@ -4595,7 +4832,7 @@ function unitRequest(unit, fixture) {
     `\u8FD4\u56DE\u4E00\u4E2A JSON \u5BF9\u8C61\uFF1AinputRefs \u4E3A\u8F93\u5165\u5F15\u7528\u5217\u8868\uFF0Cresult \u4E3A\u672C\u5355\u5143\u7ED3\u679C\u3002\u6240\u9700\u5B57\u6BB5\u4E0E\u7C7B\u578B\uFF1A${JSON.stringify(contract.result)}\u3002${contract.choices ? `\u5DE5\u7A0B\u53D6\u503C\uFF1A${JSON.stringify(contract.choices)}\u3002` : ""}\u53EF\u589E\u52A0\u5B57\u6BB5\uFF0C\u5185\u5BB9\u4FDD\u6301\u5F00\u653E\u3002\u4E0D\u8981\u8F93\u51FA\u989D\u5916\u7684\u6D41\u7A0B\u8BF4\u660E\u3002`,
     `\u56FA\u5B9A\u8F93\u5165\uFF1A${JSON.stringify({ inputRefs, inputs: fixture.inputs }, null, 2)}`
   ].join("\n\n");
-  return { unit, inputRefs, prompt, promptHash: createHash4("sha256").update(prompt).digest("hex") };
+  return { unit, inputRefs, prompt, promptHash: createHash5("sha256").update(prompt).digest("hex") };
 }
 function canonical(value) {
   return JSON.stringify(
@@ -4610,7 +4847,7 @@ async function recordStep(store2, operationId, unit, input) {
   return store2.transaction((state) => {
     const owner = state.pending?.id === operationId ? pendingFor(state, operationId) : state.stories.find((story) => story.id === operationId && story.petId === state.pet?.id);
     if (!owner) throw new Error("Generation step belongs to another or missing story");
-    const id = `step-${createHash4("sha256").update(canonical([operationId, unit, output])).digest("hex").slice(0, 24)}`;
+    const id = `step-${createHash5("sha256").update(canonical([operationId, unit, output])).digest("hex").slice(0, 24)}`;
     const steps = owner.steps ??= [], previous = steps.find((step2) => step2.id === id);
     if (previous) return previous;
     const step = { id, unit, at: Date.now(), ...output };
@@ -4619,1223 +4856,123 @@ async function recordStep(store2, operationId, unit, input) {
   });
 }
 
-// src/migration.ts
-import { readFile as readFile5, copyFile as copyFile2, mkdir as mkdir3 } from "node:fs/promises";
-import path8 from "node:path";
-import { randomUUID as randomUUID7 } from "node:crypto";
-async function migrateLegacy(store2, file, design) {
-  if (store2.host !== "desktop") throw new Error("Legacy migration is for desktop records");
-  if (!path8.isAbsolute(file)) throw new Error("Legacy file must be absolute");
-  const legacy = JSON.parse(await readFile5(file, "utf8"));
-  if (legacy.version !== 1 || !legacy.pet) throw new Error("No v1 pet to migrate");
-  const genes = text(design.genes, "observed legacy identity"), place = text(design.place, "origin"), connection2 = text(design.connection, "connection");
-  return store2.transaction(async (state) => {
-    if (state.legacy && state.pet?.id === legacy.pet.id) return state;
-    if (state.pet) throw new Error("Migration never replaces an existing v2 pet");
-    const petId = identifier(legacy.pet.id, "legacy petId");
-    const stage = validateStage("egg", legacy.pet.stage);
-    const backup = path8.join(store2.root, "backups", `legacy-${randomUUID7()}.json`);
-    await atomicJson(backup, legacy);
-    state.pet = {
-      id: petId,
-      name: text(legacy.pet.profile?.name ?? "GenPet", "name"),
-      adoptedAt: legacy.pet.adoptedAt,
-      revision: 1,
-      genes,
-      stage,
-      acquisition: { place, connection: connection2, storyId: "legacy" },
-      state: { description: legacy.pet.state?.reason || "Continuing the existing companion", updatedAt: Date.now() }
-    };
-    state.legacy = { backup, importedAt: Date.now() };
-    const destination = legacy.nativeExport?.destination;
-    if (destination)
-      state.pet.binding = { host: "desktop", avatarId: `custom:${path8.basename(destination)}`, destination };
-    const dir = path8.join(store2.root, "pets", petId, "assets");
-    await mkdir3(dir, { recursive: true });
-    for (const art of legacy.art ?? []) {
-      if (!["portrait", "atlas"].includes(art.kind) || !path8.isAbsolute(art.file)) continue;
-      const id = `art-${randomUUID7()}`, target2 = path8.join(dir, id + path8.extname(art.file));
-      try {
-        await copyFile2(art.file, target2);
-      } catch (error) {
-        if (error.code === "ENOENT") continue;
-        throw error;
-      }
-      state.art.push({
-        id,
-        petId,
-        requestId: "legacy",
-        stage: validateStage("egg", art.stage),
-        description: "Imported existing artwork",
-        file: target2,
-        kind: art.kind,
-        createdAt: art.createdAt,
-        provenance: art.provenance || "Preserved v1 artwork"
-      });
-      if (art.kind === "atlas" && art.stage === stage) state.pet.state.appearanceId = id;
-    }
-    return state;
-  });
-}
-
-// src/native-pets.ts
-import { readFile as readFile6, readdir } from "node:fs/promises";
-import { homedir as homedir5 } from "node:os";
-import path9 from "node:path";
-
-// node_modules/smol-toml/dist/error.js
-function getLineColFromPtr(string, ptr) {
-  let lines = string.slice(0, ptr).split(/\r?\n/);
-  return [lines.length, lines.pop().length + 1];
-}
-function makeCodeBlock(string, line, column) {
-  let lines = string.split(/\r?\n/);
-  let codeblock = "";
-  let numberLen = (Math.log10(line + 1) | 0) + 1;
-  for (let i = line - 1; i <= line + 1; i++) {
-    let l = lines[i - 1];
-    if (!l)
-      continue;
-    codeblock += i.toString().padEnd(numberLen, " ");
-    codeblock += ":  ";
-    codeblock += l;
-    codeblock += "\n";
-    if (i === line) {
-      codeblock += " ".repeat(numberLen + column + 2);
-      codeblock += "^\n";
-    }
-  }
-  return codeblock;
-}
-var TomlError = class _TomlError extends Error {
-  line;
-  column;
-  codeblock;
-  constructor(message, options) {
-    const [line, column] = getLineColFromPtr(options.toml, options.ptr);
-    const codeblock = makeCodeBlock(options.toml, line, column);
-    super(`Invalid TOML document: ${message}
-
-${codeblock}`, options);
-    this.line = line;
-    this.column = column;
-    this.codeblock = codeblock;
-  }
-  /** @internal */
-  static x(message, ctx, ptr) {
-    throw new _TomlError(message, { toml: ctx.s, ptr: ptr ?? ctx.p });
-  }
-};
-
-// node_modules/smol-toml/dist/primitive.js
-function parseString(ctx) {
-  let startPtr = ctx.p;
-  let c = ctx.s.charCodeAt(ctx.p++);
-  let first = c;
-  let isLiteral = c === 39;
-  let isMultiline = c === ctx.s.charCodeAt(ctx.p) && c === ctx.s.charCodeAt(ctx.p + 1);
-  if (isMultiline) {
-    if ((c = ctx.s.charCodeAt(ctx.p += 2)) === 10)
-      ctx.p++;
-    else if (c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10)
-      ctx.p += 2;
-  }
-  let parsed = "";
-  let sliceStart = ctx.p;
-  let state = 0;
-  for (; ctx.p < ctx.s.length; ctx.p++) {
-    c = ctx.s.charCodeAt(ctx.p);
-    if (isMultiline && (c === 10 || c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10)) {
-      state = state && 3;
-    } else if (c < 32 && c !== 9 || c === 127) {
-      TomlError.x("control characters are not allowed in strings", ctx);
-    } else if ((!state || state === 3) && c === first && (!isMultiline || ctx.s.charCodeAt(ctx.p + 1) === first && ctx.s.charCodeAt(ctx.p + 2) === first)) {
-      if (isMultiline) {
-        if (ctx.s.charCodeAt(ctx.p + 3) === first)
-          ctx.p++;
-        if (ctx.s.charCodeAt(ctx.p + 3) === first)
-          ctx.p++;
-      }
-      if (!state) {
-        let s = ctx.s.slice(sliceStart, ctx.p);
-        parsed = parsed ? parsed + s : s;
-      }
-      ctx.p += isMultiline ? 3 : 1;
-      return parsed;
-    } else if (!state) {
-      if (!isLiteral && c === 92) {
-        parsed += ctx.s.slice(sliceStart, sliceStart = ctx.p);
-        state = 1;
-      }
-    } else if (state === 1) {
-      if (c === 120 || c === 117 || c === 85) {
-        let errPtr = ctx.p++ - 1;
-        let value = 0;
-        let len = c === 120 ? 2 : c === 117 ? 4 : 8;
-        for (let j = 0; j < len; j++, ctx.p++) {
-          let hex = ctx.s.charCodeAt(ctx.p);
-          let digit = (
-            /* 0-9 */
-            hex >= 48 && hex <= 57 ? hex - 48 : (
-              /* A-F */
-              hex >= 65 && hex <= 70 ? hex - 65 + 10 : (
-                /* a-f */
-                hex >= 97 && hex <= 102 ? hex - 97 + 10 : -1
-              )
-            )
-          );
-          if (digit < 0)
-            TomlError.x("invalid non-hex character in unicode escape", ctx);
-          value = value << 4 | digit;
-        }
-        if (value < 0 || value > 1114111 || value >= 55296 && value <= 57343) {
-          TomlError.x("invalid unicode escape", ctx, errPtr);
-        }
-        parsed += String.fromCodePoint(value);
-        sliceStart = ctx.p--;
-        state = 0;
-      } else if (isMultiline && (c === 32 || c === 9)) {
-        state = 2;
-      } else {
-        if (c === 98)
-          parsed += "\b";
-        else if (c === 116)
-          parsed += "	";
-        else if (c === 110)
-          parsed += "\n";
-        else if (c === 102)
-          parsed += "\f";
-        else if (c === 114)
-          parsed += "\r";
-        else if (c === 101)
-          parsed += "\x1B";
-        else if (c === 34)
-          parsed += '"';
-        else if (c === 92)
-          parsed += "\\";
-        else
-          TomlError.x("unrecognised escape sequence", ctx);
-        sliceStart = ctx.p + 1;
-        state = 0;
-      }
-    } else if (c !== 32 && c !== 9) {
-      if (state === 2)
-        TomlError.x("invalid escape: only line-ending whitespace may be escaped", ctx, sliceStart);
-      state = !isLiteral && c === 92 ? 1 : 0;
-      sliceStart = ctx.p;
-    }
-  }
-  TomlError.x("unfinished string", ctx, startPtr);
-}
-
-// node_modules/smol-toml/dist/date.js
-var DATE_TIME_RE = /^(\d{4}-\d{2}-\d{2})?[Tt ]?(?:(\d{2}):\d{2}(?::\d{2}(?:\.\d+)?)?)?(Z|z|[-+]\d{2}:\d{2})?$/i;
-var TomlDate = class _TomlDate extends Date {
-  #hasDate = false;
-  #hasTime = false;
-  #offset = null;
-  constructor(date, fasttype, unsafeDelim) {
-    let hasDate = true;
-    let hasTime = true;
-    let offset = "Z";
-    let c;
-    if (typeof date === "string") {
-      if (fasttype)
-        prep: {
-          if (fasttype < 3) {
-            if (+date.slice(11, 13) > 23) {
-              date = "";
-              break prep;
-            }
-            if (fasttype === 2) {
-              offset = null;
-              date += "Z";
-            } else if ((c = date.charCodeAt(date.length - 1)) !== 90 && c !== 122) {
-              offset = date.slice(date.length - 6);
-            }
-            if (unsafeDelim)
-              date = date.slice(0, 10) + "T" + date.slice(11);
-          } else if (fasttype === 4) {
-            date = +date.slice(0, 2) > 23 ? "" : `0000-01-01T${date}Z`;
-          }
-          hasDate = fasttype !== 4;
-          hasTime = fasttype !== 3;
-        }
-      else {
-        let match = date.match(DATE_TIME_RE);
-        if (match) {
-          if (!match[1]) {
-            hasDate = false;
-            date = `0000-01-01T${date}`;
-          }
-          hasTime = !!match[2];
-          hasTime && date[10] === " " && (date = date.replace(" ", "T"));
-          if (match[2] && +match[2] > 23) {
-            date = "";
-          } else {
-            offset = match[3] || null;
-            if (!offset && hasTime)
-              date += "Z";
-          }
-        } else {
-          date = "";
-        }
-      }
-    }
-    super(date);
-    if (!isNaN(this.getTime())) {
-      this.#hasDate = hasDate;
-      this.#hasTime = hasTime;
-      this.#offset = offset;
-    }
-  }
-  isDateTime() {
-    return this.#hasDate && this.#hasTime;
-  }
-  isLocal() {
-    return !this.#hasDate || !this.#hasTime || !this.#offset;
-  }
-  isDate() {
-    return this.#hasDate && !this.#hasTime;
-  }
-  isTime() {
-    return this.#hasTime && !this.#hasDate;
-  }
-  isValid() {
-    return this.#hasDate || this.#hasTime;
-  }
-  toISOString() {
-    let iso = super.toISOString();
-    if (this.isDate())
-      return iso.slice(0, 10);
-    if (this.isTime())
-      return iso.slice(11, 23);
-    if (this.#offset === null)
-      return iso.slice(0, -1);
-    if (this.#offset === "Z" || this.#offset === "z")
-      return iso;
-    let offset = +this.#offset.slice(1, 3) * 60 + +this.#offset.slice(4, 6);
-    offset = this.#offset[0] === "-" ? offset : -offset;
-    let offsetDate = new Date(this.getTime() - offset * 6e4);
-    return offsetDate.toISOString().slice(0, -1) + this.#offset;
-  }
-  static wrapAsOffsetDateTime(jsDate, offset = "Z") {
-    let date = new _TomlDate(jsDate);
-    date.#offset = offset;
-    return date;
-  }
-  static wrapAsLocalDateTime(jsDate) {
-    let date = new _TomlDate(jsDate);
-    date.#offset = null;
-    return date;
-  }
-  static wrapAsLocalDate(jsDate) {
-    let date = new _TomlDate(jsDate);
-    date.#hasTime = false;
-    date.#offset = null;
-    return date;
-  }
-  static wrapAsLocalTime(jsDate) {
-    let date = new _TomlDate(jsDate);
-    date.#hasDate = false;
-    date.#offset = null;
-    return date;
-  }
-};
-
-// node_modules/smol-toml/dist/extract.js
-function isDigit(char, base = 10) {
-  return base === 16 ? char > 47 && char < 58 || char > 64 && char < 71 || char > 96 && char < 103 : char > 47 && char < 48 + base;
-}
-function isEndOfValue(char, delim) {
-  return char === 32 || char === 9 || char === 10 || char === 13 || // Structure end or next value delimiter
-  delim && (char === delim || char === 44) || // Comment
-  char === 35;
-}
-function extractValue(ctx, end) {
-  let errPtr = ctx.p;
-  let c = ctx.s.charCodeAt(ctx.p);
-  if (c === 91 || c === 123) {
-    ctx.d-- || TomlError.x("document contains excessively nested structures. aborting.", ctx);
-    let value = c === 91 ? parseArray(ctx) : parseInlineTable(ctx);
-    ctx.d++;
-    return value;
-  }
-  if (c === 34 || c === 39) {
-    return parseString(ctx);
-  }
-  if (c === 116) {
-    if (ctx.s.charCodeAt(++ctx.p) !== 114 || ctx.s.charCodeAt(++ctx.p) !== 117 || ctx.s.charCodeAt(++ctx.p) !== 101)
-      TomlError.x("invalid value", ctx, errPtr);
-    return ctx.p++, true;
-  }
-  if (c === 102) {
-    if (ctx.s.charCodeAt(++ctx.p) !== 97 || ctx.s.charCodeAt(++ctx.p) !== 108 || ctx.s.charCodeAt(++ctx.p) !== 115 || ctx.s.charCodeAt(++ctx.p) !== 101)
-      TomlError.x("invalid value", ctx, errPtr);
-    return ctx.p++, false;
-  }
-  if (c === 43 || c === 45) {
-    return parseNumber(ctx, ctx.p, ctx.s.charCodeAt(++ctx.p), 44 - c, end);
-  }
-  if (ctx.s.charCodeAt(ctx.p + 4) === 45 && ctx.s.charCodeAt(ctx.p + 7) === 45) {
-    return parseDate(ctx, c, end);
-  }
-  if (ctx.s.charCodeAt(ctx.p + 2) === 58) {
-    return parseTime(ctx, c, end);
-  }
-  return parseNumber(ctx, ctx.p, c, 0, end);
-}
-function parseNumber(ctx, startPtr, startChr, sign, endChr) {
-  let c = startChr;
-  let state = 0;
-  let hasUnderscores = false;
-  if (c === 105) {
-    if (ctx.s.charCodeAt(++ctx.p) !== 110 || ctx.s.charCodeAt(++ctx.p) !== 102)
-      TomlError.x("invalid value", ctx, startPtr);
-    return ctx.p++, (sign || 1) / 0;
-  }
-  if (c === 110) {
-    if (ctx.s.charCodeAt(++ctx.p) !== 97 || ctx.s.charCodeAt(++ctx.p) !== 110)
-      TomlError.x("invalid value", ctx, startPtr);
-    return ctx.p++, NaN;
-  }
-  if (c === 48) {
-    if (++ctx.p >= ctx.s.length || isEndOfValue(c = ctx.s.charCodeAt(ctx.p), endChr))
-      return ctx.bi === true ? 0n : 0;
-    if (!sign) {
-      if (c === 120)
-        return parseIntegerBaseN(ctx, startPtr, 16, endChr);
-      else if (c === 98)
-        return parseIntegerBaseN(ctx, startPtr, 2, endChr);
-      else if (c === 111)
-        return parseIntegerBaseN(ctx, startPtr, 8, endChr);
-    }
-    if (c === 46)
-      state = 2;
-    else if (c === 101 || c === 69)
-      state = 4;
-    else
-      TomlError.x("illegal leading zero", ctx, startPtr);
-  } else if (!isDigit(c))
-    TomlError.x("invalid value", ctx, startPtr);
-  while (++ctx.p < ctx.s.length && (c = ctx.s.charCodeAt(ctx.p), !isEndOfValue(c, endChr))) {
-    if (!state)
-      state = 1;
-    if (c === 95) {
-      if (!(state & 1))
-        TomlError.x("illegal underscore", ctx);
-      state += 11;
-      hasUnderscores = true;
-    } else if (state === 1 && c === 46)
-      state = 2;
-    else if ((state === 1 || state === 3) && (c === 101 || c === 69))
-      state = 4;
-    else if (state === 4 && (c === 43 || c === 45)) {
-    } else if (!isDigit(c))
-      TomlError.x(`illegal character in numeric literal`, ctx);
-    else if (state > 9)
-      state -= 11;
-    else if (!(state & 1))
-      state++;
-  }
-  if (!state) {
-    let val = (startChr - 48) * (sign || 1);
-    return ctx.bi === true ? BigInt(val) : val;
-  }
-  if (!(state & 1))
-    TomlError.x("unfinished numeric value", ctx, startPtr);
-  let str = ctx.s.slice(startPtr, ctx.p);
-  if (hasUnderscores)
-    str = str.replaceAll("_", "");
-  return state > 1 ? parseFloat(str) : parseInteger(ctx, str, 10, startPtr);
-}
-function parseIntegerBaseN(ctx, startPtr, base, endChr) {
-  let c, underscore = 1;
-  while (++ctx.p < ctx.s.length && (c = ctx.s.charCodeAt(ctx.p), !isEndOfValue(c, endChr))) {
-    if (c === 95) {
-      if (underscore & 1)
-        TomlError.x("illegal underscore", ctx);
-      underscore = 3;
-    } else if (!isDigit(c, base))
-      TomlError.x(`illegal character in numeric literal`, ctx);
-    else if (underscore & 1)
-      underscore--;
-  }
-  if (underscore & 1)
-    TomlError.x("unfinished numeric value", ctx);
-  let str = ctx.s.slice(startPtr + 2, ctx.p);
-  if (underscore)
-    str = str.replaceAll("_", "");
-  return parseInteger(ctx, str, base, startPtr);
-}
-function parseInteger(ctx, str, base, startPtr) {
-  if (ctx.bi !== true)
-    int: {
-      let val = parseInt(str, base);
-      if (!Number.isSafeInteger(val)) {
-        if (ctx.bi)
-          break int;
-        TomlError.x("integer value cannot be represented losslessly", ctx, startPtr);
-      }
-      return val;
-    }
-  return base === 10 ? BigInt(str) : BigInt((base === 2 ? "0b" : base === 8 ? "0o" : "0x") + str);
-}
-function parseDate(ctx, c, endChr) {
-  let startPtr = ctx.p++, unsafeSeparator;
-  if (!isDigit(c) || !isDigit(ctx.s.charCodeAt(ctx.p++)) || !isDigit(ctx.s.charCodeAt(ctx.p++)) || !isDigit(ctx.s.charCodeAt(ctx.p++))) {
-    return parseNumber(ctx, ctx.p = startPtr, c, 0, endChr);
-  }
-  ctx.p += 5;
-  if (!isDigit(ctx.s.charCodeAt(ctx.p++)))
-    TomlError.x("invalid date-time: date part is malformed", ctx, startPtr);
-  if (ctx.p >= ctx.s.length || ((c = ctx.s.charCodeAt(ctx.p)) !== 32 || (unsafeSeparator = true, !isDigit(ctx.s.charCodeAt(ctx.p + 1)))) && c !== 84 && c !== 116) {
-    let t2 = ctx.s.slice(startPtr, ctx.p);
-    return readDate(ctx, t2, 3, false, startPtr);
-  }
-  if (ctx.s.charCodeAt(ctx.p += 3) !== 58)
-    TomlError.x("invalid date-time: time part is malformed", ctx, startPtr);
-  if (ctx.s.charCodeAt(ctx.p += 3) === 58)
-    ctx.p += 3;
-  if (ctx.s.charCodeAt(ctx.p) === 46)
-    while (isDigit(ctx.s.charCodeAt(++ctx.p)))
-      ;
-  if (c = ctx.s.charCodeAt(ctx.p)) {
-    if (c === 90 || c === 122) {
-      let t2 = ctx.s.slice(startPtr, ++ctx.p);
-      return readDate(ctx, t2, 1, unsafeSeparator, startPtr, "[+00:00]");
-    }
-    if (c === 43 || c === 45) {
-      let t2 = ctx.s.slice(startPtr, ctx.p += 6);
-      return readDate(ctx, t2, 1, unsafeSeparator, startPtr, !ctx.ld && "[" + ctx.s.slice(ctx.p - 6, ctx.p) + "]");
-    }
-  }
-  let t = ctx.s.slice(startPtr, ctx.p);
-  return readDate(ctx, t, 2, unsafeSeparator, startPtr);
-}
-function parseTime(ctx, c, endChr) {
-  let start = ctx.p;
-  if (!isDigit(c) || !isDigit(ctx.s.charCodeAt(++ctx.p))) {
-    return parseNumber(ctx, --ctx.p, c, 0, endChr);
-  }
-  if (ctx.s.charCodeAt(ctx.p += 4) === 58)
-    ctx.p += 3;
-  if (ctx.s.charCodeAt(ctx.p) === 46)
-    while (isDigit(ctx.s.charCodeAt(++ctx.p)))
-      ;
-  let t = ctx.s.slice(start, ctx.p);
-  return readDate(ctx, t, 4, false, start);
-}
-function readDate(ctx, str, type, unsafeDelim, errPtr, temporalSuffix) {
-  if (ctx.ld) {
-    let date = new TomlDate(str, type, unsafeDelim);
-    if (!date.isValid())
-      TomlError.x("invalid date", ctx, errPtr);
-    return date;
-  }
-  try {
-    if (temporalSuffix)
-      str += temporalSuffix;
-    switch (type) {
-      case 1:
-        return Temporal.ZonedDateTime.from(str);
-      case 2:
-        return Temporal.PlainDateTime.from(str);
-      case 3:
-        return Temporal.PlainDate.from(str);
-      case 4:
-        return Temporal.PlainTime.from(str);
-    }
-  } catch (e) {
-    TomlError.x(e instanceof Error ? e.message : "" + e, ctx, errPtr);
-  }
-}
-
-// node_modules/smol-toml/dist/util.js
-function skipComment(ctx) {
-  for (; ctx.p < ctx.s.length; ctx.p++) {
-    let c = ctx.s.charCodeAt(ctx.p);
-    if (c === 10)
-      break;
-    if (c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10) {
-      ctx.p++;
-      break;
-    }
-    if (c < 32 && c !== 9 || c === 127) {
-      TomlError.x("control characters are not allowed in comments", ctx);
-    }
-  }
-}
-function skipVoid(ctx, banNewLines, banComments) {
-  let c;
-  while (ctx.p < ctx.s.length) {
-    while (ctx.p < ctx.s.length && ((c = ctx.s.charCodeAt(ctx.p)) === 32 || c === 9 || !banNewLines && (c === 10 || c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10)))
-      ctx.p++;
-    if (banComments || c !== 35)
-      break;
-    skipComment(ctx);
-  }
-}
-
-// node_modules/smol-toml/dist/struct.js
-function parseKey(ctx, end = 61) {
-  let startPtr;
-  let state = 0;
-  let parsed = [];
-  let sliceStart;
-  let c = ctx.s.charCodeAt(startPtr = ctx.p);
-  do {
-    if (c === end) {
-      if (!state)
-        TomlError.x("unexpected end of key", ctx);
-      if (state === 1)
-        parsed.push(ctx.s.slice(sliceStart, ctx.p));
-      return ctx.p++, parsed;
-    } else if (c === 46) {
-      if (!state)
-        TomlError.x("illegal empty bare key", ctx);
-      if (state === 1)
-        parsed.push(ctx.s.slice(sliceStart, ctx.p));
-      state = 0;
-    } else if (!state && (c === 34 || c === 39)) {
-      if (c === ctx.s.charCodeAt(ctx.p + 1) && c === ctx.s.charCodeAt(ctx.p + 2))
-        TomlError.x("illegal quoted key: multiline strings are not allowed", ctx);
-      parsed.push(parseString(ctx));
-      state = 2;
-      ctx.p--;
-    } else if (c === 32 || c === 9) {
-      if (state === 1) {
-        parsed.push(ctx.s.slice(sliceStart, ctx.p));
-        state = 2;
-      }
-    } else if (state === 2 || c < 48 && c !== 45 || c > 57 && c < 65 || c > 90 && c < 97 && c !== 95 || c > 122) {
-      TomlError.x("illegal character in key", ctx);
-    } else if (!state) {
-      state = 1;
-      sliceStart = ctx.p;
-    }
-  } while (c = ctx.s.charCodeAt(++ctx.p));
-  TomlError.x("incomplete key-value: cannot find end of key", ctx, startPtr);
-}
-function parseInlineTable(ctx) {
-  let startPtr = ctx.p++;
-  let res = /* @__PURE__ */ Object.create(null);
-  let seen = /* @__PURE__ */ new Set();
-  let c;
-  while (ctx.p < ctx.s.length) {
-    skipVoid(ctx);
-    if ((c = ctx.s.charCodeAt(ctx.p)) === 125) {
-      ctx.p++;
-      return res;
-    }
-    let k;
-    let t = res;
-    let hasOwn = false;
-    let errPtr = ctx.p;
-    let key = parseKey(ctx);
-    for (let i = 0; i < key.length; i++) {
-      if (i)
-        t = hasOwn ? t[k] : t[k] = /* @__PURE__ */ Object.create(null);
-      k = key[i];
-      if ((hasOwn = Object.hasOwn(t, k)) && (typeof t[k] !== "object" || seen.has(t[k]))) {
-        TomlError.x("trying to redefine an already defined value", ctx, errPtr);
-      }
-      let unsafe = k === "__proto__";
-      if (ctx.uk && (unsafe || k === "constructor")) {
-        t = ctx.uk !== 1 && TomlError.x("document contains an unsafe property", ctx, errPtr);
-        break;
-      }
-      if (!hasOwn && unsafe) {
-        Object.defineProperty(t, k, { enumerable: true, configurable: true, writable: true });
-      }
-    }
-    if (hasOwn) {
-      TomlError.x("trying to redefine an already defined value", ctx, errPtr);
-    }
-    skipVoid(ctx, true, true);
-    let value = extractValue(
-      ctx,
-      125
-      /* } */
-    );
-    if (t && typeof (t[k] = value) === "object")
-      seen.add(value);
-    skipVoid(ctx);
-    if ((c = ctx.s.charCodeAt(ctx.p++)) === 125) {
-      return res;
-    }
-    if (c !== 44)
-      TomlError.x("expected comma or end of structure", ctx, ctx.p - 1);
-  }
-  TomlError.x("unfinished table", ctx, startPtr);
-}
-function parseArray(ctx) {
-  let startPtr = ctx.p++;
-  let res = [];
-  let c;
-  while (ctx.p < ctx.s.length) {
-    skipVoid(ctx);
-    if ((c = ctx.s.charCodeAt(ctx.p)) === 93) {
-      ctx.p++;
-      return res;
-    }
-    res.push(extractValue(
-      ctx,
-      93
-      /* ] */
-    ));
-    skipVoid(ctx);
-    if ((c = ctx.s.charCodeAt(ctx.p++)) === 93) {
-      return res;
-    }
-    if (c !== 44)
-      TomlError.x("expected comma or end of structure", ctx, ctx.p - 1);
-  }
-  TomlError.x("unfinished array", ctx, startPtr);
-}
-
-// node_modules/smol-toml/dist/parse.js
-function peekTable(ctx, key, table, meta, type) {
-  let t = table;
-  let m = meta;
-  let k;
-  let hasOwn = false;
-  let state;
-  for (let i = 0; i < key.length; i++) {
-    if (i) {
-      t = hasOwn ? t[k] : t[k] = /* @__PURE__ */ Object.create(null);
-      m = (state = m[k]).c;
-      if (type === 0 && (state.t === 1 || state.t === 2)) {
-        return null;
-      }
-      if (state.t === 2) {
-        let l = t.length - 1;
-        t = t[l];
-        m = m[l].c;
-      }
-    }
-    k = key[i];
-    if ((hasOwn = Object.hasOwn(t, k)) && m[k]?.t === 0 && m[k]?.d) {
-      return null;
-    }
-    if (!hasOwn) {
-      let unsafe = k === "__proto__";
-      if (ctx.uk && (unsafe || k === "constructor"))
-        return false;
-      if (unsafe) {
-        Object.defineProperty(t, k, { enumerable: true, configurable: true, writable: true });
-        Object.defineProperty(m, k, { enumerable: true, configurable: true, writable: true });
-      }
-      m[k] = {
-        t: i < key.length - 1 && type === 2 ? 3 : type,
-        d: false,
-        i: 0,
-        c: /* @__PURE__ */ Object.create(null)
-      };
-    }
-  }
-  state = m[k];
-  if (state.t !== type && !(type === 1 && state.t === 3)) {
-    return null;
-  }
-  if (type === 2) {
-    if (!state.d) {
-      state.d = true;
-      t[k] = [];
-    }
-    t[k].push(t = /* @__PURE__ */ Object.create(null));
-    state.c[state.i++] = state = { t: 1, d: false, i: 0, c: /* @__PURE__ */ Object.create(null) };
-  }
-  if (state.d) {
-    return null;
-  }
-  state.d = true;
-  if (type === 1) {
-    t = hasOwn ? t[k] : t[k] = /* @__PURE__ */ Object.create(null);
-  } else if (type === 0 && hasOwn) {
-    return null;
-  }
-  return [k, t, state.c];
-}
-function validateTablePeek(ctx, peek, ptr) {
-  if (peek === null || ctx.uk === 2)
-    TomlError.x(peek === null ? "trying to redefine an already defined table or value" : "document contains an unsafe property", ctx, ptr);
-}
-function parse(toml, options = {}) {
-  let ctx = {
-    s: toml,
-    p: 0,
-    d: options.maxDepth ?? 1e3,
-    bi: options.integersAsBigInt ?? false,
-    ld: options.useLegacyDate ?? true,
-    uk: options.unsafeKeyBehaviour === "throw" ? 2 : options.unsafeKeyBehaviour === "drop" ? 1 : 0
-  };
-  let res = /* @__PURE__ */ Object.create(null);
-  let meta = /* @__PURE__ */ Object.create(null);
-  let tmp;
-  let skipping = false;
-  let tbl = res;
-  let m = meta;
-  if (toml.charCodeAt(0) === 65279)
-    ctx.p++;
-  skipVoid(ctx);
-  while (ctx.p < toml.length) {
-    if (toml.charCodeAt(ctx.p) === 91) {
-      let isTableArray = toml.charCodeAt(++ctx.p) === 91;
-      tmp = ctx.p += +isTableArray;
-      skipping = false;
-      let k = parseKey(
-        ctx,
-        93
-        /* ] */
-      );
-      if (isTableArray) {
-        if (toml.charCodeAt(ctx.p) !== 93) {
-          TomlError.x("expected end of table array declaration", ctx);
-        }
-        ctx.p++;
-      }
-      let p = peekTable(
-        ctx,
-        k,
-        res,
-        meta,
-        isTableArray ? 2 : 1
-        /* Type.EXPLICIT */
-      );
-      if (!p) {
-        validateTablePeek(ctx, p, tmp);
-        skipping = true;
-      } else {
-        m = p[2];
-        tbl = p[1];
-      }
-    } else {
-      tmp = ctx.p;
-      let k = parseKey(ctx);
-      let p = peekTable(
-        ctx,
-        k,
-        tbl,
-        m,
-        0
-        /* Type.DOTTED */
-      );
-      if (!p && !skipping)
-        validateTablePeek(ctx, p, tmp);
-      skipVoid(ctx, true, true);
-      let v = extractValue(ctx, void 0);
-      if (p && !skipping)
-        p[1][p[0]] = v;
-    }
-    skipVoid(ctx, true);
-    if (ctx.p < toml.length && (tmp = toml.charCodeAt(ctx.p)) !== 10 && (tmp !== 13 || toml.charCodeAt(ctx.p + 1) !== 10)) {
-      TomlError.x("each key-value declaration must be followed by an end-of-line", ctx);
-    }
-    skipVoid(ctx);
-  }
-  return res;
-}
-
-// node_modules/smol-toml/dist/stringify.js
-var HAS_WELLFORMED = !!"".isWellFormed;
-
-// src/native-pets.ts
-var BUILTIN_PET_CATALOG = [
-  { id: "codex", displayName: "Codex", source: "builtin" },
-  { id: "dewey", displayName: "Dewey", source: "builtin" },
-  { id: "fireball", displayName: "Fireball", source: "builtin" },
-  { id: "hoots", displayName: "Hoots", source: "builtin" },
-  { id: "rocky", displayName: "Rocky", source: "builtin" },
-  { id: "seedy", displayName: "Seedy", source: "builtin" },
-  { id: "stacky", displayName: "Stacky", source: "builtin" },
-  { id: "bsod", displayName: "BSOD", source: "builtin" },
-  { id: "null-signal", displayName: "Null Signal", source: "builtin" }
-];
-function isRecord(value) {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-function selection(value, source) {
+// src/schedule.ts
+var DAILY_TIMES = ["07:00", "12:00", "16:00", "21:00"];
+function dueStory(state, now = Date.now(), timezone = state.schedule?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(now);
+  const get = (key) => parts.find((part) => part.type === key).value;
+  const date = `${get("year")}-${get("month")}-${get("day")}`;
+  const time = `${get("hour")}:${get("minute")}`;
+  const times = state.schedule?.times ?? DAILY_TIMES;
+  const slot = times.filter((slot2) => slot2 <= time).at(-1);
+  const triggerId = slot ? `daily:${date}:${slot}:${timezone.replace(/\//g, ".")}` : null;
   return {
-    selectedPetId: value,
-    genpetSelected: source === "unavailable" ? null : value === "custom:genpet-companion",
-    source,
-    liveVerified: false
+    timezone,
+    times,
+    triggerId,
+    due: !!triggerId && !state.stories.some((story) => story.triggerId === triggerId),
+    pending: state.pending?.id ?? null
   };
 }
-async function optionalText(file) {
-  try {
-    return await readFile6(file, "utf8");
-  } catch (error) {
-    if (error.code === "ENOENT") return void 0;
-    throw error;
-  }
-}
-async function readSelection(home, errors) {
-  let config;
-  try {
-    config = await optionalText(path9.join(home, "config.toml"));
-  } catch {
-    errors.push("config.toml: \u65E0\u6CD5\u8BFB\u53D6\u9009\u62E9\u8BBE\u7F6E");
-    return selection(null, "unavailable");
-  }
-  if (config !== void 0) {
-    let parsed;
-    try {
-      parsed = parse(config, { integersAsBigInt: true });
-    } catch {
-      errors.push("config.toml: TOML \u683C\u5F0F\u65E0\u6548\uFF0C\u65E0\u6CD5\u786E\u5B9A\u9009\u62E9\u8BBE\u7F6E");
-      return selection(null, "unavailable");
-    }
-    const desktop = parsed.desktop;
-    if (desktop !== void 0 && !isRecord(desktop)) {
-      errors.push("config.toml: desktop \u5FC5\u987B\u662F\u8868");
-      return selection(null, "unavailable");
-    }
-    if (isRecord(desktop) && Object.hasOwn(desktop, "selected-avatar-id")) {
-      const value = desktop["selected-avatar-id"];
-      if (typeof value !== "string") {
-        errors.push("config.toml: selected-avatar-id \u5FC5\u987B\u662F\u5B57\u7B26\u4E32");
-        return selection(null, "unavailable");
-      }
-      return selection(value, "config");
-    }
-  }
-  let legacy;
-  try {
-    legacy = await optionalText(path9.join(home, ".codex-global-state.json"));
-  } catch {
-    errors.push(".codex-global-state.json: \u65E0\u6CD5\u8BFB\u53D6\u65E7\u9009\u62E9\u8BBE\u7F6E");
-    return selection(null, "unavailable");
-  }
-  if (legacy !== void 0) {
-    try {
-      const state = JSON.parse(legacy);
-      if (!isRecord(state)) throw new Error("Invalid state");
-      const atoms = state["electron-persisted-atom-state"];
-      if (atoms !== void 0 && !isRecord(atoms)) throw new Error("Invalid atoms");
-      if (isRecord(atoms) && Object.hasOwn(atoms, "selected-avatar-id")) {
-        const value = atoms["selected-avatar-id"];
-        if (value !== null && typeof value !== "string") throw new Error("Invalid selection");
-        return selection(value, "legacy");
-      }
-    } catch {
-      errors.push(".codex-global-state.json: \u65E7\u9009\u62E9\u8BBE\u7F6E\u683C\u5F0F\u65E0\u6548");
-      return selection(null, "unavailable");
-    }
-  }
-  return selection("codex", "default");
-}
-async function localPets(home, errors) {
-  const pets = /* @__PURE__ */ new Map();
-  for (const [directory, filename] of [
-    ["avatars", "avatar.json"],
-    ["pets", "pet.json"]
-  ]) {
-    let entries;
-    try {
-      entries = await readdir(path9.join(home, directory), { withFileTypes: true });
-    } catch (error) {
-      if (error.code !== "ENOENT") errors.push(`${directory}: \u65E0\u6CD5\u8BFB\u53D6\u5BA0\u7269\u76EE\u5F55`);
-      continue;
-    }
-    for (const entry of entries) {
-      if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
-      const label = `${directory}/${entry.name}/${filename}`;
-      try {
-        const text2 = await optionalText(path9.join(home, directory, entry.name, filename));
-        if (text2 === void 0) continue;
-        const manifest = JSON.parse(text2);
-        if (!isRecord(manifest)) throw new Error("Invalid manifest");
-        for (const key of ["id", "displayName"]) {
-          if (manifest[key] !== void 0 && (typeof manifest[key] !== "string" || !manifest[key].trim()))
-            throw new Error("Invalid name");
-        }
-        const id = `custom:${entry.name}`;
-        const displayName = (manifest.displayName ?? manifest.id ?? entry.name).trim();
-        pets.set(id, { id, displayName, source: "local" });
-      } catch {
-        errors.push(`${label}: \u65E0\u6CD5\u8BFB\u53D6\u6709\u6548\u5BA0\u7269\u6E05\u5355`);
-      }
-    }
-  }
-  return [...pets.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
-}
-async function getNativePetCatalog(home = process.env.CODEX_HOME || path9.join(homedir5(), ".codex")) {
-  const errors = [];
-  const selected = await readSelection(home, errors);
-  const local = await localPets(home, errors);
-  return {
-    pets: [...BUILTIN_PET_CATALOG.map((pet) => ({ ...pet })), ...local],
-    selection: selected,
-    activation: { immediate: false, reason: "\u5F53\u524D\u4E3A\u78C1\u76D8\u5FEB\u7167\uFF1B\u5373\u65F6\u5207\u6362\u9700\u8981\u53EF\u7528\u7684 Codex app-tools \u4F1A\u8BDD\u901A\u9053\u3002" },
-    ...errors.length ? { errors } : {}
-  };
-}
-
-// src/debugger.ts
-import { spawn } from "node:child_process";
-import path10 from "node:path";
-async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageHost() === "dots" ? 47832 : 47831))) {
-  if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("Invalid debugger port");
-  const url = `http://127.0.0.1:${port}`, root = new Store(void 0, packageHost()).root;
-  async function inspect() {
-    let response;
-    try {
-      response = await fetch(url + "/api/health", { signal: AbortSignal.timeout(500) });
-    } catch {
-      return false;
-    }
-    const value = await response.json().catch(() => null);
-    if (value?.service !== "genpet-debugger" || value.root !== root)
-      throw new Error("Debugger port belongs to another service or data directory");
-    return true;
-  }
-  if (await inspect()) return { url, reused: true };
-  const child = spawn(process.execPath, [path10.join(import.meta.dirname, "debugger-server.js")], {
-    detached: true,
-    stdio: "ignore",
-    env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: path10.resolve(dataRoot()) }
-  });
-  let failure;
-  child.once("error", (error) => {
-    failure = error;
-  });
-  child.unref();
-  for (let i = 0; i < 50; i++) {
-    if (failure) throw failure;
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    if (await inspect()) return { url, reused: false };
-    if (child.exitCode !== null) throw new Error("Debugger failed to start");
-  }
-  throw new Error("Debugger startup timed out");
-}
-
-// src/naming.ts
-function namingDue(state) {
-  return !state.pending && !!state.pet && state.pet.stage !== "egg" && state.pet.naming?.status === "unasked";
-}
-function target(state, petId) {
-  identifier(petId, "petId");
-  if (!state.pet || state.pet.id !== petId) throw new Error("Naming reply belongs to another or missing pet");
-  if (state.pending) throw new Error("Finish the unfinished story before naming this pet");
-  return state.pet;
-}
-async function markNameAsked(store2, petId) {
-  return store2.transaction((state) => {
-    const pet = target(state, petId);
-    if (!namingDue(state)) return { petId, asked: false, status: pet.naming?.status ?? "named" };
-    pet.naming = { status: "asked", askedAt: Date.now() };
-    return { petId, asked: true, status: pet.naming.status };
-  });
-}
-async function namePet(store2, petId, userName) {
-  const name = text(userName, "user supplied name");
-  if (name.length > 100 || /[\u0000-\u001f\u007f]/.test(name))
-    throw new Error("Name must be one line of at most 100 characters");
-  return store2.transaction((state) => {
-    const pet = target(state, petId);
-    if (pet.name === name && pet.naming?.status === "named") return pet;
-    pet.name = name;
-    pet.naming = {
-      status: "named",
-      namedAt: Date.now(),
-      ...pet.naming?.askedAt ? { askedAt: pet.naming.askedAt } : {}
-    };
-    pet.revision++;
-    return pet;
-  });
+async function setSchedule(store2, timezone, reference) {
+  const zone = text(timezone, "timezone");
+  new Intl.DateTimeFormat("en", { timeZone: zone });
+  const schedule = { timezone: zone, reference: text(reference, "schedule reference"), times: DAILY_TIMES };
+  return store2.transaction((state) => state.schedule = schedule);
 }
 
 // src/cli.ts
-var [command, ...args] = process.argv.slice(2);
-var store = new Store(void 0, packageHost());
-var jsonFile = async (file) => {
-  if (!path11.isAbsolute(file ?? "")) throw new Error("JSON input requires an absolute file");
-  return JSON.parse(await readFile7(file, "utf8"));
-};
-try {
-  let output;
-  switch (command) {
-    case "status": {
-      const state = await store.peek(), legacyFile = !state.pet ? await store.legacyCandidate() : null;
-      output = {
+async function jsonFile(file) {
+  if (!path10.isAbsolute(file ?? "")) throw new Error("JSON input requires an absolute file");
+  return JSON.parse(await readFile8(file, "utf8"));
+}
+var shared = {
+  status: {
+    usage: "status",
+    run: async (_, store2) => {
+      const state = await store2.peek();
+      const legacyFile = state.pet ? null : await findLegacyRecord(store2);
+      return {
         ...state,
         namingDue: namingDue(state),
-        dataDirectory: store.root,
+        dataDirectory: store2.root,
         ...legacyFile ? { legacyFile } : {}
       };
-      break;
     }
-    case "begin-story":
-      output = await beginStory(
-        store,
-        args[0] || `manual:${randomUUID8()}`,
-        args[1] || "story",
-        args[2]
-      );
-      break;
-    case "plan-story":
-      output = await planStory(store, args[0], await jsonFile(args[1]));
-      break;
-    case "finish-story":
-      output = await finishStory(store, args[0]);
-      break;
-    case "name-pet":
-      output = await namePet(store, args[0], args[1]);
-      break;
-    case "name-asked":
-      output = await markNameAsked(store, args[0]);
-      break;
-    case "cancel-story":
-      output = await store.transaction((state) => {
-        const pending = pendingFor(state, args[0]);
-        if (pending.mode === "initialization" && pending.plan)
-          throw new Error("Initialization genes are saved; resume it or explicitly reset the pet");
-        state.pending = null;
-        return { cancelled: pending.id };
-      });
-      break;
-    case "art-request":
-      output = artRequest(await store.peek());
-      break;
-    case "accept-art":
-      output = await acceptArt(store, {
-        requestId: args[0],
-        file: args[1],
-        kind: args[2],
-        provenance: args[3],
-        description: args[4]
-      });
-      break;
-    case "host-request":
-      output = hostRequest(await store.peek());
-      break;
-    case "host-result":
-      output = await recordHostResult(store, args[0], await jsonFile(args[1]));
-      break;
-    case "bind-avatar":
-      output = await bindAvatar(store, args[0]);
-      break;
-    case "publish":
-      if (store.host !== "desktop")
-        throw new Error("Dots: use host-request, update the Avatar with Dots tools, then host-result");
-      output = await installNative(store);
-      break;
-    case "prompt":
-      output = { prompt: readPrompt(args[0]) };
-      break;
-    case "unit-request":
-      output = unitRequest(args[0], await jsonFile(args[1]));
-      break;
-    case "verify-unit":
-      output = { unit: args[0], contractValid: true, ...validateUnitResult(args[0], await jsonFile(args[1])) };
-      break;
-    case "record-step":
-      output = await recordStep(store, args[0], args[1], await jsonFile(args[2]));
-      break;
-    case "due":
-      output = dueStory(await store.peek(), Date.now(), args[0]);
-      break;
-    case "schedule": {
-      const timezone = text(args[0], "timezone"), reference = text(args[1], "schedule reference");
-      new Intl.DateTimeFormat("en", { timeZone: timezone });
-      output = await store.transaction((state) => state.schedule = { timezone, reference, times: DAILY_TIMES });
-      break;
-    }
-    case "story-output": {
-      const state = await store.peek(), story = args[0] ? state.stories.find((story2) => story2.id === args[0]) : state.stories.at(-1);
-      if (!story) throw new Error("No completed story");
-      output = {
-        text: story.text,
-        media: state.art.filter((art) => story.mediaIds.includes(art.id)),
-        appearance: state.art.find((art) => art.id === story.appearanceId),
-        naming: { due: namingDue(state), petId: state.pet?.id, status: state.pet?.naming?.status ?? "named" },
-        prompt: readPrompt("output")
-      };
-      break;
-    }
-    case "migrate-legacy":
-      output = await migrateLegacy(store, args[0], await jsonFile(args[1]));
-      break;
-    case "reset":
-      output = await resetPet(store, args[0] || randomUUID8());
-      break;
-    case "debugger":
-      output = await launchDebugger();
-      break;
-    case "switch-pet": {
-      if (store.host !== "desktop") throw new Error("switch-pet requires the desktop package");
-      const usage = "Usage: switch-pet [PET_ID|--current|--list|--help]";
-      if (args.length > 1) throw new Error(usage);
-      const target2 = args[0] ?? "--current";
-      if (target2 === "--help") {
-        output = { usage, examples: ["switch-pet --list", "switch-pet --current", "switch-pet dewey"] };
-        break;
-      }
-      if (target2 === "--current") {
-        const current = await readNativePetLive();
-        if (!current.available) throw new Error(current.reason);
-        output = current;
-        break;
-      }
-      if (target2.startsWith("-") && target2 !== "--list") throw new Error(usage);
-      const catalog = await getNativePetCatalog();
-      if (target2 === "--list") {
-        output = { pets: catalog.pets, ...catalog.errors ? { errors: catalog.errors } : {} };
-        break;
-      }
-      if (!catalog.pets.some((pet) => pet.id === target2))
-        throw new Error(`Unknown pet ID: ${target2}. Use switch-pet --list.`);
-      output = await selectNativePetLive(target2);
-      break;
-    }
-    default:
-      throw new Error(
-        "Commands: status, begin-story [TRIGGER_ID] [initialization|story|grow], plan-story OPERATION_ID PLAN_JSON, art-request, accept-art REQUEST_ID FILE portrait|atlas|avatar|story|artifact PROVENANCE [DESCRIPTION], publish (desktop), host-request, host-result OPERATION_ID RESULT_JSON, bind-avatar AVATAR_ID, finish-story OPERATION_ID, story-output [STORY_ID], name-pet PET_ID USER_NAME, name-asked PET_ID, due [TIMEZONE], schedule TIMEZONE REFERENCE, prompt MODULE, unit-request UNIT INPUT_JSON, verify-unit UNIT RESULT_JSON, record-step OPERATION_ID UNIT RESULT_JSON, migrate-legacy V1_FILE DESIGN_JSON, cancel-story OPERATION_ID, reset [OPERATION_ID], debugger, switch-pet [PET_ID|--current|--list|--help]"
-      );
-  }
-  console.log(JSON.stringify(output, null, 2));
+  },
+  // Story lifecycle
+  "begin-story": {
+    usage: "begin-story [TRIGGER_ID] [initialization|story|grow]",
+    run: ([trigger, mode, name2], store2) => beginStory(store2, trigger || `manual:${randomUUID9()}`, mode || "story", name2)
+  },
+  "plan-story": {
+    usage: "plan-story OPERATION_ID PLAN_JSON",
+    run: async ([id, file], store2) => planStory(store2, id, await jsonFile(file))
+  },
+  "finish-story": { usage: "finish-story OPERATION_ID", run: ([id], store2) => finishStory(store2, id) },
+  "cancel-story": { usage: "cancel-story OPERATION_ID", run: ([id], store2) => cancelStory(store2, id) },
+  "story-output": { usage: "story-output [STORY_ID]", run: async ([id], store2) => storyOutput(await store2.peek(), id) },
+  reset: { usage: "reset [OPERATION_ID]", run: ([id], store2) => resetPet(store2, id || randomUUID9()) },
+  // Artwork and host updates
+  "art-request": { usage: "art-request", run: async (_, store2) => artRequest(await store2.peek()) },
+  "accept-art": {
+    usage: "accept-art REQUEST_ID FILE portrait|atlas|avatar|story|artifact PROVENANCE [DESCRIPTION]",
+    run: ([requestId2, file, kind, provenance, description], store2) => acceptArt(store2, { requestId: requestId2, file, kind, provenance, description })
+  },
+  "host-result": {
+    usage: "host-result OPERATION_ID RESULT_JSON",
+    run: async ([id, file], store2) => recordHostResult(store2, id, await jsonFile(file))
+  },
+  // Naming
+  "name-pet": { usage: "name-pet PET_ID USER_NAME", run: ([id, name2], store2) => namePet(store2, id, name2) },
+  "name-asked": { usage: "name-asked PET_ID", run: ([id], store2) => markNameAsked(store2, id) },
+  // Generation units
+  prompt: { usage: "prompt MODULE", run: ([name2]) => ({ prompt: readPrompt(name2) }) },
+  "unit-request": {
+    usage: "unit-request UNIT INPUT_JSON",
+    run: async ([unit, file]) => unitRequest(unit, await jsonFile(file))
+  },
+  "verify-unit": {
+    usage: "verify-unit UNIT RESULT_JSON",
+    run: async ([unit, file]) => ({ unit, contractValid: true, ...validateUnitResult(unit, await jsonFile(file)) })
+  },
+  "record-step": {
+    usage: "record-step OPERATION_ID UNIT RESULT_JSON",
+    run: async ([id, unit, file], store2) => recordStep(store2, id, unit, await jsonFile(file))
+  },
+  // Scheduling
+  due: { usage: "due [TIMEZONE]", run: async ([zone], store2) => dueStory(await store2.peek(), Date.now(), zone) },
+  schedule: {
+    usage: "schedule TIMEZONE REFERENCE",
+    run: ([zone, reference], store2) => setSchedule(store2, zone, reference)
+  },
+  // Maintenance
+  "migrate-legacy": {
+    usage: "migrate-legacy V1_FILE DESIGN_JSON",
+    run: async ([file, design], store2) => migrateLegacy(store2, file, await jsonFile(design))
+  },
+  debugger: { usage: "debugger", run: () => launchDebugger() }
+};
+var store = new Store(void 0, packageHost());
+var commands = { ...shared, ...hostFor(store.host).commands };
+var [name, ...args] = process.argv.slice(2);
+try {
+  const command = commands[name];
+  if (!command)
+    throw new Error(
+      `Commands:
+${Object.values(commands).map((command2) => `  ${command2.usage}`).join("\n")}`
+    );
+  console.log(JSON.stringify(await command.run(args, store), null, 2));
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;
 }
-/*! Bundled license information:
-
-smol-toml/dist/error.js:
-smol-toml/dist/primitive.js:
-smol-toml/dist/date.js:
-smol-toml/dist/extract.js:
-smol-toml/dist/util.js:
-smol-toml/dist/struct.js:
-smol-toml/dist/parse.js:
-smol-toml/dist/stringify.js:
-smol-toml/dist/index.js:
-  (*!
-   * Copyright (c) Squirrel Chat et al., All rights reserved.
-   * SPDX-License-Identifier: BSD-3-Clause
-   *
-   * Redistribution and use in source and binary forms, with or without
-   * modification, are permitted provided that the following conditions are met:
-   *
-   * 1. Redistributions of source code must retain the above copyright notice, this
-   *    list of conditions and the following disclaimer.
-   * 2. Redistributions in binary form must reproduce the above copyright notice,
-   *    this list of conditions and the following disclaimer in the
-   *    documentation and/or other materials provided with the distribution.
-   * 3. Neither the name of the copyright holder nor the names of its contributors
-   *    may be used to endorse or promote products derived from this software without
-   *    specific prior written permission.
-   *
-   * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-   * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-   * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-   * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-   * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-   * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-   *)
-*/

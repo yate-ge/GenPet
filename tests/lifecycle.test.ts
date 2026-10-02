@@ -5,9 +5,11 @@ import { PNG } from 'pngjs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Store } from '../src/store.js';
-import { beginStory, planStory, finishStory, recordHostResult, dueStory, resetPet } from '../src/story.js';
+import { beginStory, planStory, finishStory, resetPet } from '../src/lifecycle.js';
+import { recordHostResult } from '../src/hosts/result.js';
+import { dueStory } from '../src/schedule.js';
 import { artRequest, acceptArt } from '../src/art.js';
-import { bindAvatar } from '../src/hosts.js';
+import { bindAvatar } from '../src/hosts/dots.js';
 import { initialPlan, initialization, image, hostDone } from './fixtures.js';
 test('identity is persisted once, reads do not age it, and competing triggers cannot create another pet', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-story-'));

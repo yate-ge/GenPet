@@ -4,7 +4,7 @@ import { mkdtemp, rm, readFile, writeFile, access } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Store } from '../src/store.js';
-import { beginStory } from '../src/story.js';
+import { beginStory } from '../src/lifecycle.js';
 test('two hosts have separate identities and read-only status creates no files', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-hosts-'));
   const desktop = new Store(root),

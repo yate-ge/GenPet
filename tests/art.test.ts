@@ -4,8 +4,9 @@ import { mkdtemp, readFile, rm, readdir, mkdir, writeFile } from 'node:fs/promis
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { Store } from '../src/store.js';
-import { artRequest, acceptArt, validateImage, installNative, exportNative } from '../src/art.js';
-import { finishStory, beginStory, planStory } from '../src/story.js';
+import { artRequest, acceptArt, validateImage } from '../src/art.js';
+import { exportNative, installNative } from '../src/hosts/desktop/publish.js';
+import { finishStory, beginStory, planStory } from '../src/lifecycle.js';
 import { initialization, image } from './fixtures.js';
 test('native atlas validation rejects wrong layout, blank cells and occupied unused cells', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-validate-'));

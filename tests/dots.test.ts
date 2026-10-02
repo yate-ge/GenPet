@@ -4,9 +4,11 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { Store } from '../src/store.js';
-import { artRequest, acceptArt, installNative } from '../src/art.js';
-import { bindAvatar, hostRequest } from '../src/hosts.js';
-import { finishStory, beginStory, planStory, recordHostResult } from '../src/story.js';
+import { artRequest, acceptArt } from '../src/art.js';
+import { installNative } from '../src/hosts/desktop/publish.js';
+import { bindAvatar, hostRequest } from '../src/hosts/dots.js';
+import { recordHostResult } from '../src/hosts/result.js';
+import { finishStory, beginStory, planStory } from '../src/lifecycle.js';
 import { initialization, image } from './fixtures.js';
 test('Dots hands the bound target to its own tools, records the result and supports reuse', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-dots-host-')),
