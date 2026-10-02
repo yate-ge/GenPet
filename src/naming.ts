@@ -32,12 +32,3 @@ export async function namePet(store: Store, petId: string, userName: string) {
     return pet;
   });
 }
-export async function deferName(store: Store, petId: string) {
-  return store.transaction(state => {
-    const pet = target(state, petId);
-    if (pet.stage === 'egg') throw new Error('The automatic naming invitation follows a completed hatch');
-    if (pet.naming?.status === 'named' || !pet.naming) throw new Error('This pet already has a saved name');
-    pet.naming = { ...pet.naming, status: 'deferred' };
-    return { petId, status: pet.naming.status };
-  });
-}

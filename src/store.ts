@@ -46,9 +46,9 @@ export async function atomicJson(file: string, value: unknown) {
 /** A separate namespace per host, even when both packages share an explicit root. */
 export class Store {
   readonly base: string; readonly root: string; readonly file: string;
-  constructor(root = dataRoot(), readonly demo = false, readonly host: Host = 'desktop') {
+  constructor(root = dataRoot(), readonly host: Host = 'desktop') {
     this.base = path.resolve(root);
-    this.root = path.resolve(this.base, host, ...(demo ? ['demo'] : []));
+    this.root = path.resolve(this.base, host);
     this.file = path.join(this.root, 'state.json');
   }
   now() { return Date.now(); }
@@ -59,15 +59,14 @@ export class Store {
       if (state.pet) {
         identifier(state.pet.id, 'petId'); validateStage('egg',state.pet.stage);
         if (state.pet.personality !== undefined && (typeof state.pet.personality !== 'string' || !state.pet.personality.trim())) throw new Error('Invalid personality');
-        if (state.pet.naming && !['unasked','asked','named','deferred'].includes(state.pet.naming.status)) throw new Error('Invalid naming status');
+        if ((state.pet.naming?.status as string) === 'deferred') state.pet.naming!.status = 'asked'; // 0.6.0 records
+        if (state.pet.naming && !['unasked','asked','named'].includes(state.pet.naming.status)) throw new Error('Invalid naming status');
       }
       return state;
     } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return fresh(this.host); throw error; }
   }
-  /** Read-only; elapsed time never evolves a pet. */
-  current() { return this.peek(); }
   async legacyCandidate(): Promise<string | null> {
-    if (this.host !== 'desktop' || this.demo) return null;
+    if (this.host !== 'desktop') return null;
     const file = path.join(this.base,'state.json');
     try { const old=JSON.parse(await readFile(file,'utf8')); return old.version===1&&old.pet?file:null; }
     catch(error) { if ((error as NodeJS.ErrnoException).code==='ENOENT') return null; throw error; }
@@ -88,7 +87,6 @@ export class Store {
     try {
       const state = await this.peek(); const result = await fn(state);
       await atomicJson(this.file, state);
-      if (state.pet) await atomicJson(path.join(this.root, 'pets', state.pet.id, 'record.json'), state);
       return result;
     } finally { await rm(lock, { recursive: true, force: true }); }
   }

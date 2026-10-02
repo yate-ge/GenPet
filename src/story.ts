@@ -113,7 +113,6 @@ export function validateHostResult(state: State, id: string, input: HostResult):
     ...(input.evidence ? { evidence: text(input.evidence, 'evidence') } : {}), ...(input.error ? { error: text(input.error, 'error') } : {}) };
 }
 export async function recordHostResult(store: Store, id: string, input: HostResult) {
-  if (store.demo) throw new Error('Demo records cannot update a host Avatar');
   return store.transaction(state => {
     const pending = pendingFor(state, id); if (!pending.plan?.appearance) throw new Error('No planned appearance update');
     if (!desiredAppearance(state)) throw new Error('Complete or select appearance artwork first');
@@ -131,11 +130,9 @@ export async function finishStory(store: Store, id: string) {
     if (plan.appearance) {
       if (!appearance) throw new Error('Appearance artwork is unfinished');
       await access(appearance.file);
-      if (!store.demo) {
-        const result = pending.hostResult;
-        if (!result?.updated || result.appearanceId !== appearance.id || result.error || (result.active !== false && !result.refreshRequested && result.displayStatus !== 'confirmed'))
-          throw new Error('Host update or active Avatar refresh is unfinished; resume it');
-      }
+      const result = pending.hostResult;
+      if (!result?.updated || result.appearanceId !== appearance.id || result.error || (result.active !== false && !result.refreshRequested && result.displayStatus !== 'confirmed'))
+        throw new Error('Host update or active Avatar refresh is unfinished; resume it');
     }
     const mediaIds = [...new Set([...(plan.mediaIds ?? []), ...state.art.filter(art => art.requestId === requestId(state) && ['story','artifact'].includes(art.kind)).map(art => art.id)])];
     for (const mediaId of mediaIds) await access(state.art.find(art => art.id === mediaId && art.petId === pet.id)!.file);
@@ -150,11 +147,12 @@ export async function finishStory(store: Store, id: string) {
     state.stories.push(story); state.pending = null; return story;
   });
 }
+export const DAILY_TIMES = ['07:00','12:00','16:00','21:00'];
 export function dueStory(state: State, now = Date.now(), timezone = state.schedule?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone) {
   const parts = new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).formatToParts(now);
   const get = (key: string) => parts.find(part => part.type === key)!.value;
   const date = `${get('year')}-${get('month')}-${get('day')}`, time = `${get('hour')}:${get('minute')}`;
-  const times = state.schedule?.times ?? ['07:00','12:00','16:00','21:00'], slot = times.filter(slot => slot <= time).at(-1);
+  const times = state.schedule?.times ?? DAILY_TIMES, slot = times.filter(slot => slot <= time).at(-1);
   const triggerId = slot ? `daily:${date}:${slot}:${timezone.replace(/\//g,'.')}` : null;
   return { timezone, times, triggerId, due: !!triggerId && !state.stories.some(story => story.triggerId === triggerId), pending: state.pending?.id ?? null };
 }

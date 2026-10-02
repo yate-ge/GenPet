@@ -1,6 +1,6 @@
 import { refreshViaIpc, type IpcRefreshEvidence } from './native-ipc.js';
 import { createHash } from 'node:crypto';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -63,13 +63,4 @@ export function isLiveNativeDestination(destination: string) {
   if (configured.startsWith('/var/folders/') || configured.includes('/tmp/') ||
       relativeToTemp === '' || (relativeToTemp !== '..' && !relativeToTemp.startsWith(`..${path.sep}`) && !path.isAbsolute(relativeToTemp))) return false;
   return belongs(resolved);
-}
-
-export async function listInstalledSprites(destination: string) {
-  try {
-    const names = await readdir(destination);
-    return names.filter((name) => name.startsWith('spritesheet'));
-  } catch {
-    return [];
-  }
 }

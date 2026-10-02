@@ -100,11 +100,6 @@ async function readSelection(home: string, errors: string[]): Promise<NativePetS
   return selection('codex', 'default');
 }
 
-/** A lightweight disk snapshot for refresh responses; errors produce an unknown selection. */
-export async function readNativePetSelection(home = process.env.CODEX_HOME || path.join(homedir(), '.codex')): Promise<NativePetSelection> {
-  return readSelection(home, []);
-}
-
 async function localPets(home: string, errors: string[]): Promise<NativePetEntry[]> {
   const pets = new Map<string, NativePetEntry>();
   for (const [directory, filename] of [['avatars', 'avatar.json'], ['pets', 'pet.json']]) {

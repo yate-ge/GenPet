@@ -1,6 +1,6 @@
 /** Both installed packages, outside repository dependencies and real Pet data. */
 import {execFileSync} from 'node:child_process';
-import {mkdtemp,rm,readFile,readdir,writeFile,mkdir} from 'node:fs/promises';
+import {mkdtemp,rm,readFile,readdir,writeFile,mkdir,copyFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -20,16 +20,18 @@ try{
  let destination;
  if(host==='dots'){
   call('bind-avatar','dots-smoke-avatar');
-  const script=path.join(temp,'adapter.mjs');await writeFile(script,"import {copyFile} from 'node:fs/promises';let input='';for await(const c of process.stdin)input+=c;const r=JSON.parse(input);await copyFile(r.file,process.argv[2]);console.log(JSON.stringify({petId:r.petId,operationId:r.operationId,appearanceId:r.appearanceId,avatarId:r.target.avatarId,updated:true,active:true,refreshRequested:true,displayStatus:'unconfirmed'}));");
-  call('configure-host',await file('adapter.json',{command:process.execPath,args:[script,path.join(temp,'host-avatar.webp')]}));
  }else{
   await mkdir(env.CODEX_HOME,{recursive:true});await writeFile(path.join(env.CODEX_HOME,'config.toml'),'[desktop]\nselected-avatar-id = "dewey"\n');
  }
  // Live selection is unavailable with host IPC disabled. Record only the known
  // inactive synthetic fixture; do not weaken runtime completion or claim display.
  const publishFixture=async()=>{
+  if(host==='dots'){
+   // Stand-in for the Dots Agent's own Avatar tools: host-request in, host-result out.
+   const r=call('host-request');await copyFile(r.file,path.join(temp,'host-avatar.webp'));
+   return call('host-result',r.operationId,await file('dots-host.json',{petId:r.petId,operationId:r.operationId,appearanceId:r.appearanceId,avatarId:r.target.avatarId,updated:true,active:true,refreshRequested:true,displayStatus:'unconfirmed'}));
+  }
   const result=call('publish');
-  if(host!=='desktop')return result;
   assert.equal(result.active,null);assert.equal(result.refreshRequested,false);
   assert.equal(result.displayStatus,'unconfirmed');
   const reported=call('host-result',result.operationId,await file('inactive-host.json',{
