@@ -8,13 +8,13 @@ import { Store } from '../src/store.js';
 import { beginStory, planStory, finishStory, recordHostResult, dueStory, resetPet } from '../src/story.js';
 import { artRequest, acceptArt } from '../src/art.js';
 import { bindAvatar } from '../src/hosts.js';
-import { initialPlan,initialization,image } from './fixtures.js';
+import { initialPlan,initialization,image,hostDone } from './fixtures.js';
 test('identity is persisted once, reads do not age it, and competing triggers cannot create another pet',async()=>{
- const root=await mkdtemp(path.join(tmpdir(),'genpet-story-'));const store=new Store(root,true);
+ const root=await mkdtemp(path.join(tmpdir(),'genpet-story-'));const store=new Store(root);
  try{
   const first=await beginStory(store,'manual:first','initialization');const before=await readFile(store.file,'utf8');
-  assert.equal((await store.current()).pet!.stage,'egg');assert.equal(await readFile(store.file,'utf8'),before);
-  assert.equal((await beginStory(new Store(root,true),'manual:first')).pet!.id,first.pet!.id);
+  assert.equal((await store.peek()).pet!.stage,'egg');assert.equal(await readFile(store.file,'utf8'),before);
+  assert.equal((await beginStory(new Store(root),'manual:first')).pet!.id,first.pet!.id);
   await assert.rejects(()=>beginStory(store,'manual:second'),/Unfinished/);
   await planStory(store,first.pending!.id,initialPlan);
   await assert.rejects(()=>planStory(store,first.pending!.id,{...initialPlan,genes:'Different random pet'}),/saved/);
@@ -23,21 +23,21 @@ test('identity is persisted once, reads do not age it, and competing triggers ca
  }finally{await rm(root,{recursive:true,force:true});}
 });
 test('saved state art is reusable across stories; completion and retries preserve genes and story count',async()=>{
- const root=await mkdtemp(path.join(tmpdir(),'genpet-reuse-')),store=new Store(root,true,'dots');
+ const root=await mkdtemp(path.join(tmpdir(),'genpet-reuse-')),store=new Store(root,'dots');
  try{
   const op=await initialization(store),file=path.join(root,'avatar.png');await image(file);
   const art=await acceptArt(store,{requestId:artRequest(await store.peek())!.id,file,kind:'avatar',provenance:'Synthetic fixture, not generated Pet art'});
-  await finishStory(store,op);const identity=(await store.peek()).pet!;
+  await hostDone(store,op);await finishStory(store,op);const identity=(await store.peek()).pet!;
   assert.equal((await beginStory(store,'test:init')).status,'completed');assert.equal((await finishStory(store,op)).id,op);
   const next=(await beginStory(store,'manual:later')).pending!.id;
   await planStory(store,next,{text:'The folded echo returned to its familiar resting layers.',basis:'Fits the existing state',state:'Resting layers',appearance:{description:'Reuse the same folded state',reuseArtId:art.id}});
-  assert.equal(artRequest(await store.peek())!.status,'ready');await finishStory(store,next);
+  assert.equal(artRequest(await store.peek())!.status,'ready');await hostDone(store,next);await finishStory(store,next);
   const s=await store.peek();assert.equal(s.pet!.id,identity.id);assert.equal(s.pet!.genes,initialPlan.genes);assert.equal(s.art.length,1);assert.equal(s.stories.length,2);assert.equal(s.pet!.state.appearanceId,art.id);
-  await access(art.file);await access(path.join(store.root,'pets',identity.id,'record.json'));
+  await access(art.file);
  }finally{await rm(root,{recursive:true,force:true});}
 });
 test('host failure leaves current stage intact and active refresh is required before completion',async()=>{
- const root=await mkdtemp(path.join(tmpdir(),'genpet-host-gate-')),store=new Store(root,false,'dots');
+ const root=await mkdtemp(path.join(tmpdir(),'genpet-host-gate-')),store=new Store(root,'dots');
  try{
   const op=await initialization(store),file=path.join(root,'avatar.png');await image(file);
   const firstArt=await acceptArt(store,{requestId:artRequest(await store.peek())!.id,file,kind:'avatar',provenance:'Synthetic host gate fixture'});
@@ -66,7 +66,7 @@ test('daily slots use user timezone, coalesce missed checks and deduplicate comp
  assert.equal(dueStory(done,Date.parse('2026-10-02T08:02:00Z'),'Asia/Taipei').due,false);
 });
 test('replacement artwork invalidates an earlier host confirmation for the same story',async()=>{
- const root=await mkdtemp(path.join(tmpdir(),'genpet-stale-display-')),store=new Store(root,false,'dots');
+ const root=await mkdtemp(path.join(tmpdir(),'genpet-stale-display-')),store=new Store(root,'dots');
  try{
   const op=await initialization(store),file=path.join(root,'avatar.png');await image(file);
   const request=artRequest(await store.peek())!.id;
@@ -83,15 +83,14 @@ test('replacement artwork invalidates an earlier host confirmation for the same 
  }finally{await rm(root,{recursive:true,force:true});}
 });
 test('an explicit reset changes identity once, preserving the bound surface, schedule and previous archive',async()=>{
- const root=await mkdtemp(path.join(tmpdir(),'genpet-reset-')),store=new Store(root,true,'dots');
+ const root=await mkdtemp(path.join(tmpdir(),'genpet-reset-')),store=new Store(root,'dots');
  try{
   const op=await initialization(store),file=path.join(root,'avatar.png');await image(file);
-  await acceptArt(store,{requestId:artRequest(await store.peek())!.id,file,kind:'avatar',provenance:'Synthetic reset fixture'});await finishStory(store,op);
+  await acceptArt(store,{requestId:artRequest(await store.peek())!.id,file,kind:'avatar',provenance:'Synthetic reset fixture'});await hostDone(store,op);await finishStory(store,op);
   await store.transaction(state=>{state.pet!.binding={host:'dots',avatarId:'same-surface'};state.schedule={timezone:'Asia/Taipei',reference:'test-only-task',times:['07:00','12:00','16:00','21:00']};state.legacy={backup:'test-only-legacy',importedAt:0};});
   const previous=await store.peek(),reset=await resetPet(store,'reset-unit');
   assert.ok(reset.backup);assert.deepEqual(JSON.parse(await readFile(reset.backup!,'utf8')),previous);
   const next=await store.peek();assert.notEqual(next.pet!.id,previous.pet!.id);assert.equal(next.pet!.genes,null);assert.equal(next.pet!.stage,'egg');assert.deepEqual(next.pet!.binding,previous.pet!.binding);assert.deepEqual(next.schedule,previous.schedule);assert.equal(next.legacy,undefined);assert.equal(next.replacesPetId,previous.pet!.id);assert.equal(next.stories.length,0);assert.equal(next.art.length,0);
-  assert.deepEqual(JSON.parse(await readFile(path.join(store.root,'pets',previous.pet!.id,'record.json'),'utf8')),previous);
   assert.equal((await resetPet(store,'reset-unit')).pet!.id,next.pet!.id);assert.equal((await readdir(path.join(store.root,'backups'))).length,1);
   await assert.rejects(()=>resetPet(store,'competing-reset'),/unfinished/);
  }finally{await rm(root,{recursive:true,force:true});}

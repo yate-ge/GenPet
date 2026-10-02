@@ -6,7 +6,7 @@ import { atomicJson, type Store } from './store.js';
 
 /** Explicit migration; old files remain intact, no time-derived growth or reroll. */
 export async function migrateLegacy(store: Store, file: string, design: {genes:string;place:string;connection:string}) {
-  if (store.host!=='desktop' || store.demo) throw new Error('Legacy migration is for desktop records');
+  if (store.host!=='desktop') throw new Error('Legacy migration is for desktop records');
   if (!path.isAbsolute(file)) throw new Error('Legacy file must be absolute');
   const legacy=JSON.parse(await readFile(file,'utf8'));
   if(legacy.version!==1 || !legacy.pet)throw new Error('No v1 pet to migrate');

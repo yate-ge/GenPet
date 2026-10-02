@@ -6,7 +6,7 @@ export interface Binding { host: Host; avatarId: string; destination?: string; }
 export interface Pet {
   id: string; name: string; adoptedAt: number; revision: number; genes: string | null;
   personality?: string;
-  naming?: { status: 'unasked' | 'asked' | 'named' | 'deferred'; askedAt?: number; namedAt?: number };
+  naming?: { status: 'unasked' | 'asked' | 'named'; askedAt?: number; namedAt?: number };
   acquisition?: { place: string; connection: string; storyId: string };
   stage: Stage;
   state: { description: string; appearanceId?: string; storyId?: string; updatedAt: number };
