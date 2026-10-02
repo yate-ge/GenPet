@@ -1,0 +1,6 @@
+interface:
+  display_name: "genpet-reset"
+  short_description: "明确请求新宠物时备份旧记录，建立新编号并沿用已绑定的宿主位置"
+  default_prompt: "使用 $genpet-reset 备份我的旧宠物，重新生成一个蛋并重新开始成长。"
+policy:
+  allow_implicit_invocation: false

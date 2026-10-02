@@ -1,0 +1,6 @@
+interface:
+  display_name: "genpet-grow"
+  short_description: "显式验证同一宠物的后续阶段，以基因延续形象并形成进化故事"
+  default_prompt: "使用 $genpet-grow 为我的宠物形成下一阶段的进化故事与形象。"
+policy:
+  allow_implicit_invocation: false
