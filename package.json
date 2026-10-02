@@ -12,7 +12,7 @@
     "build": "node scripts/clean-build.mjs && tsc",
     "build:plugin": "tsx scripts/build-plugin.ts",
     "test": "tsx --test tests/*.test.ts",
-    "check": "tsc --noEmit",
+    "check": "tsc --noEmit -p tsconfig.tests.json",
     "install:codex": "npm run build:plugin && npm run build && tsx scripts/install.ts",
     "pet:switch": "node plugins/genpet/dist/cli.js switch-pet",
     "package:plugin": "npm run build:plugin && npm run verify:version && tsx scripts/package.ts",
