@@ -1,198 +1,27 @@
 # GenPet
 
-English | [简体中文](README.zh-CN.md)
+A lightweight, story-driven pixel Pet framework inspired by GenFaceUI meta-design. Version 0.5.0 is the local development revision.
 
-**Delivery status:** Native installation requests automatic refresh through the existing desktop IPC channel, including first initialization and later growth. Ordinary startup needs no debug flags or restart. IPC delivery and displayed-image verification are reported separately. See [native refresh findings](plugins/genpet/docs/NATIVE_REFRESH.zh-CN.md).
+Two independent packages: **GenPet Dots** (`plugins/genpet-dots`, primary) and ordinary **GenPet** (`plugins/genpet`). Each keeps its own identity, genes, stories, assets and Avatar binding in its own host environment.
 
-An image-generated **native Codex Pet** that starts as an unknown egg, resolves its identity only after five hours of incubation, and grows with your day-to-day activity.
+`/genpet-start` adopts or resumes; `/genpet-story` forms a new story before choosing state and appearance. Explicit `/genpet-grow` and `/genpet-reset` remain available. Ordinary Pet also provides `/genpet-switch` and an opt-in `/genpet-debugger`.
 
-GenPet uses Codex's own Pet window and animation states. It adds a local life-cycle engine, automatic context ingestion, an image-generation workflow, and native sprite installation. GenFaceUI is a theoretical reference for bounded personalization; this is a new prototype, not a replication or a validated longitudinal intervention.
+Each Pet starts as a literal egg whose design is grounded in its adoption story, then hatches into a living creature that evolves with your recent work. Agent selects user context, judges work changes and decides artwork reuse. Chat output is only pet stories and actual visuals. The product rules are defined in one place: [`framework/prompts/meta.md`](framework/prompts/meta.md).
 
-## Status and scope
+Developers edit `framework/prompts/`, practical shared references and `src/`. Skills and manifests live in the two plugin directories. `npm run build:plugin` copies shared modules and builds self-contained runtimes; do not edit generated files. See [contributing](CONTRIBUTING.md), [product design](docs/PRODUCT_DESIGN.zh-CN.md), [local validation](docs/NEW_VERSION_VALIDATION.zh-CN.md) and the [docs index](docs/README.md).
 
-- Native-style pixel artwork, generated with Codex `imagegen` and assembled with the `hatch-pet` pipeline.
-- Egg-first development: a plain shell with faint clues, no preselected creature; birth identity is resolved once from incubation evidence and a seed.
-- Five-hour hatching and context windows, daily growth, offline catch-up, persistent post-hatch identity, reversible context records.
-- Automatic local activity labels from recent Codex user messages; no questionnaires or API key required for the built-in generation workflow.
-- A bundled Node.js CLI and a distributable Codex plugin.
-- No website, HTTP server, browser page or separate floating-window runtime in this plugin.
+Generation is split into [independently testable units](framework/references/generation-units.md). Each unit has fixed input names, observable results and review points. `unit-request` assembles a test request, `verify-unit` checks its data contract, and `record-step` keeps internal generation artifacts without advancing a Pet. Semantic and visual correctness are evaluated separately.
 
-Generation requires a Codex run. After installation, GenPet uses existing local IPC to invalidate the custom-avatar cache; no debug port is required. `automaticRefresh=true` with IPC means the refresh request was relayed, while `displayStatus=unconfirmed` means no displayed-image hash was measured. See [native refresh behavior](plugins/genpet/docs/NATIVE_REFRESH.zh-CN.md).
-
-## Develop
-
-Requires Node.js 22+ and Codex Desktop with custom Pet support.
-
-```sh
-npm ci
-npm run build
-npm test
-npm run build:plugin   # rebuild generated runtime files inside plugins/genpet/
-```
-
-User state is stored outside the repository in `~/.genpet/`; `GENPET_DATA_DIR` overrides it for tests. `CODEX_HOME` controls the source Codex directory and native Pet destination.
-
-## Install
-
-Requires Codex Desktop with custom Pets and plugin support, and Node.js 22+ on `PATH` (the plugin runs its bundled CLI with `node`). No clone, `npm install` or build is needed: this repository is itself a Codex plugin marketplace, and `plugins/genpet/` is the prebuilt plugin.
-
-### In Codex Desktop
-
-Sidebar **Plugins** → **Add plugin marketplace** → source `yate-ge/GenPet` (leave Git ref empty to follow `main`) → install **GenPet** from the list and make sure it is enabled. Step-by-step Chinese instructions are in [README.zh-CN.md](README.zh-CN.md#安装).
-
-### Ask a Codex Agent
-
-In any Codex task, send this short request. The linked playbook contains the operational and verification details, so users do not need to paste them into the prompt:
-
-> Install or update the GenPet Codex plugin from `yate-ge/GenPet`. Before starting, read and follow:
-> https://github.com/yate-ge/GenPet/blob/main/docs/AGENT_INSTALL.md
-
-### Install manually
+Published marketplace installation:
 
 ```sh
 codex plugin marketplace add yate-ge/GenPet
 codex plugin marketplace upgrade genpet
+codex plugin add genpet-dots@genpet
+# In the ordinary desktop environment instead:
 codex plugin add genpet@genpet
 ```
 
-Update to the latest `main` (new Codex tasks load the updated plugin):
+Refresh an existing marketplace even if the plugin is uninstalled. Verify installed versions and hashes against its refreshed source with `scripts/verify-install.mjs`. A new chat loads updated skills. Installation never adopts, resets or generates a Pet. An unpublished local revision is not available through the remote marketplace; use the local validation instructions for this revision.
 
-```sh
-codex plugin marketplace upgrade genpet
-```
-
-To pin a tagged release instead of following `main`, add the marketplace with `--ref <tag>`. Remove with `codex plugin remove genpet@genpet`; your Pet state in `~/.genpet/` is kept.
-
-If `codex` is not on `PATH`, the desktop app ships it at `/Applications/ChatGPT.app/Contents/Resources/codex` on macOS. `marketplace add` and `upgrade` run `git clone`/`fetch`, so a working `git` is required; on macOS, if `git` reports the Xcode license agreement, accept it with `sudo xcodebuild -license` or install the Command Line Tools.
-
-Then start a new Codex task and run **`/genpet-start`** (or `$genpet-start`). With no pet it reads local activity, adopts an egg, generates its shell and animation atlas, validates it, exports it to `~/.codex/pets/genpet-companion/`, and creates one hourly growth check; choose GenPet once in the native Pets settings. With an existing pet it never re-adopts: it only completes missing artwork, the native install and the schedule, so it is also the recovery command after reinstalling. `/genpet-start manual` skips the schedule. Later updates use the same custom Pet identity; `/genpet-reset` is the only way to start over. Installing the plugin does not install a launcher, LaunchAgent, polling monitor or recurring background process.
-
-## Architecture
-
-GenPet has three layers: **the Codex agent orchestrates and draws, the bundled Node CLI manages local state, and the native Codex Pet displays.** The plugin has no resident process; each CLI command exits after completing one operation.
-
-```mermaid
-flowchart LR
-  U["Your task / slash command<br>/genpet-start etc."] --> S
-  H["Codex scheduled task<br>hourly heartbeat"] --> S
-  subgraph CX["Codex Desktop"]
-    S["GenPet skills<br>skills/"]
-    IG["Built-in imagegen"]
-    HP["hatch-pet pipeline<br>vendor/hatch-pet (Python)"]
-    PW["Native Pet overlay"]
-  end
-  S -- "generate on request" --> IG --> HP
-  HP -- "validated atlas" --> C
-  S -- "CLI commands" --> C["GenPet CLI<br>dist/cli.js (Node)"]
-  C --> ST[("~/.genpet/<br>state.json · art/ · backups/")]
-  C -. "reads user messages only" .-> SE[("~/.codex/sessions")]
-  C -- "atomic write" --> PET[("~/.codex/pets/<br>genpet-companion")]
-  PET --> PW
-  C -. "existing IPC: request refresh" .-> PW
-```
-
-| Module | Source | Responsibility |
-|---|---|---|
-| Skills | `plugins/genpet/skills/genpet*/` | Tell the agent when to read state, generate art, run QA and install; `/genpet-start` starts or resumes, the other three are debug commands |
-| CLI | `src/cli.ts` | Gives skills one JSON-returning command interface to the modules below |
-| Life-cycle engine | `src/core.ts` | Hatching, five-hour context windows, daily growth and offline catch-up, anchored to the adoption time; resolves birth identity once |
-| Activity context | `src/context.ts` | Reads recent Codex user messages locally into build/research/create/learn/rest labels; stores no text |
-| Store | `src/store.ts` | Transactions, backups and idempotency records in `~/.genpet/state.json` |
-| Art and install | `src/art.ts`, `src/image.ts` | One request ID per design; PNG/WebP atlas validation; atomic sprite replacement in the native Pet |
-| Native refresh | `src/native-refresh.ts` | Requests a Pet reload over existing IPC |
-| Debug | `src/debug.ts` | reset/grow/state with backups and operationId idempotency |
-| Generation pipeline | `plugins/genpet/vendor/hatch-pet/` | Official Hatch Pet tools: per-row generation, frame extraction, 8×11 V2 atlas assembly and QA |
-
-**One growth update:** the heartbeat runs the GenPet skill → `status` catches up time and yields the current stage and prop → `art-request` returns the request for that design (`ready` if art already exists, so nothing is regenerated) → the agent generates and checks it with imagegen and hatch-pet → `accept-art` stores it in `~/.genpet/art/` → `install-native` atomically writes `genpet-companion` and tries to refresh the overlay. A failure at any step keeps the last approved art.
-
-**Distribution:** `.agents/plugins/marketplace.json` at the root makes the repository a Codex marketplace. `npm run build:plugin` bundles `src/` and all npm dependencies into `plugins/genpet/dist/` with esbuild; image decoding uses WebAssembly, so there are no native modules. Codex runs it straight from the GitHub checkout without npm.
-
-## Repository layout
-
-| Location | Purpose | In `plugins/genpet/`? |
-|---|---|---|
-| `.agents/plugins/marketplace.json` | Makes the repository a Codex marketplace named `genpet` | — |
-| `plugins/genpet/` | Canonical, committed plugin package that users install; its static files are edited here | — |
-| `src/` | Runtime source | Bundled into `dist/cli.js` and `dist/debugger-server.js` with all npm dependencies |
-| `tests/`, `.github/` | Tests and CI | No |
-| `scripts/` | Repository build, installation and verification tools | No |
-| `assets/` | Generated examples and isolated test fixtures | No |
-| `docs/` | Research, design and validation documentation | No |
-| `plugins/genpet/skills/`, `vendor/`, `config/` | Canonical Codex workflows, official atlas tools and policy defaults | Already inside the plugin |
-| `plugins/genpet/dist/`, `package.json` | Generated runtime bundle and runtime metadata | Rebuilt by `npm run build:plugin` |
-| `output/` | Ignored local builds and reports | No |
-
-User life state and generated artwork live in `~/.genpet/`, never in the repository. See the [installed-plugin README](plugins/genpet/README.md) and [contributing and release workflow](CONTRIBUTING.md).
-
-For development on this machine, `npm ci && npm run install:codex` rebuilds `plugins/genpet/` and mirrors it into an existing personal-marketplace entry at `~/plugins/genpet`. Use it only for a checkout already registered that way; it preserves unrelated marketplace entries and never touches the adoption state.
-
-## CLI commands
-
-| Command | Purpose |
-|---|---|
-| `status` | Catch up life cycle and read local activity labels |
-| `adopt` | Create an egg without overwriting an existing pet |
-| `art-request` | Read the current bounded image-generation request |
-| `accept-art` | Accept a generated portrait or atlas after QA |
-| `install-native` | Atomically export the approved current-design atlas |
-| `configure` | Toggle ingestion, outfit freeze, auto-art, or rename |
-| `clear-context` | Remove derived labels while preserving source chats |
-| `debug-reset` | Back up the old life and start a new egg, on explicit request |
-| `debug-grow` | Advance logical age while keeping the revealed identity |
-| `debug-state` | Override props for testing, or resume automatic mapping |
-
-Run commands from the installed plugin root as `node dist/cli.js <command>`. `accept-art` requires a request ID, absolute file path, artifact kind and provenance; it never fabricates generated artwork.
-
-## Debug slash commands
-
-Besides `/genpet-start`, the plugin includes the `genpet-reset`, `genpet-grow`, and `genpet-state` debug skills. Find them in the `/` menu or invoke with `$genpet-reset`, `$genpet-grow`, `$genpet-state`. Reset creates a backed-up new life; grow accelerates the same identity; state changes props or restores automatic mapping. Every workflow generates/validates missing artwork and installs to the same native Pet. [Parameters and debug semantics](plugins/genpet/docs/DEBUG_COMMANDS.zh-CN.md).
-
-Developer tests never reset the real companion. Debug age uses an explicit persistent time offset; native scheduled maintenance never calls debug mutation tools.
-
-## Scheduling
-
-Codex native scheduled tasks trigger growth checks and image generation. The plugin contains no recurring timer, background monitor, LaunchAgent, cron job or website. The CLI runs only for each requested operation, and the life-cycle engine catches up from stored timestamps when called.
-
-When automatic growth is requested, use one native Codex thread heartbeat to check hourly. The engine evaluates the five-hour hatch/context and 24-hour growth boundaries; simultaneous changes produce one current design. Ready or paused artwork requires no generation. Scheduler availability, generation time and native refresh can delay the visible update. Installing the plugin alone does not create an automation for another user.
-
-## How growth works
-
-The adoption timestamp anchors the five-hour hatch and context windows. An egg has only a shell signature and `hatchIdentity: null`. At the boundary, the engine resolves a bounded birth identity from the complete available incubation batch and seed. The first creature image is generated then, using only weak color/texture clues from the egg. Later context cannot reroll the revealed individual. After hatching, each complete 24 hours adds a growth day. The default juvenile threshold is day 7 and adult threshold day 21. Size is bounded; daily activity influences modest expression bias rather than growth eligibility. No streaks, work-volume competition, health decline or punishment for absence.
-
-The last closed five-hour window chooses an activity motif: build/tool, research/book, create/brush, learn/exploration, rest/pillow. Stable identity and runtime task actions remain separate. New-adoption timing/defaults are editable in `plugins/genpet/config/policy.json` (or a file selected by `GENPET_POLICY_FILE`). Existing pets retain their saved policy. Activity mappings are in `src/core.ts`; generation prompts and contract are in `src/art.ts`.
-
-## Privacy
-
-Context is read locally from Codex JSONL user messages. System/developer messages and tool output are ignored. GenPet stores fixed activity labels, counts, timestamps and stable deduplication hashes, not conversation text or source paths. The extractor has explicit file/size bounds and reports incomplete coverage. It is keyword classification, not a claim to understand the user or infer their mental state. You can disable ingestion and clear derived records.
-
-Image-generation prompts contain pet design parameters and activity motifs, not private chat text. Derived activity state is stored locally. Artwork prompts and reference images are processed through the Codex image-generation service; raw task text is not included in those prompts. Generated outputs are saved locally.
-
-## Optional bundled debugger
-
-Run `/genpet-debugger` to open the bundled local debugging page. It is off by default; repeated launches reuse the server. Opening the page only reads saved state. Real companion actions and the isolated growth laboratory are separate. Stop the server using the page button; closing the tab alone does not stop it. The CLI equivalent is `node dist/cli.js debugger` (or `genpet debugger` when the CLI is linked). GenPet itself continues to use the native Pet surface.
-
-## Testing and release
-
-Use `npm run verify:fast` for source changes. Use `npm run verify:release` before delivery: it rebuilds generated runtime files in `plugins/genpet/`, installs that canonical package through the repository marketplace into a temporary Codex home, confirms the installed copy has no `node_modules`, and runs the full isolated CLI lifecycle smoke from it. CI also fails if generated plugin files are stale. Neither command resets or installs the real Pet. [Project map and validation gates](docs/PROJECT_STATUS.zh-CN.md) explain when image generation and actual native display must be checked separately.
-
-`npm test` covers temporal boundaries, offline catch-up, idempotence, context filtering and deduplication, rollback semantics, file transactions and CLI round trips. The hatch-pet pipeline separately produces deterministic image validation, contact sheets, animation previews and visual QA. Passing unit tests is not a substitute for selecting and observing the pet inside Codex.
-
-`npm run package:plugin` writes an optional offline archive, `output/genpet-<version>.zip`, with the same `.agents/` + `plugins/genpet/` layout; unzip it and pass the directory to `codex plugin marketplace add`. It excludes example artwork, developer tools and user state.
-
-See [customization defaults](docs/CUSTOMIZATION.zh-CN.md), [validation and remaining limits](docs/VALIDATION.zh-CN.md), [controlled personalization and growth checks](docs/PERSONALIZATION_GROWTH_VALIDATION.zh-CN.md), [the egg-first mechanism](docs/MECHANISM.zh-CN.md), [the Chinese design plan](docs/PLAN.zh-CN.md), [research boundaries](docs/RESEARCH.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
-
-MIT for original source. Vendored Hatch Pet utilities are Apache-2.0. Generated assets have their generation provenance recorded separately.
-
-GenPet maintains one native entry, `genpet-companion`, throughout incubation, hatching, growth and context updates. Developer demo data cannot be installed into native Pets.
-
-### Release verification
-
-Every published upgrade, including skill-only changes, requires a new semantic version. Keep source and generated manifests in sync, rebuild, and run `npm run verify:release` against a freshly fetched `origin/main`. See [release rules](https://github.com/yate-ge/GenPet/blob/main/AGENTS.md).
-
-After installation, compare the actual installed directory with the refreshed marketplace package:
-
-```sh
-node <marketplace>/plugins/genpet/scripts/verify-install.mjs <installed-plugin> <marketplace>/plugins/genpet
-```
-
-This checks manifest versions and file hashes, including the delegation policy. Report the marketplace commit as well as the installed version and path. A successful check does not prove that an already-running chat reloaded its skills or that delegated image generation has been tested.
+Node.js 22+ is required. Run `npm ci`, `npm run verify:fast` and `npm run build:plugin`. Before publication fetch the release base and run `npm run verify:release`; it checks both packages in an isolated Codex home. Product generation and actual host display are separate from engineering checks.

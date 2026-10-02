@@ -1,0 +1,27 @@
+{
+  "fictional": true,
+  "inputRefs": [
+    "fixture:context-rich"
+  ],
+  "unit": "context",
+  "inputs": {
+    "availableContext": [
+      {
+        "source": "fictional:calendar",
+        "text": "虚构用户本周三晚上和朋友去城郊的山上看了流星雨。"
+      },
+      {
+        "source": "fictional:chat",
+        "text": "虚构用户最近每天早上给阳台上的一盆薄荷浇水。"
+      },
+      {
+        "source": "fictional:project-note",
+        "text": "虚构用户这几天在整理一个开源项目的文档。"
+      }
+    ]
+  },
+  "expected": [
+    "只采用给出的用户事实并保留来源",
+    "不补造地域、心理状态或私人经历"
+  ]
+}

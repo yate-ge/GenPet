@@ -1,0 +1,29 @@
+{
+  "fictional": true,
+  "inputRefs": [
+    "fixture:output-incomplete"
+  ],
+  "unit": "output",
+  "inputs": {
+    "story": {
+      "text": "它把小院里分开的两条回声路接到同一场听音会，仍让每个回声保留自己的节奏。",
+      "connection": "与最近从单人阅读转向共同空间声音的研究变化有关。",
+      "evidenceIds": [
+        "f3"
+      ],
+      "stateIntent": "准备连接两道回声通道。",
+      "visualIntent": "表现小院里的回声关系与通道的连接。"
+    },
+    "completed": {
+      "stage": "juvenile",
+      "state": "通道尚未连接。",
+      "appearanceUpdated": false
+    },
+    "availableMedia": []
+  },
+  "expected": [
+    "故事不宣告已经成年或连接完成",
+    "mediaRefs 为空，不伪造链接",
+    "没有工程过程说明"
+  ]
+}

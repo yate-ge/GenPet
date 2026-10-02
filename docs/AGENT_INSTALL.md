@@ -1,14 +1,16 @@
 # GenPet agent installation
 
-Install or update GenPet from its GitHub marketplace without changing the user's Pet state.
+Install or update a **published** GenPet version from its GitHub marketplace without changing the user's Pet state. The unpublished 0.5.0 checkout uses [local validation](NEW_VERSION_VALIDATION.zh-CN.md), not the remote marketplace.
 
 1. Run `node --version`. GenPet requires Node.js 22 or newer. If it is missing or older, tell the user that Node.js 22+ is required to run GenPet, then ask them to install or upgrade it before continuing.
 2. Run `codex plugin list`. If GenPet already comes from another marketplace, report that source instead of installing a duplicate.
-3. Add and refresh the repository marketplace, then install the plugin if needed:
+3. Add and refresh the repository marketplace, then install the package for the intended environment. Dots and ordinary Pet run in separate environments:
 
    ```sh
    codex plugin marketplace add yate-ge/GenPet
    codex plugin marketplace upgrade genpet
+   codex plugin add genpet-dots@genpet
+   # In the ordinary desktop environment instead:
    codex plugin add genpet@genpet
    ```
 
@@ -17,9 +19,9 @@ Install or update GenPet from its GitHub marketplace without changing the user's
 4. Resolve the refreshed marketplace checkout and actual installed directory, then run:
 
    ```sh
-   node <marketplace>/plugins/genpet/scripts/verify-install.mjs \
+   node <marketplace>/plugins/<package>/scripts/verify-install.mjs \
      <installed-plugin> \
-     <marketplace>/plugins/genpet
+     <marketplace>/plugins/<package>
    ```
 
 5. Report the marketplace commit, installed version, installed path, and verification result.

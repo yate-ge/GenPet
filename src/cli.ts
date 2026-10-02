@@ -1,83 +1,75 @@
 #!/usr/bin/env node
-import { launchDebugger } from './debugger.js';
-import { Store, configureState } from './store.js';
-import { artRequest, acceptArt, installNative, nativeTick } from './art.js';
-import { refreshNativePet } from './native-refresh.js';
-import { HOUR, evolvePet, removeContext, updateProfile, type Palette } from './core.js';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { debugReset, debugGrow, debugState, type GrowthTarget, type DebugState } from './debug.js';
+import { Store, type ArtKind, type Pending } from './store.js';
+import { text } from './core.js';
+import { artRequest, acceptArt, installNative } from './art.js';
+import { beginStory, planStory, finishStory, dueStory, pendingFor, recordHostResult, resetPet } from './story.js';
+import { bindAvatar, configureAdapter, hostRequest, publishDots } from './hosts.js';
+import { packageHost, readPrompt } from './prompts.js';
+import { recordStep, unitRequest, validateUnitResult } from './generation.js';
+import { migrateLegacy } from './migration.js';
 import { getNativePetCatalog } from './native-pets.js';
 import { readNativePetLive, selectNativePetLive } from './native-pet-live.js';
-const argv=process.argv.slice(2);const demo=argv[0]==='--demo';if(demo)argv.shift();
-const [command,...args]=argv;const store=new Store(undefined,demo);
-const boolean=(value:string,key:string)=>{if(value==='true')return true;if(value==='false')return false;throw new Error(`${key} must be true or false.`);};
+import { launchDebugger } from './debugger.js';
+
+const argv=process.argv.slice(2), demo=argv[0]==='--demo';if(demo)argv.shift();
+const [command,...args]=argv, store=new Store(undefined,demo,packageHost());
+const jsonFile=async(file:string)=>{if(!path.isAbsolute(file??''))throw new Error('JSON input requires an absolute file');return JSON.parse(await readFile(file,'utf8'));};
 try {
  let output:unknown;
- switch(command){
+ switch(command) {
+  case 'status': {
+   const state=await store.peek(),legacyFile=!state.pet?await store.legacyCandidate():null;
+   output={...state,dataDirectory:store.root,...(legacyFile?{legacyFile}:{})};break;
+  }
+  case 'begin-story':output=await beginStory(store,args[0]||`manual:${randomUUID()}`,(args[1]||'story') as Pending['mode'],args[2]);break;
+  case 'plan-story':output=await planStory(store,args[0],await jsonFile(args[1]));break;
+  case 'finish-story':output=await finishStory(store,args[0]);break;
+  case 'cancel-story':output=await store.transaction(state=>{
+   const pending=pendingFor(state,args[0]);
+   if(pending.mode==='initialization'&&pending.plan)throw new Error('Initialization genes are saved; resume it or explicitly reset the pet');
+   state.pending=null;return {cancelled:pending.id};
+  });break;
+  case 'art-request':output=artRequest(await store.peek());break;
+  case 'accept-art':output=await acceptArt(store,{requestId:args[0],file:args[1],kind:args[2] as ArtKind,provenance:args[3],description:args[4]});break;
+  case 'install-native':case 'refresh-native':output=await installNative(store);break;
+  case 'host-request':output=hostRequest(await store.peek());break;
+  case 'host-result':output=await recordHostResult(store,args[0],await jsonFile(args[1]));break;
+  case 'bind-avatar':output=await bindAvatar(store,args[0]);break;
+  case 'configure-host':output=await configureAdapter(store,await jsonFile(args[0]));break;
+  case 'publish':output=store.host==='desktop'?await installNative(store):await publishDots(store);break;
+  case 'prompt':output={prompt:readPrompt(args[0])};break;
+  case 'unit-request':output=unitRequest(args[0],await jsonFile(args[1]));break;
+  case 'verify-unit':output={unit:args[0],contractValid:true,...validateUnitResult(args[0],await jsonFile(args[1]))};break;
+  case 'record-step':output=await recordStep(store,args[0],args[1],await jsonFile(args[2]));break;
+  case 'due':output=dueStory(await store.peek(),Date.now(),args[0]);break;
+  case 'schedule': {
+   const timezone=text(args[0],'timezone'), reference=text(args[1],'schedule reference');new Intl.DateTimeFormat('en',{timeZone:timezone});
+   output=await store.transaction(state=>state.schedule={timezone,reference,times:['07:00','12:00','16:00','21:00']});break;
+  }
+  case 'story-output': {
+   const state=await store.peek(), story=args[0]?state.stories.find(story=>story.id===args[0]):state.stories.at(-1);
+   if(!story)throw new Error('No completed story');
+   output={text:story.text,media:state.art.filter(art=>story.mediaIds.includes(art.id)),appearance:state.art.find(art=>art.id===story.appearanceId),prompt:readPrompt('output')};break;
+  }
+  case 'migrate-legacy':output=await migrateLegacy(store,args[0],await jsonFile(args[1]));break;
+  case 'reset':output=await resetPet(store,args[0]||randomUUID());break;
   case 'debugger':output=await launchDebugger();break;
-  case 'switch-pet':{
-   if(demo)throw new Error('switch-pet controls the real Codex desktop and cannot run with --demo.');
-   const usage='Usage: switch-pet [PET_ID|--current|--list|--help]';
-   if(args.length>1)throw new Error(usage);
+  case 'switch-pet': {
+   if(demo||store.host!=='desktop')throw new Error('switch-pet requires the desktop package and cannot run with --demo');
+   const usage='Usage: switch-pet [PET_ID|--current|--list|--help]';if(args.length>1)throw new Error(usage);
    const target=args[0]??'--current';
-   if(target==='--help'){output={usage,examples:['switch-pet --list','switch-pet --current','switch-pet dewey','switch-pet custom:genpet-companion']};break;}
-   if(target==='--current'){
-    const current=await readNativePetLive();
-    if(!current.available)throw new Error(`${current.reason} Run this command from a local Codex desktop chat with its app-tools connection.`);
-    output=current;break;
-   }
+   if(target==='--help'){output={usage,examples:['switch-pet --list','switch-pet --current','switch-pet dewey']};break;}
+   if(target==='--current'){const current=await readNativePetLive();if(!current.available)throw new Error(current.reason);output=current;break;}
    if(target.startsWith('-')&&target!=='--list')throw new Error(usage);
    const catalog=await getNativePetCatalog();
    if(target==='--list'){output={pets:catalog.pets,...(catalog.errors?{errors:catalog.errors}:{})};break;}
-   if(!catalog.pets.some(pet=>pet.id===target))throw new Error(`Unknown pet ID: ${target}. Use switch-pet --list to see builtin and local pet IDs.`);
+   if(!catalog.pets.some(pet=>pet.id===target))throw new Error(`Unknown pet ID: ${target}. Use switch-pet --list.`);
    output=await selectNativePetLive(target);break;
   }
-  case 'status':output=await store.current();break;
-  case 'tick':await nativeTick(store);output=await store.current();break;
-  case 'adopt':{
-   const [name,palette]=args;
-   if(palette&&!['sage','peach','sky','lilac'].includes(palette))throw new Error('Palette must be sage, peach, sky, or lilac.');
-   const profile:Record<string,unknown>={};
-   if(name)profile.name=name;else if(demo)profile.name='GenPet Demo';
-   if(palette)profile.palette=palette as Palette;
-   output=await store.transaction(s=>store.adopt(s,profile));break;
-  }
-  case 'advance':{
-   if(!demo)throw new Error('Time travel requires --demo; the real adoption clock is immutable.');
-   const hours=Number(args[0]);if(!Number.isFinite(hours)||hours<=0||hours>24*90)throw new Error('Use a positive demo time jump of at most 90 days.');
-   output=await store.transaction(s=>{if(!s.pet)throw new Error('Adopt a demo egg first.');s.clockOffset+=hours*HOUR;s.pet=evolvePet(s.pet,store.now(s));return s.pet;});break;
-  }
-  case 'art-request':output=artRequest(await store.current());break;
-  case 'configure':{
-   const input:Record<string,unknown>={};
-   for(const argument of args){const split=argument.indexOf('=');if(split<1)throw new Error('Configure values use key=value.');const key=argument.slice(0,split),value=argument.slice(split+1);
-    if(['autoContext','freezeOutfit','autoArt'].includes(key))input[key]=boolean(value,key);
-    else if(key==='name')input.name=value;
-    else throw new Error(`Unknown setting: ${key}`);
-   }
-   output=await store.transaction(s=>{configureState(s,input);if(typeof input.name==='string'&&s.pet)s.pet=updateProfile(s.pet,{name:input.name});return s;});break;
-  }
-  case 'clear-context':output=await store.transaction(s=>{if(s.pet)for(const entry of [...s.pet.context])s.pet=removeContext(s.pet,entry.id,store.now(s));return {cleared:true,state:s};});break;
-  case 'debug-reset':output=await debugReset(store,args[0]||randomUUID());break;
-  case 'debug-grow':{
-   const value=args[0]||'next';
-   output=await debugGrow(store,args[1]||randomUUID(),(/^\d+$/.test(value)?'next':value) as GrowthTarget,/^\d+$/.test(value)?Number(value):undefined);break;
-  }
-  case 'debug-state':output=await debugState(store,args[1]||randomUUID(),args[0] as DebugState);break;
-  case 'accept-art':{
-   const [requestId,file,kind,...provenance]=args;if(kind!=='portrait'&&kind!=='atlas')throw new Error('Usage: accept-art REQUEST_ID /absolute/image.png portrait|atlas "Imagegen provenance and QA"');
-   output=await acceptArt(store,{requestId,file,kind,provenance:provenance.join(' ')});break;
-  }
-  case 'install-native':output=await installNative(store);break;
-  case 'refresh-native':{
-   const s=await store.current();
-   const destination=path.join(process.env.CODEX_HOME||path.join((await import('node:os')).homedir(),'.codex'),'pets','genpet-companion');
-   const manifest=JSON.parse(await (await import('node:fs/promises')).readFile(path.join(destination,'pet.json'),'utf8'));
-   output=await refreshNativePet({expectedSpritePath:path.join(destination,manifest.spritesheetPath)});
-   break;
-  }
-  default:throw new Error('Commands: debugger; switch-pet [PET_ID|--current|--list|--help]; [--demo] status, tick, adopt [name] [sage|peach|sky|lilac], art-request, configure key=value..., clear-context, accept-art <id> <file> <portrait|atlas> <provenance>, install-native, refresh-native; debug-reset [operationId], debug-grow [next|hatch|juvenile|adult|days] [operationId], debug-state <build|research|create|learn|rest|none|auto> [operationId]; --demo advance <hours>');
+  default:throw new Error('Commands: status, begin-story [TRIGGER_ID] [initialization|story|grow], plan-story OPERATION_ID PLAN_JSON, art-request, accept-art REQUEST_ID FILE portrait|atlas|avatar|story|artifact PROVENANCE [DESCRIPTION], publish, host-request, host-result OPERATION_ID RESULT_JSON, bind-avatar AVATAR_ID, configure-host ADAPTER_JSON, finish-story OPERATION_ID, story-output [STORY_ID], due [TIMEZONE], schedule TIMEZONE REFERENCE, prompt MODULE, unit-request UNIT INPUT_JSON, verify-unit UNIT RESULT_JSON, record-step OPERATION_ID UNIT RESULT_JSON, migrate-legacy V1_FILE DESIGN_JSON, cancel-story OPERATION_ID, reset [OPERATION_ID], debugger, switch-pet [PET_ID|--current|--list|--help]');
  }
  console.log(JSON.stringify(output,null,2));
-}catch(e){console.error((e as Error).message);process.exitCode=1;}
+}catch(error){console.error((error as Error).message);process.exitCode=1;}

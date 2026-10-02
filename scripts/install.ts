@@ -1,25 +1,30 @@
-import { cp,mkdir,readFile,rm } from 'node:fs/promises';
+/** Explicit local developer installation. Never changes Pet data or creates schedules. */
+import { readFile, realpath } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { retireLegacyDemo } from '../dist/native-migration.js';
-// Developer route: mirror the committed plugins/genpet bundle into this machine's personal marketplace.
-const source=path.resolve(import.meta.dirname,'..','plugins','genpet');
-const target=path.join(homedir(),'plugins','genpet');
-await mkdir(target,{recursive:true});
-for(const item of ['dist','assets','web','skills','vendor','scripts','config','docs','.codex-plugin','.mcp.json','README.md','LICENSE','THIRD_PARTY_NOTICES.md','node_modules','package.json','package-lock.json']) {
-  // Remove obsolete GenPet-owned examples/dev files; user state is elsewhere.
-  await rm(path.join(target,item),{recursive:true,force:true});
+
+const name = process.argv[2] || 'genpet';
+if (!['genpet', 'genpet-dots'].includes(name)) throw new Error('Choose genpet or genpet-dots');
+const root = await realpath(path.resolve(import.meta.dirname, '..'));
+const catalog = JSON.parse(await readFile(path.join(root, '.agents/plugins/marketplace.json'), 'utf8'));
+const marketplace = catalog.name;
+const codex = process.env.CODEX_BIN || 'codex';
+const run = (args: string[]) => execFileSync(codex, args, { encoding: 'utf8' });
+const list = () => JSON.parse(run(['plugin', 'marketplace', 'list', '--json'])).marketplaces;
+const previous = list().find((entry: { name: string }) => entry.name === marketplace);
+if (previous && await realpath(previous.root) !== root) {
+  throw new Error(`Marketplace ${marketplace} already uses ${previous.root}. This command installs the local checkout; use docs/NEW_VERSION_VALIDATION.zh-CN.md or explicitly configure the intended source first.`);
 }
-await cp(source,target,{recursive:true});
-const marketplace=path.join(homedir(),'.agents','plugins','marketplace.json');
-const catalog=JSON.parse(await readFile(marketplace,'utf8'));
-if(!catalog.plugins?.some((p:any)=>p.name==='genpet'))throw new Error('GenPet marketplace entry is missing. Follow README setup first.');
-if(!/^[A-Za-z0-9_-]+$/.test(catalog.name))throw new Error('Invalid marketplace identifier');
-const creator=path.join(process.env.CODEX_HOME||path.join(homedir(),'.codex'),'skills','.system','plugin-creator','scripts');
-const marketplaceName=execFileSync('python3',[path.join(creator,'read_marketplace_name.py')],{encoding:'utf8'}).trim();
-execFileSync('python3',[path.join(creator,'update_plugin_cachebuster.py'),target],{stdio:'inherit'});
-execFileSync('codex',['plugin','add',`genpet@${marketplaceName}`,'--json'],{stdio:'inherit'});
-const retired=await retireLegacyDemo(process.env.CODEX_HOME||path.join(homedir(),'.codex'),path.join(homedir(),'.genpet','backups'));
-if(retired)console.log(`Retired legacy GenPet Demo entry; recoverable backup: ${retired.backup}`);
-console.log(`Installed GenPet from ${target}. New Codex tasks will load its skills.`);
+run(['plugin', 'marketplace', 'add', root, '--json']);
+run(['plugin', 'marketplace', 'upgrade', marketplace, '--json']);
+const refreshed = list().find((entry: { name: string }) => entry.name === marketplace);
+if (!refreshed || await realpath(refreshed.root) !== root) throw new Error('Refreshed marketplace does not match this checkout');
+const source = path.join(refreshed.root, 'plugins', name);
+const version = JSON.parse(await readFile(path.join(source, '.codex-plugin/plugin.json'), 'utf8')).version;
+run(['plugin', 'add', `${name}@${marketplace}`, '--json']);
+const installed = path.join(process.env.CODEX_HOME || path.join(homedir(), '.codex'), 'plugins/cache', marketplace, name, version);
+const verification = JSON.parse(execFileSync(process.execPath, [path.join(root, 'scripts/verify-install.mjs'), installed, source], { encoding: 'utf8' }));
+const marketplaceCommit = execFileSync('git', ['-C', refreshed.root, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+const hasLocalChanges = !!execFileSync('git', ['-C', refreshed.root, 'status', '--porcelain'], { encoding: 'utf8' }).trim();
+console.log(JSON.stringify({ ...verification, marketplace, marketplaceCommit, hasLocalChanges, note: 'New chats load updated skills. This installation did not modify a Pet or create a schedule.' }, null, 2));
