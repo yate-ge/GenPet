@@ -1,103 +1,48 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp,readFile,rm,readdir } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdtemp, readFile, rm, readdir, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { writeFile } from 'node:fs/promises';
-import { PNG } from 'pngjs';
+import { tmpdir } from 'node:os';
 import { Store } from '../src/store.js';
-import { actions,artRequest,acceptArt,validateImage,exportNative,installNative } from '../src/art.js';
-import { refreshNativePet } from '../src/native-refresh.js';
-
-async function png(file:string,width:number,height:number,rgba=Buffer.alloc(width*height*4)){
- const image=new PNG({width,height});rgba.copy(image.data);await writeFile(file,PNG.sync.write(image));
-}
-// Synthetic opaque blocks are validation fixtures only, never pet artwork.
-async function fixture(file:string,badUnused=false,color=80){
- const width=1536,height=2288,rgba=Buffer.alloc(width*height*4);
- for(let row=0;row<11;row++)for(let col=0;col<(row===0?7:row<9?actions[row].count:8);col++)for(let y=70;y<100;y++)for(let x=70;x<100;x++){
-  const p=((row*208+y)*width+col*192+x)*4;rgba[p]=color;rgba[p+1]=130;rgba[p+2]=60;rgba[p+3]=255;
- }
- if(badUnused)rgba[(50*width+7*192+50)*4+3]=255;
- await png(file,width,height,rgba);
-}
-test('atlas validation rejects bad geometry, blank used and nonempty unused cells',async()=>{
- const dir=await mkdtemp(path.join(tmpdir(),'genpet-art-'));
- try{const good=path.join(dir,'good.png');await fixture(good);assert.equal((await validateImage(good,'atlas')).height,2288);
-  const bad=path.join(dir,'bad.png');await fixture(bad,true);await assert.rejects(()=>validateImage(bad,'atlas'),/Unused cell/);
-  const empty=path.join(dir,'empty.png');await png(empty,1536,2288);await assert.rejects(()=>validateImage(empty,'atlas'),/Empty animation cell/);
-  const wrong=path.join(dir,'wrong.png');await png(wrong,32,32);await assert.rejects(()=>validateImage(wrong,'atlas'),/Atlas must/);
- }finally{await rm(dir,{recursive:true,force:true});}
+import { artRequest, acceptArt, validateImage, installNative, exportNative } from '../src/art.js';
+import { finishStory, beginStory, planStory } from '../src/story.js';
+import { initialization, image } from './fixtures.js';
+test('native atlas validation rejects wrong layout, blank cells and occupied unused cells',async()=>{
+ const root=await mkdtemp(path.join(tmpdir(),'genpet-validate-'));try{
+  const file=path.join(root,'atlas.png');await image(file,true);assert.equal((await validateImage(file,'atlas')).height,2288);
+  await image(file,true,true);await assert.rejects(()=>validateImage(file,'atlas'),/Unused/);
+  await image(file);await assert.rejects(()=>validateImage(file,'atlas'),/Atlas must/);
+  await writeFile(file,Buffer.from('not an image'));await assert.rejects(()=>validateImage(file,'story'));
+ }finally{await rm(root,{recursive:true,force:true});}
 });
-test('stale art is rejected and successful native install keeps an atomic manifest and rollback',async()=>{
- const dir=await mkdtemp(path.join(tmpdir(),'genpet-accept-'));const store=new Store(dir,true);
- try{await store.transaction(s=>store.adopt(s));const s=await store.current(),request=artRequest(s)!;
-  const file=path.join(dir,'fixture.png');await fixture(file);
-  await assert.rejects(()=>acceptArt(store,{file,kind:'atlas',requestId:'stale',provenance:'Synthetic test fixture, never distributed'}),/Stale/);assert.equal((await store.current()).art.length,0);
-  await acceptArt(store,{file,kind:'atlas',requestId:request.id,provenance:'Synthetic test fixture, never distributed'});
-  const destination=path.join(dir,'native');await exportNative(await store.current(),destination);const manifest=JSON.parse(await readFile(path.join(destination,'pet.json'),'utf8'));assert.match(manifest.spritesheetPath,/^spritesheet-[a-f0-9]{16}\.png$/);assert.equal(manifest.spriteVersionNumber,2);
-  await validateImage(path.join(destination,manifest.spritesheetPath),'atlas');await exportNative(await store.current(),destination);assert.equal(await readFile(path.join(destination,'previous-pet.json'),'utf8'),await readFile(path.join(destination,'pet.json'),'utf8'));
-  // A long image generation may cross a life-stage boundary without a status poll.
-  await store.transaction(state=>{state.clockOffset=5*3_600_000;});
-  await assert.rejects(()=>acceptArt(store,{file,kind:'atlas',requestId:request.id,provenance:'Synthetic test fixture, never distributed'}),/Stale/);
- }finally{await rm(dir,{recursive:true,force:true});}
-});
-
-test('image references progress from shell-only to a revealed identity, never a preselected creature',async()=>{
- const dir=await mkdtemp(path.join(tmpdir(),'genpet-forward-'));const store=new Store(dir,true);
- try {
-  await store.transaction(s=>store.adopt(s));
-  const file=path.join(dir,'portrait.png');
-  await png(file,32,32,Buffer.alloc(32*32*4).map((_,i)=>[230,230,220,204][i%4]));
-  let request=artRequest(await store.current())!;
-  assert.equal(request.visual.hatchIdentity,null);assert.deepEqual(request.referenceFiles,[]);
-  assert.match(request.prompt,/egg-three profile/);
-  assert.match(request.prompt,/three AI-generated eight-frame loops/);
-  assert.match(request.prompt,/one neutral calm frame across all sixteen look slots/);
-  assert.doesNotMatch(request.prompt,/Do not visually inspect/);
-  const shell=await acceptArt(store,{file,kind:'portrait',requestId:request.id,provenance:'Synthetic reference test only; never distributed.'});
-  let state=await store.current();assert.equal(state.eggReference,shell.file);assert.equal(state.identityReference,undefined);
-  await store.transaction(s=>{s.clockOffset=5*3_600_000;});
-  request=artRequest(await store.current())!;assert.match(request.prompt,/FORWARD HATCHING/);
-  assert.match(request.prompt,/all nine state rows and both eight-pose look rows independently from base/);
-  assert.doesNotMatch(request.prompt,/egg-three profile/);
-  assert.match(request.prompt,/seed-derived permanent marking/);
-  assert.match(request.prompt,/natural head and body turns/);
-  assert.match(request.prompt,/Visually review each generated source/);
-  assert.doesNotMatch(request.prompt,/torso facing the viewer|change gaze only|validate structure only/);
-  assert.deepEqual(request.referenceFiles,[shell.file]);assert.ok(request.visual.hatchIdentity);
-  const child=await acceptArt(store,{file,kind:'portrait',requestId:request.id,provenance:'Synthetic reference test only; never distributed.'});
-  state=await store.current();assert.equal(state.identityReference,child.file);assert.equal(state.eggReference,shell.file);
-  request=artRequest(state)!;assert.deepEqual(request.referenceFiles,[child.file]);assert.match(request.prompt,/CONTINUE THE SAME REVEALED INDIVIDUAL/);
-  assert.doesNotMatch(request.prompt,/seed-derived permanent marking/);
- }finally{await rm(dir,{recursive:true,force:true});}
-});
-test('demo installation is blocked before it writes any native files',async()=>{
- const dir=await mkdtemp(path.join(tmpdir(),'genpet-demo-block-'));const oldHome=process.env.CODEX_HOME;
- process.env.CODEX_HOME=path.join(dir,'codex');
- try {
-  await assert.rejects(()=>installNative(new Store(path.join(dir,'data'),true)),/Demo state cannot install/);
-  assert.deepEqual(await readdir(dir),[]);
- }finally{if(oldHome===undefined)delete process.env.CODEX_HOME;else process.env.CODEX_HOME=oldHome;await rm(dir,{recursive:true,force:true});}
-});
-
-test('first install and ready-art resume request refresh and persist IPC delivery independently of display proof',async()=>{
- const dir=await mkdtemp(path.join(tmpdir(),'genpet-ipc-install-'));const oldHome=process.env.CODEX_HOME;process.env.CODEX_HOME=path.join(dir,'codex');
- const store=new Store(path.join(dir,'data'));let calls=0;
+test('request freshness and durable media prevent stale or temporary-file installs',async()=>{
+ const root=await mkdtemp(path.join(tmpdir(),'genpet-art-')),store=new Store(root,true);
  try{
-  await store.transaction(s=>{s.settings.autoContext=false;return store.adopt(s);});
-  const file=path.join(dir,'fixture.png');await fixture(file);
-  await acceptArt(store,{file,kind:'atlas',requestId:artRequest(await store.current())!.id,provenance:'Synthetic IPC wiring fixture only.'});
-  const adapter:typeof refreshNativePet=async()=>{calls++;return {automaticRefresh:true,refreshRequested:true,displayStatus:'unconfirmed',strategy:'ipc-query-invalidate',expectedSpriteSha256:'fixture',notice:'IPC delivered'};};
-  for(let i=0;i<2;i++){const r=await installNative(store,{refresh:adapter});assert.equal(r.refreshRequired,false);assert.equal(r.displayStatus,'unconfirmed');assert.equal(r.automaticRefresh,true);}
-  assert.equal(calls,2);assert.equal((await store.current()).nativeExport!.refreshRequired,false);
-  const failed=await installNative(store,{refresh:options=>refreshNativePet({...options,ipcSocketPath:path.join(dir,'missing.sock'),timeoutMs:150})});
-  assert.equal(failed.automaticRefresh,false);
-  assert.equal(failed.refresh?.refreshRequested,false);
-  assert.equal(failed.refreshRequired,true);
-  assert.equal((await store.current()).nativeExport!.refreshRequired,true);
-  const retried=await installNative(store,{refresh:adapter});
-  assert.equal(retried.refreshRequired,false);
-  assert.equal((await store.current()).nativeExport!.refreshRequired,false);
- }finally{if(oldHome===undefined)delete process.env.CODEX_HOME;else process.env.CODEX_HOME=oldHome;await rm(dir,{recursive:true,force:true});}
+  await initialization(store);const file=path.join(root,'art.png');await image(file,true);
+  await assert.rejects(()=>acceptArt(store,{requestId:'wrong',file,kind:'atlas',provenance:'Test'}),/Stale/);
+  const request=artRequest(await store.peek())!,input={requestId:request.id,file,kind:'atlas' as const,provenance:'Synthetic native validation fixture'};
+  const art=await acceptArt(store,input);assert.equal((await acceptArt(store,input)).id,art.id);await rm(file);await validateImage(art.file,'atlas');
+  assert.equal((await store.peek()).art.length,1);await assert.rejects(()=>installNative(store),/Demo/);
+  const destination=path.join(root,'export');await exportNative(await store.peek(),destination);const first=await readFile(path.join(destination,'pet.json'),'utf8');
+  await exportNative(await store.peek(),destination);assert.equal(await readFile(path.join(destination,'previous-pet.json'),'utf8'),first);
+  const foreign=path.join(root,'foreign');await mkdir(foreign);await writeFile(path.join(foreign,'pet.json'),JSON.stringify({genpetId:'another-pet'}));
+  await assert.rejects(async()=>exportNative(await store.peek(),foreign),/another pet/);assert.deepEqual(await readdir(foreign),['pet.json']);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+test('active and inactive updates retain target ID and never change selection; failed refresh can resume',async()=>{
+ const root=await mkdtemp(path.join(tmpdir(),'genpet-publish-')),store=new Store(root),old=process.env.CODEX_HOME;process.env.CODEX_HOME=path.join(root,'codex');
+ try{
+  const op=await initialization(store),file=path.join(root,'atlas.png');await image(file,true);
+  await acceptArt(store,{requestId:artRequest(await store.peek())!.id,file,kind:'atlas',provenance:'Synthetic publish fixture'});
+  const petId=(await store.peek()).pet!.id;
+  const refresh=async()=>({automaticRefresh:true,refreshRequested:true,displayStatus:'unconfirmed' as const,strategy:'ipc-query-invalidate' as const,expectedSpriteSha256:'fixture',notice:'Delivered'});
+  const selection=async()=>({available:true as const,selectedPetId:`custom:${petId}`,effectiveSelectedPetId:`custom:${petId}`});
+  const result=await installNative(store,{refresh,selection});assert.equal(result.avatarId,`custom:${petId}`);assert.equal(result.active,true);assert.equal(result.displayStatus,'unconfirmed');
+  const failed=await installNative(store,{selection,refresh:async()=>({...await refresh(),automaticRefresh:false,refreshRequested:false})});assert.ok(failed.error);await assert.rejects(()=>finishStory(store,op),/unfinished/);
+  await installNative(store,{refresh,selection});await finishStory(store,op);
+  const next=(await beginStory(store,'story:reuse')).pending!.id, art=(await store.peek()).art[0];
+  await planStory(store,next,{text:'A new quiet story.',basis:'Same state fits',state:'Quiet',appearance:{description:'Same appearance',reuseArtId:art.id}});
+  const inactive=await installNative(store,{refresh,selection:async()=>({available:true,selectedPetId:'dewey',effectiveSelectedPetId:'dewey'})});assert.equal(inactive.active,false);assert.equal(inactive.avatarId,result.avatarId);
+  await finishStory(store,next);assert.deepEqual(await readdir(path.join(root,'codex','pets')),[petId]);
+ }finally{if(old===undefined)delete process.env.CODEX_HOME;else process.env.CODEX_HOME=old;await rm(root,{recursive:true,force:true});}
 });

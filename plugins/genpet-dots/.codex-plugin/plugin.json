@@ -1,0 +1,33 @@
+{
+  "name": "genpet-dots",
+  "version": "0.5.0",
+  "description": "A lightweight story-driven Pet framework for Codex Dots and native Codex Pets.",
+  "author": {
+    "name": "GenPet contributors"
+  },
+  "license": "MIT",
+  "keywords": [
+    "pet",
+    "story",
+    "meta-design",
+    "imagegen",
+    "dots"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "GenPet Dots",
+    "shortDescription": "A story-driven pixel companion.",
+    "longDescription": "Meaningful adoption, open genes, Agent-led evolution and reusable story appearances. Dots uses its own Avatar environment.",
+    "developerName": "GenPet contributors",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "使用 $genpet-start 开始或继续我的宠物故事",
+      "使用 $genpet-story 生成新的宠物故事"
+    ],
+    "brandColor": "#78934E"
+  }
+}
