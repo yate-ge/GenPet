@@ -174,10 +174,9 @@ test('switch-pet rejects unknown IDs before any host connection or write', async
   }));
 });
 
-test('switch-pet rejects demo, extra arguments and unknown flags without host calls', async () => {
+test('switch-pet rejects extra arguments and unknown flags without host calls', async () => {
   await withHost(async host => withCli(host.pipePath, async cli => {
     for (const args of [
-      ['--demo', 'switch-pet', 'dewey'],
       ['switch-pet', '--demo'],
       ['switch-pet', 'dewey', 'codex'],
       ['switch-pet', '--current', 'dewey'],
@@ -186,7 +185,7 @@ test('switch-pet rejects demo, extra arguments and unknown flags without host ca
       const result = await cli(...args);
       assert.notEqual(result.code, 0);
       assert.equal(result.stdout, '');
-      assert.match(result.stderr, /--demo|Usage:/);
+      assert.match(result.stderr, /Usage:/);
     }
     assert.equal(host.connections(), 0);
     assert.deepEqual(host.calls, []);

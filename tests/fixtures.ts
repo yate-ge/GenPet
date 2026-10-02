@@ -1,7 +1,8 @@
 import { writeFile } from 'node:fs/promises';
 import { PNG } from 'pngjs';
 import { actions } from '../src/art.js';
-import { beginStory, planStory } from '../src/story.js';
+import { beginStory, planStory, recordHostResult, desiredAppearance } from '../src/story.js';
+import { bindAvatar } from '../src/hosts.js';
 import type { Store } from '../src/store.js';
 export const personality='Patient and curious. Offers quiet company without assuming the user needs help. Draws its feelers close when listening and unfolds them when exploring. A fictional individual met beside an unfinished drawing; not a claim about user personality.';
 export const initialPlan={text:'You found an egg beside the unfinished drawing.',basis:'The user is working on a drawing; the encounter is fictional.',state:'A quiet intact egg.',stage:'egg' as const,genes:'A faceless, low-bodied creature with four short clawed feet, two tactile feelers and a left-curving tail; its back folds develop across stages while these body relationships persist.',personality,place:'Beside an unfinished drawing',connection:'A meaningful encounter around an ongoing creative task',appearance:{description:'A complete conventional pixel egg shell with curved gray-blue markings.'}};
@@ -17,4 +18,10 @@ export async function image(file:string,atlas=false,badUnused=false) {
  }
  if(badUnused)png.data[(20*width+7*192+20)*4+3]=255;
  await writeFile(file,PNG.sync.write(png));
+}
+/** Stand-in for the host step: record an inactive, updated target so a story can finish in isolated data. */
+export async function hostDone(store:Store,op:string) {
+ if(store.host==='dots'&&!(await store.peek()).pet!.binding)await bindAvatar(store,'dots:test');
+ const state=await store.peek();
+ return recordHostResult(store,op,{petId:state.pet!.id,operationId:op,appearanceId:desiredAppearance(state)!.id,avatarId:state.pet!.binding?.avatarId??`custom:${state.pet!.id}`,updated:true,active:false,refreshRequested:false,displayStatus:'unconfirmed'});
 }

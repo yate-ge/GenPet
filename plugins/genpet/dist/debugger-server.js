@@ -2167,14 +2167,12 @@ async function atomicJson(file, value) {
   }
 }
 var Store = class {
-  constructor(root = dataRoot(), demo = false, host = "desktop") {
-    this.demo = demo;
+  constructor(root = dataRoot(), host = "desktop") {
     this.host = host;
     this.base = path.resolve(root);
-    this.root = path.resolve(this.base, host, ...demo ? ["demo"] : []);
+    this.root = path.resolve(this.base, host);
     this.file = path.join(this.root, "state.json");
   }
-  demo;
   host;
   base;
   root;
@@ -2190,7 +2188,8 @@ var Store = class {
         identifier(state.pet.id, "petId");
         validateStage("egg", state.pet.stage);
         if (state.pet.personality !== void 0 && (typeof state.pet.personality !== "string" || !state.pet.personality.trim())) throw new Error("Invalid personality");
-        if (state.pet.naming && !["unasked", "asked", "named", "deferred"].includes(state.pet.naming.status)) throw new Error("Invalid naming status");
+        if (state.pet.naming?.status === "deferred") state.pet.naming.status = "asked";
+        if (state.pet.naming && !["unasked", "asked", "named"].includes(state.pet.naming.status)) throw new Error("Invalid naming status");
       }
       return state;
     } catch (error) {
@@ -2198,12 +2197,8 @@ var Store = class {
       throw error;
     }
   }
-  /** Read-only; elapsed time never evolves a pet. */
-  current() {
-    return this.peek();
-  }
   async legacyCandidate() {
-    if (this.host !== "desktop" || this.demo) return null;
+    if (this.host !== "desktop") return null;
     const file = path.join(this.base, "state.json");
     try {
       const old = JSON.parse(await readFile(file, "utf8"));
@@ -2234,7 +2229,6 @@ var Store = class {
       const state = await this.peek();
       const result = await fn(state);
       await atomicJson(this.file, state);
-      if (state.pet) await atomicJson(path.join(this.root, "pets", state.pet.id, "record.json"), state);
       return result;
     } finally {
       await rm(lock, { recursive: true, force: true });
@@ -3345,7 +3339,7 @@ async function getNativePetCatalog(home = process.env.CODEX_HOME || path4.join(h
 
 // src/debugger-server.ts
 async function startServer(port = Number(process.env.GENPET_PORT || 47831), root) {
-  const real = new Store(root, false, packageHost()), demo = new Store(root, true, packageHost()), token = randomBytes(24).toString("hex");
+  const store = new Store(root, packageHost()), token = randomBytes(24).toString("hex");
   const server = http.createServer(async (req, res) => {
     const json = (value, status = 200) => {
       res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" });
@@ -3355,11 +3349,11 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
       const host = req.headers.host || "";
       if (!/^(127\.0\.0\.1|localhost)(:\d+)?$/.test(host)) return json({ error: "Local access only" }, 403);
       if (req.headers.origin && req.headers.origin !== `http://${host}`) return json({ error: "Origin rejected" }, 403);
-      const url = new URL(req.url || "/", "http://" + host), store = url.searchParams.get("demo") === "1" ? demo : real;
-      if (req.method === "GET" && url.pathname === "/api/health") return json({ service: "genpet-debugger", root: real.root });
-      if (req.method === "GET" && url.pathname === "/api/state") return json({ state: await store.peek(), token, demo: store.demo });
+      const url = new URL(req.url || "/", "http://" + host);
+      if (req.method === "GET" && url.pathname === "/api/health") return json({ service: "genpet-debugger", root: store.root });
+      if (req.method === "GET" && url.pathname === "/api/state") return json({ state: await store.peek(), token });
       if (req.method === "GET" && url.pathname === "/api/art-request") return json(artRequest(await store.peek()));
-      if (req.method === "GET" && url.pathname === "/api/native-pets") return json(real.host === "desktop" ? { ...await getNativePetCatalog(), live: await readNativePetLive() } : null);
+      if (req.method === "GET" && url.pathname === "/api/native-pets") return json(store.host === "desktop" ? { ...await getNativePetCatalog(), live: await readNativePetLive() } : null);
       if (req.method === "POST" && url.pathname === "/api/action") {
         if (req.headers["x-genpet-token"] !== token) return json({ error: "Invalid request token" }, 403);
         let body = "";
@@ -3375,7 +3369,7 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
           return;
         }
         if (input.action === "switch-pet") {
-          if (store.demo || store.host !== "desktop") throw new Error("Demo/Dots cannot switch the desktop Pet");
+          if (store.host !== "desktop") throw new Error("Dots cannot switch the desktop Pet");
           const catalog = await getNativePetCatalog();
           if (!catalog.pets.some((pet) => pet.id === input.petId)) throw new Error("Unknown pet ID");
           return json({ ok: true, result: await selectNativePetLive(input.petId) });

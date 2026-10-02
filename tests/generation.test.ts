@@ -33,7 +33,7 @@ test('contract checks allow open design and extra fields while rejecting missing
  assert.deepEqual(validateUnitResult('appearance',{inputRefs:[],result:{appearance:null,visuals:[]}}).result,{appearance:null,visuals:[]});
 });
 test('step retries deduplicate, revisions remain observable, and logging cannot mutate the saved plan or advance a pet',async()=>{
- const root=await mkdtemp(path.join(tmpdir(),'genpet-step-')),store=new Store(root,true,'dots');
+ const root=await mkdtemp(path.join(tmpdir(),'genpet-step-')),store=new Store(root,'dots');
  try{
   const operation=(await beginStory(store,'unit:logging','initialization')).pending!.id;
   await planStory(store,operation,initialPlan);const before=await store.peek(),hash=requestId(before);
@@ -50,7 +50,7 @@ test('step retries deduplicate, revisions remain observable, and logging cannot 
  }finally{await rm(root,{recursive:true,force:true});}
 });
 test('completed stories keep their unit artifacts and accept an internal output result without changing story text',async()=>{
- const root=await mkdtemp(path.join(tmpdir(),'genpet-completed-step-')),store=new Store(root,true,'dots');
+ const root=await mkdtemp(path.join(tmpdir(),'genpet-completed-step-')),store=new Store(root,'dots');
  try{
   await store.transaction(state=>{state.pet=createPet();state.pet.genes='Existing individual';});
   const operation=(await beginStory(store,'unit:completed')).pending!.id;
@@ -72,7 +72,7 @@ test('CLI unit request and contract verification are read-only and story output 
   await writeFile(resultFile,JSON.stringify(context));
   assert.equal(call('unit-request','context',fixture).unit,'context');assert.equal(call('verify-unit','context',resultFile).contractValid,true);
   await assert.rejects(()=>access(data));await assert.rejects(()=>access(env.CODEX_HOME));
-  const store=new Store(data,false,'desktop');
+  const store=new Store(data,'desktop');
   await store.transaction(state=>{state.pet=createPet();state.pet.genes='Test genes';state.stories.push({id:'completed-test',triggerId:'unit:output',petId:state.pet.id,at:0,text:'A story only.',basis:'Internal basis',stage:'egg',state:'Resting',mediaIds:[],steps:[{id:'step-private',unit:'context',at:0,...context}]});});
   const visible=call('story-output','completed-test');assert.equal(visible.text,'A story only.');assert.equal('steps' in visible,false);assert.equal('basis' in visible,false);
  }finally{await rm(root,{recursive:true,force:true});}

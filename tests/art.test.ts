@@ -16,13 +16,13 @@ test('native atlas validation rejects wrong layout, blank cells and occupied unu
  }finally{await rm(root,{recursive:true,force:true});}
 });
 test('request freshness and durable media prevent stale or temporary-file installs',async()=>{
- const root=await mkdtemp(path.join(tmpdir(),'genpet-art-')),store=new Store(root,true);
+ const root=await mkdtemp(path.join(tmpdir(),'genpet-art-')),store=new Store(root);
  try{
   await initialization(store);const file=path.join(root,'art.png');await image(file,true);
   await assert.rejects(()=>acceptArt(store,{requestId:'wrong',file,kind:'atlas',provenance:'Test'}),/Stale/);
   const request=artRequest(await store.peek())!,input={requestId:request.id,file,kind:'atlas' as const,provenance:'Synthetic native validation fixture'};
   const art=await acceptArt(store,input);assert.equal((await acceptArt(store,input)).id,art.id);await rm(file);await validateImage(art.file,'atlas');
-  assert.equal((await store.peek()).art.length,1);await assert.rejects(()=>installNative(store),/Demo/);
+  assert.equal((await store.peek()).art.length,1);
   const destination=path.join(root,'export');await exportNative(await store.peek(),destination);const first=await readFile(path.join(destination,'pet.json'),'utf8');
   await exportNative(await store.peek(),destination);assert.equal(await readFile(path.join(destination,'previous-pet.json'),'utf8'),first);
   const foreign=path.join(root,'foreign');await mkdir(foreign);await writeFile(path.join(foreign,'pet.json'),JSON.stringify({genpetId:'another-pet'}));

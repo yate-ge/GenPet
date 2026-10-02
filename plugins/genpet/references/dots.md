@@ -16,6 +16,4 @@ Record the actual result in a JSON file, then `host-result OPERATION_ID RESULT_F
 
 `confirmed` requires a concise `evidence` describing the actual observed display. Request acceptance alone is `unconfirmed`. An unsuccessful update uses `updated:false` and an `error`; do not complete its story as if a visual change succeeded.
 
-For reusable automatic installation, an optional adapter reads that `host-request` JSON from stdin and returns one `HostResult` JSON on stdout. Install it in the Dots environment, then `configure-host ADAPTER_FILE` where the config is `{"command":"/absolute/executable","args":["/absolute/adapter-script"]}`. `publish` calls this adapter, preserving the same operation IDs and target. No shell interpolation is used. Prefer native tools directly when this small bridge is unnecessary.
-
 The first integration must verify two actual cases: active target updates immediately; inactive target updates without changing selection. Local protocol tests are not Dots display evidence. Plug-in packaging cannot establish a particular cloud host's APIs; the Dots Agent must check and validate its own environment.
