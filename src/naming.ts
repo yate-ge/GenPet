@@ -1,6 +1,6 @@
-import { identifier, text } from './core.js';
-import type { Pet } from './core.js';
-import type { Store, State } from './store.js';
+/** User naming after the hatch: invite once, save only the user's own answer, keyed by Pet ID. */
+import { identifier, text, type Pet, type State } from './model.js';
+import type { Store } from './store.js';
 
 export function namingDue(state: State): boolean {
   return !state.pending && !!state.pet && state.pet.stage !== 'egg' && state.pet.naming?.status === 'unasked';

@@ -1671,7 +1671,7 @@ var require_sync_inflate = __commonJS({
       if (typeof asyncCb === "function") {
         return zlib.Inflate._processChunk.call(this, chunk, flushFlag, asyncCb);
       }
-      let self = this;
+      let self2 = this;
       let availInBefore = chunk && chunk.length;
       let availOutBefore = this._chunkSize - this._offset;
       let leftToInflate = this._maxLength;
@@ -1683,14 +1683,14 @@ var require_sync_inflate = __commonJS({
         error = err;
       });
       function handleChunk(availInAfter, availOutAfter) {
-        if (self._hadError) {
+        if (self2._hadError) {
           return;
         }
         let have = availOutBefore - availOutAfter;
         assert(have >= 0, "have should not go down");
         if (have > 0) {
-          let out = self._buffer.slice(self._offset, self._offset + have);
-          self._offset += have;
+          let out = self2._buffer.slice(self2._offset, self2._offset + have);
+          self2._offset += have;
           if (out.length > leftToInflate) {
             out = out.slice(0, leftToInflate);
           }
@@ -1701,10 +1701,10 @@ var require_sync_inflate = __commonJS({
             return false;
           }
         }
-        if (availOutAfter === 0 || self._offset >= self._chunkSize) {
-          availOutBefore = self._chunkSize;
-          self._offset = 0;
-          self._buffer = Buffer.allocUnsafe(self._chunkSize);
+        if (availOutAfter === 0 || self2._offset >= self2._chunkSize) {
+          availOutBefore = self2._chunkSize;
+          self2._offset = 0;
+          self2._buffer = Buffer.allocUnsafe(self2._chunkSize);
         }
         if (availOutAfter === 0) {
           inOff += availInBefore - availInAfter;
@@ -1975,10 +1975,10 @@ var require_packer_sync = __commonJS({
 var require_png_sync = __commonJS({
   "node_modules/pngjs/lib/png-sync.js"(exports) {
     "use strict";
-    var parse2 = require_parser_sync();
+    var parse = require_parser_sync();
     var pack = require_packer_sync();
     exports.read = function(buffer, options) {
-      return parse2(buffer, options || {});
+      return parse(buffer, options || {});
     };
     exports.write = function(png, options) {
       return pack(png, options);
@@ -2125,19 +2125,51 @@ var require_png = __commonJS({
 
 // src/debugger-server.ts
 import http from "node:http";
-import { readFile as readFile3 } from "node:fs/promises";
-import path5 from "node:path";
+import { readFile as readFile7 } from "node:fs/promises";
+import path6 from "node:path";
 import { randomBytes } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
 // src/store.ts
 import { mkdir, readFile, rename, writeFile, rm, stat } from "node:fs/promises";
-import { homedir } from "node:os";
-import path from "node:path";
+import path2 from "node:path";
 import { randomUUID } from "node:crypto";
 
-// src/core.ts
+// src/config.ts
+import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+var here = path.dirname(fileURLToPath(import.meta.url));
+function pluginRoot() {
+  const candidates = [path.resolve(here, ".."), path.resolve(here, "..", "plugins", "genpet")];
+  return candidates.find((dir) => existsSync(path.join(dir, ".codex-plugin", "plugin.json"))) ?? candidates[0];
+}
+function packageHost() {
+  const file = path.join(pluginRoot(), "config", "host.json");
+  const host = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")).host : "desktop";
+  if (!["desktop", "dots"].includes(host)) throw new Error("Invalid package host");
+  return host;
+}
+var dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), ".genpet");
+var codexHome = () => process.env.CODEX_HOME || path.join(homedir(), ".codex");
+function readPromptFile(fileName) {
+  const candidates = [
+    path.resolve(here, "..", "framework", "prompts", fileName),
+    path.join(pluginRoot(), "prompts", fileName)
+  ];
+  const file = candidates.find(existsSync);
+  if (!file) throw new Error(`Missing prompt file: ${fileName}`);
+  return readFileSync(file, "utf8");
+}
+function readPrompt(name) {
+  if (!/^[a-z][a-z0-9-]*$/.test(name)) throw new Error("Invalid prompt module");
+  return readPromptFile(`${name}.md`);
+}
+
+// src/model.ts
 var stages = ["egg", "hatchling", "juvenile", "adult"];
+var fresh = (host) => ({ version: 2, host, pet: null, stories: [], art: [], pending: null });
 function text(value, field) {
   if (typeof value !== "string" || !value.trim()) throw new Error(`${field} must be nonempty text`);
   return value.trim();
@@ -2155,10 +2187,8 @@ function validateStage(current, target) {
 }
 
 // src/store.ts
-var dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), ".genpet");
-var fresh = (host) => ({ version: 2, host, pet: null, stories: [], art: [], pending: null });
 async function atomicJson(file, value) {
-  await mkdir(path.dirname(file), { recursive: true, mode: 448 });
+  await mkdir(path2.dirname(file), { recursive: true, mode: 448 });
   const tmp = `${file}.${randomUUID()}.tmp`;
   try {
     await writeFile(tmp, JSON.stringify(value, null, 2) + "\n", { mode: 384, flag: "wx" });
@@ -2170,28 +2200,27 @@ async function atomicJson(file, value) {
 var Store = class {
   constructor(root = dataRoot(), host = "desktop") {
     this.host = host;
-    this.base = path.resolve(root);
-    this.root = path.resolve(this.base, host);
-    this.file = path.join(this.root, "state.json");
+    this.base = path2.resolve(root);
+    this.root = path2.resolve(this.base, host);
+    this.file = path2.join(this.root, "state.json");
   }
   host;
   base;
   root;
   file;
-  now() {
-    return Date.now();
-  }
+  /** Read-only; a missing file is an empty record, and elapsed time never changes a pet. */
   async peek() {
     try {
       const state = JSON.parse(await readFile(this.file, "utf8"));
       if (state.version !== 2 || state.host !== this.host) throw new Error("Unsupported or mismatched pet record");
-      if (state.pet) {
-        identifier(state.pet.id, "petId");
-        validateStage("egg", state.pet.stage);
-        if (state.pet.personality !== void 0 && (typeof state.pet.personality !== "string" || !state.pet.personality.trim()))
+      const pet = state.pet;
+      if (pet) {
+        identifier(pet.id, "petId");
+        validateStage("egg", pet.stage);
+        if (pet.personality !== void 0 && (typeof pet.personality !== "string" || !pet.personality.trim()))
           throw new Error("Invalid personality");
-        if (state.pet.naming?.status === "deferred") state.pet.naming.status = "asked";
-        if (state.pet.naming && !["unasked", "asked", "named"].includes(state.pet.naming.status))
+        if (pet.naming?.status === "deferred") pet.naming.status = "asked";
+        if (pet.naming && !["unasked", "asked", "named"].includes(pet.naming.status))
           throw new Error("Invalid naming status");
       }
       return state;
@@ -2200,29 +2229,21 @@ var Store = class {
       throw error;
     }
   }
-  async legacyCandidate() {
-    if (this.host !== "desktop") return null;
-    const file = path.join(this.base, "state.json");
-    try {
-      const old = JSON.parse(await readFile(file, "utf8"));
-      return old.version === 1 && old.pet ? file : null;
-    } catch (error) {
-      if (error.code === "ENOENT") return null;
-      throw error;
-    }
-  }
+  /** Serializes changes across processes; the record is written only if `fn` succeeds. */
   async transaction(fn) {
     await mkdir(this.root, { recursive: true, mode: 448 });
     const lock = this.file + ".lock";
     let acquired = false;
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 100 && !acquired; i++) {
       try {
         await mkdir(lock);
         acquired = true;
-        break;
       } catch (error) {
         if (error.code !== "EEXIST") throw error;
-        const age = await stat(lock).then((info) => Date.now() - info.mtimeMs).catch(() => 0);
+        const age = await stat(lock).then(
+          (info) => Date.now() - info.mtimeMs,
+          () => 0
+        );
         if (age > 12e4) await rm(lock, { recursive: true, force: true });
         else await new Promise((resolve) => setTimeout(resolve, 50));
       }
@@ -2239,1092 +2260,281 @@ var Store = class {
   }
 };
 
-// src/image.ts
-var import_pngjs = __toESM(require_png(), 1);
+// src/art.ts
+import { mkdir as mkdir3, readFile as readFile6, rename as rename3, rm as rm2, stat as stat2, writeFile as writeFile3 } from "node:fs/promises";
 
-// src/story.ts
-import { randomUUID as randomUUID2, createHash } from "node:crypto";
-function appearanceFor(state, stage, id) {
-  const kind = state.host === "desktop" ? "atlas" : "avatar";
-  const art = state.art.find(
-    (art2) => art2.id === id && art2.petId === state.pet.id && art2.kind === kind && art2.stage === stage
-  );
-  if (!art)
-    throw new Error("Reusable appearance is missing, belongs to another pet, or is incompatible with this host/stage");
-  return art;
-}
-function requestId(state) {
-  const pending = state.pending;
-  return pending?.plan ? createHash("sha256").update(JSON.stringify([pending.id, pending.petId, pending.baseRevision, pending.plan])).digest("hex").slice(0, 24) : null;
-}
-function desiredAppearance(state) {
-  const plan = state.pending?.plan;
-  if (!plan?.appearance) return state.art.find((art) => art.id === state.pet?.state.appearanceId);
-  if (plan.appearance.reuseArtId) return appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
-  const kind = state.host === "desktop" ? "atlas" : "avatar";
-  return [...state.art].reverse().find((art) => art.petId === state.pet?.id && art.requestId === requestId(state) && art.kind === kind);
-}
+// src/appearance.ts
+import { createHash as createHash3 } from "node:crypto";
 
-// src/native-pet-live.ts
-import { randomUUID as randomUUID3 } from "node:crypto";
-import net from "node:net";
-var maxFrameBytes = 8 * 1024 * 1024;
-var selectedKey = "selected-avatar-id";
-function record(value) {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-function connection(options) {
-  const pipePath = (Object.hasOwn(options, "pipePath") ? options.pipePath : process.env.CODEX_APP_TOOLS_PIPE_PATH)?.trim();
-  const threadId = (Object.hasOwn(options, "threadId") ? options.threadId : process.env.CODEX_THREAD_ID)?.trim();
-  if (!pipePath || !threadId) throw new Error("The current Codex app tools pipe and thread ID are unavailable.");
-  if (process.platform === "win32" && !pipePath.startsWith("\\\\.\\pipe\\")) {
-    throw new Error("Expected a local Windows named pipe for Codex app tools.");
-  }
-  const timeoutMs = options.timeoutMs ?? 5e3;
-  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error("The Codex app tools timeout must be positive.");
-  return { pipePath, threadId, timeoutMs };
-}
-function frame(message) {
-  const payload = Buffer.from(JSON.stringify(message));
-  const header = Buffer.alloc(4);
-  header.writeUInt32LE(payload.length);
-  return Buffer.concat([header, payload]);
-}
-function projectSelection(value) {
-  if (!record(value) || !record(value.settings) || !record(value.effectiveSettings)) {
-    throw new Error("Codex returned an invalid settings response.");
-  }
-  const selectedPetId = value.settings[selectedKey] ?? null;
-  const effectiveSelectedPetId = value.effectiveSettings[selectedKey] ?? null;
-  if (selectedPetId !== null && typeof selectedPetId !== "string" || effectiveSelectedPetId !== null && typeof effectiveSelectedPetId !== "string") {
-    throw new Error("Codex returned an invalid pet selection.");
-  }
-  return { selectedPetId, effectiveSelectedPetId };
-}
-async function requestSelection(options, petId) {
-  const { pipePath, threadId, timeoutMs } = connection(options);
-  const id = 1;
-  const request = {
-    jsonrpc: "2.0",
-    id,
-    method: "tools/call",
-    params: {
-      namespace: "codex_app",
-      tool: petId === void 0 ? "read_settings" : "write_settings",
-      arguments: petId === void 0 ? { include_config: false } : { settings: { [selectedKey]: petId } },
-      callerSource: "codex",
-      threadId,
-      callId: `mcp-call-${randomUUID3()}`,
-      // These fallbacks follow the bundled app-tools MCP's request metadata.
-      turnId: `mcp-turn-${randomUUID3()}`
+// src/hosts/desktop/atlas.ts
+var ATLAS = { width: 1536, height: 2288, columns: 8, rows: 11, cellWidth: 192, cellHeight: 208 };
+var ATLAS_CONTRACT = {
+  columns: ATLAS.columns,
+  cellWidth: ATLAS.cellWidth,
+  cellHeight: ATLAS.cellHeight,
+  rows: ATLAS.rows,
+  spriteVersionNumber: 2
+};
+var actions = [
+  { name: "idle", row: 0, count: 6, durations: [280, 110, 110, 140, 140, 320] },
+  { name: "running-right", row: 1, count: 8, durations: [120, 120, 120, 120, 120, 120, 120, 220] },
+  { name: "running-left", row: 2, count: 8, durations: [120, 120, 120, 120, 120, 120, 120, 220] },
+  { name: "waving", row: 3, count: 4, durations: [140, 140, 140, 280] },
+  { name: "jumping", row: 4, count: 5, durations: [140, 140, 140, 140, 280] },
+  { name: "failed", row: 5, count: 8, durations: [140, 140, 140, 140, 140, 140, 140, 240] },
+  { name: "waiting", row: 6, count: 6, durations: [150, 150, 150, 150, 150, 260] },
+  { name: "running", row: 7, count: 6, durations: [120, 120, 120, 120, 120, 220] },
+  { name: "review", row: 8, count: 6, durations: [150, 150, 150, 150, 150, 280] }
+];
+function checkAtlas(image) {
+  if (image.width !== ATLAS.width || image.height !== ATLAS.height) throw new Error("Atlas must be 1536 \xD7 2288 (v2)");
+  const { cellWidth: w, cellHeight: h } = ATLAS;
+  for (let row = 0; row < ATLAS.rows; row++)
+    for (let col = 0; col < ATLAS.columns; col++) {
+      const used = col < (row < actions.length ? actions[row].count : ATLAS.columns) || row === 0 && col === 6;
+      let visible = 0;
+      for (let y = row * h; y < (row + 1) * h; y++)
+        for (let x = col * w; x < (col + 1) * w; x++) if (image.data[(y * image.width + x) * 4 + 3] > 0) visible++;
+      if (used && visible < 30) throw new Error(`Empty animation cell ${row},${col}`);
+      if (!used && visible > 0) throw new Error(`Unused cell ${row},${col} must be transparent`);
     }
-  };
-  return new Promise((resolve, reject) => {
-    const socket = net.createConnection(pipePath);
-    let pending = Buffer.alloc(0);
-    let settled = false;
-    let sent = false;
-    const finish = (error, result, cancel = false) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      if (cancel && sent && !socket.destroyed) {
-        socket.end(frame({ jsonrpc: "2.0", id, method: "tools/cancel" }));
-        socket.destroySoon();
-      } else socket.destroy();
-      if (error) reject(error);
-      else resolve(result);
-    };
-    const timer = setTimeout(
-      () => finish(new Error("Codex app tools timed out; the current selection is unconfirmed."), void 0, true),
-      timeoutMs
-    );
-    socket.once("connect", () => {
-      sent = true;
-      socket.write(frame(request));
-    });
-    socket.on(
-      "error",
-      (error) => finish(
-        new Error(`Codex app tools connection failed (${error.code ?? "socket error"}).`)
-      )
-    );
-    socket.on("close", () => finish(new Error("Codex app tools closed before confirming the pet selection.")));
-    socket.on("data", (bytes) => {
-      if (settled) return;
-      pending = Buffer.concat([pending, bytes]);
-      while (pending.length >= 4) {
-        const length = pending.readUInt32LE(0);
-        if (length > maxFrameBytes) return finish(new Error("Codex app tools response exceeded the size limit."));
-        if (pending.length < length + 4) return;
-        let response;
-        try {
-          response = JSON.parse(pending.subarray(4, length + 4).toString("utf8"));
-        } catch {
-          return finish(new Error("Codex app tools returned invalid JSON."));
-        }
-        pending = pending.subarray(length + 4);
-        if (!record(response) || response.id !== id) continue;
-        if (response.error !== void 0) return finish(new Error("Codex rejected the app tool request."));
-        const result = response.result;
-        if (!record(result) || result.success !== true || !Array.isArray(result.contentItems)) {
-          return finish(new Error("Codex could not complete the pet settings request."));
-        }
-        const item = result.contentItems.find((item2) => record(item2) && item2.type === "inputText");
-        if (!record(item) || typeof item.text !== "string")
-          return finish(new Error("Codex returned no pet settings result."));
-        try {
-          finish(void 0, projectSelection(JSON.parse(item.text)));
-        } catch {
-          finish(new Error("Codex returned an invalid pet settings result."));
-        }
-      }
-    });
-  });
-}
-async function readNativePetLive(options = {}) {
-  try {
-    return { available: true, ...await requestSelection(options) };
-  } catch (error) {
-    return {
-      available: false,
-      reason: error instanceof Error ? error.message : "Live Codex pet selection is unavailable."
-    };
-  }
-}
-async function selectNativePetLive(petId, options = {}) {
-  if (typeof petId !== "string" || petId.trim() !== petId || petId.length === 0 || petId.length > 512 || /[\x00-\x1f\x7f]/.test(petId)) {
-    throw new Error("A valid pet ID is required.");
-  }
-  await requestSelection(options, petId);
-  const result = await requestSelection(options);
-  if (result.selectedPetId !== petId || result.effectiveSelectedPetId !== petId) {
-    throw new Error("The live Codex selection did not match the requested pet; its current selection is unconfirmed.");
-  }
-  return { ...result, immediate: true, restartRequired: false, hostStateConfirmed: true, visualVerified: false };
 }
 
-// src/prompts.ts
-import { existsSync as existsSync2, readFileSync } from "node:fs";
+// src/hosts/desktop/publish.ts
+import { copyFile, mkdir as mkdir2, readFile as readFile4, rename as rename2, writeFile as writeFile2 } from "node:fs/promises";
+import { createHash as createHash2, randomUUID as randomUUID4 } from "node:crypto";
+import path5 from "node:path";
+
+// src/lifecycle.ts
+function pendingFor(state, id) {
+  const pending = state.pending;
+  if (!pending || pending.id !== id || !state.pet || pending.petId !== state.pet.id || pending.baseRevision !== state.pet.revision)
+    throw new Error("Stale story operation; read the persisted record before continuing");
+  return pending;
+}
+
+// src/hosts/result.ts
+function validateHostResult(state, operationId, input) {
+  const pending = pendingFor(state, operationId);
+  const binding = state.pet?.binding;
+  if (!binding) throw new Error("Bind the actual host target before recording an update");
+  if (input.petId !== pending.petId || input.operationId !== operationId)
+    throw new Error("Host result belongs to another pet or operation");
+  if (input.appearanceId !== desiredAppearance(state)?.id)
+    throw new Error("Host result belongs to a different appearance");
+  const avatarId = text(input.avatarId, "avatarId");
+  if (binding.avatarId !== avatarId) throw new Error("Host updated a different Avatar from the persisted target");
+  if (typeof input.updated !== "boolean" || ![true, false, null].includes(input.active) || typeof input.refreshRequested !== "boolean" || !["confirmed", "unconfirmed"].includes(input.displayStatus))
+    throw new Error("Invalid host result");
+  if (input.displayStatus === "confirmed" && !input.evidence?.trim())
+    throw new Error("Confirmed display requires evidence");
+  return {
+    petId: input.petId,
+    operationId,
+    appearanceId: input.appearanceId,
+    avatarId,
+    updated: input.updated,
+    active: input.active,
+    refreshRequested: input.refreshRequested,
+    displayStatus: input.displayStatus,
+    ...input.evidence ? { evidence: text(input.evidence, "evidence") } : {},
+    ...input.error ? { error: text(input.error, "error") } : {}
+  };
+}
+
+// src/hosts/desktop/refresh.ts
+import net from "node:net";
+import { lstat, readFile as readFile2 } from "node:fs/promises";
+import { createHash, randomUUID as randomUUID2 } from "node:crypto";
 import path3 from "node:path";
 
-// src/plugin-root.ts
-import { existsSync } from "node:fs";
-import path2 from "node:path";
-import { fileURLToPath } from "node:url";
-function pluginRoot() {
-  const moduleDirectory = path2.dirname(fileURLToPath(import.meta.url));
-  const candidates = [path2.resolve(moduleDirectory, ".."), path2.resolve(moduleDirectory, "..", "plugins", "genpet")];
-  return candidates.find((candidate) => existsSync(path2.join(candidate, ".codex-plugin", "plugin.json"))) ?? candidates[0];
+// src/hosts/desktop/frames.ts
+function encodeFrame(message) {
+  const body = Buffer.from(JSON.stringify(message));
+  const header = Buffer.alloc(4);
+  header.writeUInt32LE(body.length);
+  return Buffer.concat([header, body]);
 }
-
-// src/prompts.ts
-function packageHost() {
-  const file = path3.join(pluginRoot(), "config", "host.json");
-  const host = existsSync2(file) ? JSON.parse(readFileSync(file, "utf8")).host : "desktop";
-  if (!["desktop", "dots"].includes(host)) throw new Error("Invalid package host");
-  return host;
-}
-function readPromptFile(fileName) {
-  const candidates = [
-    path3.resolve(import.meta.dirname, "..", "framework", "prompts", fileName),
-    path3.join(pluginRoot(), "prompts", fileName)
-  ];
-  const file = candidates.find(existsSync2);
-  if (!file) throw new Error(`Missing prompt file: ${fileName}`);
-  return readFileSync(file, "utf8");
-}
-function readPrompt(name) {
-  if (!/^[a-z][a-z0-9-]*$/.test(name)) throw new Error("Invalid prompt module");
-  return readPromptFile(`${name}.md`);
-}
-
-// src/art.ts
-function artRequest(state) {
-  if (!state.pet || !state.pending?.plan) return null;
-  const plan = state.pending.plan, existing = desiredAppearance(state), id = requestId(state);
-  const references = state.art.filter(
-    (art) => art.petId === state.pet.id && (art.kind === "portrait" || state.host === "dots" && art.kind === "avatar")
-  );
-  return {
-    id,
-    operationId: state.pending.id,
-    petId: state.pet.id,
-    host: state.host,
-    status: !plan.appearance ? "unchanged" : existing ? "ready" : "pending",
-    stage: plan.stage,
-    name: state.pet.name,
-    naming: state.pet.naming,
-    personality: state.pet.personality ?? plan.personality,
-    genes: state.pet.genes ?? plan.genes,
-    story: plan.text,
-    appearance: plan.appearance,
-    reusableAppearances: state.art.filter((art) => art.petId === state.pet.id && ["atlas", "avatar"].includes(art.kind)),
-    referenceFiles: [
-      ...new Set(
-        [
-          references.find((art) => art.stage === "egg")?.file,
-          references.find((art) => art.stage !== "egg")?.file,
-          references.at(-1)?.file
-        ].filter((file) => !!file)
-      )
-    ],
-    prompt: readPrompt("meta") + "\n" + readPrompt("appearance"),
-    contract: state.host === "desktop" ? { columns: 8, cellWidth: 192, cellHeight: 208, rows: 11, spriteVersionNumber: 2 } : null,
-    target: state.pet.binding ?? null
+function readFrames(maxBytes, onMessage, onError) {
+  let buffer = Buffer.alloc(0);
+  let failed = false;
+  return (chunk) => {
+    if (failed) return;
+    buffer = Buffer.concat([buffer, chunk]);
+    while (buffer.length >= 4) {
+      const length = buffer.readUInt32LE(0);
+      if (length > maxBytes) {
+        failed = true;
+        return onError("too-large");
+      }
+      if (buffer.length < length + 4) return;
+      const body = buffer.subarray(4, length + 4);
+      buffer = buffer.subarray(length + 4);
+      let message;
+      try {
+        message = JSON.parse(body.toString("utf8"));
+      } catch {
+        failed = true;
+        return onError("invalid-json");
+      }
+      onMessage(message);
+    }
   };
 }
 
-// src/native-pets.ts
-import { readFile as readFile2, readdir } from "node:fs/promises";
-import { homedir as homedir2 } from "node:os";
-import path4 from "node:path";
-
-// node_modules/smol-toml/dist/error.js
-function getLineColFromPtr(string, ptr) {
-  let lines = string.slice(0, ptr).split(/\r?\n/);
-  return [lines.length, lines.pop().length + 1];
+// src/hosts/desktop/refresh.ts
+var INVALIDATE = { queryKey: ["custom-avatars"], reset: false };
+function desktopIpcPath() {
+  return process.platform === "win32" ? "\\\\.\\pipe\\codex-ipc" : path3.join(codexHome(), "ipc", "ipc.sock");
 }
-function makeCodeBlock(string, line, column) {
-  let lines = string.split(/\r?\n/);
-  let codeblock = "";
-  let numberLen = (Math.log10(line + 1) | 0) + 1;
-  for (let i = line - 1; i <= line + 1; i++) {
-    let l = lines[i - 1];
-    if (!l)
-      continue;
-    codeblock += i.toString().padEnd(numberLen, " ");
-    codeblock += ":  ";
-    codeblock += l;
-    codeblock += "\n";
-    if (i === line) {
-      codeblock += " ".repeat(numberLen + column + 2);
-      codeblock += "^\n";
-    }
-  }
-  return codeblock;
+function isLiveDestination(destination) {
+  if (process.env.GENPET_SKIP_NATIVE_REFRESH === "1") return false;
+  const relative = path3.relative(path3.resolve(codexHome(), "pets"), path3.resolve(destination));
+  return /^genpet-[a-zA-Z0-9_-]+$/.test(relative);
 }
-var TomlError = class _TomlError extends Error {
-  line;
-  column;
-  codeblock;
-  constructor(message, options) {
-    const [line, column] = getLineColFromPtr(options.toml, options.ptr);
-    const codeblock = makeCodeBlock(options.toml, line, column);
-    super(`Invalid TOML document: ${message}
-
-${codeblock}`, options);
-    this.line = line;
-    this.column = column;
-    this.codeblock = codeblock;
-  }
-  /** @internal */
-  static x(message, ctx, ptr) {
-    throw new _TomlError(message, { toml: ctx.s, ptr: ptr ?? ctx.p });
-  }
-};
-
-// node_modules/smol-toml/dist/primitive.js
-function parseString(ctx) {
-  let startPtr = ctx.p;
-  let c = ctx.s.charCodeAt(ctx.p++);
-  let first = c;
-  let isLiteral = c === 39;
-  let isMultiline = c === ctx.s.charCodeAt(ctx.p) && c === ctx.s.charCodeAt(ctx.p + 1);
-  if (isMultiline) {
-    if ((c = ctx.s.charCodeAt(ctx.p += 2)) === 10)
-      ctx.p++;
-    else if (c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10)
-      ctx.p += 2;
-  }
-  let parsed = "";
-  let sliceStart = ctx.p;
-  let state = 0;
-  for (; ctx.p < ctx.s.length; ctx.p++) {
-    c = ctx.s.charCodeAt(ctx.p);
-    if (isMultiline && (c === 10 || c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10)) {
-      state = state && 3;
-    } else if (c < 32 && c !== 9 || c === 127) {
-      TomlError.x("control characters are not allowed in strings", ctx);
-    } else if ((!state || state === 3) && c === first && (!isMultiline || ctx.s.charCodeAt(ctx.p + 1) === first && ctx.s.charCodeAt(ctx.p + 2) === first)) {
-      if (isMultiline) {
-        if (ctx.s.charCodeAt(ctx.p + 3) === first)
-          ctx.p++;
-        if (ctx.s.charCodeAt(ctx.p + 3) === first)
-          ctx.p++;
-      }
-      if (!state) {
-        let s = ctx.s.slice(sliceStart, ctx.p);
-        parsed = parsed ? parsed + s : s;
-      }
-      ctx.p += isMultiline ? 3 : 1;
-      return parsed;
-    } else if (!state) {
-      if (!isLiteral && c === 92) {
-        parsed += ctx.s.slice(sliceStart, sliceStart = ctx.p);
-        state = 1;
-      }
-    } else if (state === 1) {
-      if (c === 120 || c === 117 || c === 85) {
-        let errPtr = ctx.p++ - 1;
-        let value = 0;
-        let len = c === 120 ? 2 : c === 117 ? 4 : 8;
-        for (let j = 0; j < len; j++, ctx.p++) {
-          let hex = ctx.s.charCodeAt(ctx.p);
-          let digit = (
-            /* 0-9 */
-            hex >= 48 && hex <= 57 ? hex - 48 : (
-              /* A-F */
-              hex >= 65 && hex <= 70 ? hex - 65 + 10 : (
-                /* a-f */
-                hex >= 97 && hex <= 102 ? hex - 97 + 10 : -1
-              )
-            )
-          );
-          if (digit < 0)
-            TomlError.x("invalid non-hex character in unicode escape", ctx);
-          value = value << 4 | digit;
-        }
-        if (value < 0 || value > 1114111 || value >= 55296 && value <= 57343) {
-          TomlError.x("invalid unicode escape", ctx, errPtr);
-        }
-        parsed += String.fromCodePoint(value);
-        sliceStart = ctx.p--;
-        state = 0;
-      } else if (isMultiline && (c === 32 || c === 9)) {
-        state = 2;
-      } else {
-        if (c === 98)
-          parsed += "\b";
-        else if (c === 116)
-          parsed += "	";
-        else if (c === 110)
-          parsed += "\n";
-        else if (c === 102)
-          parsed += "\f";
-        else if (c === 114)
-          parsed += "\r";
-        else if (c === 101)
-          parsed += "\x1B";
-        else if (c === 34)
-          parsed += '"';
-        else if (c === 92)
-          parsed += "\\";
-        else
-          TomlError.x("unrecognised escape sequence", ctx);
-        sliceStart = ctx.p + 1;
-        state = 0;
-      }
-    } else if (c !== 32 && c !== 9) {
-      if (state === 2)
-        TomlError.x("invalid escape: only line-ending whitespace may be escaped", ctx, sliceStart);
-      state = !isLiteral && c === 92 ? 1 : 0;
-      sliceStart = ctx.p;
-    }
-  }
-  TomlError.x("unfinished string", ctx, startPtr);
-}
-
-// node_modules/smol-toml/dist/date.js
-var DATE_TIME_RE = /^(\d{4}-\d{2}-\d{2})?[Tt ]?(?:(\d{2}):\d{2}(?::\d{2}(?:\.\d+)?)?)?(Z|z|[-+]\d{2}:\d{2})?$/i;
-var TomlDate = class _TomlDate extends Date {
-  #hasDate = false;
-  #hasTime = false;
-  #offset = null;
-  constructor(date, fasttype, unsafeDelim) {
-    let hasDate = true;
-    let hasTime = true;
-    let offset = "Z";
-    let c;
-    if (typeof date === "string") {
-      if (fasttype)
-        prep: {
-          if (fasttype < 3) {
-            if (+date.slice(11, 13) > 23) {
-              date = "";
-              break prep;
-            }
-            if (fasttype === 2) {
-              offset = null;
-              date += "Z";
-            } else if ((c = date.charCodeAt(date.length - 1)) !== 90 && c !== 122) {
-              offset = date.slice(date.length - 6);
-            }
-            if (unsafeDelim)
-              date = date.slice(0, 10) + "T" + date.slice(11);
-          } else if (fasttype === 4) {
-            date = +date.slice(0, 2) > 23 ? "" : `0000-01-01T${date}Z`;
-          }
-          hasDate = fasttype !== 4;
-          hasTime = fasttype !== 3;
-        }
-      else {
-        let match = date.match(DATE_TIME_RE);
-        if (match) {
-          if (!match[1]) {
-            hasDate = false;
-            date = `0000-01-01T${date}`;
-          }
-          hasTime = !!match[2];
-          hasTime && date[10] === " " && (date = date.replace(" ", "T"));
-          if (match[2] && +match[2] > 23) {
-            date = "";
-          } else {
-            offset = match[3] || null;
-            if (!offset && hasTime)
-              date += "Z";
-          }
-        } else {
-          date = "";
-        }
-      }
-    }
-    super(date);
-    if (!isNaN(this.getTime())) {
-      this.#hasDate = hasDate;
-      this.#hasTime = hasTime;
-      this.#offset = offset;
-    }
-  }
-  isDateTime() {
-    return this.#hasDate && this.#hasTime;
-  }
-  isLocal() {
-    return !this.#hasDate || !this.#hasTime || !this.#offset;
-  }
-  isDate() {
-    return this.#hasDate && !this.#hasTime;
-  }
-  isTime() {
-    return this.#hasTime && !this.#hasDate;
-  }
-  isValid() {
-    return this.#hasDate || this.#hasTime;
-  }
-  toISOString() {
-    let iso = super.toISOString();
-    if (this.isDate())
-      return iso.slice(0, 10);
-    if (this.isTime())
-      return iso.slice(11, 23);
-    if (this.#offset === null)
-      return iso.slice(0, -1);
-    if (this.#offset === "Z" || this.#offset === "z")
-      return iso;
-    let offset = +this.#offset.slice(1, 3) * 60 + +this.#offset.slice(4, 6);
-    offset = this.#offset[0] === "-" ? offset : -offset;
-    let offsetDate = new Date(this.getTime() - offset * 6e4);
-    return offsetDate.toISOString().slice(0, -1) + this.#offset;
-  }
-  static wrapAsOffsetDateTime(jsDate, offset = "Z") {
-    let date = new _TomlDate(jsDate);
-    date.#offset = offset;
-    return date;
-  }
-  static wrapAsLocalDateTime(jsDate) {
-    let date = new _TomlDate(jsDate);
-    date.#offset = null;
-    return date;
-  }
-  static wrapAsLocalDate(jsDate) {
-    let date = new _TomlDate(jsDate);
-    date.#hasTime = false;
-    date.#offset = null;
-    return date;
-  }
-  static wrapAsLocalTime(jsDate) {
-    let date = new _TomlDate(jsDate);
-    date.#hasDate = false;
-    date.#offset = null;
-    return date;
-  }
-};
-
-// node_modules/smol-toml/dist/extract.js
-function isDigit(char, base = 10) {
-  return base === 16 ? char > 47 && char < 58 || char > 64 && char < 71 || char > 96 && char < 103 : char > 47 && char < 48 + base;
-}
-function isEndOfValue(char, delim) {
-  return char === 32 || char === 9 || char === 10 || char === 13 || // Structure end or next value delimiter
-  delim && (char === delim || char === 44) || // Comment
-  char === 35;
-}
-function extractValue(ctx, end) {
-  let errPtr = ctx.p;
-  let c = ctx.s.charCodeAt(ctx.p);
-  if (c === 91 || c === 123) {
-    ctx.d-- || TomlError.x("document contains excessively nested structures. aborting.", ctx);
-    let value = c === 91 ? parseArray(ctx) : parseInlineTable(ctx);
-    ctx.d++;
-    return value;
-  }
-  if (c === 34 || c === 39) {
-    return parseString(ctx);
-  }
-  if (c === 116) {
-    if (ctx.s.charCodeAt(++ctx.p) !== 114 || ctx.s.charCodeAt(++ctx.p) !== 117 || ctx.s.charCodeAt(++ctx.p) !== 101)
-      TomlError.x("invalid value", ctx, errPtr);
-    return ctx.p++, true;
-  }
-  if (c === 102) {
-    if (ctx.s.charCodeAt(++ctx.p) !== 97 || ctx.s.charCodeAt(++ctx.p) !== 108 || ctx.s.charCodeAt(++ctx.p) !== 115 || ctx.s.charCodeAt(++ctx.p) !== 101)
-      TomlError.x("invalid value", ctx, errPtr);
-    return ctx.p++, false;
-  }
-  if (c === 43 || c === 45) {
-    return parseNumber(ctx, ctx.p, ctx.s.charCodeAt(++ctx.p), 44 - c, end);
-  }
-  if (ctx.s.charCodeAt(ctx.p + 4) === 45 && ctx.s.charCodeAt(ctx.p + 7) === 45) {
-    return parseDate(ctx, c, end);
-  }
-  if (ctx.s.charCodeAt(ctx.p + 2) === 58) {
-    return parseTime(ctx, c, end);
-  }
-  return parseNumber(ctx, ctx.p, c, 0, end);
-}
-function parseNumber(ctx, startPtr, startChr, sign, endChr) {
-  let c = startChr;
-  let state = 0;
-  let hasUnderscores = false;
-  if (c === 105) {
-    if (ctx.s.charCodeAt(++ctx.p) !== 110 || ctx.s.charCodeAt(++ctx.p) !== 102)
-      TomlError.x("invalid value", ctx, startPtr);
-    return ctx.p++, (sign || 1) / 0;
-  }
-  if (c === 110) {
-    if (ctx.s.charCodeAt(++ctx.p) !== 97 || ctx.s.charCodeAt(++ctx.p) !== 110)
-      TomlError.x("invalid value", ctx, startPtr);
-    return ctx.p++, NaN;
-  }
-  if (c === 48) {
-    if (++ctx.p >= ctx.s.length || isEndOfValue(c = ctx.s.charCodeAt(ctx.p), endChr))
-      return ctx.bi === true ? 0n : 0;
-    if (!sign) {
-      if (c === 120)
-        return parseIntegerBaseN(ctx, startPtr, 16, endChr);
-      else if (c === 98)
-        return parseIntegerBaseN(ctx, startPtr, 2, endChr);
-      else if (c === 111)
-        return parseIntegerBaseN(ctx, startPtr, 8, endChr);
-    }
-    if (c === 46)
-      state = 2;
-    else if (c === 101 || c === 69)
-      state = 4;
-    else
-      TomlError.x("illegal leading zero", ctx, startPtr);
-  } else if (!isDigit(c))
-    TomlError.x("invalid value", ctx, startPtr);
-  while (++ctx.p < ctx.s.length && (c = ctx.s.charCodeAt(ctx.p), !isEndOfValue(c, endChr))) {
-    if (!state)
-      state = 1;
-    if (c === 95) {
-      if (!(state & 1))
-        TomlError.x("illegal underscore", ctx);
-      state += 11;
-      hasUnderscores = true;
-    } else if (state === 1 && c === 46)
-      state = 2;
-    else if ((state === 1 || state === 3) && (c === 101 || c === 69))
-      state = 4;
-    else if (state === 4 && (c === 43 || c === 45)) {
-    } else if (!isDigit(c))
-      TomlError.x(`illegal character in numeric literal`, ctx);
-    else if (state > 9)
-      state -= 11;
-    else if (!(state & 1))
-      state++;
-  }
-  if (!state) {
-    let val = (startChr - 48) * (sign || 1);
-    return ctx.bi === true ? BigInt(val) : val;
-  }
-  if (!(state & 1))
-    TomlError.x("unfinished numeric value", ctx, startPtr);
-  let str = ctx.s.slice(startPtr, ctx.p);
-  if (hasUnderscores)
-    str = str.replaceAll("_", "");
-  return state > 1 ? parseFloat(str) : parseInteger(ctx, str, 10, startPtr);
-}
-function parseIntegerBaseN(ctx, startPtr, base, endChr) {
-  let c, underscore = 1;
-  while (++ctx.p < ctx.s.length && (c = ctx.s.charCodeAt(ctx.p), !isEndOfValue(c, endChr))) {
-    if (c === 95) {
-      if (underscore & 1)
-        TomlError.x("illegal underscore", ctx);
-      underscore = 3;
-    } else if (!isDigit(c, base))
-      TomlError.x(`illegal character in numeric literal`, ctx);
-    else if (underscore & 1)
-      underscore--;
-  }
-  if (underscore & 1)
-    TomlError.x("unfinished numeric value", ctx);
-  let str = ctx.s.slice(startPtr + 2, ctx.p);
-  if (underscore)
-    str = str.replaceAll("_", "");
-  return parseInteger(ctx, str, base, startPtr);
-}
-function parseInteger(ctx, str, base, startPtr) {
-  if (ctx.bi !== true)
-    int: {
-      let val = parseInt(str, base);
-      if (!Number.isSafeInteger(val)) {
-        if (ctx.bi)
-          break int;
-        TomlError.x("integer value cannot be represented losslessly", ctx, startPtr);
-      }
-      return val;
-    }
-  return base === 10 ? BigInt(str) : BigInt((base === 2 ? "0b" : base === 8 ? "0o" : "0x") + str);
-}
-function parseDate(ctx, c, endChr) {
-  let startPtr = ctx.p++, unsafeSeparator;
-  if (!isDigit(c) || !isDigit(ctx.s.charCodeAt(ctx.p++)) || !isDigit(ctx.s.charCodeAt(ctx.p++)) || !isDigit(ctx.s.charCodeAt(ctx.p++))) {
-    return parseNumber(ctx, ctx.p = startPtr, c, 0, endChr);
-  }
-  ctx.p += 5;
-  if (!isDigit(ctx.s.charCodeAt(ctx.p++)))
-    TomlError.x("invalid date-time: date part is malformed", ctx, startPtr);
-  if (ctx.p >= ctx.s.length || ((c = ctx.s.charCodeAt(ctx.p)) !== 32 || (unsafeSeparator = true, !isDigit(ctx.s.charCodeAt(ctx.p + 1)))) && c !== 84 && c !== 116) {
-    let t2 = ctx.s.slice(startPtr, ctx.p);
-    return readDate(ctx, t2, 3, false, startPtr);
-  }
-  if (ctx.s.charCodeAt(ctx.p += 3) !== 58)
-    TomlError.x("invalid date-time: time part is malformed", ctx, startPtr);
-  if (ctx.s.charCodeAt(ctx.p += 3) === 58)
-    ctx.p += 3;
-  if (ctx.s.charCodeAt(ctx.p) === 46)
-    while (isDigit(ctx.s.charCodeAt(++ctx.p)))
-      ;
-  if (c = ctx.s.charCodeAt(ctx.p)) {
-    if (c === 90 || c === 122) {
-      let t2 = ctx.s.slice(startPtr, ++ctx.p);
-      return readDate(ctx, t2, 1, unsafeSeparator, startPtr, "[+00:00]");
-    }
-    if (c === 43 || c === 45) {
-      let t2 = ctx.s.slice(startPtr, ctx.p += 6);
-      return readDate(ctx, t2, 1, unsafeSeparator, startPtr, !ctx.ld && "[" + ctx.s.slice(ctx.p - 6, ctx.p) + "]");
-    }
-  }
-  let t = ctx.s.slice(startPtr, ctx.p);
-  return readDate(ctx, t, 2, unsafeSeparator, startPtr);
-}
-function parseTime(ctx, c, endChr) {
-  let start = ctx.p;
-  if (!isDigit(c) || !isDigit(ctx.s.charCodeAt(++ctx.p))) {
-    return parseNumber(ctx, --ctx.p, c, 0, endChr);
-  }
-  if (ctx.s.charCodeAt(ctx.p += 4) === 58)
-    ctx.p += 3;
-  if (ctx.s.charCodeAt(ctx.p) === 46)
-    while (isDigit(ctx.s.charCodeAt(++ctx.p)))
-      ;
-  let t = ctx.s.slice(start, ctx.p);
-  return readDate(ctx, t, 4, false, start);
-}
-function readDate(ctx, str, type, unsafeDelim, errPtr, temporalSuffix) {
-  if (ctx.ld) {
-    let date = new TomlDate(str, type, unsafeDelim);
-    if (!date.isValid())
-      TomlError.x("invalid date", ctx, errPtr);
-    return date;
-  }
-  try {
-    if (temporalSuffix)
-      str += temporalSuffix;
-    switch (type) {
-      case 1:
-        return Temporal.ZonedDateTime.from(str);
-      case 2:
-        return Temporal.PlainDateTime.from(str);
-      case 3:
-        return Temporal.PlainDate.from(str);
-      case 4:
-        return Temporal.PlainTime.from(str);
-    }
-  } catch (e) {
-    TomlError.x(e instanceof Error ? e.message : "" + e, ctx, errPtr);
-  }
-}
-
-// node_modules/smol-toml/dist/util.js
-function skipComment(ctx) {
-  for (; ctx.p < ctx.s.length; ctx.p++) {
-    let c = ctx.s.charCodeAt(ctx.p);
-    if (c === 10)
-      break;
-    if (c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10) {
-      ctx.p++;
-      break;
-    }
-    if (c < 32 && c !== 9 || c === 127) {
-      TomlError.x("control characters are not allowed in comments", ctx);
-    }
-  }
-}
-function skipVoid(ctx, banNewLines, banComments) {
-  let c;
-  while (ctx.p < ctx.s.length) {
-    while (ctx.p < ctx.s.length && ((c = ctx.s.charCodeAt(ctx.p)) === 32 || c === 9 || !banNewLines && (c === 10 || c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10)))
-      ctx.p++;
-    if (banComments || c !== 35)
-      break;
-    skipComment(ctx);
-  }
-}
-
-// node_modules/smol-toml/dist/struct.js
-function parseKey(ctx, end = 61) {
-  let startPtr;
-  let state = 0;
-  let parsed = [];
-  let sliceStart;
-  let c = ctx.s.charCodeAt(startPtr = ctx.p);
-  do {
-    if (c === end) {
-      if (!state)
-        TomlError.x("unexpected end of key", ctx);
-      if (state === 1)
-        parsed.push(ctx.s.slice(sliceStart, ctx.p));
-      return ctx.p++, parsed;
-    } else if (c === 46) {
-      if (!state)
-        TomlError.x("illegal empty bare key", ctx);
-      if (state === 1)
-        parsed.push(ctx.s.slice(sliceStart, ctx.p));
-      state = 0;
-    } else if (!state && (c === 34 || c === 39)) {
-      if (c === ctx.s.charCodeAt(ctx.p + 1) && c === ctx.s.charCodeAt(ctx.p + 2))
-        TomlError.x("illegal quoted key: multiline strings are not allowed", ctx);
-      parsed.push(parseString(ctx));
-      state = 2;
-      ctx.p--;
-    } else if (c === 32 || c === 9) {
-      if (state === 1) {
-        parsed.push(ctx.s.slice(sliceStart, ctx.p));
-        state = 2;
-      }
-    } else if (state === 2 || c < 48 && c !== 45 || c > 57 && c < 65 || c > 90 && c < 97 && c !== 95 || c > 122) {
-      TomlError.x("illegal character in key", ctx);
-    } else if (!state) {
-      state = 1;
-      sliceStart = ctx.p;
-    }
-  } while (c = ctx.s.charCodeAt(++ctx.p));
-  TomlError.x("incomplete key-value: cannot find end of key", ctx, startPtr);
-}
-function parseInlineTable(ctx) {
-  let startPtr = ctx.p++;
-  let res = /* @__PURE__ */ Object.create(null);
-  let seen = /* @__PURE__ */ new Set();
-  let c;
-  while (ctx.p < ctx.s.length) {
-    skipVoid(ctx);
-    if ((c = ctx.s.charCodeAt(ctx.p)) === 125) {
-      ctx.p++;
-      return res;
-    }
-    let k;
-    let t = res;
-    let hasOwn = false;
-    let errPtr = ctx.p;
-    let key = parseKey(ctx);
-    for (let i = 0; i < key.length; i++) {
-      if (i)
-        t = hasOwn ? t[k] : t[k] = /* @__PURE__ */ Object.create(null);
-      k = key[i];
-      if ((hasOwn = Object.hasOwn(t, k)) && (typeof t[k] !== "object" || seen.has(t[k]))) {
-        TomlError.x("trying to redefine an already defined value", ctx, errPtr);
-      }
-      let unsafe = k === "__proto__";
-      if (ctx.uk && (unsafe || k === "constructor")) {
-        t = ctx.uk !== 1 && TomlError.x("document contains an unsafe property", ctx, errPtr);
-        break;
-      }
-      if (!hasOwn && unsafe) {
-        Object.defineProperty(t, k, { enumerable: true, configurable: true, writable: true });
-      }
-    }
-    if (hasOwn) {
-      TomlError.x("trying to redefine an already defined value", ctx, errPtr);
-    }
-    skipVoid(ctx, true, true);
-    let value = extractValue(
-      ctx,
-      125
-      /* } */
-    );
-    if (t && typeof (t[k] = value) === "object")
-      seen.add(value);
-    skipVoid(ctx);
-    if ((c = ctx.s.charCodeAt(ctx.p++)) === 125) {
-      return res;
-    }
-    if (c !== 44)
-      TomlError.x("expected comma or end of structure", ctx, ctx.p - 1);
-  }
-  TomlError.x("unfinished table", ctx, startPtr);
-}
-function parseArray(ctx) {
-  let startPtr = ctx.p++;
-  let res = [];
-  let c;
-  while (ctx.p < ctx.s.length) {
-    skipVoid(ctx);
-    if ((c = ctx.s.charCodeAt(ctx.p)) === 93) {
-      ctx.p++;
-      return res;
-    }
-    res.push(extractValue(
-      ctx,
-      93
-      /* ] */
-    ));
-    skipVoid(ctx);
-    if ((c = ctx.s.charCodeAt(ctx.p++)) === 93) {
-      return res;
-    }
-    if (c !== 44)
-      TomlError.x("expected comma or end of structure", ctx, ctx.p - 1);
-  }
-  TomlError.x("unfinished array", ctx, startPtr);
-}
-
-// node_modules/smol-toml/dist/parse.js
-function peekTable(ctx, key, table, meta, type) {
-  let t = table;
-  let m = meta;
-  let k;
-  let hasOwn = false;
-  let state;
-  for (let i = 0; i < key.length; i++) {
-    if (i) {
-      t = hasOwn ? t[k] : t[k] = /* @__PURE__ */ Object.create(null);
-      m = (state = m[k]).c;
-      if (type === 0 && (state.t === 1 || state.t === 2)) {
-        return null;
-      }
-      if (state.t === 2) {
-        let l = t.length - 1;
-        t = t[l];
-        m = m[l].c;
-      }
-    }
-    k = key[i];
-    if ((hasOwn = Object.hasOwn(t, k)) && m[k]?.t === 0 && m[k]?.d) {
-      return null;
-    }
-    if (!hasOwn) {
-      let unsafe = k === "__proto__";
-      if (ctx.uk && (unsafe || k === "constructor"))
-        return false;
-      if (unsafe) {
-        Object.defineProperty(t, k, { enumerable: true, configurable: true, writable: true });
-        Object.defineProperty(m, k, { enumerable: true, configurable: true, writable: true });
-      }
-      m[k] = {
-        t: i < key.length - 1 && type === 2 ? 3 : type,
-        d: false,
-        i: 0,
-        c: /* @__PURE__ */ Object.create(null)
+async function refreshNativePet(options) {
+  const expectedSpriteSha256 = createHash("sha256").update(await readFile2(options.expectedSpritePath)).digest("hex");
+  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || isLiveDestination(path3.dirname(options.expectedSpritePath)));
+  const errors = [];
+  if (useIpc) {
+    try {
+      const ipc = await refreshViaIpc(options.ipcSocketPath ?? void 0, options.timeoutMs ?? 2e3);
+      return {
+        automaticRefresh: true,
+        refreshRequested: true,
+        displayStatus: "unconfirmed",
+        strategy: "ipc-query-invalidate",
+        ipc,
+        expectedSpriteSha256,
+        notice: "Automatic refresh requested through the existing desktop IPC channel. Router relay confirmed; the displayed sprite hash was not measured."
       };
+    } catch (error) {
+      errors.push(`ipc: ${error.message}`);
     }
   }
-  state = m[k];
-  if (state.t !== type && !(type === 1 && state.t === 3)) {
-    return null;
-  }
-  if (type === 2) {
-    if (!state.d) {
-      state.d = true;
-      t[k] = [];
-    }
-    t[k].push(t = /* @__PURE__ */ Object.create(null));
-    state.c[state.i++] = state = { t: 1, d: false, i: 0, c: /* @__PURE__ */ Object.create(null) };
-  }
-  if (state.d) {
-    return null;
-  }
-  state.d = true;
-  if (type === 1) {
-    t = hasOwn ? t[k] : t[k] = /* @__PURE__ */ Object.create(null);
-  } else if (type === 0 && hasOwn) {
-    return null;
-  }
-  return [k, t, state.c];
-}
-function validateTablePeek(ctx, peek, ptr) {
-  if (peek === null || ctx.uk === 2)
-    TomlError.x(peek === null ? "trying to redefine an already defined table or value" : "document contains an unsafe property", ctx, ptr);
-}
-function parse(toml, options = {}) {
-  let ctx = {
-    s: toml,
-    p: 0,
-    d: options.maxDepth ?? 1e3,
-    bi: options.integersAsBigInt ?? false,
-    ld: options.useLegacyDate ?? true,
-    uk: options.unsafeKeyBehaviour === "throw" ? 2 : options.unsafeKeyBehaviour === "drop" ? 1 : 0
-  };
-  let res = /* @__PURE__ */ Object.create(null);
-  let meta = /* @__PURE__ */ Object.create(null);
-  let tmp;
-  let skipping = false;
-  let tbl = res;
-  let m = meta;
-  if (toml.charCodeAt(0) === 65279)
-    ctx.p++;
-  skipVoid(ctx);
-  while (ctx.p < toml.length) {
-    if (toml.charCodeAt(ctx.p) === 91) {
-      let isTableArray = toml.charCodeAt(++ctx.p) === 91;
-      tmp = ctx.p += +isTableArray;
-      skipping = false;
-      let k = parseKey(
-        ctx,
-        93
-        /* ] */
-      );
-      if (isTableArray) {
-        if (toml.charCodeAt(ctx.p) !== 93) {
-          TomlError.x("expected end of table array declaration", ctx);
-        }
-        ctx.p++;
-      }
-      let p = peekTable(
-        ctx,
-        k,
-        res,
-        meta,
-        isTableArray ? 2 : 1
-        /* Type.EXPLICIT */
-      );
-      if (!p) {
-        validateTablePeek(ctx, p, tmp);
-        skipping = true;
-      } else {
-        m = p[2];
-        tbl = p[1];
-      }
-    } else {
-      tmp = ctx.p;
-      let k = parseKey(ctx);
-      let p = peekTable(
-        ctx,
-        k,
-        tbl,
-        m,
-        0
-        /* Type.DOTTED */
-      );
-      if (!p && !skipping)
-        validateTablePeek(ctx, p, tmp);
-      skipVoid(ctx, true, true);
-      let v = extractValue(ctx, void 0);
-      if (p && !skipping)
-        p[1][p[0]] = v;
-    }
-    skipVoid(ctx, true);
-    if (ctx.p < toml.length && (tmp = toml.charCodeAt(ctx.p)) !== 10 && (tmp !== 13 || toml.charCodeAt(ctx.p + 1) !== 10)) {
-      TomlError.x("each key-value declaration must be followed by an end-of-line", ctx);
-    }
-    skipVoid(ctx);
-  }
-  return res;
-}
-
-// node_modules/smol-toml/dist/stringify.js
-var HAS_WELLFORMED = !!"".isWellFormed;
-
-// src/native-pets.ts
-var BUILTIN_PET_CATALOG = [
-  { id: "codex", displayName: "Codex", source: "builtin" },
-  { id: "dewey", displayName: "Dewey", source: "builtin" },
-  { id: "fireball", displayName: "Fireball", source: "builtin" },
-  { id: "hoots", displayName: "Hoots", source: "builtin" },
-  { id: "rocky", displayName: "Rocky", source: "builtin" },
-  { id: "seedy", displayName: "Seedy", source: "builtin" },
-  { id: "stacky", displayName: "Stacky", source: "builtin" },
-  { id: "bsod", displayName: "BSOD", source: "builtin" },
-  { id: "null-signal", displayName: "Null Signal", source: "builtin" }
-];
-function isRecord(value) {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-function selection(value, source) {
   return {
-    selectedPetId: value,
-    genpetSelected: source === "unavailable" ? null : value === "custom:genpet-companion",
-    source,
-    liveVerified: false
+    automaticRefresh: false,
+    refreshRequested: false,
+    displayStatus: "unconfirmed",
+    strategy: "none",
+    expectedSpriteSha256,
+    notice: useIpc ? "Files committed to the same GenPet entry. IPC refresh failed; retry when the desktop is running and ready. Visible update remains unconfirmed." : "Files committed to the same GenPet entry. IPC refresh was skipped for this destination. Visible update remains unconfirmed.",
+    ...errors.length ? { errors } : {}
   };
 }
-async function optionalText(file) {
+async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
+  await assertPrivateSocket(socketPath);
+  const sockets = /* @__PURE__ */ new Set();
+  const waiting = /* @__PURE__ */ new Set();
+  let failure;
+  const fail = (error) => {
+    failure ??= error;
+    for (const reject of [...waiting]) reject(error);
+  };
+  const deadline = setTimeout(() => fail(Error("IPC refresh timed out")), timeoutMs);
+  const connect = () => new Promise((resolve, reject) => {
+    if (failure) return reject(failure);
+    waiting.add(reject);
+    const socket = net.createConnection(socketPath);
+    sockets.add(socket);
+    const requestId2 = randomUUID2();
+    let listener;
+    const send = (message) => {
+      if (failure) throw failure;
+      socket.write(encodeFrame(message));
+    };
+    socket.on("error", fail);
+    socket.on("close", () => fail(Error("IPC connection closed")));
+    socket.on(
+      "connect",
+      () => send({
+        type: "request",
+        requestId: requestId2,
+        sourceClientId: "genpet",
+        version: 0,
+        method: "initialize",
+        params: { clientType: "genpet" }
+      })
+    );
+    socket.on(
+      "data",
+      readFrames(
+        16 * 1024 * 1024,
+        (value) => {
+          if (!value || typeof value !== "object") return fail(Error("Invalid IPC message"));
+          const message = value;
+          if (message.type === "response" && message.requestId === requestId2) {
+            if (message.resultType !== "success" || typeof message.result?.clientId !== "string")
+              return fail(Error("IPC initialization rejected"));
+            waiting.delete(reject);
+            resolve({ id: message.result.clientId, send, onMessage: (fn) => listener = fn });
+          }
+          listener?.(message);
+        },
+        (problem) => fail(Error(problem === "too-large" ? "IPC frame too large" : "Invalid IPC JSON"))
+      )
+    );
+  });
   try {
-    return await readFile2(file, "utf8");
-  } catch (error) {
-    if (error.code === "ENOENT") return void 0;
-    throw error;
+    const observer = await connect();
+    const sender = await connect();
+    await new Promise((resolve, reject) => {
+      if (failure) return reject(failure);
+      waiting.add(reject);
+      observer.onMessage((message) => {
+        if (message.type === "broadcast" && message.method === "query-cache-invalidate" && message.version === 0 && message.sourceClientId === sender.id && JSON.stringify(message.params) === JSON.stringify(INVALIDATE)) {
+          waiting.delete(reject);
+          resolve();
+        }
+      });
+      sender.send({
+        type: "broadcast",
+        method: "query-cache-invalidate",
+        version: 0,
+        sourceClientId: sender.id,
+        params: INVALIDATE
+      });
+    });
+    return { socketPath, handshakeConfirmed: true, relayConfirmed: true, hostRefreshRequested: true };
+  } finally {
+    clearTimeout(deadline);
+    for (const socket of sockets) {
+      socket.removeAllListeners("close");
+      socket.destroy();
+    }
   }
 }
-async function readSelection(home, errors) {
-  let config;
-  try {
-    config = await optionalText(path4.join(home, "config.toml"));
-  } catch {
-    errors.push("config.toml: \u65E0\u6CD5\u8BFB\u53D6\u9009\u62E9\u8BBE\u7F6E");
-    return selection(null, "unavailable");
+async function assertPrivateSocket(socketPath) {
+  if (process.platform === "win32") {
+    if (!socketPath.startsWith("\\\\.\\pipe\\")) throw Error("Expected a local Windows named pipe");
+    return;
   }
-  if (config !== void 0) {
-    let parsed;
-    try {
-      parsed = parse(config, { integersAsBigInt: true });
-    } catch {
-      errors.push("config.toml: TOML \u683C\u5F0F\u65E0\u6548\uFF0C\u65E0\u6CD5\u786E\u5B9A\u9009\u62E9\u8BBE\u7F6E");
-      return selection(null, "unavailable");
-    }
-    const desktop = parsed.desktop;
-    if (desktop !== void 0 && !isRecord(desktop)) {
-      errors.push("config.toml: desktop \u5FC5\u987B\u662F\u8868");
-      return selection(null, "unavailable");
-    }
-    if (isRecord(desktop) && Object.hasOwn(desktop, "selected-avatar-id")) {
-      const value = desktop["selected-avatar-id"];
-      if (typeof value !== "string") {
-        errors.push("config.toml: selected-avatar-id \u5FC5\u987B\u662F\u5B57\u7B26\u4E32");
-        return selection(null, "unavailable");
-      }
-      return selection(value, "config");
-    }
-  }
-  let legacy;
-  try {
-    legacy = await optionalText(path4.join(home, ".codex-global-state.json"));
-  } catch {
-    errors.push(".codex-global-state.json: \u65E0\u6CD5\u8BFB\u53D6\u65E7\u9009\u62E9\u8BBE\u7F6E");
-    return selection(null, "unavailable");
-  }
-  if (legacy !== void 0) {
-    try {
-      const state = JSON.parse(legacy);
-      if (!isRecord(state)) throw new Error("Invalid state");
-      const atoms = state["electron-persisted-atom-state"];
-      if (atoms !== void 0 && !isRecord(atoms)) throw new Error("Invalid atoms");
-      if (isRecord(atoms) && Object.hasOwn(atoms, "selected-avatar-id")) {
-        const value = atoms["selected-avatar-id"];
-        if (value !== null && typeof value !== "string") throw new Error("Invalid selection");
-        return selection(value, "legacy");
-      }
-    } catch {
-      errors.push(".codex-global-state.json: \u65E7\u9009\u62E9\u8BBE\u7F6E\u683C\u5F0F\u65E0\u6548");
-      return selection(null, "unavailable");
-    }
-  }
-  return selection("codex", "default");
+  const [file, directory] = await Promise.all([lstat(socketPath), lstat(path3.dirname(socketPath))]);
+  const uid = process.getuid?.();
+  if (uid == null || file.uid !== uid || directory.uid !== uid || !file.isSocket() || !directory.isDirectory() || directory.mode & 18)
+    throw Error("IPC socket must belong to the current user in a protected directory");
 }
-async function localPets(home, errors) {
-  const pets = /* @__PURE__ */ new Map();
+
+// src/hosts/desktop/switch.ts
+import { readFile as readFile3, readdir } from "node:fs/promises";
+import { randomUUID as randomUUID3 } from "node:crypto";
+import net2 from "node:net";
+import path4 from "node:path";
+var BUILTIN_PETS = [
+  ["codex", "Codex"],
+  ["dewey", "Dewey"],
+  ["fireball", "Fireball"],
+  ["hoots", "Hoots"],
+  ["rocky", "Rocky"],
+  ["seedy", "Seedy"],
+  ["stacky", "Stacky"],
+  ["bsod", "BSOD"],
+  ["null-signal", "Null Signal"]
+].map(([id, displayName]) => ({ id, displayName, source: "builtin" }));
+var isRecord = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
+async function listPets(home = codexHome()) {
+  const errors = [];
+  const local = /* @__PURE__ */ new Map();
   for (const [directory, filename] of [
     ["avatars", "avatar.json"],
     ["pets", "pet.json"]
@@ -3338,36 +2548,1853 @@ async function localPets(home, errors) {
     }
     for (const entry of entries) {
       if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
-      const label = `${directory}/${entry.name}/${filename}`;
+      let text2;
       try {
-        const text2 = await optionalText(path4.join(home, directory, entry.name, filename));
-        if (text2 === void 0) continue;
+        text2 = await readFile3(path4.join(home, directory, entry.name, filename), "utf8");
+      } catch (error) {
+        if (error.code === "ENOENT") continue;
+        errors.push(`${directory}/${entry.name}/${filename}: \u65E0\u6CD5\u8BFB\u53D6\u6709\u6548\u5BA0\u7269\u6E05\u5355`);
+        continue;
+      }
+      try {
         const manifest = JSON.parse(text2);
         if (!isRecord(manifest)) throw new Error("Invalid manifest");
-        for (const key of ["id", "displayName"]) {
+        for (const key of ["id", "displayName"])
           if (manifest[key] !== void 0 && (typeof manifest[key] !== "string" || !manifest[key].trim()))
             throw new Error("Invalid name");
-        }
         const id = `custom:${entry.name}`;
         const displayName = (manifest.displayName ?? manifest.id ?? entry.name).trim();
-        pets.set(id, { id, displayName, source: "local" });
+        local.set(id, { id, displayName, source: "local" });
       } catch {
-        errors.push(`${label}: \u65E0\u6CD5\u8BFB\u53D6\u6709\u6548\u5BA0\u7269\u6E05\u5355`);
+        errors.push(`${directory}/${entry.name}/${filename}: \u65E0\u6CD5\u8BFB\u53D6\u6709\u6548\u5BA0\u7269\u6E05\u5355`);
       }
     }
   }
-  return [...pets.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
+  const sorted = [...local.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
+  return { pets: [...BUILTIN_PETS.map((pet) => ({ ...pet })), ...sorted], ...errors.length ? { errors } : {} };
 }
-async function getNativePetCatalog(home = process.env.CODEX_HOME || path4.join(homedir2(), ".codex")) {
-  const errors = [];
-  const selected = await readSelection(home, errors);
-  const local = await localPets(home, errors);
+async function readSelectedPet(options = {}) {
+  try {
+    return { available: true, ...await callSettings(options) };
+  } catch (error) {
+    return {
+      available: false,
+      reason: error instanceof Error ? error.message : "Live Codex pet selection is unavailable."
+    };
+  }
+}
+async function selectPet(petId, options = {}) {
+  if (typeof petId !== "string" || petId.trim() !== petId || petId.length === 0 || petId.length > 512 || /[\x00-\x1f\x7f]/.test(petId))
+    throw new Error("A valid pet ID is required.");
+  await callSettings(options, petId);
+  const result = await callSettings(options);
+  if (result.selectedPetId !== petId || result.effectiveSelectedPetId !== petId)
+    throw new Error("The live Codex selection did not match the requested pet; its current selection is unconfirmed.");
   return {
-    pets: [...BUILTIN_PET_CATALOG.map((pet) => ({ ...pet })), ...local],
-    selection: selected,
-    activation: { immediate: false, reason: "\u5F53\u524D\u4E3A\u78C1\u76D8\u5FEB\u7167\uFF1B\u5373\u65F6\u5207\u6362\u9700\u8981\u53EF\u7528\u7684 Codex app-tools \u4F1A\u8BDD\u901A\u9053\u3002" },
-    ...errors.length ? { errors } : {}
+    ...result,
+    immediate: true,
+    restartRequired: false,
+    hostStateConfirmed: true,
+    visualVerified: false
   };
+}
+var SWITCH_USAGE = "Usage: switch-pet [PET_ID|--current|--list|--help]";
+async function switchPet(args) {
+  if (args.length > 1) throw new Error(SWITCH_USAGE);
+  const target = args[0] ?? "--current";
+  if (target === "--help")
+    return { usage: SWITCH_USAGE, examples: ["switch-pet --list", "switch-pet --current", "switch-pet dewey"] };
+  if (target === "--current") {
+    const current = await readSelectedPet();
+    if (!current.available) throw new Error(current.reason);
+    return current;
+  }
+  if (target.startsWith("-") && target !== "--list") throw new Error(SWITCH_USAGE);
+  const catalog = await listPets();
+  if (target === "--list") return catalog;
+  if (!catalog.pets.some((pet) => pet.id === target))
+    throw new Error(`Unknown pet ID: ${target}. Use switch-pet --list.`);
+  return selectPet(target);
+}
+var SELECTED_KEY = "selected-avatar-id";
+function appToolsConnection(options) {
+  const pick = (key, env) => (Object.hasOwn(options, key) ? options[key] : env)?.trim();
+  const pipePath = pick("pipePath", process.env.CODEX_APP_TOOLS_PIPE_PATH);
+  const threadId = pick("threadId", process.env.CODEX_THREAD_ID);
+  if (!pipePath || !threadId) throw new Error("The current Codex app tools pipe and thread ID are unavailable.");
+  if (process.platform === "win32" && !pipePath.startsWith("\\\\.\\pipe\\"))
+    throw new Error("Expected a local Windows named pipe for Codex app tools.");
+  const timeoutMs = options.timeoutMs ?? 5e3;
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error("The Codex app tools timeout must be positive.");
+  return { pipePath, threadId, timeoutMs };
+}
+function projectSelection(value) {
+  if (!isRecord(value) || !isRecord(value.settings) || !isRecord(value.effectiveSettings))
+    throw new Error("Codex returned an invalid settings response.");
+  const selectedPetId = value.settings[SELECTED_KEY] ?? null;
+  const effectiveSelectedPetId = value.effectiveSettings[SELECTED_KEY] ?? null;
+  if (selectedPetId !== null && typeof selectedPetId !== "string" || effectiveSelectedPetId !== null && typeof effectiveSelectedPetId !== "string")
+    throw new Error("Codex returned an invalid pet selection.");
+  return { selectedPetId, effectiveSelectedPetId };
+}
+async function callSettings(options, petId) {
+  const { pipePath, threadId, timeoutMs } = appToolsConnection(options);
+  const id = 1;
+  const request = {
+    jsonrpc: "2.0",
+    id,
+    method: "tools/call",
+    params: {
+      namespace: "codex_app",
+      tool: petId === void 0 ? "read_settings" : "write_settings",
+      arguments: petId === void 0 ? { include_config: false } : { settings: { [SELECTED_KEY]: petId } },
+      callerSource: "codex",
+      threadId,
+      callId: `mcp-call-${randomUUID3()}`,
+      // These fallbacks follow the bundled app-tools MCP's request metadata.
+      turnId: `mcp-turn-${randomUUID3()}`
+    }
+  };
+  return new Promise((resolve, reject) => {
+    const socket = net2.createConnection(pipePath);
+    let settled = false;
+    let sent = false;
+    const finish = (error, result, cancel = false) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (cancel && sent && !socket.destroyed) {
+        socket.end(encodeFrame({ jsonrpc: "2.0", id, method: "tools/cancel" }));
+        socket.destroySoon();
+      } else socket.destroy();
+      if (error) reject(error);
+      else resolve(result);
+    };
+    const timer = setTimeout(
+      () => finish(new Error("Codex app tools timed out; the current selection is unconfirmed."), void 0, true),
+      timeoutMs
+    );
+    socket.once("connect", () => {
+      sent = true;
+      socket.write(encodeFrame(request));
+    });
+    socket.on(
+      "error",
+      (error) => finish(
+        new Error(`Codex app tools connection failed (${error.code ?? "socket error"}).`)
+      )
+    );
+    socket.on("close", () => finish(new Error("Codex app tools closed before confirming the pet selection.")));
+    socket.on(
+      "data",
+      readFrames(
+        8 * 1024 * 1024,
+        (response) => {
+          if (settled || !isRecord(response) || response.id !== id) return;
+          if (response.error !== void 0) return finish(new Error("Codex rejected the app tool request."));
+          const result = response.result;
+          if (!isRecord(result) || result.success !== true || !Array.isArray(result.contentItems))
+            return finish(new Error("Codex could not complete the pet settings request."));
+          const item = result.contentItems.find((item2) => isRecord(item2) && item2.type === "inputText");
+          if (!isRecord(item) || typeof item.text !== "string")
+            return finish(new Error("Codex returned no pet settings result."));
+          try {
+            finish(void 0, projectSelection(JSON.parse(item.text)));
+          } catch {
+            finish(new Error("Codex returned an invalid pet settings result."));
+          }
+        },
+        (problem) => finish(
+          new Error(
+            problem === "too-large" ? "Codex app tools response exceeded the size limit." : "Codex app tools returned invalid JSON."
+          )
+        )
+      )
+    );
+  });
+}
+
+// src/hosts/desktop/publish.ts
+function desktopDestination(state) {
+  if (!state.pet) throw new Error("No pet");
+  const pets = path5.resolve(codexHome(), "pets");
+  const destination = state.pet.binding?.destination ?? path5.join(pets, state.pet.id);
+  const relative = path5.relative(pets, path5.resolve(destination));
+  if (!relative || relative.startsWith("..") || path5.isAbsolute(relative) || relative.includes(path5.sep))
+    throw new Error("Target must be one entry in this Codex home");
+  if (state.pet.binding && state.pet.binding.avatarId !== `custom:${path5.basename(destination)}`)
+    throw new Error("Avatar binding does not match its destination");
+  return destination;
+}
+async function exportNative(state, destination) {
+  if (!state.pet || state.host !== "desktop") throw new Error("Native export requires a desktop pet");
+  const art = desiredAppearance(state);
+  if (!art || art.kind !== "atlas") throw new Error("Complete or select a validated atlas first");
+  await validateImage(art.file, "atlas");
+  let previous;
+  try {
+    previous = await readFile4(path5.join(destination, "pet.json"), "utf8");
+    const old = JSON.parse(previous);
+    const boundHere = state.pet.binding?.destination === destination;
+    const ours = old.genpetId === state.pet.id || boundHere && state.replacesPetId && old.genpetId === state.replacesPetId || // explicit reset
+    boundHere && state.legacy && !old.genpetId;
+    if (!ours) throw new Error("Target entry belongs to another pet; it was preserved");
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  await mkdir2(destination, { recursive: true });
+  const bytes = await readFile4(art.file);
+  const spritesheetPath = `spritesheet-${createHash2("sha256").update(bytes).digest("hex").slice(0, 16)}${path5.extname(art.file)}`;
+  const tmp = path5.join(destination, `.pending-${randomUUID4()}`);
+  await copyFile(art.file, tmp);
+  await rename2(tmp, path5.join(destination, spritesheetPath));
+  const manifest = {
+    id: path5.basename(destination),
+    genpetId: state.pet.id,
+    displayName: state.pet.name,
+    description: "GenPet \xB7 a companion with its own stories",
+    spriteVersionNumber: 2,
+    spritesheetPath
+  };
+  if (previous) await writeFile2(path5.join(destination, "previous-pet.json"), previous);
+  const manifestTmp = path5.join(destination, `.pet-${randomUUID4()}.json`);
+  await writeFile2(manifestTmp, JSON.stringify(manifest, null, 2));
+  await rename2(manifestTmp, path5.join(destination, "pet.json"));
+  return { destination, manifest, artId: art.id, filesCommitted: true };
+}
+async function installNative(store, options = {}) {
+  if (store.host !== "desktop") throw new Error("Dots updates its own Avatar through host-request and host-result");
+  return store.transaction(async (state) => {
+    if (!state.pending?.plan?.appearance) throw new Error("No planned appearance update");
+    const operationId = state.pending.id;
+    const destination = desktopDestination(state);
+    const avatarId = `custom:${path5.basename(destination)}`;
+    const result = await exportNative(state, destination);
+    state.pet.binding = { host: "desktop", avatarId, destination };
+    const selection = await (options.selection ?? readSelectedPet)();
+    const active = selection.available ? selection.effectiveSelectedPetId === avatarId : null;
+    const refresh = await (options.refresh ?? refreshNativePet)({
+      expectedSpritePath: path5.join(destination, result.manifest.spritesheetPath)
+    });
+    const mustRefresh = active === true || active === null && isLiveDestination(destination);
+    const hostResult = validateHostResult(state, operationId, {
+      petId: state.pet.id,
+      operationId,
+      appearanceId: result.artId,
+      avatarId,
+      updated: true,
+      active,
+      refreshRequested: refresh.refreshRequested,
+      displayStatus: refresh.displayStatus,
+      ...mustRefresh && !refresh.automaticRefresh ? { error: "Active Avatar refresh did not complete" } : {}
+    });
+    state.pending.hostResult = hostResult;
+    return { ...result, ...hostResult, refresh };
+  });
+}
+
+// src/hosts/desktop/index.ts
+var desktop = {
+  appearanceKind: "atlas",
+  referenceKinds: ["portrait"],
+  artContract: ATLAS_CONTRACT,
+  commands: {
+    publish: { usage: "publish", run: (_, store) => installNative(store) },
+    "switch-pet": { usage: "switch-pet [PET_ID|--current|--list|--help]", run: (args) => switchPet(args) }
+  }
+};
+
+// src/hosts/dots.ts
+async function bindAvatar(store, avatarId) {
+  if (store.host !== "dots") throw new Error("bind-avatar is for a real Dots pet");
+  return store.transaction((state) => {
+    if (!state.pet) throw new Error("Allocate the pet identity first");
+    const id = text(avatarId, "avatarId");
+    if (state.pet.binding && state.pet.binding.avatarId !== id)
+      throw new Error("Target is already bound; preserve the existing Avatar");
+    return state.pet.binding ??= { host: "dots", avatarId: id };
+  });
+}
+function hostRequest(state) {
+  if (state.host !== "dots") throw new Error("This handoff is for Dots Avatar updates");
+  if (!state.pending?.plan?.appearance) throw new Error("No planned Avatar update");
+  if (!state.pet?.binding) throw new Error("Bind the actual Dots Avatar before requesting an update");
+  const pending = pendingFor(state, state.pending.id);
+  const art = desiredAppearance(state);
+  if (!art || art.kind !== "avatar") throw new Error("Complete or select Dots Avatar artwork first");
+  return {
+    operation: "update-avatar",
+    petId: pending.petId,
+    operationId: pending.id,
+    name: state.pet.name,
+    target: state.pet.binding,
+    file: art.file,
+    appearanceId: art.id,
+    description: state.pending.plan.appearance.description,
+    stage: state.pending.plan.stage,
+    refreshWhenActive: true,
+    preserveCurrentSelection: true
+  };
+}
+var dots = {
+  appearanceKind: "avatar",
+  referenceKinds: ["portrait", "avatar"],
+  artContract: null,
+  commands: {
+    "bind-avatar": { usage: "bind-avatar AVATAR_ID", run: (args, store) => bindAvatar(store, args[0]) },
+    "host-request": { usage: "host-request", run: async (_, store) => hostRequest(await store.peek()) }
+  }
+};
+
+// src/hosts/index.ts
+function hostFor(host) {
+  return { desktop, dots }[host];
+}
+
+// src/appearance.ts
+function requestId(state) {
+  const pending = state.pending;
+  if (!pending?.plan) return null;
+  return createHash3("sha256").update(JSON.stringify([pending.id, pending.petId, pending.baseRevision, pending.plan])).digest("hex").slice(0, 24);
+}
+function appearanceFor(state, stage, id) {
+  const kind = hostFor(state.host).appearanceKind;
+  const art = state.art.find(
+    (art2) => art2.id === id && art2.petId === state.pet.id && art2.kind === kind && art2.stage === stage
+  );
+  if (!art)
+    throw new Error("Reusable appearance is missing, belongs to another pet, or is incompatible with this host/stage");
+  return art;
+}
+function desiredAppearance(state) {
+  const plan = state.pending?.plan;
+  if (!plan?.appearance) return state.art.find((art) => art.id === state.pet?.state.appearanceId);
+  if (plan.appearance.reuseArtId) return appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
+  const kind = hostFor(state.host).appearanceKind;
+  const current = requestId(state);
+  return state.art.findLast((art) => art.petId === state.pet?.id && art.requestId === current && art.kind === kind);
+}
+
+// src/image.ts
+var import_pngjs = __toESM(require_png(), 1);
+import { readFile as readFile5 } from "node:fs/promises";
+import { existsSync as existsSync2, readFileSync as readFileSync2 } from "node:fs";
+import { createRequire } from "node:module";
+import { fileURLToPath as fileURLToPath2 } from "node:url";
+
+// node_modules/@jsquash/webp/codec/dec/webp_dec.js
+var Module = (() => {
+  var _scriptDir = import.meta.url;
+  return (function(Module2 = {}) {
+    var Module2 = typeof Module2 != "undefined" ? Module2 : {};
+    var readyPromiseResolve, readyPromiseReject;
+    Module2["ready"] = new Promise(function(resolve, reject) {
+      readyPromiseResolve = resolve;
+      readyPromiseReject = reject;
+    });
+    const isServiceWorker = globalThis.ServiceWorkerGlobalScope !== void 0;
+    const isRunningInCloudFlareWorkers = isServiceWorker && typeof self !== "undefined" && globalThis.caches && globalThis.caches.default !== void 0;
+    const isRunningInNode = typeof process === "object" && process.release && process.release.name === "node";
+    if (isRunningInCloudFlareWorkers || isRunningInNode) {
+      if (!globalThis.ImageData) {
+        globalThis.ImageData = class ImageData {
+          constructor(data, width, height) {
+            this.data = data;
+            this.width = width;
+            this.height = height;
+          }
+        };
+      }
+      if (import.meta.url === void 0) {
+        import.meta.url = "https://localhost";
+      }
+      if (typeof self !== "undefined" && self.location === void 0) {
+        self.location = { href: "" };
+      }
+    }
+    var moduleOverrides = Object.assign({}, Module2);
+    var arguments_ = [];
+    var thisProgram = "./this.program";
+    var quit_ = (status, toThrow) => {
+      throw toThrow;
+    };
+    var ENVIRONMENT_IS_WEB = typeof window == "object";
+    var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
+    var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions == "object" && typeof process.versions.node == "string";
+    var scriptDirectory = "";
+    function locateFile(path7) {
+      if (Module2["locateFile"]) {
+        return Module2["locateFile"](path7, scriptDirectory);
+      }
+      return scriptDirectory + path7;
+    }
+    var read_, readAsync, readBinary, setWindowTitle;
+    if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
+      if (ENVIRONMENT_IS_WORKER) {
+        scriptDirectory = self.location.href;
+      } else if (typeof document != "undefined" && document.currentScript) {
+        scriptDirectory = document.currentScript.src;
+      }
+      if (_scriptDir) {
+        scriptDirectory = _scriptDir;
+      }
+      if (scriptDirectory.indexOf("blob:") !== 0) {
+        scriptDirectory = scriptDirectory.substr(0, scriptDirectory.replace(/[?#].*/, "").lastIndexOf("/") + 1);
+      } else {
+        scriptDirectory = "";
+      }
+      {
+        read_ = (url) => {
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", url, false);
+          xhr.send(null);
+          return xhr.responseText;
+        };
+        if (ENVIRONMENT_IS_WORKER) {
+          readBinary = (url) => {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", url, false);
+            xhr.responseType = "arraybuffer";
+            xhr.send(null);
+            return new Uint8Array(xhr.response);
+          };
+        }
+        readAsync = (url, onload, onerror) => {
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", url, true);
+          xhr.responseType = "arraybuffer";
+          xhr.onload = () => {
+            if (xhr.status == 200 || xhr.status == 0 && xhr.response) {
+              onload(xhr.response);
+              return;
+            }
+            onerror();
+          };
+          xhr.onerror = onerror;
+          xhr.send(null);
+        };
+      }
+      setWindowTitle = (title) => document.title = title;
+    } else {
+    }
+    var out = Module2["print"] || console.log.bind(console);
+    var err = Module2["printErr"] || console.warn.bind(console);
+    Object.assign(Module2, moduleOverrides);
+    moduleOverrides = null;
+    if (Module2["arguments"]) arguments_ = Module2["arguments"];
+    if (Module2["thisProgram"]) thisProgram = Module2["thisProgram"];
+    if (Module2["quit"]) quit_ = Module2["quit"];
+    var wasmBinary;
+    if (Module2["wasmBinary"]) wasmBinary = Module2["wasmBinary"];
+    var noExitRuntime = Module2["noExitRuntime"] || true;
+    if (typeof WebAssembly != "object") {
+      abort("no native wasm support detected");
+    }
+    var wasmMemory;
+    var ABORT = false;
+    var EXITSTATUS;
+    function UTF8ArrayToString(heapOrArray, idx, maxBytesToRead) {
+      var endIdx = idx + maxBytesToRead;
+      var str = "";
+      while (!(idx >= endIdx)) {
+        var u0 = heapOrArray[idx++];
+        if (!u0) return str;
+        if (!(u0 & 128)) {
+          str += String.fromCharCode(u0);
+          continue;
+        }
+        var u1 = heapOrArray[idx++] & 63;
+        if ((u0 & 224) == 192) {
+          str += String.fromCharCode((u0 & 31) << 6 | u1);
+          continue;
+        }
+        var u2 = heapOrArray[idx++] & 63;
+        if ((u0 & 240) == 224) {
+          u0 = (u0 & 15) << 12 | u1 << 6 | u2;
+        } else {
+          u0 = (u0 & 7) << 18 | u1 << 12 | u2 << 6 | heapOrArray[idx++] & 63;
+        }
+        if (u0 < 65536) {
+          str += String.fromCharCode(u0);
+        } else {
+          var ch = u0 - 65536;
+          str += String.fromCharCode(55296 | ch >> 10, 56320 | ch & 1023);
+        }
+      }
+      return str;
+    }
+    function UTF8ToString(ptr, maxBytesToRead) {
+      return ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead) : "";
+    }
+    function stringToUTF8Array(str, heap, outIdx, maxBytesToWrite) {
+      if (!(maxBytesToWrite > 0)) return 0;
+      var startIdx = outIdx;
+      var endIdx = outIdx + maxBytesToWrite - 1;
+      for (var i = 0; i < str.length; ++i) {
+        var u = str.charCodeAt(i);
+        if (u >= 55296 && u <= 57343) {
+          var u1 = str.charCodeAt(++i);
+          u = 65536 + ((u & 1023) << 10) | u1 & 1023;
+        }
+        if (u <= 127) {
+          if (outIdx >= endIdx) break;
+          heap[outIdx++] = u;
+        } else if (u <= 2047) {
+          if (outIdx + 1 >= endIdx) break;
+          heap[outIdx++] = 192 | u >> 6;
+          heap[outIdx++] = 128 | u & 63;
+        } else if (u <= 65535) {
+          if (outIdx + 2 >= endIdx) break;
+          heap[outIdx++] = 224 | u >> 12;
+          heap[outIdx++] = 128 | u >> 6 & 63;
+          heap[outIdx++] = 128 | u & 63;
+        } else {
+          if (outIdx + 3 >= endIdx) break;
+          heap[outIdx++] = 240 | u >> 18;
+          heap[outIdx++] = 128 | u >> 12 & 63;
+          heap[outIdx++] = 128 | u >> 6 & 63;
+          heap[outIdx++] = 128 | u & 63;
+        }
+      }
+      heap[outIdx] = 0;
+      return outIdx - startIdx;
+    }
+    function stringToUTF8(str, outPtr, maxBytesToWrite) {
+      return stringToUTF8Array(str, HEAPU8, outPtr, maxBytesToWrite);
+    }
+    function lengthBytesUTF8(str) {
+      var len = 0;
+      for (var i = 0; i < str.length; ++i) {
+        var c = str.charCodeAt(i);
+        if (c <= 127) {
+          len++;
+        } else if (c <= 2047) {
+          len += 2;
+        } else if (c >= 55296 && c <= 57343) {
+          len += 4;
+          ++i;
+        } else {
+          len += 3;
+        }
+      }
+      return len;
+    }
+    var HEAP8, HEAPU8, HEAP16, HEAPU16, HEAP32, HEAPU32, HEAPF32, HEAPF64;
+    function updateMemoryViews() {
+      var b = wasmMemory.buffer;
+      Module2["HEAP8"] = HEAP8 = new Int8Array(b);
+      Module2["HEAP16"] = HEAP16 = new Int16Array(b);
+      Module2["HEAP32"] = HEAP32 = new Int32Array(b);
+      Module2["HEAPU8"] = HEAPU8 = new Uint8Array(b);
+      Module2["HEAPU16"] = HEAPU16 = new Uint16Array(b);
+      Module2["HEAPU32"] = HEAPU32 = new Uint32Array(b);
+      Module2["HEAPF32"] = HEAPF32 = new Float32Array(b);
+      Module2["HEAPF64"] = HEAPF64 = new Float64Array(b);
+    }
+    var wasmTable;
+    var __ATPRERUN__ = [];
+    var __ATINIT__ = [];
+    var __ATPOSTRUN__ = [];
+    var runtimeInitialized = false;
+    function preRun() {
+      if (Module2["preRun"]) {
+        if (typeof Module2["preRun"] == "function") Module2["preRun"] = [Module2["preRun"]];
+        while (Module2["preRun"].length) {
+          addOnPreRun(Module2["preRun"].shift());
+        }
+      }
+      callRuntimeCallbacks(__ATPRERUN__);
+    }
+    function initRuntime() {
+      runtimeInitialized = true;
+      callRuntimeCallbacks(__ATINIT__);
+    }
+    function postRun() {
+      if (Module2["postRun"]) {
+        if (typeof Module2["postRun"] == "function") Module2["postRun"] = [Module2["postRun"]];
+        while (Module2["postRun"].length) {
+          addOnPostRun(Module2["postRun"].shift());
+        }
+      }
+      callRuntimeCallbacks(__ATPOSTRUN__);
+    }
+    function addOnPreRun(cb) {
+      __ATPRERUN__.unshift(cb);
+    }
+    function addOnInit(cb) {
+      __ATINIT__.unshift(cb);
+    }
+    function addOnPostRun(cb) {
+      __ATPOSTRUN__.unshift(cb);
+    }
+    var runDependencies = 0;
+    var runDependencyWatcher = null;
+    var dependenciesFulfilled = null;
+    function addRunDependency(id) {
+      runDependencies++;
+      if (Module2["monitorRunDependencies"]) {
+        Module2["monitorRunDependencies"](runDependencies);
+      }
+    }
+    function removeRunDependency(id) {
+      runDependencies--;
+      if (Module2["monitorRunDependencies"]) {
+        Module2["monitorRunDependencies"](runDependencies);
+      }
+      if (runDependencies == 0) {
+        if (runDependencyWatcher !== null) {
+          clearInterval(runDependencyWatcher);
+          runDependencyWatcher = null;
+        }
+        if (dependenciesFulfilled) {
+          var callback = dependenciesFulfilled;
+          dependenciesFulfilled = null;
+          callback();
+        }
+      }
+    }
+    function abort(what) {
+      if (Module2["onAbort"]) {
+        Module2["onAbort"](what);
+      }
+      what = "Aborted(" + what + ")";
+      err(what);
+      ABORT = true;
+      EXITSTATUS = 1;
+      what += ". Build with -sASSERTIONS for more info.";
+      var e = new WebAssembly.RuntimeError(what);
+      readyPromiseReject(e);
+      throw e;
+    }
+    var dataURIPrefix = "data:application/octet-stream;base64,";
+    function isDataURI(filename) {
+      return filename.startsWith(dataURIPrefix);
+    }
+    var wasmBinaryFile;
+    if (Module2["locateFile"]) {
+      wasmBinaryFile = "webp_dec.wasm";
+      if (!isDataURI(wasmBinaryFile)) {
+        wasmBinaryFile = locateFile(wasmBinaryFile);
+      }
+    } else {
+      wasmBinaryFile = new URL("webp_dec.wasm", import.meta.url).href;
+    }
+    function getBinary(file) {
+      try {
+        if (file == wasmBinaryFile && wasmBinary) {
+          return new Uint8Array(wasmBinary);
+        }
+        if (readBinary) {
+          return readBinary(file);
+        }
+        throw "both async and sync fetching of the wasm failed";
+      } catch (err2) {
+        abort(err2);
+      }
+    }
+    function getBinaryPromise(binaryFile) {
+      if (!wasmBinary && (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER)) {
+        if (typeof fetch == "function") {
+          return fetch(binaryFile, { credentials: "same-origin" }).then(function(response) {
+            if (!response["ok"]) {
+              throw "failed to load wasm binary file at '" + binaryFile + "'";
+            }
+            return response["arrayBuffer"]();
+          }).catch(function() {
+            return getBinary(binaryFile);
+          });
+        }
+      }
+      return Promise.resolve().then(function() {
+        return getBinary(binaryFile);
+      });
+    }
+    function instantiateArrayBuffer(binaryFile, imports, receiver) {
+      return getBinaryPromise(binaryFile).then(function(binary) {
+        return WebAssembly.instantiate(binary, imports);
+      }).then(function(instance) {
+        return instance;
+      }).then(receiver, function(reason) {
+        err("failed to asynchronously prepare wasm: " + reason);
+        abort(reason);
+      });
+    }
+    function instantiateAsync(binary, binaryFile, imports, callback) {
+      if (!binary && typeof WebAssembly.instantiateStreaming == "function" && !isDataURI(binaryFile) && typeof fetch == "function") {
+        return fetch(binaryFile, { credentials: "same-origin" }).then(function(response) {
+          var result = WebAssembly.instantiateStreaming(response, imports);
+          return result.then(callback, function(reason) {
+            err("wasm streaming compile failed: " + reason);
+            err("falling back to ArrayBuffer instantiation");
+            return instantiateArrayBuffer(binaryFile, imports, callback);
+          });
+        });
+      } else {
+        return instantiateArrayBuffer(binaryFile, imports, callback);
+      }
+    }
+    function createWasm() {
+      var info = { "a": wasmImports };
+      function receiveInstance(instance, module) {
+        var exports = instance.exports;
+        Module2["asm"] = exports;
+        wasmMemory = Module2["asm"]["s"];
+        updateMemoryViews();
+        wasmTable = Module2["asm"]["y"];
+        addOnInit(Module2["asm"]["t"]);
+        removeRunDependency("wasm-instantiate");
+        return exports;
+      }
+      addRunDependency("wasm-instantiate");
+      function receiveInstantiationResult(result) {
+        receiveInstance(result["instance"]);
+      }
+      if (Module2["instantiateWasm"]) {
+        try {
+          return Module2["instantiateWasm"](info, receiveInstance);
+        } catch (e) {
+          err("Module.instantiateWasm callback failed with error: " + e);
+          readyPromiseReject(e);
+        }
+      }
+      instantiateAsync(wasmBinary, wasmBinaryFile, info, receiveInstantiationResult).catch(readyPromiseReject);
+      return {};
+    }
+    function callRuntimeCallbacks(callbacks) {
+      while (callbacks.length > 0) {
+        callbacks.shift()(Module2);
+      }
+    }
+    function ExceptionInfo(excPtr) {
+      this.excPtr = excPtr;
+      this.ptr = excPtr - 24;
+      this.set_type = function(type) {
+        HEAPU32[this.ptr + 4 >> 2] = type;
+      };
+      this.get_type = function() {
+        return HEAPU32[this.ptr + 4 >> 2];
+      };
+      this.set_destructor = function(destructor) {
+        HEAPU32[this.ptr + 8 >> 2] = destructor;
+      };
+      this.get_destructor = function() {
+        return HEAPU32[this.ptr + 8 >> 2];
+      };
+      this.set_refcount = function(refcount) {
+        HEAP32[this.ptr >> 2] = refcount;
+      };
+      this.set_caught = function(caught) {
+        caught = caught ? 1 : 0;
+        HEAP8[this.ptr + 12 >> 0] = caught;
+      };
+      this.get_caught = function() {
+        return HEAP8[this.ptr + 12 >> 0] != 0;
+      };
+      this.set_rethrown = function(rethrown) {
+        rethrown = rethrown ? 1 : 0;
+        HEAP8[this.ptr + 13 >> 0] = rethrown;
+      };
+      this.get_rethrown = function() {
+        return HEAP8[this.ptr + 13 >> 0] != 0;
+      };
+      this.init = function(type, destructor) {
+        this.set_adjusted_ptr(0);
+        this.set_type(type);
+        this.set_destructor(destructor);
+        this.set_refcount(0);
+        this.set_caught(false);
+        this.set_rethrown(false);
+      };
+      this.add_ref = function() {
+        var value = HEAP32[this.ptr >> 2];
+        HEAP32[this.ptr >> 2] = value + 1;
+      };
+      this.release_ref = function() {
+        var prev = HEAP32[this.ptr >> 2];
+        HEAP32[this.ptr >> 2] = prev - 1;
+        return prev === 1;
+      };
+      this.set_adjusted_ptr = function(adjustedPtr) {
+        HEAPU32[this.ptr + 16 >> 2] = adjustedPtr;
+      };
+      this.get_adjusted_ptr = function() {
+        return HEAPU32[this.ptr + 16 >> 2];
+      };
+      this.get_exception_ptr = function() {
+        var isPointer = ___cxa_is_pointer_type(this.get_type());
+        if (isPointer) {
+          return HEAPU32[this.excPtr >> 2];
+        }
+        var adjusted = this.get_adjusted_ptr();
+        if (adjusted !== 0) return adjusted;
+        return this.excPtr;
+      };
+    }
+    var exceptionLast = 0;
+    var uncaughtExceptionCount = 0;
+    function ___cxa_throw(ptr, type, destructor) {
+      var info = new ExceptionInfo(ptr);
+      info.init(type, destructor);
+      exceptionLast = ptr;
+      uncaughtExceptionCount++;
+      throw ptr;
+    }
+    function __embind_register_bigint(primitiveType, name, size, minRange, maxRange) {
+    }
+    function getShiftFromSize(size) {
+      switch (size) {
+        case 1:
+          return 0;
+        case 2:
+          return 1;
+        case 4:
+          return 2;
+        case 8:
+          return 3;
+        default:
+          throw new TypeError("Unknown type size: " + size);
+      }
+    }
+    function embind_init_charCodes() {
+      var codes = new Array(256);
+      for (var i = 0; i < 256; ++i) {
+        codes[i] = String.fromCharCode(i);
+      }
+      embind_charCodes = codes;
+    }
+    var embind_charCodes = void 0;
+    function readLatin1String(ptr) {
+      var ret = "";
+      var c = ptr;
+      while (HEAPU8[c]) {
+        ret += embind_charCodes[HEAPU8[c++]];
+      }
+      return ret;
+    }
+    var awaitingDependencies = {};
+    var registeredTypes = {};
+    var typeDependencies = {};
+    var char_0 = 48;
+    var char_9 = 57;
+    function makeLegalFunctionName(name) {
+      if (void 0 === name) {
+        return "_unknown";
+      }
+      name = name.replace(/[^a-zA-Z0-9_]/g, "$");
+      var f = name.charCodeAt(0);
+      if (f >= char_0 && f <= char_9) {
+        return "_" + name;
+      }
+      return name;
+    }
+    function createNamedFunction(name, body) {
+      name = makeLegalFunctionName(name);
+      return { [name]: function() {
+        return body.apply(this, arguments);
+      } }[name];
+    }
+    function extendError(baseErrorType, errorName) {
+      var errorClass = createNamedFunction(errorName, function(message) {
+        this.name = errorName;
+        this.message = message;
+        var stack = new Error(message).stack;
+        if (stack !== void 0) {
+          this.stack = this.toString() + "\n" + stack.replace(/^Error(:[^\n]*)?\n/, "");
+        }
+      });
+      errorClass.prototype = Object.create(baseErrorType.prototype);
+      errorClass.prototype.constructor = errorClass;
+      errorClass.prototype.toString = function() {
+        if (this.message === void 0) {
+          return this.name;
+        } else {
+          return this.name + ": " + this.message;
+        }
+      };
+      return errorClass;
+    }
+    var BindingError = void 0;
+    function throwBindingError(message) {
+      throw new BindingError(message);
+    }
+    var InternalError = void 0;
+    function throwInternalError(message) {
+      throw new InternalError(message);
+    }
+    function whenDependentTypesAreResolved(myTypes, dependentTypes, getTypeConverters) {
+      myTypes.forEach(function(type) {
+        typeDependencies[type] = dependentTypes;
+      });
+      function onComplete(typeConverters2) {
+        var myTypeConverters = getTypeConverters(typeConverters2);
+        if (myTypeConverters.length !== myTypes.length) {
+          throwInternalError("Mismatched type converter count");
+        }
+        for (var i = 0; i < myTypes.length; ++i) {
+          registerType(myTypes[i], myTypeConverters[i]);
+        }
+      }
+      var typeConverters = new Array(dependentTypes.length);
+      var unregisteredTypes = [];
+      var registered = 0;
+      dependentTypes.forEach((dt, i) => {
+        if (registeredTypes.hasOwnProperty(dt)) {
+          typeConverters[i] = registeredTypes[dt];
+        } else {
+          unregisteredTypes.push(dt);
+          if (!awaitingDependencies.hasOwnProperty(dt)) {
+            awaitingDependencies[dt] = [];
+          }
+          awaitingDependencies[dt].push(() => {
+            typeConverters[i] = registeredTypes[dt];
+            ++registered;
+            if (registered === unregisteredTypes.length) {
+              onComplete(typeConverters);
+            }
+          });
+        }
+      });
+      if (0 === unregisteredTypes.length) {
+        onComplete(typeConverters);
+      }
+    }
+    function registerType(rawType, registeredInstance, options = {}) {
+      if (!("argPackAdvance" in registeredInstance)) {
+        throw new TypeError("registerType registeredInstance requires argPackAdvance");
+      }
+      var name = registeredInstance.name;
+      if (!rawType) {
+        throwBindingError('type "' + name + '" must have a positive integer typeid pointer');
+      }
+      if (registeredTypes.hasOwnProperty(rawType)) {
+        if (options.ignoreDuplicateRegistrations) {
+          return;
+        } else {
+          throwBindingError("Cannot register type '" + name + "' twice");
+        }
+      }
+      registeredTypes[rawType] = registeredInstance;
+      delete typeDependencies[rawType];
+      if (awaitingDependencies.hasOwnProperty(rawType)) {
+        var callbacks = awaitingDependencies[rawType];
+        delete awaitingDependencies[rawType];
+        callbacks.forEach((cb) => cb());
+      }
+    }
+    function __embind_register_bool(rawType, name, size, trueValue, falseValue) {
+      var shift = getShiftFromSize(size);
+      name = readLatin1String(name);
+      registerType(rawType, { name, "fromWireType": function(wt) {
+        return !!wt;
+      }, "toWireType": function(destructors, o) {
+        return o ? trueValue : falseValue;
+      }, "argPackAdvance": 8, "readValueFromPointer": function(pointer) {
+        var heap;
+        if (size === 1) {
+          heap = HEAP8;
+        } else if (size === 2) {
+          heap = HEAP16;
+        } else if (size === 4) {
+          heap = HEAP32;
+        } else {
+          throw new TypeError("Unknown boolean type size: " + name);
+        }
+        return this["fromWireType"](heap[pointer >> shift]);
+      }, destructorFunction: null });
+    }
+    var emval_free_list = [];
+    var emval_handle_array = [{}, { value: void 0 }, { value: null }, { value: true }, { value: false }];
+    function __emval_decref(handle) {
+      if (handle > 4 && 0 === --emval_handle_array[handle].refcount) {
+        emval_handle_array[handle] = void 0;
+        emval_free_list.push(handle);
+      }
+    }
+    function count_emval_handles() {
+      var count = 0;
+      for (var i = 5; i < emval_handle_array.length; ++i) {
+        if (emval_handle_array[i] !== void 0) {
+          ++count;
+        }
+      }
+      return count;
+    }
+    function get_first_emval() {
+      for (var i = 5; i < emval_handle_array.length; ++i) {
+        if (emval_handle_array[i] !== void 0) {
+          return emval_handle_array[i];
+        }
+      }
+      return null;
+    }
+    function init_emval() {
+      Module2["count_emval_handles"] = count_emval_handles;
+      Module2["get_first_emval"] = get_first_emval;
+    }
+    var Emval = { toValue: (handle) => {
+      if (!handle) {
+        throwBindingError("Cannot use deleted val. handle = " + handle);
+      }
+      return emval_handle_array[handle].value;
+    }, toHandle: (value) => {
+      switch (value) {
+        case void 0:
+          return 1;
+        case null:
+          return 2;
+        case true:
+          return 3;
+        case false:
+          return 4;
+        default: {
+          var handle = emval_free_list.length ? emval_free_list.pop() : emval_handle_array.length;
+          emval_handle_array[handle] = { refcount: 1, value };
+          return handle;
+        }
+      }
+    } };
+    function simpleReadValueFromPointer(pointer) {
+      return this["fromWireType"](HEAP32[pointer >> 2]);
+    }
+    function __embind_register_emval(rawType, name) {
+      name = readLatin1String(name);
+      registerType(rawType, { name, "fromWireType": function(handle) {
+        var rv = Emval.toValue(handle);
+        __emval_decref(handle);
+        return rv;
+      }, "toWireType": function(destructors, value) {
+        return Emval.toHandle(value);
+      }, "argPackAdvance": 8, "readValueFromPointer": simpleReadValueFromPointer, destructorFunction: null });
+    }
+    function floatReadValueFromPointer(name, shift) {
+      switch (shift) {
+        case 2:
+          return function(pointer) {
+            return this["fromWireType"](HEAPF32[pointer >> 2]);
+          };
+        case 3:
+          return function(pointer) {
+            return this["fromWireType"](HEAPF64[pointer >> 3]);
+          };
+        default:
+          throw new TypeError("Unknown float type: " + name);
+      }
+    }
+    function __embind_register_float(rawType, name, size) {
+      var shift = getShiftFromSize(size);
+      name = readLatin1String(name);
+      registerType(rawType, { name, "fromWireType": function(value) {
+        return value;
+      }, "toWireType": function(destructors, value) {
+        return value;
+      }, "argPackAdvance": 8, "readValueFromPointer": floatReadValueFromPointer(name, shift), destructorFunction: null });
+    }
+    function runDestructors(destructors) {
+      while (destructors.length) {
+        var ptr = destructors.pop();
+        var del = destructors.pop();
+        del(ptr);
+      }
+    }
+    function craftInvokerFunction(humanName, argTypes, classType, cppInvokerFunc, cppTargetFunc, isAsync) {
+      var argCount = argTypes.length;
+      if (argCount < 2) {
+        throwBindingError("argTypes array size mismatch! Must at least get return value and 'this' types!");
+      }
+      var isClassMethodFunc = argTypes[1] !== null && classType !== null;
+      var needsDestructorStack = false;
+      for (var i = 1; i < argTypes.length; ++i) {
+        if (argTypes[i] !== null && argTypes[i].destructorFunction === void 0) {
+          needsDestructorStack = true;
+          break;
+        }
+      }
+      var returns = argTypes[0].name !== "void";
+      var expectedArgCount = argCount - 2;
+      var argsWired = new Array(expectedArgCount);
+      var invokerFuncArgs = [];
+      var destructors = [];
+      return function() {
+        if (arguments.length !== expectedArgCount) {
+          throwBindingError("function " + humanName + " called with " + arguments.length + " arguments, expected " + expectedArgCount + " args!");
+        }
+        destructors.length = 0;
+        var thisWired;
+        invokerFuncArgs.length = isClassMethodFunc ? 2 : 1;
+        invokerFuncArgs[0] = cppTargetFunc;
+        if (isClassMethodFunc) {
+          thisWired = argTypes[1]["toWireType"](destructors, this);
+          invokerFuncArgs[1] = thisWired;
+        }
+        for (var i2 = 0; i2 < expectedArgCount; ++i2) {
+          argsWired[i2] = argTypes[i2 + 2]["toWireType"](destructors, arguments[i2]);
+          invokerFuncArgs.push(argsWired[i2]);
+        }
+        var rv = cppInvokerFunc.apply(null, invokerFuncArgs);
+        function onDone(rv2) {
+          if (needsDestructorStack) {
+            runDestructors(destructors);
+          } else {
+            for (var i3 = isClassMethodFunc ? 1 : 2; i3 < argTypes.length; i3++) {
+              var param = i3 === 1 ? thisWired : argsWired[i3 - 2];
+              if (argTypes[i3].destructorFunction !== null) {
+                argTypes[i3].destructorFunction(param);
+              }
+            }
+          }
+          if (returns) {
+            return argTypes[0]["fromWireType"](rv2);
+          }
+        }
+        return onDone(rv);
+      };
+    }
+    function ensureOverloadTable(proto, methodName, humanName) {
+      if (void 0 === proto[methodName].overloadTable) {
+        var prevFunc = proto[methodName];
+        proto[methodName] = function() {
+          if (!proto[methodName].overloadTable.hasOwnProperty(arguments.length)) {
+            throwBindingError("Function '" + humanName + "' called with an invalid number of arguments (" + arguments.length + ") - expects one of (" + proto[methodName].overloadTable + ")!");
+          }
+          return proto[methodName].overloadTable[arguments.length].apply(this, arguments);
+        };
+        proto[methodName].overloadTable = [];
+        proto[methodName].overloadTable[prevFunc.argCount] = prevFunc;
+      }
+    }
+    function exposePublicSymbol(name, value, numArguments) {
+      if (Module2.hasOwnProperty(name)) {
+        if (void 0 === numArguments || void 0 !== Module2[name].overloadTable && void 0 !== Module2[name].overloadTable[numArguments]) {
+          throwBindingError("Cannot register public name '" + name + "' twice");
+        }
+        ensureOverloadTable(Module2, name, name);
+        if (Module2.hasOwnProperty(numArguments)) {
+          throwBindingError("Cannot register multiple overloads of a function with the same number of arguments (" + numArguments + ")!");
+        }
+        Module2[name].overloadTable[numArguments] = value;
+      } else {
+        Module2[name] = value;
+        if (void 0 !== numArguments) {
+          Module2[name].numArguments = numArguments;
+        }
+      }
+    }
+    function heap32VectorToArray(count, firstElement) {
+      var array = [];
+      for (var i = 0; i < count; i++) {
+        array.push(HEAPU32[firstElement + i * 4 >> 2]);
+      }
+      return array;
+    }
+    function replacePublicSymbol(name, value, numArguments) {
+      if (!Module2.hasOwnProperty(name)) {
+        throwInternalError("Replacing nonexistant public symbol");
+      }
+      if (void 0 !== Module2[name].overloadTable && void 0 !== numArguments) {
+        Module2[name].overloadTable[numArguments] = value;
+      } else {
+        Module2[name] = value;
+        Module2[name].argCount = numArguments;
+      }
+    }
+    function dynCallLegacy(sig, ptr, args) {
+      var f = Module2["dynCall_" + sig];
+      return args && args.length ? f.apply(null, [ptr].concat(args)) : f.call(null, ptr);
+    }
+    var wasmTableMirror = [];
+    function getWasmTableEntry(funcPtr) {
+      var func = wasmTableMirror[funcPtr];
+      if (!func) {
+        if (funcPtr >= wasmTableMirror.length) wasmTableMirror.length = funcPtr + 1;
+        wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr);
+      }
+      return func;
+    }
+    function dynCall(sig, ptr, args) {
+      if (sig.includes("j")) {
+        return dynCallLegacy(sig, ptr, args);
+      }
+      var rtn = getWasmTableEntry(ptr).apply(null, args);
+      return rtn;
+    }
+    function getDynCaller(sig, ptr) {
+      var argCache = [];
+      return function() {
+        argCache.length = 0;
+        Object.assign(argCache, arguments);
+        return dynCall(sig, ptr, argCache);
+      };
+    }
+    function embind__requireFunction(signature, rawFunction) {
+      signature = readLatin1String(signature);
+      function makeDynCaller() {
+        if (signature.includes("j")) {
+          return getDynCaller(signature, rawFunction);
+        }
+        return getWasmTableEntry(rawFunction);
+      }
+      var fp = makeDynCaller();
+      if (typeof fp != "function") {
+        throwBindingError("unknown function pointer with signature " + signature + ": " + rawFunction);
+      }
+      return fp;
+    }
+    var UnboundTypeError = void 0;
+    function getTypeName(type) {
+      var ptr = ___getTypeName(type);
+      var rv = readLatin1String(ptr);
+      _free(ptr);
+      return rv;
+    }
+    function throwUnboundTypeError(message, types) {
+      var unboundTypes = [];
+      var seen = {};
+      function visit(type) {
+        if (seen[type]) {
+          return;
+        }
+        if (registeredTypes[type]) {
+          return;
+        }
+        if (typeDependencies[type]) {
+          typeDependencies[type].forEach(visit);
+          return;
+        }
+        unboundTypes.push(type);
+        seen[type] = true;
+      }
+      types.forEach(visit);
+      throw new UnboundTypeError(message + ": " + unboundTypes.map(getTypeName).join([", "]));
+    }
+    function __embind_register_function(name, argCount, rawArgTypesAddr, signature, rawInvoker, fn, isAsync) {
+      var argTypes = heap32VectorToArray(argCount, rawArgTypesAddr);
+      name = readLatin1String(name);
+      rawInvoker = embind__requireFunction(signature, rawInvoker);
+      exposePublicSymbol(name, function() {
+        throwUnboundTypeError("Cannot call " + name + " due to unbound types", argTypes);
+      }, argCount - 1);
+      whenDependentTypesAreResolved([], argTypes, function(argTypes2) {
+        var invokerArgsArray = [argTypes2[0], null].concat(argTypes2.slice(1));
+        replacePublicSymbol(name, craftInvokerFunction(name, invokerArgsArray, null, rawInvoker, fn, isAsync), argCount - 1);
+        return [];
+      });
+    }
+    function integerReadValueFromPointer(name, shift, signed) {
+      switch (shift) {
+        case 0:
+          return signed ? function readS8FromPointer(pointer) {
+            return HEAP8[pointer];
+          } : function readU8FromPointer(pointer) {
+            return HEAPU8[pointer];
+          };
+        case 1:
+          return signed ? function readS16FromPointer(pointer) {
+            return HEAP16[pointer >> 1];
+          } : function readU16FromPointer(pointer) {
+            return HEAPU16[pointer >> 1];
+          };
+        case 2:
+          return signed ? function readS32FromPointer(pointer) {
+            return HEAP32[pointer >> 2];
+          } : function readU32FromPointer(pointer) {
+            return HEAPU32[pointer >> 2];
+          };
+        default:
+          throw new TypeError("Unknown integer type: " + name);
+      }
+    }
+    function __embind_register_integer(primitiveType, name, size, minRange, maxRange) {
+      name = readLatin1String(name);
+      if (maxRange === -1) {
+        maxRange = 4294967295;
+      }
+      var shift = getShiftFromSize(size);
+      var fromWireType = (value) => value;
+      if (minRange === 0) {
+        var bitshift = 32 - 8 * size;
+        fromWireType = (value) => value << bitshift >>> bitshift;
+      }
+      var isUnsignedType = name.includes("unsigned");
+      var checkAssertions = (value, toTypeName) => {
+      };
+      var toWireType;
+      if (isUnsignedType) {
+        toWireType = function(destructors, value) {
+          checkAssertions(value, this.name);
+          return value >>> 0;
+        };
+      } else {
+        toWireType = function(destructors, value) {
+          checkAssertions(value, this.name);
+          return value;
+        };
+      }
+      registerType(primitiveType, { name, "fromWireType": fromWireType, "toWireType": toWireType, "argPackAdvance": 8, "readValueFromPointer": integerReadValueFromPointer(name, shift, minRange !== 0), destructorFunction: null });
+    }
+    function __embind_register_memory_view(rawType, dataTypeIndex, name) {
+      var typeMapping = [Int8Array, Uint8Array, Int16Array, Uint16Array, Int32Array, Uint32Array, Float32Array, Float64Array];
+      var TA = typeMapping[dataTypeIndex];
+      function decodeMemoryView(handle) {
+        handle = handle >> 2;
+        var heap = HEAPU32;
+        var size = heap[handle];
+        var data = heap[handle + 1];
+        return new TA(heap.buffer, data, size);
+      }
+      name = readLatin1String(name);
+      registerType(rawType, { name, "fromWireType": decodeMemoryView, "argPackAdvance": 8, "readValueFromPointer": decodeMemoryView }, { ignoreDuplicateRegistrations: true });
+    }
+    function __embind_register_std_string(rawType, name) {
+      name = readLatin1String(name);
+      var stdStringIsUTF8 = name === "std::string";
+      registerType(rawType, { name, "fromWireType": function(value) {
+        var length = HEAPU32[value >> 2];
+        var payload = value + 4;
+        var str;
+        if (stdStringIsUTF8) {
+          var decodeStartPtr = payload;
+          for (var i = 0; i <= length; ++i) {
+            var currentBytePtr = payload + i;
+            if (i == length || HEAPU8[currentBytePtr] == 0) {
+              var maxRead = currentBytePtr - decodeStartPtr;
+              var stringSegment = UTF8ToString(decodeStartPtr, maxRead);
+              if (str === void 0) {
+                str = stringSegment;
+              } else {
+                str += String.fromCharCode(0);
+                str += stringSegment;
+              }
+              decodeStartPtr = currentBytePtr + 1;
+            }
+          }
+        } else {
+          var a = new Array(length);
+          for (var i = 0; i < length; ++i) {
+            a[i] = String.fromCharCode(HEAPU8[payload + i]);
+          }
+          str = a.join("");
+        }
+        _free(value);
+        return str;
+      }, "toWireType": function(destructors, value) {
+        if (value instanceof ArrayBuffer) {
+          value = new Uint8Array(value);
+        }
+        var length;
+        var valueIsOfTypeString = typeof value == "string";
+        if (!(valueIsOfTypeString || value instanceof Uint8Array || value instanceof Uint8ClampedArray || value instanceof Int8Array)) {
+          throwBindingError("Cannot pass non-string to std::string");
+        }
+        if (stdStringIsUTF8 && valueIsOfTypeString) {
+          length = lengthBytesUTF8(value);
+        } else {
+          length = value.length;
+        }
+        var base = _malloc(4 + length + 1);
+        var ptr = base + 4;
+        HEAPU32[base >> 2] = length;
+        if (stdStringIsUTF8 && valueIsOfTypeString) {
+          stringToUTF8(value, ptr, length + 1);
+        } else {
+          if (valueIsOfTypeString) {
+            for (var i = 0; i < length; ++i) {
+              var charCode = value.charCodeAt(i);
+              if (charCode > 255) {
+                _free(ptr);
+                throwBindingError("String has UTF-16 code units that do not fit in 8 bits");
+              }
+              HEAPU8[ptr + i] = charCode;
+            }
+          } else {
+            for (var i = 0; i < length; ++i) {
+              HEAPU8[ptr + i] = value[i];
+            }
+          }
+        }
+        if (destructors !== null) {
+          destructors.push(_free, base);
+        }
+        return base;
+      }, "argPackAdvance": 8, "readValueFromPointer": simpleReadValueFromPointer, destructorFunction: function(ptr) {
+        _free(ptr);
+      } });
+    }
+    function UTF16ToString(ptr, maxBytesToRead) {
+      var str = "";
+      for (var i = 0; !(i >= maxBytesToRead / 2); ++i) {
+        var codeUnit = HEAP16[ptr + i * 2 >> 1];
+        if (codeUnit == 0) break;
+        str += String.fromCharCode(codeUnit);
+      }
+      return str;
+    }
+    function stringToUTF16(str, outPtr, maxBytesToWrite) {
+      if (maxBytesToWrite === void 0) {
+        maxBytesToWrite = 2147483647;
+      }
+      if (maxBytesToWrite < 2) return 0;
+      maxBytesToWrite -= 2;
+      var startPtr = outPtr;
+      var numCharsToWrite = maxBytesToWrite < str.length * 2 ? maxBytesToWrite / 2 : str.length;
+      for (var i = 0; i < numCharsToWrite; ++i) {
+        var codeUnit = str.charCodeAt(i);
+        HEAP16[outPtr >> 1] = codeUnit;
+        outPtr += 2;
+      }
+      HEAP16[outPtr >> 1] = 0;
+      return outPtr - startPtr;
+    }
+    function lengthBytesUTF16(str) {
+      return str.length * 2;
+    }
+    function UTF32ToString(ptr, maxBytesToRead) {
+      var i = 0;
+      var str = "";
+      while (!(i >= maxBytesToRead / 4)) {
+        var utf32 = HEAP32[ptr + i * 4 >> 2];
+        if (utf32 == 0) break;
+        ++i;
+        if (utf32 >= 65536) {
+          var ch = utf32 - 65536;
+          str += String.fromCharCode(55296 | ch >> 10, 56320 | ch & 1023);
+        } else {
+          str += String.fromCharCode(utf32);
+        }
+      }
+      return str;
+    }
+    function stringToUTF32(str, outPtr, maxBytesToWrite) {
+      if (maxBytesToWrite === void 0) {
+        maxBytesToWrite = 2147483647;
+      }
+      if (maxBytesToWrite < 4) return 0;
+      var startPtr = outPtr;
+      var endPtr = startPtr + maxBytesToWrite - 4;
+      for (var i = 0; i < str.length; ++i) {
+        var codeUnit = str.charCodeAt(i);
+        if (codeUnit >= 55296 && codeUnit <= 57343) {
+          var trailSurrogate = str.charCodeAt(++i);
+          codeUnit = 65536 + ((codeUnit & 1023) << 10) | trailSurrogate & 1023;
+        }
+        HEAP32[outPtr >> 2] = codeUnit;
+        outPtr += 4;
+        if (outPtr + 4 > endPtr) break;
+      }
+      HEAP32[outPtr >> 2] = 0;
+      return outPtr - startPtr;
+    }
+    function lengthBytesUTF32(str) {
+      var len = 0;
+      for (var i = 0; i < str.length; ++i) {
+        var codeUnit = str.charCodeAt(i);
+        if (codeUnit >= 55296 && codeUnit <= 57343) ++i;
+        len += 4;
+      }
+      return len;
+    }
+    function __embind_register_std_wstring(rawType, charSize, name) {
+      name = readLatin1String(name);
+      var decodeString, encodeString, getHeap, lengthBytesUTF, shift;
+      if (charSize === 2) {
+        decodeString = UTF16ToString;
+        encodeString = stringToUTF16;
+        lengthBytesUTF = lengthBytesUTF16;
+        getHeap = () => HEAPU16;
+        shift = 1;
+      } else if (charSize === 4) {
+        decodeString = UTF32ToString;
+        encodeString = stringToUTF32;
+        lengthBytesUTF = lengthBytesUTF32;
+        getHeap = () => HEAPU32;
+        shift = 2;
+      }
+      registerType(rawType, { name, "fromWireType": function(value) {
+        var length = HEAPU32[value >> 2];
+        var HEAP = getHeap();
+        var str;
+        var decodeStartPtr = value + 4;
+        for (var i = 0; i <= length; ++i) {
+          var currentBytePtr = value + 4 + i * charSize;
+          if (i == length || HEAP[currentBytePtr >> shift] == 0) {
+            var maxReadBytes = currentBytePtr - decodeStartPtr;
+            var stringSegment = decodeString(decodeStartPtr, maxReadBytes);
+            if (str === void 0) {
+              str = stringSegment;
+            } else {
+              str += String.fromCharCode(0);
+              str += stringSegment;
+            }
+            decodeStartPtr = currentBytePtr + charSize;
+          }
+        }
+        _free(value);
+        return str;
+      }, "toWireType": function(destructors, value) {
+        if (!(typeof value == "string")) {
+          throwBindingError("Cannot pass non-string to C++ string type " + name);
+        }
+        var length = lengthBytesUTF(value);
+        var ptr = _malloc(4 + length + charSize);
+        HEAPU32[ptr >> 2] = length >> shift;
+        encodeString(value, ptr + 4, length + charSize);
+        if (destructors !== null) {
+          destructors.push(_free, ptr);
+        }
+        return ptr;
+      }, "argPackAdvance": 8, "readValueFromPointer": simpleReadValueFromPointer, destructorFunction: function(ptr) {
+        _free(ptr);
+      } });
+    }
+    function __embind_register_void(rawType, name) {
+      name = readLatin1String(name);
+      registerType(rawType, { isVoid: true, name, "argPackAdvance": 0, "fromWireType": function() {
+        return void 0;
+      }, "toWireType": function(destructors, o) {
+        return void 0;
+      } });
+    }
+    var emval_symbols = {};
+    function getStringOrSymbol(address) {
+      var symbol = emval_symbols[address];
+      if (symbol === void 0) {
+        return readLatin1String(address);
+      }
+      return symbol;
+    }
+    function emval_get_global() {
+      if (typeof globalThis == "object") {
+        return globalThis;
+      }
+      function testGlobal(obj) {
+        obj["$$$embind_global$$$"] = obj;
+        var success = typeof $$$embind_global$$$ == "object" && obj["$$$embind_global$$$"] == obj;
+        if (!success) {
+          delete obj["$$$embind_global$$$"];
+        }
+        return success;
+      }
+      if (typeof $$$embind_global$$$ == "object") {
+        return $$$embind_global$$$;
+      }
+      if (typeof global == "object" && testGlobal(global)) {
+        $$$embind_global$$$ = global;
+      } else if (typeof self == "object" && testGlobal(self)) {
+        $$$embind_global$$$ = self;
+      }
+      if (typeof $$$embind_global$$$ == "object") {
+        return $$$embind_global$$$;
+      }
+      throw Error("unable to get global object.");
+    }
+    function __emval_get_global(name) {
+      if (name === 0) {
+        return Emval.toHandle(emval_get_global());
+      } else {
+        name = getStringOrSymbol(name);
+        return Emval.toHandle(emval_get_global()[name]);
+      }
+    }
+    function __emval_incref(handle) {
+      if (handle > 4) {
+        emval_handle_array[handle].refcount += 1;
+      }
+    }
+    function requireRegisteredType(rawType, humanName) {
+      var impl = registeredTypes[rawType];
+      if (void 0 === impl) {
+        throwBindingError(humanName + " has unknown type " + getTypeName(rawType));
+      }
+      return impl;
+    }
+    function craftEmvalAllocator(argCount) {
+      var argsList = new Array(argCount + 1);
+      return function(constructor, argTypes, args) {
+        argsList[0] = constructor;
+        for (var i = 0; i < argCount; ++i) {
+          var argType = requireRegisteredType(HEAPU32[argTypes + i * 4 >> 2], "parameter " + i);
+          argsList[i + 1] = argType["readValueFromPointer"](args);
+          args += argType["argPackAdvance"];
+        }
+        var obj = new (constructor.bind.apply(constructor, argsList))();
+        return Emval.toHandle(obj);
+      };
+    }
+    var emval_newers = {};
+    function __emval_new(handle, argCount, argTypes, args) {
+      handle = Emval.toValue(handle);
+      var newer = emval_newers[argCount];
+      if (!newer) {
+        newer = craftEmvalAllocator(argCount);
+        emval_newers[argCount] = newer;
+      }
+      return newer(handle, argTypes, args);
+    }
+    function _abort() {
+      abort("");
+    }
+    function _emscripten_memcpy_big(dest, src, num) {
+      HEAPU8.copyWithin(dest, src, src + num);
+    }
+    function getHeapMax() {
+      return 2147483648;
+    }
+    function emscripten_realloc_buffer(size) {
+      var b = wasmMemory.buffer;
+      try {
+        wasmMemory.grow(size - b.byteLength + 65535 >>> 16);
+        updateMemoryViews();
+        return 1;
+      } catch (e) {
+      }
+    }
+    function _emscripten_resize_heap(requestedSize) {
+      var oldSize = HEAPU8.length;
+      requestedSize = requestedSize >>> 0;
+      var maxHeapSize = getHeapMax();
+      if (requestedSize > maxHeapSize) {
+        return false;
+      }
+      let alignUp = (x, multiple) => x + (multiple - x % multiple) % multiple;
+      for (var cutDown = 1; cutDown <= 4; cutDown *= 2) {
+        var overGrownHeapSize = oldSize * (1 + 0.2 / cutDown);
+        overGrownHeapSize = Math.min(overGrownHeapSize, requestedSize + 100663296);
+        var newSize = Math.min(maxHeapSize, alignUp(Math.max(requestedSize, overGrownHeapSize), 65536));
+        var replacement = emscripten_realloc_buffer(newSize);
+        if (replacement) {
+          return true;
+        }
+      }
+      return false;
+    }
+    embind_init_charCodes();
+    BindingError = Module2["BindingError"] = extendError(Error, "BindingError");
+    InternalError = Module2["InternalError"] = extendError(Error, "InternalError");
+    init_emval();
+    UnboundTypeError = Module2["UnboundTypeError"] = extendError(Error, "UnboundTypeError");
+    var wasmImports = { "n": ___cxa_throw, "o": __embind_register_bigint, "l": __embind_register_bool, "r": __embind_register_emval, "k": __embind_register_float, "c": __embind_register_function, "b": __embind_register_integer, "a": __embind_register_memory_view, "g": __embind_register_std_string, "f": __embind_register_std_wstring, "m": __embind_register_void, "d": __emval_decref, "e": __emval_get_global, "i": __emval_incref, "h": __emval_new, "j": _abort, "q": _emscripten_memcpy_big, "p": _emscripten_resize_heap };
+    var asm = createWasm();
+    var ___wasm_call_ctors = function() {
+      return (___wasm_call_ctors = Module2["asm"]["t"]).apply(null, arguments);
+    };
+    var _malloc = function() {
+      return (_malloc = Module2["asm"]["u"]).apply(null, arguments);
+    };
+    var _free = function() {
+      return (_free = Module2["asm"]["v"]).apply(null, arguments);
+    };
+    var ___getTypeName = Module2["___getTypeName"] = function() {
+      return (___getTypeName = Module2["___getTypeName"] = Module2["asm"]["w"]).apply(null, arguments);
+    };
+    var __embind_initialize_bindings = Module2["__embind_initialize_bindings"] = function() {
+      return (__embind_initialize_bindings = Module2["__embind_initialize_bindings"] = Module2["asm"]["x"]).apply(null, arguments);
+    };
+    var ___errno_location = function() {
+      return (___errno_location = Module2["asm"]["__errno_location"]).apply(null, arguments);
+    };
+    var ___cxa_is_pointer_type = function() {
+      return (___cxa_is_pointer_type = Module2["asm"]["z"]).apply(null, arguments);
+    };
+    var calledRun;
+    dependenciesFulfilled = function runCaller() {
+      if (!calledRun) run();
+      if (!calledRun) dependenciesFulfilled = runCaller;
+    };
+    function run() {
+      if (runDependencies > 0) {
+        return;
+      }
+      preRun();
+      if (runDependencies > 0) {
+        return;
+      }
+      function doRun() {
+        if (calledRun) return;
+        calledRun = true;
+        Module2["calledRun"] = true;
+        if (ABORT) return;
+        initRuntime();
+        readyPromiseResolve(Module2);
+        if (Module2["onRuntimeInitialized"]) Module2["onRuntimeInitialized"]();
+        postRun();
+      }
+      if (Module2["setStatus"]) {
+        Module2["setStatus"]("Running...");
+        setTimeout(function() {
+          setTimeout(function() {
+            Module2["setStatus"]("");
+          }, 1);
+          doRun();
+        }, 1);
+      } else {
+        doRun();
+      }
+    }
+    if (Module2["preInit"]) {
+      if (typeof Module2["preInit"] == "function") Module2["preInit"] = [Module2["preInit"]];
+      while (Module2["preInit"].length > 0) {
+        Module2["preInit"].pop()();
+      }
+    }
+    run();
+    return Module2.ready;
+  });
+})();
+var webp_dec_default = Module;
+
+// node_modules/@jsquash/webp/utils.js
+function initEmscriptenModule(moduleFactory, wasmModule, moduleOptionOverrides = {}) {
+  let instantiateWasm;
+  if (wasmModule) {
+    instantiateWasm = (imports, callback) => {
+      const instance = new WebAssembly.Instance(wasmModule, imports);
+      callback(instance);
+      return instance.exports;
+    };
+  }
+  return moduleFactory({
+    // Just to be safe, don't automatically invoke any wasm functions
+    noInitialRun: true,
+    instantiateWasm,
+    ...moduleOptionOverrides
+  });
+}
+
+// node_modules/@jsquash/webp/decode.js
+var emscriptenModule;
+async function init(module, moduleOptionOverrides) {
+  let actualModule = module;
+  let actualOptions = moduleOptionOverrides;
+  if (arguments.length === 1 && !(module instanceof WebAssembly.Module)) {
+    actualModule = void 0;
+    actualOptions = module;
+  }
+  emscriptenModule = initEmscriptenModule(webp_dec_default, actualModule, actualOptions);
+}
+async function decode(buffer) {
+  if (!emscriptenModule)
+    init();
+  const module = await emscriptenModule;
+  const result = module.decode(buffer);
+  if (!result)
+    throw new Error("Decoding error");
+  return result;
+}
+
+// src/image.ts
+function imageInfo(buf) {
+  if (buf.length >= 33 && buf.readUInt32BE(0) === 2303741511 && buf.toString("ascii", 12, 16) === "IHDR") {
+    const colorType = buf[25];
+    let hasAlpha = colorType === 4 || colorType === 6;
+    for (let at = 8; !hasAlpha && at + 8 <= buf.length; ) {
+      const type = buf.toString("ascii", at + 4, at + 8);
+      if (type === "tRNS") hasAlpha = true;
+      if (type === "IDAT" || type === "IEND") break;
+      at += 12 + buf.readUInt32BE(at);
+    }
+    return { format: "png", width: buf.readUInt32BE(16), height: buf.readUInt32BE(20), hasAlpha };
+  }
+  if (buf.length >= 30 && buf.toString("ascii", 0, 4) === "RIFF" && buf.toString("ascii", 8, 12) === "WEBP") {
+    const chunk = buf.toString("ascii", 12, 16);
+    if (chunk === "VP8X")
+      return {
+        format: "webp",
+        width: 1 + buf.readUIntLE(24, 3),
+        height: 1 + buf.readUIntLE(27, 3),
+        hasAlpha: (buf[20] & 16) !== 0
+      };
+    if (chunk === "VP8L") {
+      const bits = buf.readUInt32LE(21);
+      return {
+        format: "webp",
+        width: 1 + (bits & 16383),
+        height: 1 + (bits >>> 14 & 16383),
+        hasAlpha: (bits >>> 28 & 1) === 1
+      };
+    }
+    if (chunk === "VP8 ")
+      return {
+        format: "webp",
+        width: buf.readUInt16LE(26) & 16383,
+        height: buf.readUInt16LE(28) & 16383,
+        hasAlpha: false
+      };
+  }
+  throw new Error("Use a PNG or WebP image");
+}
+async function readImageInfo(file) {
+  return imageInfo(await readFile5(file));
+}
+var webpReady;
+function webpWasm() {
+  const bundled = fileURLToPath2(new URL("./webp_dec.wasm", import.meta.url));
+  return existsSync2(bundled) ? bundled : createRequire(import.meta.url).resolve("@jsquash/webp/codec/dec/webp_dec.wasm");
+}
+async function decodeRgba(file) {
+  const buf = await readFile5(file);
+  const info = imageInfo(buf);
+  if (info.format === "png") return { ...info, data: import_pngjs.PNG.sync.read(buf).data };
+  globalThis.ImageData ??= class {
+    constructor(data, width, height) {
+      this.data = data;
+      this.width = width;
+      this.height = height;
+    }
+    data;
+    width;
+    height;
+  };
+  webpReady ??= WebAssembly.compile(readFileSync2(webpWasm())).then(
+    (module) => init(module)
+  );
+  await webpReady;
+  const decoded = await decode(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
+  return { ...info, data: new Uint8Array(decoded.data.buffer, decoded.data.byteOffset, decoded.data.byteLength) };
+}
+
+// src/art.ts
+function artRequest(state) {
+  if (!state.pet || !state.pending?.plan) return null;
+  const pet = state.pet;
+  const plan = state.pending.plan;
+  const host = hostFor(state.host);
+  const own = state.art.filter((art) => art.petId === pet.id);
+  const references = own.filter((art) => host.referenceKinds.includes(art.kind));
+  const referenceFiles = [
+    references.find((art) => art.stage === "egg")?.file,
+    references.find((art) => art.stage !== "egg")?.file,
+    references.at(-1)?.file
+  ].filter((file) => !!file);
+  return {
+    id: requestId(state),
+    operationId: state.pending.id,
+    petId: pet.id,
+    host: state.host,
+    status: !plan.appearance ? "unchanged" : desiredAppearance(state) ? "ready" : "pending",
+    stage: plan.stage,
+    name: pet.name,
+    naming: pet.naming,
+    personality: pet.personality ?? plan.personality,
+    genes: pet.genes ?? plan.genes,
+    story: plan.text,
+    appearance: plan.appearance,
+    reusableAppearances: own.filter((art) => art.kind === "atlas" || art.kind === "avatar"),
+    referenceFiles: [...new Set(referenceFiles)],
+    prompt: readPrompt("meta") + "\n" + readPrompt("appearance"),
+    contract: host.artContract,
+    target: pet.binding ?? null
+  };
+}
+async function validateImage(file, kind) {
+  const info = await stat2(file);
+  if (!info.isFile() || info.size > 64 * 1024 * 1024) throw new Error("Artifact must be a regular file below 64 MiB");
+  if (kind === "artifact") return { format: "artifact", width: 0, height: 0, hasAlpha: false };
+  const meta = await readImageInfo(file);
+  if ((kind === "portrait" || kind === "atlas") && !meta.hasAlpha)
+    throw new Error("Pet images must have an alpha channel");
+  if (meta.width * meta.height > 16e6) throw new Error("Image exceeds size limit");
+  const decoded = await decodeRgba(file);
+  if (kind === "atlas") checkAtlas(decoded);
+  return meta;
 }
 
 // src/debugger-server.ts
@@ -3392,9 +4419,7 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
       if (req.method === "GET" && url.pathname === "/api/state") return json({ state: await store.peek(), token });
       if (req.method === "GET" && url.pathname === "/api/art-request") return json(artRequest(await store.peek()));
       if (req.method === "GET" && url.pathname === "/api/native-pets")
-        return json(
-          store.host === "desktop" ? { ...await getNativePetCatalog(), live: await readNativePetLive() } : null
-        );
+        return json(store.host === "desktop" ? { ...await listPets(), live: await readSelectedPet() } : null);
       if (req.method === "POST" && url.pathname === "/api/action") {
         if (req.headers["x-genpet-token"] !== token) return json({ error: "Invalid request token" }, 403);
         let body = "";
@@ -3411,34 +4436,34 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
         }
         if (input.action === "switch-pet") {
           if (store.host !== "desktop") throw new Error("Dots cannot switch the desktop Pet");
-          const catalog = await getNativePetCatalog();
+          const catalog = await listPets();
           if (!catalog.pets.some((pet) => pet.id === input.petId)) throw new Error("Unknown pet ID");
-          return json({ ok: true, result: await selectNativePetLive(input.petId) });
+          return json({ ok: true, result: await selectPet(input.petId) });
         }
         return json({ error: "Use the story workflow to change pet records" }, 400);
       }
       if (req.method === "GET" && url.pathname.startsWith("/art/")) {
-        const state = await store.peek(), record2 = state.art.find((art) => art.id === url.pathname.slice(5));
-        if (!record2 || record2.kind === "artifact") return json({ error: "Image not found" }, 404);
+        const state = await store.peek(), record = state.art.find((art) => art.id === url.pathname.slice(5));
+        if (!record || record.kind === "artifact") return json({ error: "Image not found" }, 404);
         res.writeHead(200, {
-          "Content-Type": record2.file.endsWith(".webp") ? "image/webp" : "image/png",
+          "Content-Type": record.file.endsWith(".webp") ? "image/webp" : "image/png",
           "Cache-Control": "no-store"
         });
-        res.end(await readFile3(record2.file));
+        res.end(await readFile7(record.file));
         return;
       }
       const routes = { "/": "index.html", "/app.js": "app.js", "/style.css": "style.css" };
       if (req.method !== "GET" || !routes[url.pathname]) return json({ error: "Not found" }, 404);
-      const file = path5.join(pluginRoot(), "debugger-web", routes[url.pathname]), types = {
+      const file = path6.join(pluginRoot(), "debugger-web", routes[url.pathname]), types = {
         ".html": "text/html; charset=utf-8",
         ".js": "text/javascript; charset=utf-8",
         ".css": "text/css; charset=utf-8"
       };
       res.writeHead(200, {
-        "Content-Type": types[path5.extname(file)],
+        "Content-Type": types[path6.extname(file)],
         "Content-Security-Policy": "default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; frame-ancestors 'none'"
       });
-      res.end(await readFile3(file));
+      res.end(await readFile7(file));
     } catch (error) {
       if (!res.headersSent) json({ error: error.message }, 400);
       else res.end();
@@ -3457,42 +4482,3 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
 export {
   startServer
 };
-/*! Bundled license information:
-
-smol-toml/dist/error.js:
-smol-toml/dist/primitive.js:
-smol-toml/dist/date.js:
-smol-toml/dist/extract.js:
-smol-toml/dist/util.js:
-smol-toml/dist/struct.js:
-smol-toml/dist/parse.js:
-smol-toml/dist/stringify.js:
-smol-toml/dist/index.js:
-  (*!
-   * Copyright (c) Squirrel Chat et al., All rights reserved.
-   * SPDX-License-Identifier: BSD-3-Clause
-   *
-   * Redistribution and use in source and binary forms, with or without
-   * modification, are permitted provided that the following conditions are met:
-   *
-   * 1. Redistributions of source code must retain the above copyright notice, this
-   *    list of conditions and the following disclaimer.
-   * 2. Redistributions in binary form must reproduce the above copyright notice,
-   *    this list of conditions and the following disclaimer in the
-   *    documentation and/or other materials provided with the distribution.
-   * 3. Neither the name of the copyright holder nor the names of its contributors
-   *    may be used to endorse or promote products derived from this software without
-   *    specific prior written permission.
-   *
-   * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-   * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-   * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-   * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-   * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-   * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-   * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-   * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-   *)
-*/

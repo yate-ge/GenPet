@@ -5,10 +5,8 @@ import { randomBytes } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { Store } from './store.js';
 import { artRequest } from './art.js';
-import { pluginRoot } from './plugin-root.js';
-import { packageHost } from './prompts.js';
-import { getNativePetCatalog } from './native-pets.js';
-import { readNativePetLive, selectNativePetLive } from './native-pet-live.js';
+import { packageHost, pluginRoot } from './config.js';
+import { listPets, readSelectedPet, selectPet } from './hosts/desktop/switch.js';
 
 /** Explicitly launched, local, read-only pet inspection. Switching requires an explicit action. */
 export async function startServer(port = Number(process.env.GENPET_PORT || 47831), root?: string) {
@@ -33,9 +31,7 @@ export async function startServer(port = Number(process.env.GENPET_PORT || 47831
       if (req.method === 'GET' && url.pathname === '/api/state') return json({ state: await store.peek(), token });
       if (req.method === 'GET' && url.pathname === '/api/art-request') return json(artRequest(await store.peek()));
       if (req.method === 'GET' && url.pathname === '/api/native-pets')
-        return json(
-          store.host === 'desktop' ? { ...(await getNativePetCatalog()), live: await readNativePetLive() } : null,
-        );
+        return json(store.host === 'desktop' ? { ...(await listPets()), live: await readSelectedPet() } : null);
       if (req.method === 'POST' && url.pathname === '/api/action') {
         if (req.headers['x-genpet-token'] !== token) return json({ error: 'Invalid request token' }, 403);
         let body = '';
@@ -52,9 +48,9 @@ export async function startServer(port = Number(process.env.GENPET_PORT || 47831
         }
         if (input.action === 'switch-pet') {
           if (store.host !== 'desktop') throw new Error('Dots cannot switch the desktop Pet');
-          const catalog = await getNativePetCatalog();
+          const catalog = await listPets();
           if (!catalog.pets.some(pet => pet.id === input.petId)) throw new Error('Unknown pet ID');
-          return json({ ok: true, result: await selectNativePetLive(input.petId) });
+          return json({ ok: true, result: await selectPet(input.petId) });
         }
         return json({ error: 'Use the story workflow to change pet records' }, 400);
       }

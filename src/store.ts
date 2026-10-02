@@ -1,89 +1,10 @@
+/** Persistence only: one state.json per host, read without side effects, changed inside a locked transaction. */
 import { mkdir, readFile, rename, writeFile, rm, stat } from 'node:fs/promises';
-import { homedir } from 'node:os';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { identifier, validateStage, type Host, type Pet, type Stage } from './core.js';
-export type ArtKind = 'portrait' | 'atlas' | 'avatar' | 'story' | 'artifact';
-export interface ArtRecord {
-  id: string;
-  petId: string;
-  requestId: string;
-  stage: Stage;
-  description: string;
-  file: string;
-  kind: ArtKind;
-  createdAt: number;
-  provenance: string;
-}
-export interface StoryPlan {
-  text: string;
-  basis: string;
-  state: string;
-  stage?: Stage;
-  genes?: string;
-  place?: string;
-  connection?: string;
-  personality?: string;
-  appearance?: { description: string; reuseArtId?: string };
-  mediaIds?: string[];
-}
-export interface HostResult {
-  petId: string;
-  operationId: string;
-  appearanceId: string;
-  avatarId: string;
-  updated: boolean;
-  active: boolean | null;
-  refreshRequested: boolean;
-  displayStatus: 'confirmed' | 'unconfirmed';
-  evidence?: string;
-  error?: string;
-}
-export interface GenerationStep {
-  id: string;
-  unit: string;
-  at: number;
-  inputRefs: string[];
-  result: Record<string, unknown>;
-}
-export interface Story {
-  id: string;
-  triggerId: string;
-  petId: string;
-  at: number;
-  text: string;
-  basis: string;
-  stage: Stage;
-  state: string;
-  appearanceId?: string;
-  mediaIds: string[];
-  hostResult?: HostResult;
-  steps?: GenerationStep[];
-}
-export interface Pending {
-  id: string;
-  triggerId: string;
-  petId: string;
-  baseRevision: number;
-  startedAt: number;
-  mode: 'initialization' | 'story' | 'grow';
-  plan?: StoryPlan;
-  hostResult?: HostResult;
-  steps?: GenerationStep[];
-}
-export interface State {
-  version: 2;
-  host: Host;
-  pet: Pet | null;
-  stories: Story[];
-  art: ArtRecord[];
-  pending: Pending | null;
-  schedule?: { timezone: string; reference: string; times: string[] };
-  legacy?: { backup: string; importedAt: number };
-  replacesPetId?: string;
-}
-export const dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), '.genpet');
-export const fresh = (host: Host): State => ({ version: 2, host, pet: null, stories: [], art: [], pending: null });
+import { dataRoot } from './config.js';
+import { fresh, identifier, validateStage, type Host, type State } from './model.js';
+
 export async function atomicJson(file: string, value: unknown) {
   await mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
   const tmp = `${file}.${randomUUID()}.tmp`;
@@ -94,6 +15,7 @@ export async function atomicJson(file: string, value: unknown) {
     await rm(tmp, { force: true });
   }
 }
+
 /** A separate namespace per host, even when both packages share an explicit root. */
 export class Store {
   readonly base: string;
@@ -107,23 +29,20 @@ export class Store {
     this.root = path.resolve(this.base, host);
     this.file = path.join(this.root, 'state.json');
   }
-  now() {
-    return Date.now();
-  }
+
+  /** Read-only; a missing file is an empty record, and elapsed time never changes a pet. */
   async peek(): Promise<State> {
     try {
       const state = JSON.parse(await readFile(this.file, 'utf8')) as State;
       if (state.version !== 2 || state.host !== this.host) throw new Error('Unsupported or mismatched pet record');
-      if (state.pet) {
-        identifier(state.pet.id, 'petId');
-        validateStage('egg', state.pet.stage);
-        if (
-          state.pet.personality !== undefined &&
-          (typeof state.pet.personality !== 'string' || !state.pet.personality.trim())
-        )
+      const pet = state.pet;
+      if (pet) {
+        identifier(pet.id, 'petId');
+        validateStage('egg', pet.stage);
+        if (pet.personality !== undefined && (typeof pet.personality !== 'string' || !pet.personality.trim()))
           throw new Error('Invalid personality');
-        if ((state.pet.naming?.status as string) === 'deferred') state.pet.naming!.status = 'asked'; // 0.6.0 records
-        if (state.pet.naming && !['unasked', 'asked', 'named'].includes(state.pet.naming.status))
+        if ((pet.naming?.status as string) === 'deferred') pet.naming!.status = 'asked'; // 0.6.0 records
+        if (pet.naming && !['unasked', 'asked', 'named'].includes(pet.naming.status))
           throw new Error('Invalid naming status');
       }
       return state;
@@ -132,31 +51,22 @@ export class Store {
       throw error;
     }
   }
-  async legacyCandidate(): Promise<string | null> {
-    if (this.host !== 'desktop') return null;
-    const file = path.join(this.base, 'state.json');
-    try {
-      const old = JSON.parse(await readFile(file, 'utf8'));
-      return old.version === 1 && old.pet ? file : null;
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
-      throw error;
-    }
-  }
+
+  /** Serializes changes across processes; the record is written only if `fn` succeeds. */
   async transaction<T>(fn: (state: State) => T | Promise<T>): Promise<T> {
     await mkdir(this.root, { recursive: true, mode: 0o700 });
     const lock = this.file + '.lock';
     let acquired = false;
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 100 && !acquired; i++) {
       try {
         await mkdir(lock);
         acquired = true;
-        break;
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
-        const age = await stat(lock)
-          .then(info => Date.now() - info.mtimeMs)
-          .catch(() => 0);
+        const age = await stat(lock).then(
+          info => Date.now() - info.mtimeMs,
+          () => 0,
+        );
         if (age > 120_000) await rm(lock, { recursive: true, force: true });
         else await new Promise(resolve => setTimeout(resolve, 50));
       }

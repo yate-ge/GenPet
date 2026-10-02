@@ -5,8 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { mkdtemp, writeFile, rm, chmod } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
-import { desktopIpcPath, refreshViaIpc } from '../src/native-ipc.js';
-import { refreshNativePet } from '../src/native-refresh.js';
+import { desktopIpcPath, refreshViaIpc, refreshNativePet } from '../src/hosts/desktop/refresh.js';
 
 async function fixture(mode = 'relay') {
   const dir = await mkdtemp(path.join(tmpdir(), 'gp-ipc-'));

@@ -1,7 +1,8 @@
 import { spawn } from 'node:child_process';
 import path from 'node:path';
-import { Store, dataRoot } from './store.js';
-import { packageHost } from './prompts.js';
+/** `debugger`: start (or reuse) the optional local record viewer for this package's data. */
+import { dataRoot, packageHost } from './config.js';
+import { Store } from './store.js';
 export async function launchDebugger(
   port = Number(process.env.GENPET_PORT || (packageHost() === 'dots' ? 47832 : 47831)),
 ) {

@@ -4,7 +4,7 @@ import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { refreshNativePet, isLiveNativeDestination } from '../src/native-refresh.js';
+import { refreshNativePet, isLiveDestination } from '../src/hosts/desktop/refresh.js';
 
 test('refresh for an isolated destination reports unconfirmed and never claims automatic refresh', async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'genpet-refresh-'));
@@ -28,21 +28,20 @@ test('refresh for an isolated destination reports unconfirmed and never claims a
   }
 });
 
-test('isLiveNativeDestination matches bound GenPet entries and excludes sandboxes', () => {
+test('isLiveDestination matches GenPet entries in the current Codex home unless skipped', () => {
   const home = process.env.CODEX_HOME;
   const skip = process.env.GENPET_SKIP_NATIVE_REFRESH;
   try {
     delete process.env.GENPET_SKIP_NATIVE_REFRESH;
     process.env.CODEX_HOME = '/Users/genpet-test/.codex';
-    assert.equal(isLiveNativeDestination('/Users/genpet-test/.codex/pets/genpet-companion'), true);
-    assert.equal(isLiveNativeDestination('/Users/genpet-test/.codex/pets/genpet-companion-2'), true);
-    assert.equal(isLiveNativeDestination('/Users/genpet-test/.codex/pets/unrelated-pet'), false);
-    process.env.CODEX_HOME = '/var/folders/xx/genpet-test/codex';
-    assert.equal(isLiveNativeDestination('/var/folders/xx/genpet-test/codex/pets/genpet-companion'), false);
+    assert.equal(isLiveDestination('/Users/genpet-test/.codex/pets/genpet-companion'), true);
+    assert.equal(isLiveDestination('/Users/genpet-test/.codex/pets/genpet-companion-2'), true);
+    assert.equal(isLiveDestination('/Users/genpet-test/.codex/pets/unrelated-pet'), false);
+    assert.equal(isLiveDestination('/Users/genpet-test/.codex/pets/genpet-a/nested'), false);
     process.env.CODEX_HOME = '/Users/genpet-test/CustomCodexHome';
-    assert.equal(isLiveNativeDestination('/Users/genpet-test/CustomCodexHome/pets/genpet-companion'), true);
+    assert.equal(isLiveDestination('/Users/genpet-test/CustomCodexHome/pets/genpet-companion'), true);
     process.env.GENPET_SKIP_NATIVE_REFRESH = '1';
-    assert.equal(isLiveNativeDestination('/Users/genpet-test/.codex/pets/genpet-companion'), false);
+    assert.equal(isLiveDestination('/Users/genpet-test/.codex/pets/genpet-companion'), false);
   } finally {
     if (home === undefined) delete process.env.CODEX_HOME;
     else process.env.CODEX_HOME = home;

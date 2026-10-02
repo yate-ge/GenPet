@@ -4,7 +4,7 @@ import net from 'node:net';
 import { randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { readNativePetLive, selectNativePetLive } from '../src/native-pet-live.js';
+import { readSelectedPet, selectPet } from '../src/hosts/desktop/switch.js';
 
 type Request = {
   id: number;
@@ -86,7 +86,7 @@ test('read projects only pet fields and handles fragmented native pipe frames', 
       setImmediate(() => socket.write(bytes.subarray(2)));
     },
     async options => {
-      assert.deepEqual(await readNativePetLive(options), {
+      assert.deepEqual(await readSelectedPet(options), {
         available: true,
         selectedPetId: 'custom:test',
         effectiveSelectedPetId: 'custom:test',
@@ -108,7 +108,7 @@ test('select writes only the pet key, then confirms with an independent read', a
       socket.write(frame(response(request.id, selected)));
     },
     async options => {
-      assert.deepEqual(await selectNativePetLive('dewey', options), {
+      assert.deepEqual(await selectPet('dewey', options), {
         selectedPetId: 'dewey',
         effectiveSelectedPetId: 'dewey',
         immediate: true,
@@ -123,8 +123,8 @@ test('select writes only the pet key, then confirms with an independent read', a
 
 test('missing environment is explicit and cannot trigger a write', async () => {
   const options = { pipePath: null, threadId: null };
-  assert.equal((await readNativePetLive(options)).available, false);
-  await assert.rejects(selectNativePetLive('dewey', options), /unavailable/);
+  assert.equal((await readSelectedPet(options)).available, false);
+  await assert.rejects(selectPet('dewey', options), /unavailable/);
 });
 
 test('a rejected write is not retried and never falls back to config files', async () => {
@@ -141,7 +141,7 @@ test('a rejected write is not retried and never falls back to config files', asy
       );
     },
     async options => {
-      await assert.rejects(selectNativePetLive('dewey', options), /could not complete/);
+      await assert.rejects(selectPet('dewey', options), /could not complete/);
       assert.deepEqual(calls, ['write_settings']);
     },
   );
@@ -152,7 +152,7 @@ test('readback mismatch rejects even after a successful write response', async (
     (request, socket) =>
       socket.write(frame(response(request.id, request.params?.tool === 'write_settings' ? 'dewey' : 'codex'))),
     async options => {
-      await assert.rejects(selectNativePetLive('dewey', options), /did not match/);
+      await assert.rejects(selectPet('dewey', options), /did not match/);
     },
   );
 });
@@ -161,7 +161,7 @@ test('timeouts and oversized responses return unavailable without exposing paylo
   await withHost(
     () => {},
     async options => {
-      const result = await readNativePetLive({ ...options, timeoutMs: 20 });
+      const result = await readSelectedPet({ ...options, timeoutMs: 20 });
       assert.equal(result.available, false);
       if (!result.available) assert.match(result.reason, /timed out/);
     },
@@ -173,7 +173,7 @@ test('timeouts and oversized responses return unavailable without exposing paylo
       socket.write(header);
     },
     async options => {
-      const result = await readNativePetLive(options);
+      const result = await readSelectedPet(options);
       assert.equal(result.available, false);
       if (!result.available) assert.match(result.reason, /size limit/);
     },
