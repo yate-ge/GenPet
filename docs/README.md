@@ -6,9 +6,10 @@
 
 | 文档 | 内容 |
 | --- | --- |
+| [代码架构](ARCHITECTURE.md) | 三层结构、一次故事的流程、源码地图与扩展方式 |
 | [产品设计](PRODUCT_DESIGN.zh-CN.md) | 产品目标、基因、进化、新故事与输出范围 |
 | [0.6.0 命名、用户联系与性格](COMPANION_0_6.zh-CN.md) | 提示词主导的实现、必要代码与验证边界 |
-| [工程设计与待决问题](ENGINEERING.zh-CN.md) | 待决问题状态表、宿主接入、持久记录、宠物编号与 0.5.0 实现 |
+| [工程设计与待决问题](ENGINEERING.zh-CN.md) | 待决问题状态表、宿主接入、持久记录与宠物编号 |
 | [新版验证说明](NEW_VERSION_VALIDATION.zh-CN.md) | 用户验证入口、本轮工程检查与当前证据（安装脚本引用此路径） |
 | [生成证据摘要](evidence/README.md) | 各轮生成单元测试的结论与状态；原始文件在本地 `output/` |
 | [Agent 安装](AGENT_INSTALL.md) | 从已发布的 marketplace 安装或更新 |
