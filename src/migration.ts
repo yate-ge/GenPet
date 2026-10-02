@@ -1,10 +1,24 @@
 import { readFile, copyFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { identifier, text, validateStage, type Stage } from './core.js';
+/** Legacy v1 desktop records: found, never auto-migrated, and imported only on explicit request. */
+import { identifier, text, validateStage, type Stage } from './model.js';
 import { atomicJson, type Store } from './store.js';
 
-/** Explicit migration; old files remain intact, no time-derived growth or reroll. */
+/** The v1 record a desktop install may still have beside the v2 namespaces. */
+export async function findLegacyRecord(store: Store): Promise<string | null> {
+  if (store.host !== 'desktop') return null;
+  const file = path.join(store.base, 'state.json');
+  try {
+    const old = JSON.parse(await readFile(file, 'utf8'));
+    return old.version === 1 && old.pet ? file : null;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
+/** `migrate-legacy`: old files remain intact; no time-derived growth or reroll. */
 export async function migrateLegacy(
   store: Store,
   file: string,

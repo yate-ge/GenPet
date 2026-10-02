@@ -1,8 +1,10 @@
 import { writeFile } from 'node:fs/promises';
 import { PNG } from 'pngjs';
-import { actions } from '../src/art.js';
-import { beginStory, planStory, recordHostResult, desiredAppearance } from '../src/story.js';
-import { bindAvatar } from '../src/hosts.js';
+import { desiredAppearance } from '../src/appearance.js';
+import { actions } from '../src/hosts/desktop/atlas.js';
+import { bindAvatar } from '../src/hosts/dots.js';
+import { recordHostResult } from '../src/hosts/result.js';
+import { beginStory, planStory } from '../src/lifecycle.js';
 import type { Store } from '../src/store.js';
 export const personality =
   'Patient and curious. Offers quiet company without assuming the user needs help. Draws its feelers close when listening and unfolds them when exploring. A fictional individual met beside an unfinished drawing; not a claim about user personality.';

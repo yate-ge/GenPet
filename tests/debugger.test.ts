@@ -4,7 +4,7 @@ import { mkdtemp, rm, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Store } from '../src/store.js';
-import { beginStory } from '../src/story.js';
+import { beginStory } from '../src/lifecycle.js';
 import { startServer } from '../src/debugger-server.js';
 test('debugger is read-only, rejects cross-origin actions and stops', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-debugger-')),

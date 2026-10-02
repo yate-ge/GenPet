@@ -4,7 +4,7 @@ import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { Store } from '../src/store.js';
-import { beginStory } from '../src/story.js';
+import { beginStory } from '../src/lifecycle.js';
 import { migrateLegacy } from '../src/migration.js';
 import { image } from './fixtures.js';
 test('legacy migration preserves ID, stage, images and binding without aging or editing the source', async () => {

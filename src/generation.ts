@@ -1,8 +1,9 @@
+/** Generation units: assemble a unit request, check a result's data contract, keep results with the story. */
 import { createHash } from 'node:crypto';
-import { text } from './core.js';
-import { readPrompt, readUnits } from './prompts.js';
-import { pendingFor } from './story.js';
-import type { Store, GenerationStep } from './store.js';
+import { readPrompt, readUnits } from './config.js';
+import { pendingFor } from './lifecycle.js';
+import { text, type GenerationStep } from './model.js';
+import type { Store } from './store.js';
 
 export interface UnitResult {
   inputRefs: string[];
