@@ -3,94 +3,27 @@ import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { randomUUID } from 'node:crypto';
-import net from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
+import { frame, PRIVATE_SETTING, settingsResponse, withAppTools, type AppToolsRequest } from './fake-app-tools.js';
+
 const execute = promisify(execFile);
 const threadId = 'isolated-cli-pet-test';
-const privateSetting = 'unrelated-host-setting-must-not-escape';
-type Request = {
-  id: number;
-  method: string;
-  params?: {
-    namespace: string;
-    tool: string;
-    arguments: { settings?: Record<string, unknown> };
-    callerSource: string;
-    threadId: string;
-  };
-};
 type Result = { code: number; stdout: string; stderr: string };
+type Host = { pipePath: string; calls: AppToolsRequest[]; connections: () => number };
 
-function frame(value: unknown) {
-  const payload = Buffer.from(JSON.stringify(value));
-  const header = Buffer.alloc(4);
-  header.writeUInt32LE(payload.length);
-  return Buffer.concat([header, payload]);
-}
-
-async function withHost(
-  run: (host: { pipePath: string; calls: Request[]; connections: () => number }) => Promise<void>,
-) {
-  const pipePath =
-    process.platform === 'win32'
-      ? `\\\\.\\pipe\\genpet-cli-test-${randomUUID()}`
-      : path.join(tmpdir(), `genpet-cli-${randomUUID()}.sock`);
-  const calls: Request[] = [];
-  const sockets = new Set<net.Socket>();
-  let connections = 0;
+/** A host whose selection changes on write, like the running desktop app. */
+function withHost(run: (host: Host) => Promise<void>) {
   let selected: unknown = 'cloud:host-selection';
   let effective: unknown = 'dewey';
-  const server = net.createServer(socket => {
-    connections++;
-    sockets.add(socket);
-    socket.on('close', () => sockets.delete(socket));
-    socket.on('error', () => {});
-    let pending = Buffer.alloc(0);
-    socket.on('data', bytes => {
-      pending = Buffer.concat([pending, bytes]);
-      while (pending.length >= 4 && pending.length >= pending.readUInt32LE(0) + 4) {
-        const length = pending.readUInt32LE(0);
-        const request = JSON.parse(pending.subarray(4, length + 4).toString('utf8')) as Request;
-        pending = pending.subarray(length + 4);
-        calls.push(request);
-        if (request.params?.tool === 'write_settings') {
-          selected = request.params.arguments.settings?.['selected-avatar-id'];
-          effective = selected;
-        }
-        socket.write(
-          frame({
-            jsonrpc: '2.0',
-            id: request.id,
-            result: {
-              success: true,
-              contentItems: [
-                {
-                  type: 'inputText',
-                  text: JSON.stringify({
-                    settings: { 'selected-avatar-id': selected, private: privateSetting },
-                    effectiveSettings: { 'selected-avatar-id': effective, other: privateSetting },
-                  }),
-                },
-              ],
-            },
-          }),
-        );
-      }
-    });
-  });
-  await new Promise<void>((resolve, reject) => {
-    server.once('error', reject);
-    server.listen(pipePath, resolve);
-  });
-  try {
-    await run({ pipePath, calls, connections: () => connections });
-  } finally {
-    for (const socket of sockets) socket.destroy();
-    await new Promise<void>(resolve => server.close(() => resolve()));
-  }
+  return withAppTools((request, socket) => {
+    if (request.params?.tool === 'write_settings') {
+      selected = request.params.arguments.settings?.['selected-avatar-id'];
+      effective = selected;
+    }
+    socket.write(frame(settingsResponse(request.id, selected, effective)));
+  }, run);
 }
 
 async function withCli(pipePath: string, run: (cli: (...args: string[]) => Promise<Result>) => Promise<void>) {
@@ -140,7 +73,7 @@ async function withCli(pipePath: string, run: (cli: (...args: string[]) => Promi
 function output(result: Result): unknown {
   assert.equal(result.code, 0, result.stderr);
   assert.equal(result.stderr, '');
-  assert.ok(!result.stdout.includes(privateSetting));
+  assert.ok(!result.stdout.includes(PRIVATE_SETTING));
   return JSON.parse(result.stdout);
 }
 
@@ -259,6 +192,19 @@ test('switch-pet help works without a host connection', async () => {
   await withHost(async host =>
     withCli(host.pipePath, async cli => {
       assert.match((output(await cli('switch-pet', '--help')) as { usage: string }).usage, /Usage: switch-pet/);
+      assert.equal(host.connections(), 0);
+    }),
+  );
+});
+
+test('an unknown command lists the shared commands and this package host commands only', async () => {
+  await withHost(async host =>
+    withCli(host.pipePath, async cli => {
+      const result = await cli('no-such-command');
+      assert.notEqual(result.code, 0);
+      for (const usage of ['status', 'begin-story', 'accept-art', 'host-result', 'publish', 'switch-pet'])
+        assert.match(result.stderr, new RegExp(`^  ${usage}\\b`, 'm'));
+      assert.doesNotMatch(result.stderr, /bind-avatar|host-request/);
       assert.equal(host.connections(), 0);
     }),
   );

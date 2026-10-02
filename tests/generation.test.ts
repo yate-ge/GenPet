@@ -167,7 +167,7 @@ test('CLI unit request and contract verification are read-only and story output 
   const call = (...args: string[]) =>
     JSON.parse(execFileSync(process.execPath, ['--import', 'tsx', cli, ...args], { env, encoding: 'utf8' }));
   try {
-    const fixture = path.resolve('tests/generation-unit-fixtures/context-sparse.json'),
+    const fixture = path.resolve('tests/agent/contexts/sparse.json'),
       resultFile = path.join(root, 'result.json');
     await writeFile(resultFile, JSON.stringify(context));
     assert.equal(call('unit-request', 'context', fixture).unit, 'context');

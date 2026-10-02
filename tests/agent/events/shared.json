@@ -1,0 +1,13 @@
+{
+  "fictional": true,
+  "inputRefs": [
+    "fixture:event-shared"
+  ],
+  "note": "一件具体的新近用户事件。",
+  "availableContext": [
+    {
+      "source": "fictional:photo-note",
+      "text": "虚构用户今天傍晚第一次独自骑车到江边，拍下了日落。"
+    }
+  ]
+}

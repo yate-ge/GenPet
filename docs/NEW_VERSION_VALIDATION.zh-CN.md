@@ -30,7 +30,7 @@ Dots 为主要验证环境。将本次 `plugins/genpet-dots` 包或开发归档�
 
 ## 结构化单元入口
 
-当前提示词进一步拆成 context、encounter、genes、story、evolution、appearance、image-review、output 八个单元，各有固定输入名、开放结果和检查点。编排与合同见 [单元说明](../framework/references/generation-units.md)；虚构的固定输入位于 `tests/generation-unit-fixtures`。
+当前提示词进一步拆成 context、encounter、genes、story、evolution、appearance、image-review、output 八个单元，各有固定输入名、开放结果和检查点。编排与合同见 [单元说明](../framework/references/generation-units.md)；虚构资料与在 Codex 中运行的核心模块测试见 `tests/agent/README.zh-CN.md`。
 
 例如在本地只测试基因单元：
 
