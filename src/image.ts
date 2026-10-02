@@ -22,12 +22,29 @@ export function imageInfo(buf: Buffer): ImageInfo {
   }
   if (buf.length >= 30 && buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') {
     const chunk = buf.toString('ascii', 12, 16);
-    if (chunk === 'VP8X') return { format: 'webp', width: 1 + buf.readUIntLE(24, 3), height: 1 + buf.readUIntLE(27, 3), hasAlpha: (buf[20] & 0x10) !== 0 };
+    if (chunk === 'VP8X')
+      return {
+        format: 'webp',
+        width: 1 + buf.readUIntLE(24, 3),
+        height: 1 + buf.readUIntLE(27, 3),
+        hasAlpha: (buf[20] & 0x10) !== 0,
+      };
     if (chunk === 'VP8L') {
       const bits = buf.readUInt32LE(21);
-      return { format: 'webp', width: 1 + (bits & 0x3fff), height: 1 + ((bits >>> 14) & 0x3fff), hasAlpha: ((bits >>> 28) & 1) === 1 };
+      return {
+        format: 'webp',
+        width: 1 + (bits & 0x3fff),
+        height: 1 + ((bits >>> 14) & 0x3fff),
+        hasAlpha: ((bits >>> 28) & 1) === 1,
+      };
     }
-    if (chunk === 'VP8 ') return { format: 'webp', width: buf.readUInt16LE(26) & 0x3fff, height: buf.readUInt16LE(28) & 0x3fff, hasAlpha: false };
+    if (chunk === 'VP8 ')
+      return {
+        format: 'webp',
+        width: buf.readUInt16LE(26) & 0x3fff,
+        height: buf.readUInt16LE(28) & 0x3fff,
+        hasAlpha: false,
+      };
   }
   throw new Error('Use a PNG or WebP image');
 }
@@ -40,7 +57,9 @@ let webpReady: Promise<void> | undefined;
 function webpWasm() {
   // The bundled plugin ships the codec beside dist/*.js; source runs resolve it from node_modules.
   const bundled = fileURLToPath(new URL('./webp_dec.wasm', import.meta.url));
-  return existsSync(bundled) ? bundled : createRequire(import.meta.url).resolve('@jsquash/webp/codec/dec/webp_dec.wasm');
+  return existsSync(bundled)
+    ? bundled
+    : createRequire(import.meta.url).resolve('@jsquash/webp/codec/dec/webp_dec.wasm');
 }
 
 /** Decode to straight RGBA, 4 bytes per pixel. */
@@ -48,8 +67,16 @@ export async function decodeRgba(file: string): Promise<ImageInfo & { data: Uint
   const buf = await readFile(file);
   const info = imageInfo(buf);
   if (info.format === 'png') return { ...info, data: PNG.sync.read(buf).data };
-  (globalThis as any).ImageData ??= class { constructor(public data: Uint8ClampedArray, public width: number, public height: number) {} };
-  webpReady ??= WebAssembly.compile(readFileSync(webpWasm())).then(module => (initWebp as (module: WebAssembly.Module) => Promise<void>)(module));
+  (globalThis as any).ImageData ??= class {
+    constructor(
+      public data: Uint8ClampedArray,
+      public width: number,
+      public height: number,
+    ) {}
+  };
+  webpReady ??= WebAssembly.compile(readFileSync(webpWasm())).then(module =>
+    (initWebp as (module: WebAssembly.Module) => Promise<void>)(module),
+  );
   await webpReady;
   const decoded = await decodeWebp(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer);
   return { ...info, data: new Uint8Array(decoded.data.buffer, decoded.data.byteOffset, decoded.data.byteLength) };

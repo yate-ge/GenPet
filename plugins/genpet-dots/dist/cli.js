@@ -2161,7 +2161,8 @@ function createPet(name, now = Date.now()) {
 }
 function validateStage(current, target2) {
   if (!stages.includes(target2)) throw new Error("Invalid stage");
-  if (stages.indexOf(target2) < stages.indexOf(current)) throw new Error("Evolution cannot reverse the current stage");
+  if (stages.indexOf(target2) < stages.indexOf(current))
+    throw new Error("Evolution cannot reverse the current stage");
   return target2;
 }
 
@@ -2199,9 +2200,11 @@ var Store = class {
       if (state.pet) {
         identifier(state.pet.id, "petId");
         validateStage("egg", state.pet.stage);
-        if (state.pet.personality !== void 0 && (typeof state.pet.personality !== "string" || !state.pet.personality.trim())) throw new Error("Invalid personality");
+        if (state.pet.personality !== void 0 && (typeof state.pet.personality !== "string" || !state.pet.personality.trim()))
+          throw new Error("Invalid personality");
         if (state.pet.naming?.status === "deferred") state.pet.naming.status = "asked";
-        if (state.pet.naming && !["unasked", "asked", "named"].includes(state.pet.naming.status)) throw new Error("Invalid naming status");
+        if (state.pet.naming && !["unasked", "asked", "named"].includes(state.pet.naming.status))
+          throw new Error("Invalid naming status");
       }
       return state;
     } catch (error) {
@@ -3673,12 +3676,29 @@ function imageInfo(buf) {
   }
   if (buf.length >= 30 && buf.toString("ascii", 0, 4) === "RIFF" && buf.toString("ascii", 8, 12) === "WEBP") {
     const chunk = buf.toString("ascii", 12, 16);
-    if (chunk === "VP8X") return { format: "webp", width: 1 + buf.readUIntLE(24, 3), height: 1 + buf.readUIntLE(27, 3), hasAlpha: (buf[20] & 16) !== 0 };
+    if (chunk === "VP8X")
+      return {
+        format: "webp",
+        width: 1 + buf.readUIntLE(24, 3),
+        height: 1 + buf.readUIntLE(27, 3),
+        hasAlpha: (buf[20] & 16) !== 0
+      };
     if (chunk === "VP8L") {
       const bits = buf.readUInt32LE(21);
-      return { format: "webp", width: 1 + (bits & 16383), height: 1 + (bits >>> 14 & 16383), hasAlpha: (bits >>> 28 & 1) === 1 };
+      return {
+        format: "webp",
+        width: 1 + (bits & 16383),
+        height: 1 + (bits >>> 14 & 16383),
+        hasAlpha: (bits >>> 28 & 1) === 1
+      };
     }
-    if (chunk === "VP8 ") return { format: "webp", width: buf.readUInt16LE(26) & 16383, height: buf.readUInt16LE(28) & 16383, hasAlpha: false };
+    if (chunk === "VP8 ")
+      return {
+        format: "webp",
+        width: buf.readUInt16LE(26) & 16383,
+        height: buf.readUInt16LE(28) & 16383,
+        hasAlpha: false
+      };
   }
   throw new Error("Use a PNG or WebP image");
 }
@@ -3704,7 +3724,9 @@ async function decodeRgba(file) {
     width;
     height;
   };
-  webpReady ??= WebAssembly.compile(readFileSync(webpWasm())).then((module) => init(module));
+  webpReady ??= WebAssembly.compile(readFileSync(webpWasm())).then(
+    (module) => init(module)
+  );
   await webpReady;
   const decoded = await decode(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
   return { ...info, data: new Uint8Array(decoded.data.buffer, decoded.data.byteOffset, decoded.data.byteLength) };
@@ -3727,10 +3749,12 @@ async function beginStory(store2, triggerId, mode = "story", name) {
     const completed = state.stories.find((story) => story.triggerId === triggerId);
     if (completed) return { status: "completed", story: completed };
     if (state.pending) {
-      if (state.pending.triggerId !== triggerId) throw new Error(`Unfinished story ${state.pending.id}; resume it first`);
+      if (state.pending.triggerId !== triggerId)
+        throw new Error(`Unfinished story ${state.pending.id}; resume it first`);
       return { status: "pending", pending: state.pending, pet: state.pet };
     }
-    if (!state.pet && await store2.legacyCandidate()) throw new Error("Existing legacy pet found; migrate it before creating a new identity");
+    if (!state.pet && await store2.legacyCandidate())
+      throw new Error("Existing legacy pet found; migrate it before creating a new identity");
     state.pet ??= createPet(name);
     state.pending = {
       id: `story-${randomUUID3()}`,
@@ -3750,7 +3774,8 @@ async function resetPet(store2, operationId) {
     if (completed) return { status: "completed", story: completed };
     if (state.pending?.triggerId === triggerId) return { status: "pending", pending: state.pending, pet: state.pet };
     if (state.pending) throw new Error("Resume or cancel the unfinished story before an explicit reset");
-    if (!state.pet && await store2.legacyCandidate()) throw new Error("Migrate the existing legacy pet before resetting its identity");
+    if (!state.pet && await store2.legacyCandidate())
+      throw new Error("Migrate the existing legacy pet before resetting its identity");
     const backup = path2.join(store2.root, "backups", `reset-${Date.now()}-${randomUUID3()}.json`);
     await atomicJson(backup, state);
     const previous = state.pet, binding = previous?.binding, schedule = state.schedule;
@@ -3771,17 +3796,25 @@ async function resetPet(store2, operationId) {
 }
 function appearanceFor(state, stage, id) {
   const kind = state.host === "desktop" ? "atlas" : "avatar";
-  const art = state.art.find((art2) => art2.id === id && art2.petId === state.pet.id && art2.kind === kind && art2.stage === stage);
-  if (!art) throw new Error("Reusable appearance is missing, belongs to another pet, or is incompatible with this host/stage");
+  const art = state.art.find(
+    (art2) => art2.id === id && art2.petId === state.pet.id && art2.kind === kind && art2.stage === stage
+  );
+  if (!art)
+    throw new Error("Reusable appearance is missing, belongs to another pet, or is incompatible with this host/stage");
   return art;
 }
 function validatePlan(state, input) {
   const pet = state.pet;
-  const plan = { text: text(input.text, "story text"), basis: text(input.basis, "decision basis"), state: text(input.state, "state") };
+  const plan = {
+    text: text(input.text, "story text"),
+    basis: text(input.basis, "decision basis"),
+    state: text(input.state, "state")
+  };
   plan.stage = validateStage(pet.stage, input.stage ?? pet.stage);
   if (input.personality !== void 0) {
     plan.personality = text(input.personality, "personality");
-    if (pet.personality && pet.personality !== plan.personality) throw new Error("An existing pet retains its personality");
+    if (pet.personality && pet.personality !== plan.personality)
+      throw new Error("An existing pet retains its personality");
   } else if (pet.personality) plan.personality = pet.personality;
   if (!pet.genes) {
     if (plan.stage !== "egg") throw new Error("Initialization begins with an egg");
@@ -3790,16 +3823,21 @@ function validatePlan(state, input) {
     plan.connection = text(input.connection, "user connection");
     if (!plan.personality) throw new Error("Initialization requires an individual personality");
     if (!input.appearance) throw new Error("Initialization requires an egg appearance");
-  } else if (input.genes !== void 0 && input.genes !== pet.genes) throw new Error("An existing pet retains its genes");
-  if (input.appearance) plan.appearance = {
-    description: text(input.appearance.description, "appearance description"),
-    ...input.appearance.reuseArtId ? { reuseArtId: identifier(input.appearance.reuseArtId, "reuseArtId") } : {}
-  };
-  if (plan.stage !== pet.stage && !plan.appearance) throw new Error("Evolution requires an appearance for the new stage");
+  } else if (input.genes !== void 0 && input.genes !== pet.genes)
+    throw new Error("An existing pet retains its genes");
+  if (input.appearance)
+    plan.appearance = {
+      description: text(input.appearance.description, "appearance description"),
+      ...input.appearance.reuseArtId ? { reuseArtId: identifier(input.appearance.reuseArtId, "reuseArtId") } : {}
+    };
+  if (plan.stage !== pet.stage && !plan.appearance)
+    throw new Error("Evolution requires an appearance for the new stage");
   if (input.mediaIds !== void 0) {
     if (!Array.isArray(input.mediaIds)) throw new Error("mediaIds must be an array");
     plan.mediaIds = input.mediaIds.map((id) => identifier(id, "mediaId"));
-    for (const id of plan.mediaIds) if (!state.art.some((art) => art.id === id && art.petId === pet.id)) throw new Error("Media belongs to another pet or is missing");
+    for (const id of plan.mediaIds)
+      if (!state.art.some((art) => art.id === id && art.petId === pet.id))
+        throw new Error("Media belongs to another pet or is missing");
   }
   if (plan.appearance?.reuseArtId) appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
   return plan;
@@ -3809,7 +3847,8 @@ async function planStory(store2, id, input) {
     const pending = pendingFor(state, id);
     if (pending.plan && JSON.stringify(input) === JSON.stringify(pending.plan)) return pending;
     const plan = validatePlan(state, input);
-    if (pending.plan && JSON.stringify(pending.plan) !== JSON.stringify(plan)) throw new Error("The story plan is saved; resume it or cancel explicitly before redesigning");
+    if (pending.plan && JSON.stringify(pending.plan) !== JSON.stringify(plan))
+      throw new Error("The story plan is saved; resume it or cancel explicitly before redesigning");
     pending.plan = plan;
     return pending;
   });
@@ -3827,13 +3866,19 @@ function desiredAppearance(state) {
 }
 function validateHostResult(state, id, input) {
   const pending = pendingFor(state, id);
-  if (state.host === "dots" && !state.pet?.binding) throw new Error("Bind the actual Dots Avatar before recording an update");
-  if (input.petId !== pending.petId || input.operationId !== id) throw new Error("Host result belongs to another pet or operation");
-  if (input.appearanceId !== desiredAppearance(state)?.id) throw new Error("Host result belongs to a different appearance");
+  if (state.host === "dots" && !state.pet?.binding)
+    throw new Error("Bind the actual Dots Avatar before recording an update");
+  if (input.petId !== pending.petId || input.operationId !== id)
+    throw new Error("Host result belongs to another pet or operation");
+  if (input.appearanceId !== desiredAppearance(state)?.id)
+    throw new Error("Host result belongs to a different appearance");
   const avatarId = text(input.avatarId, "avatarId");
-  if (state.pet?.binding && state.pet.binding.avatarId !== avatarId) throw new Error("Host updated a different Avatar from the persisted target");
-  if (typeof input.updated !== "boolean" || ![true, false, null].includes(input.active) || typeof input.refreshRequested !== "boolean" || !["confirmed", "unconfirmed"].includes(input.displayStatus)) throw new Error("Invalid host result");
-  if (input.displayStatus === "confirmed" && !input.evidence?.trim()) throw new Error("Confirmed display requires evidence");
+  if (state.pet?.binding && state.pet.binding.avatarId !== avatarId)
+    throw new Error("Host updated a different Avatar from the persisted target");
+  if (typeof input.updated !== "boolean" || ![true, false, null].includes(input.active) || typeof input.refreshRequested !== "boolean" || !["confirmed", "unconfirmed"].includes(input.displayStatus))
+    throw new Error("Invalid host result");
+  if (input.displayStatus === "confirmed" && !input.evidence?.trim())
+    throw new Error("Confirmed display requires evidence");
   return {
     petId: input.petId,
     operationId: id,
@@ -3872,8 +3917,14 @@ async function finishStory(store2, id) {
       if (!result?.updated || result.appearanceId !== appearance.id || result.error || result.active !== false && !result.refreshRequested && result.displayStatus !== "confirmed")
         throw new Error("Host update or active Avatar refresh is unfinished; resume it");
     }
-    const mediaIds = [.../* @__PURE__ */ new Set([...plan.mediaIds ?? [], ...state.art.filter((art) => art.requestId === requestId(state) && ["story", "artifact"].includes(art.kind)).map((art) => art.id)])];
-    for (const mediaId of mediaIds) await access(state.art.find((art) => art.id === mediaId && art.petId === pet.id).file);
+    const mediaIds = [
+      .../* @__PURE__ */ new Set([
+        ...plan.mediaIds ?? [],
+        ...state.art.filter((art) => art.requestId === requestId(state) && ["story", "artifact"].includes(art.kind)).map((art) => art.id)
+      ])
+    ];
+    for (const mediaId of mediaIds)
+      await access(state.art.find((art) => art.id === mediaId && art.petId === pet.id).file);
     const story = {
       id,
       triggerId: pending.triggerId,
@@ -3908,12 +3959,26 @@ async function finishStory(store2, id) {
 }
 var DAILY_TIMES = ["07:00", "12:00", "16:00", "21:00"];
 function dueStory(state, now = Date.now(), timezone = state.schedule?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone) {
-  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(now);
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(now);
   const get = (key) => parts.find((part) => part.type === key).value;
   const date = `${get("year")}-${get("month")}-${get("day")}`, time = `${get("hour")}:${get("minute")}`;
   const times = state.schedule?.times ?? DAILY_TIMES, slot = times.filter((slot2) => slot2 <= time).at(-1);
   const triggerId = slot ? `daily:${date}:${slot}:${timezone.replace(/\//g, ".")}` : null;
-  return { timezone, times, triggerId, due: !!triggerId && !state.stories.some((story) => story.triggerId === triggerId), pending: state.pending?.id ?? null };
+  return {
+    timezone,
+    times,
+    triggerId,
+    due: !!triggerId && !state.stories.some((story) => story.triggerId === triggerId),
+    pending: state.pending?.id ?? null
+  };
 }
 
 // src/native-ipc.ts
@@ -3961,7 +4026,17 @@ async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
       };
       socket.on("error", fail);
       socket.on("close", () => fail(Error("IPC connection closed")));
-      socket.on("connect", () => send({ type: "request", requestId: requestId2, sourceClientId: "genpet", version: 0, method: "initialize", params: { clientType: "genpet" } }));
+      socket.on(
+        "connect",
+        () => send({
+          type: "request",
+          requestId: requestId2,
+          sourceClientId: "genpet",
+          version: 0,
+          method: "initialize",
+          params: { clientType: "genpet" }
+        })
+      );
       socket.on("data", (chunk) => {
         buffer = Buffer.concat([buffer, chunk]);
         while (buffer.length >= 4) {
@@ -3989,9 +4064,13 @@ async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
               return;
             }
             pending.delete(reject);
-            resolve({ id: message.result.clientId, send, onMessage: (fn) => {
-              listener = fn;
-            } });
+            resolve({
+              id: message.result.clientId,
+              send,
+              onMessage: (fn) => {
+                listener = fn;
+              }
+            });
           }
           listener?.(message);
         }
@@ -4010,7 +4089,13 @@ async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
           resolve();
         }
       });
-      sender.send({ type: "broadcast", method: "query-cache-invalidate", version: 0, sourceClientId: sender.id, params: { queryKey: ["custom-avatars"], reset: false } });
+      sender.send({
+        type: "broadcast",
+        method: "query-cache-invalidate",
+        version: 0,
+        sourceClientId: sender.id,
+        params: { queryKey: ["custom-avatars"], reset: false }
+      });
     });
     return { socketPath, handshakeConfirmed: true, relayConfirmed: true, hostRefreshRequested: true };
   } finally {
@@ -4069,7 +4154,8 @@ function isLiveNativeDestination(destination) {
   const resolved = path4.resolve(configured);
   const temp = path4.resolve(tmpdir());
   const relativeToTemp = path4.relative(temp, resolved);
-  if (configured.startsWith("/var/folders/") || configured.includes("/tmp/") || relativeToTemp === "" || relativeToTemp !== ".." && !relativeToTemp.startsWith(`..${path4.sep}`) && !path4.isAbsolute(relativeToTemp)) return false;
+  if (configured.startsWith("/var/folders/") || configured.includes("/tmp/") || relativeToTemp === "" || relativeToTemp !== ".." && !relativeToTemp.startsWith(`..${path4.sep}`) && !path4.isAbsolute(relativeToTemp))
+    return false;
   return belongs(resolved);
 }
 
@@ -4143,12 +4229,20 @@ async function requestSelection(options, petId) {
       if (error) reject(error);
       else resolve(result);
     };
-    const timer = setTimeout(() => finish(new Error("Codex app tools timed out; the current selection is unconfirmed."), void 0, true), timeoutMs);
+    const timer = setTimeout(
+      () => finish(new Error("Codex app tools timed out; the current selection is unconfirmed."), void 0, true),
+      timeoutMs
+    );
     socket.once("connect", () => {
       sent = true;
       socket.write(frame(request));
     });
-    socket.on("error", (error) => finish(new Error(`Codex app tools connection failed (${error.code ?? "socket error"}).`)));
+    socket.on(
+      "error",
+      (error) => finish(
+        new Error(`Codex app tools connection failed (${error.code ?? "socket error"}).`)
+      )
+    );
     socket.on("close", () => finish(new Error("Codex app tools closed before confirming the pet selection.")));
     socket.on("data", (bytes) => {
       if (settled) return;
@@ -4171,7 +4265,8 @@ async function requestSelection(options, petId) {
           return finish(new Error("Codex could not complete the pet settings request."));
         }
         const item = result.contentItems.find((item2) => record(item2) && item2.type === "inputText");
-        if (!record(item) || typeof item.text !== "string") return finish(new Error("Codex returned no pet settings result."));
+        if (!record(item) || typeof item.text !== "string")
+          return finish(new Error("Codex returned no pet settings result."));
         try {
           finish(void 0, projectSelection(JSON.parse(item.text)));
         } catch {
@@ -4185,7 +4280,10 @@ async function readNativePetLive(options = {}) {
   try {
     return { available: true, ...await requestSelection(options) };
   } catch (error) {
-    return { available: false, reason: error instanceof Error ? error.message : "Live Codex pet selection is unavailable." };
+    return {
+      available: false,
+      reason: error instanceof Error ? error.message : "Live Codex pet selection is unavailable."
+    };
   }
 }
 async function selectNativePetLive(petId, options = {}) {
@@ -4213,10 +4311,7 @@ import path5 from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 function pluginRoot() {
   const moduleDirectory = path5.dirname(fileURLToPath2(import.meta.url));
-  const candidates = [
-    path5.resolve(moduleDirectory, ".."),
-    path5.resolve(moduleDirectory, "..", "plugins", "genpet")
-  ];
+  const candidates = [path5.resolve(moduleDirectory, ".."), path5.resolve(moduleDirectory, "..", "plugins", "genpet")];
   return candidates.find((candidate) => existsSync2(path5.join(candidate, ".codex-plugin", "plugin.json"))) ?? candidates[0];
 }
 
@@ -4228,7 +4323,10 @@ function packageHost() {
   return host;
 }
 function readPromptFile(fileName) {
-  const candidates = [path6.resolve(import.meta.dirname, "..", "framework", "prompts", fileName), path6.join(pluginRoot(), "prompts", fileName)];
+  const candidates = [
+    path6.resolve(import.meta.dirname, "..", "framework", "prompts", fileName),
+    path6.join(pluginRoot(), "prompts", fileName)
+  ];
   const file = candidates.find(existsSync3);
   if (!file) throw new Error(`Missing prompt file: ${fileName}`);
   return readFileSync2(file, "utf8");
@@ -4256,7 +4354,9 @@ var actions = [
 function artRequest(state) {
   if (!state.pet || !state.pending?.plan) return null;
   const plan = state.pending.plan, existing = desiredAppearance(state), id = requestId(state);
-  const references2 = state.art.filter((art) => art.petId === state.pet.id && (art.kind === "portrait" || state.host === "dots" && art.kind === "avatar"));
+  const references2 = state.art.filter(
+    (art) => art.petId === state.pet.id && (art.kind === "portrait" || state.host === "dots" && art.kind === "avatar")
+  );
   return {
     id,
     operationId: state.pending.id,
@@ -4271,11 +4371,15 @@ function artRequest(state) {
     story: plan.text,
     appearance: plan.appearance,
     reusableAppearances: state.art.filter((art) => art.petId === state.pet.id && ["atlas", "avatar"].includes(art.kind)),
-    referenceFiles: [...new Set([
-      references2.find((art) => art.stage === "egg")?.file,
-      references2.find((art) => art.stage !== "egg")?.file,
-      references2.at(-1)?.file
-    ].filter((file) => !!file))],
+    referenceFiles: [
+      ...new Set(
+        [
+          references2.find((art) => art.stage === "egg")?.file,
+          references2.find((art) => art.stage !== "egg")?.file,
+          references2.at(-1)?.file
+        ].filter((file) => !!file)
+      )
+    ],
     prompt: readPrompt("meta") + "\n" + readPrompt("appearance"),
     contract: state.host === "desktop" ? { columns: 8, cellWidth: 192, cellHeight: 208, rows: 11, spriteVersionNumber: 2 } : null,
     target: state.pet.binding ?? null
@@ -4288,29 +4392,34 @@ async function validateImage(file, kind) {
   const meta = await readImageInfo(file);
   if (["portrait", "atlas"].includes(kind) && !meta.hasAlpha) throw new Error("Pet images must have an alpha channel");
   if (meta.width * meta.height > 16e6) throw new Error("Image exceeds size limit");
-  if (kind === "atlas" && (meta.width !== 1536 || meta.height !== 2288)) throw new Error("Atlas must be 1536 \xD7 2288 (v2)");
+  if (kind === "atlas" && (meta.width !== 1536 || meta.height !== 2288))
+    throw new Error("Atlas must be 1536 \xD7 2288 (v2)");
   const decoded = await decodeRgba(file);
   if (kind === "atlas") {
     const { data, width } = decoded;
-    for (let row = 0; row < 11; row++) for (let col = 0; col < 8; col++) {
-      let visible = 0;
-      const used = col < (row < 9 ? actions[row].count : 8) || row === 0 && col === 6;
-      for (let y = row * 208; y < (row + 1) * 208; y++) for (let x = col * 192; x < (col + 1) * 192; x++) if (data[(y * width + x) * 4 + 3] > 0) visible++;
-      if (used && visible < 30) throw new Error(`Empty animation cell ${row},${col}`);
-      if (!used && visible > 0) throw new Error(`Unused cell ${row},${col} must be transparent`);
-    }
+    for (let row = 0; row < 11; row++)
+      for (let col = 0; col < 8; col++) {
+        let visible = 0;
+        const used = col < (row < 9 ? actions[row].count : 8) || row === 0 && col === 6;
+        for (let y = row * 208; y < (row + 1) * 208; y++)
+          for (let x = col * 192; x < (col + 1) * 192; x++) if (data[(y * width + x) * 4 + 3] > 0) visible++;
+        if (used && visible < 30) throw new Error(`Empty animation cell ${row},${col}`);
+        if (!used && visible > 0) throw new Error(`Unused cell ${row},${col} must be transparent`);
+      }
   }
   return meta;
 }
 async function acceptArt(store2, input) {
   if (!path7.isAbsolute(input.file)) throw new Error("Artifact file must be an absolute local path");
-  if (!["portrait", "atlas", "avatar", "story", "artifact"].includes(input.kind)) throw new Error("Unknown artifact kind");
+  if (!["portrait", "atlas", "avatar", "story", "artifact"].includes(input.kind))
+    throw new Error("Unknown artifact kind");
   if (!input.provenance?.trim()) throw new Error("Record generation and validation provenance");
   await validateImage(input.file, input.kind);
   const bytes = await readFile4(input.file);
   return store2.transaction(async (state) => {
     if (requestId(state) !== input.requestId) throw new Error("Stale design request");
-    if (state.host === "dots" && input.kind === "atlas" || state.host === "desktop" && input.kind === "avatar") throw new Error("Artwork uses the other host format");
+    if (state.host === "dots" && input.kind === "atlas" || state.host === "desktop" && input.kind === "avatar")
+      throw new Error("Artwork uses the other host format");
     const id = `art-${createHash3("sha256").update(state.pet.id + input.requestId + input.kind).update(bytes).digest("hex").slice(0, 24)}`;
     const previous = state.art.find((art) => art.id === id);
     if (previous) {
@@ -4347,8 +4456,10 @@ function desktopDestination(state) {
   const home = process.env.CODEX_HOME || path7.join(homedir4(), ".codex");
   const destination = state.pet.binding?.destination ?? path7.join(home, "pets", state.pet.id);
   const relative = path7.relative(path7.resolve(home, "pets"), path7.resolve(destination));
-  if (!relative || relative.startsWith("..") || path7.isAbsolute(relative) || relative.includes(path7.sep)) throw new Error("Target must be one entry in this Codex home");
-  if (state.pet.binding && state.pet.binding.avatarId !== `custom:${path7.basename(destination)}`) throw new Error("Avatar binding does not match its destination");
+  if (!relative || relative.startsWith("..") || path7.isAbsolute(relative) || relative.includes(path7.sep))
+    throw new Error("Target must be one entry in this Codex home");
+  if (state.pet.binding && state.pet.binding.avatarId !== `custom:${path7.basename(destination)}`)
+    throw new Error("Avatar binding does not match its destination");
   return destination;
 }
 async function exportNative(state, destination) {
@@ -4361,7 +4472,8 @@ async function exportNative(state, destination) {
     previous = await readFile4(path7.join(destination, "pet.json"), "utf8");
     const old = JSON.parse(previous);
     const transferred = state.replacesPetId && old.genpetId === state.replacesPetId && state.pet.binding?.destination === destination;
-    if (old.genpetId !== state.pet.id && !transferred && !(state.legacy && state.pet.binding?.destination === destination && !old.genpetId)) throw new Error("Target entry belongs to another pet; it was preserved");
+    if (old.genpetId !== state.pet.id && !transferred && !(state.legacy && state.pet.binding?.destination === destination && !old.genpetId))
+      throw new Error("Target entry belongs to another pet; it was preserved");
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
   }
@@ -4394,7 +4506,9 @@ async function installNative(store2, options = {}) {
     state.pet.binding = { host: "desktop", avatarId, destination };
     const selection2 = await (options.selection ?? readNativePetLive)();
     const active = selection2.available ? selection2.effectiveSelectedPetId === avatarId : null;
-    const refresh = await (options.refresh ?? refreshNativePet)({ expectedSpritePath: path7.join(destination, result.manifest.spritesheetPath) });
+    const refresh = await (options.refresh ?? refreshNativePet)({
+      expectedSpritePath: path7.join(destination, result.manifest.spritesheetPath)
+    });
     const hostResult = validateHostResult(state, operationId, {
       petId: state.pet.id,
       operationId,
@@ -4437,7 +4551,8 @@ async function bindAvatar(store2, avatarId) {
   return store2.transaction((state) => {
     if (!state.pet) throw new Error("Allocate the pet identity first");
     const id = text(avatarId, "avatarId");
-    if (state.pet.binding && state.pet.binding.avatarId !== id) throw new Error("Target is already bound; preserve the existing Avatar");
+    if (state.pet.binding && state.pet.binding.avatarId !== id)
+      throw new Error("Target is already bound; preserve the existing Avatar");
     return state.pet.binding ??= { host: "dots", avatarId: id };
   });
 }
@@ -4470,7 +4585,8 @@ function validateUnitResult(unit, input) {
 function unitRequest(unit, fixture) {
   const contract = definition(unit);
   if (!object(fixture) || !object(fixture.inputs)) throw new Error("A unit fixture requires inputs");
-  for (const field of contract.inputs) if (!Object.hasOwn(fixture.inputs, field)) throw new Error(`Missing ${unit} input: ${field}`);
+  for (const field of contract.inputs)
+    if (!Object.hasOwn(fixture.inputs, field)) throw new Error(`Missing ${unit} input: ${field}`);
   const inputRefs = references(fixture.inputRefs ?? []);
   const prompt = [
     `\u8FD9\u662F\u72EC\u7ACB\u5355\u5143\u6D4B\u8BD5\uFF0C\u53EA\u6267\u884C ${unit}\u3002\u4E0B\u6E38\u6D41\u7A0B\u53EA\u4F5C\u80CC\u666F\uFF0C\u4E0D\u6267\u884C\u5176\u4ED6\u5355\u5143\u3002\u53EA\u4F7F\u7528\u4E0B\u9762\u63D0\u4F9B\u7684\u8F93\u5165\u4E0E\u771F\u5B9E\u6587\u4EF6\uFF1B\u4E0D\u5F97\u8865\u67E5\u771F\u5B9E\u7528\u6237\u8D44\u6599\u3001\u64CD\u4F5C Pet/Avatar\u3001\u521B\u5EFA\u8C03\u5EA6\u6216\u6267\u884C\u5B8C\u6574\u751F\u547D\u5468\u671F\u3002\u9700\u8981\u56FE\u50CF\u68C0\u67E5\u65F6\u5B9E\u9645\u67E5\u770B\u8F93\u5165\u6587\u4EF6\u3002`,
@@ -4482,7 +4598,12 @@ function unitRequest(unit, fixture) {
   return { unit, inputRefs, prompt, promptHash: createHash4("sha256").update(prompt).digest("hex") };
 }
 function canonical(value) {
-  return JSON.stringify(value, (_, item) => object(item) ? Object.fromEntries(Object.keys(item).sort().map((key) => [key, item[key]])) : item);
+  return JSON.stringify(
+    value,
+    (_, item) => object(item) ? Object.fromEntries(
+      Object.keys(item).sort().map((key) => [key, item[key]])
+    ) : item
+  );
 }
 async function recordStep(store2, operationId, unit, input) {
   const output = validateUnitResult(unit, input);
@@ -4527,7 +4648,8 @@ async function migrateLegacy(store2, file, design) {
     };
     state.legacy = { backup, importedAt: Date.now() };
     const destination = legacy.nativeExport?.destination;
-    if (destination) state.pet.binding = { host: "desktop", avatarId: `custom:${path8.basename(destination)}`, destination };
+    if (destination)
+      state.pet.binding = { host: "desktop", avatarId: `custom:${path8.basename(destination)}`, destination };
     const dir = path8.join(store2.root, "pets", petId, "assets");
     await mkdir3(dir, { recursive: true });
     for (const art of legacy.art ?? []) {
@@ -4539,7 +4661,17 @@ async function migrateLegacy(store2, file, design) {
         if (error.code === "ENOENT") continue;
         throw error;
       }
-      state.art.push({ id, petId, requestId: "legacy", stage: validateStage("egg", art.stage), description: "Imported existing artwork", file: target2, kind: art.kind, createdAt: art.createdAt, provenance: art.provenance || "Preserved v1 artwork" });
+      state.art.push({
+        id,
+        petId,
+        requestId: "legacy",
+        stage: validateStage("egg", art.stage),
+        description: "Imported existing artwork",
+        file: target2,
+        kind: art.kind,
+        createdAt: art.createdAt,
+        provenance: art.provenance || "Preserved v1 artwork"
+      });
       if (art.kind === "atlas" && art.stage === stage) state.pet.state.appearanceId = id;
     }
     return state;
@@ -5324,7 +5456,12 @@ function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 function selection(value, source) {
-  return { selectedPetId: value, genpetSelected: source === "unavailable" ? null : value === "custom:genpet-companion", source, liveVerified: false };
+  return {
+    selectedPetId: value,
+    genpetSelected: source === "unavailable" ? null : value === "custom:genpet-companion",
+    source,
+    liveVerified: false
+  };
 }
 async function optionalText(file) {
   try {
@@ -5391,7 +5528,10 @@ async function readSelection(home, errors) {
 }
 async function localPets(home, errors) {
   const pets = /* @__PURE__ */ new Map();
-  for (const [directory, filename] of [["avatars", "avatar.json"], ["pets", "pet.json"]]) {
+  for (const [directory, filename] of [
+    ["avatars", "avatar.json"],
+    ["pets", "pet.json"]
+  ]) {
     let entries;
     try {
       entries = await readdir(path9.join(home, directory), { withFileTypes: true });
@@ -5408,7 +5548,8 @@ async function localPets(home, errors) {
         const manifest = JSON.parse(text2);
         if (!isRecord(manifest)) throw new Error("Invalid manifest");
         for (const key of ["id", "displayName"]) {
-          if (manifest[key] !== void 0 && (typeof manifest[key] !== "string" || !manifest[key].trim())) throw new Error("Invalid name");
+          if (manifest[key] !== void 0 && (typeof manifest[key] !== "string" || !manifest[key].trim()))
+            throw new Error("Invalid name");
         }
         const id = `custom:${entry.name}`;
         const displayName = (manifest.displayName ?? manifest.id ?? entry.name).trim();
@@ -5446,11 +5587,16 @@ async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageH
       return false;
     }
     const value = await response.json().catch(() => null);
-    if (value?.service !== "genpet-debugger" || value.root !== root) throw new Error("Debugger port belongs to another service or data directory");
+    if (value?.service !== "genpet-debugger" || value.root !== root)
+      throw new Error("Debugger port belongs to another service or data directory");
     return true;
   }
   if (await inspect()) return { url, reused: true };
-  const child = spawn(process.execPath, [path10.join(import.meta.dirname, "debugger-server.js")], { detached: true, stdio: "ignore", env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: path10.resolve(dataRoot()) } });
+  const child = spawn(process.execPath, [path10.join(import.meta.dirname, "debugger-server.js")], {
+    detached: true,
+    stdio: "ignore",
+    env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: path10.resolve(dataRoot()) }
+  });
   let failure;
   child.once("error", (error) => {
     failure = error;
@@ -5485,12 +5631,17 @@ async function markNameAsked(store2, petId) {
 }
 async function namePet(store2, petId, userName) {
   const name = text(userName, "user supplied name");
-  if (name.length > 100 || /[\u0000-\u001f\u007f]/.test(name)) throw new Error("Name must be one line of at most 100 characters");
+  if (name.length > 100 || /[\u0000-\u001f\u007f]/.test(name))
+    throw new Error("Name must be one line of at most 100 characters");
   return store2.transaction((state) => {
     const pet = target(state, petId);
     if (pet.name === name && pet.naming?.status === "named") return pet;
     pet.name = name;
-    pet.naming = { status: "named", namedAt: Date.now(), ...pet.naming?.askedAt ? { askedAt: pet.naming.askedAt } : {} };
+    pet.naming = {
+      status: "named",
+      namedAt: Date.now(),
+      ...pet.naming?.askedAt ? { askedAt: pet.naming.askedAt } : {}
+    };
     pet.revision++;
     return pet;
   });
@@ -5508,11 +5659,21 @@ try {
   switch (command) {
     case "status": {
       const state = await store.peek(), legacyFile = !state.pet ? await store.legacyCandidate() : null;
-      output = { ...state, namingDue: namingDue(state), dataDirectory: store.root, ...legacyFile ? { legacyFile } : {} };
+      output = {
+        ...state,
+        namingDue: namingDue(state),
+        dataDirectory: store.root,
+        ...legacyFile ? { legacyFile } : {}
+      };
       break;
     }
     case "begin-story":
-      output = await beginStory(store, args[0] || `manual:${randomUUID8()}`, args[1] || "story", args[2]);
+      output = await beginStory(
+        store,
+        args[0] || `manual:${randomUUID8()}`,
+        args[1] || "story",
+        args[2]
+      );
       break;
     case "plan-story":
       output = await planStory(store, args[0], await jsonFile(args[1]));
@@ -5529,7 +5690,8 @@ try {
     case "cancel-story":
       output = await store.transaction((state) => {
         const pending = pendingFor(state, args[0]);
-        if (pending.mode === "initialization" && pending.plan) throw new Error("Initialization genes are saved; resume it or explicitly reset the pet");
+        if (pending.mode === "initialization" && pending.plan)
+          throw new Error("Initialization genes are saved; resume it or explicitly reset the pet");
         state.pending = null;
         return { cancelled: pending.id };
       });
@@ -5538,7 +5700,13 @@ try {
       output = artRequest(await store.peek());
       break;
     case "accept-art":
-      output = await acceptArt(store, { requestId: args[0], file: args[1], kind: args[2], provenance: args[3], description: args[4] });
+      output = await acceptArt(store, {
+        requestId: args[0],
+        file: args[1],
+        kind: args[2],
+        provenance: args[3],
+        description: args[4]
+      });
       break;
     case "host-request":
       output = hostRequest(await store.peek());
@@ -5550,7 +5718,8 @@ try {
       output = await bindAvatar(store, args[0]);
       break;
     case "publish":
-      if (store.host !== "desktop") throw new Error("Dots: use host-request, update the Avatar with Dots tools, then host-result");
+      if (store.host !== "desktop")
+        throw new Error("Dots: use host-request, update the Avatar with Dots tools, then host-result");
       output = await installNative(store);
       break;
     case "prompt":
@@ -5577,7 +5746,13 @@ try {
     case "story-output": {
       const state = await store.peek(), story = args[0] ? state.stories.find((story2) => story2.id === args[0]) : state.stories.at(-1);
       if (!story) throw new Error("No completed story");
-      output = { text: story.text, media: state.art.filter((art) => story.mediaIds.includes(art.id)), appearance: state.art.find((art) => art.id === story.appearanceId), naming: { due: namingDue(state), petId: state.pet?.id, status: state.pet?.naming?.status ?? "named" }, prompt: readPrompt("output") };
+      output = {
+        text: story.text,
+        media: state.art.filter((art) => story.mediaIds.includes(art.id)),
+        appearance: state.art.find((art) => art.id === story.appearanceId),
+        naming: { due: namingDue(state), petId: state.pet?.id, status: state.pet?.naming?.status ?? "named" },
+        prompt: readPrompt("output")
+      };
       break;
     }
     case "migrate-legacy":
@@ -5610,12 +5785,15 @@ try {
         output = { pets: catalog.pets, ...catalog.errors ? { errors: catalog.errors } : {} };
         break;
       }
-      if (!catalog.pets.some((pet) => pet.id === target2)) throw new Error(`Unknown pet ID: ${target2}. Use switch-pet --list.`);
+      if (!catalog.pets.some((pet) => pet.id === target2))
+        throw new Error(`Unknown pet ID: ${target2}. Use switch-pet --list.`);
       output = await selectNativePetLive(target2);
       break;
     }
     default:
-      throw new Error("Commands: status, begin-story [TRIGGER_ID] [initialization|story|grow], plan-story OPERATION_ID PLAN_JSON, art-request, accept-art REQUEST_ID FILE portrait|atlas|avatar|story|artifact PROVENANCE [DESCRIPTION], publish (desktop), host-request, host-result OPERATION_ID RESULT_JSON, bind-avatar AVATAR_ID, finish-story OPERATION_ID, story-output [STORY_ID], name-pet PET_ID USER_NAME, name-asked PET_ID, due [TIMEZONE], schedule TIMEZONE REFERENCE, prompt MODULE, unit-request UNIT INPUT_JSON, verify-unit UNIT RESULT_JSON, record-step OPERATION_ID UNIT RESULT_JSON, migrate-legacy V1_FILE DESIGN_JSON, cancel-story OPERATION_ID, reset [OPERATION_ID], debugger, switch-pet [PET_ID|--current|--list|--help]");
+      throw new Error(
+        "Commands: status, begin-story [TRIGGER_ID] [initialization|story|grow], plan-story OPERATION_ID PLAN_JSON, art-request, accept-art REQUEST_ID FILE portrait|atlas|avatar|story|artifact PROVENANCE [DESCRIPTION], publish (desktop), host-request, host-result OPERATION_ID RESULT_JSON, bind-avatar AVATAR_ID, finish-story OPERATION_ID, story-output [STORY_ID], name-pet PET_ID USER_NAME, name-asked PET_ID, due [TIMEZONE], schedule TIMEZONE REFERENCE, prompt MODULE, unit-request UNIT INPUT_JSON, verify-unit UNIT RESULT_JSON, record-step OPERATION_ID UNIT RESULT_JSON, migrate-legacy V1_FILE DESIGN_JSON, cancel-story OPERATION_ID, reset [OPERATION_ID], debugger, switch-pet [PET_ID|--current|--list|--help]"
+      );
   }
   console.log(JSON.stringify(output, null, 2));
 } catch (error) {

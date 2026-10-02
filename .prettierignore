@@ -1,0 +1,7 @@
+plugins/
+output/
+docs/
+dist/
+node_modules/
+*.md
+*.json
