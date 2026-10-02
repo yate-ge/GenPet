@@ -2149,7 +2149,8 @@ function identifier(value, field = "id") {
 }
 function validateStage(current, target) {
   if (!stages.includes(target)) throw new Error("Invalid stage");
-  if (stages.indexOf(target) < stages.indexOf(current)) throw new Error("Evolution cannot reverse the current stage");
+  if (stages.indexOf(target) < stages.indexOf(current))
+    throw new Error("Evolution cannot reverse the current stage");
   return target;
 }
 
@@ -2187,9 +2188,11 @@ var Store = class {
       if (state.pet) {
         identifier(state.pet.id, "petId");
         validateStage("egg", state.pet.stage);
-        if (state.pet.personality !== void 0 && (typeof state.pet.personality !== "string" || !state.pet.personality.trim())) throw new Error("Invalid personality");
+        if (state.pet.personality !== void 0 && (typeof state.pet.personality !== "string" || !state.pet.personality.trim()))
+          throw new Error("Invalid personality");
         if (state.pet.naming?.status === "deferred") state.pet.naming.status = "asked";
-        if (state.pet.naming && !["unasked", "asked", "named"].includes(state.pet.naming.status)) throw new Error("Invalid naming status");
+        if (state.pet.naming && !["unasked", "asked", "named"].includes(state.pet.naming.status))
+          throw new Error("Invalid naming status");
       }
       return state;
     } catch (error) {
@@ -2243,8 +2246,11 @@ var import_pngjs = __toESM(require_png(), 1);
 import { randomUUID as randomUUID2, createHash } from "node:crypto";
 function appearanceFor(state, stage, id) {
   const kind = state.host === "desktop" ? "atlas" : "avatar";
-  const art = state.art.find((art2) => art2.id === id && art2.petId === state.pet.id && art2.kind === kind && art2.stage === stage);
-  if (!art) throw new Error("Reusable appearance is missing, belongs to another pet, or is incompatible with this host/stage");
+  const art = state.art.find(
+    (art2) => art2.id === id && art2.petId === state.pet.id && art2.kind === kind && art2.stage === stage
+  );
+  if (!art)
+    throw new Error("Reusable appearance is missing, belongs to another pet, or is incompatible with this host/stage");
   return art;
 }
 function requestId(state) {
@@ -2329,12 +2335,20 @@ async function requestSelection(options, petId) {
       if (error) reject(error);
       else resolve(result);
     };
-    const timer = setTimeout(() => finish(new Error("Codex app tools timed out; the current selection is unconfirmed."), void 0, true), timeoutMs);
+    const timer = setTimeout(
+      () => finish(new Error("Codex app tools timed out; the current selection is unconfirmed."), void 0, true),
+      timeoutMs
+    );
     socket.once("connect", () => {
       sent = true;
       socket.write(frame(request));
     });
-    socket.on("error", (error) => finish(new Error(`Codex app tools connection failed (${error.code ?? "socket error"}).`)));
+    socket.on(
+      "error",
+      (error) => finish(
+        new Error(`Codex app tools connection failed (${error.code ?? "socket error"}).`)
+      )
+    );
     socket.on("close", () => finish(new Error("Codex app tools closed before confirming the pet selection.")));
     socket.on("data", (bytes) => {
       if (settled) return;
@@ -2357,7 +2371,8 @@ async function requestSelection(options, petId) {
           return finish(new Error("Codex could not complete the pet settings request."));
         }
         const item = result.contentItems.find((item2) => record(item2) && item2.type === "inputText");
-        if (!record(item) || typeof item.text !== "string") return finish(new Error("Codex returned no pet settings result."));
+        if (!record(item) || typeof item.text !== "string")
+          return finish(new Error("Codex returned no pet settings result."));
         try {
           finish(void 0, projectSelection(JSON.parse(item.text)));
         } catch {
@@ -2371,7 +2386,10 @@ async function readNativePetLive(options = {}) {
   try {
     return { available: true, ...await requestSelection(options) };
   } catch (error) {
-    return { available: false, reason: error instanceof Error ? error.message : "Live Codex pet selection is unavailable." };
+    return {
+      available: false,
+      reason: error instanceof Error ? error.message : "Live Codex pet selection is unavailable."
+    };
   }
 }
 async function selectNativePetLive(petId, options = {}) {
@@ -2396,10 +2414,7 @@ import path2 from "node:path";
 import { fileURLToPath } from "node:url";
 function pluginRoot() {
   const moduleDirectory = path2.dirname(fileURLToPath(import.meta.url));
-  const candidates = [
-    path2.resolve(moduleDirectory, ".."),
-    path2.resolve(moduleDirectory, "..", "plugins", "genpet")
-  ];
+  const candidates = [path2.resolve(moduleDirectory, ".."), path2.resolve(moduleDirectory, "..", "plugins", "genpet")];
   return candidates.find((candidate) => existsSync(path2.join(candidate, ".codex-plugin", "plugin.json"))) ?? candidates[0];
 }
 
@@ -2411,7 +2426,10 @@ function packageHost() {
   return host;
 }
 function readPromptFile(fileName) {
-  const candidates = [path3.resolve(import.meta.dirname, "..", "framework", "prompts", fileName), path3.join(pluginRoot(), "prompts", fileName)];
+  const candidates = [
+    path3.resolve(import.meta.dirname, "..", "framework", "prompts", fileName),
+    path3.join(pluginRoot(), "prompts", fileName)
+  ];
   const file = candidates.find(existsSync2);
   if (!file) throw new Error(`Missing prompt file: ${fileName}`);
   return readFileSync(file, "utf8");
@@ -2425,7 +2443,9 @@ function readPrompt(name) {
 function artRequest(state) {
   if (!state.pet || !state.pending?.plan) return null;
   const plan = state.pending.plan, existing = desiredAppearance(state), id = requestId(state);
-  const references = state.art.filter((art) => art.petId === state.pet.id && (art.kind === "portrait" || state.host === "dots" && art.kind === "avatar"));
+  const references = state.art.filter(
+    (art) => art.petId === state.pet.id && (art.kind === "portrait" || state.host === "dots" && art.kind === "avatar")
+  );
   return {
     id,
     operationId: state.pending.id,
@@ -2440,11 +2460,15 @@ function artRequest(state) {
     story: plan.text,
     appearance: plan.appearance,
     reusableAppearances: state.art.filter((art) => art.petId === state.pet.id && ["atlas", "avatar"].includes(art.kind)),
-    referenceFiles: [...new Set([
-      references.find((art) => art.stage === "egg")?.file,
-      references.find((art) => art.stage !== "egg")?.file,
-      references.at(-1)?.file
-    ].filter((file) => !!file))],
+    referenceFiles: [
+      ...new Set(
+        [
+          references.find((art) => art.stage === "egg")?.file,
+          references.find((art) => art.stage !== "egg")?.file,
+          references.at(-1)?.file
+        ].filter((file) => !!file)
+      )
+    ],
     prompt: readPrompt("meta") + "\n" + readPrompt("appearance"),
     contract: state.host === "desktop" ? { columns: 8, cellWidth: 192, cellHeight: 208, rows: 11, spriteVersionNumber: 2 } : null,
     target: state.pet.binding ?? null
@@ -3229,7 +3253,12 @@ function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 function selection(value, source) {
-  return { selectedPetId: value, genpetSelected: source === "unavailable" ? null : value === "custom:genpet-companion", source, liveVerified: false };
+  return {
+    selectedPetId: value,
+    genpetSelected: source === "unavailable" ? null : value === "custom:genpet-companion",
+    source,
+    liveVerified: false
+  };
 }
 async function optionalText(file) {
   try {
@@ -3296,7 +3325,10 @@ async function readSelection(home, errors) {
 }
 async function localPets(home, errors) {
   const pets = /* @__PURE__ */ new Map();
-  for (const [directory, filename] of [["avatars", "avatar.json"], ["pets", "pet.json"]]) {
+  for (const [directory, filename] of [
+    ["avatars", "avatar.json"],
+    ["pets", "pet.json"]
+  ]) {
     let entries;
     try {
       entries = await readdir(path4.join(home, directory), { withFileTypes: true });
@@ -3313,7 +3345,8 @@ async function localPets(home, errors) {
         const manifest = JSON.parse(text2);
         if (!isRecord(manifest)) throw new Error("Invalid manifest");
         for (const key of ["id", "displayName"]) {
-          if (manifest[key] !== void 0 && (typeof manifest[key] !== "string" || !manifest[key].trim())) throw new Error("Invalid name");
+          if (manifest[key] !== void 0 && (typeof manifest[key] !== "string" || !manifest[key].trim()))
+            throw new Error("Invalid name");
         }
         const id = `custom:${entry.name}`;
         const displayName = (manifest.displayName ?? manifest.id ?? entry.name).trim();
@@ -3342,7 +3375,11 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
   const store = new Store(root, packageHost()), token = randomBytes(24).toString("hex");
   const server = http.createServer(async (req, res) => {
     const json = (value, status = 200) => {
-      res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" });
+      res.writeHead(status, {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff"
+      });
       res.end(JSON.stringify(value));
     };
     try {
@@ -3350,10 +3387,14 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
       if (!/^(127\.0\.0\.1|localhost)(:\d+)?$/.test(host)) return json({ error: "Local access only" }, 403);
       if (req.headers.origin && req.headers.origin !== `http://${host}`) return json({ error: "Origin rejected" }, 403);
       const url = new URL(req.url || "/", "http://" + host);
-      if (req.method === "GET" && url.pathname === "/api/health") return json({ service: "genpet-debugger", root: store.root });
+      if (req.method === "GET" && url.pathname === "/api/health")
+        return json({ service: "genpet-debugger", root: store.root });
       if (req.method === "GET" && url.pathname === "/api/state") return json({ state: await store.peek(), token });
       if (req.method === "GET" && url.pathname === "/api/art-request") return json(artRequest(await store.peek()));
-      if (req.method === "GET" && url.pathname === "/api/native-pets") return json(store.host === "desktop" ? { ...await getNativePetCatalog(), live: await readNativePetLive() } : null);
+      if (req.method === "GET" && url.pathname === "/api/native-pets")
+        return json(
+          store.host === "desktop" ? { ...await getNativePetCatalog(), live: await readNativePetLive() } : null
+        );
       if (req.method === "POST" && url.pathname === "/api/action") {
         if (req.headers["x-genpet-token"] !== token) return json({ error: "Invalid request token" }, 403);
         let body = "";
@@ -3379,14 +3420,24 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
       if (req.method === "GET" && url.pathname.startsWith("/art/")) {
         const state = await store.peek(), record2 = state.art.find((art) => art.id === url.pathname.slice(5));
         if (!record2 || record2.kind === "artifact") return json({ error: "Image not found" }, 404);
-        res.writeHead(200, { "Content-Type": record2.file.endsWith(".webp") ? "image/webp" : "image/png", "Cache-Control": "no-store" });
+        res.writeHead(200, {
+          "Content-Type": record2.file.endsWith(".webp") ? "image/webp" : "image/png",
+          "Cache-Control": "no-store"
+        });
         res.end(await readFile3(record2.file));
         return;
       }
       const routes = { "/": "index.html", "/app.js": "app.js", "/style.css": "style.css" };
       if (req.method !== "GET" || !routes[url.pathname]) return json({ error: "Not found" }, 404);
-      const file = path5.join(pluginRoot(), "debugger-web", routes[url.pathname]), types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8" };
-      res.writeHead(200, { "Content-Type": types[path5.extname(file)], "Content-Security-Policy": "default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; frame-ancestors 'none'" });
+      const file = path5.join(pluginRoot(), "debugger-web", routes[url.pathname]), types = {
+        ".html": "text/html; charset=utf-8",
+        ".js": "text/javascript; charset=utf-8",
+        ".css": "text/css; charset=utf-8"
+      };
+      res.writeHead(200, {
+        "Content-Type": types[path5.extname(file)],
+        "Content-Security-Policy": "default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; frame-ancestors 'none'"
+      });
       res.end(await readFile3(file));
     } catch (error) {
       if (!res.headersSent) json({ error: error.message }, 400);

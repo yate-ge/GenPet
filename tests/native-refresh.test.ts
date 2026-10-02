@@ -18,7 +18,10 @@ test('refresh for an isolated destination reports unconfirmed and never claims a
     assert.equal(outcome.automaticRefresh, false);
     assert.equal(outcome.displayStatus, 'unconfirmed');
     assert.equal(outcome.strategy, 'none');
-    assert.equal(outcome.expectedSpriteSha256, createHash('sha256').update(Buffer.from('fixture-sprite-bytes')).digest('hex'));
+    assert.equal(
+      outcome.expectedSpriteSha256,
+      createHash('sha256').update(Buffer.from('fixture-sprite-bytes')).digest('hex'),
+    );
     assert.match(outcome.notice, /unconfirmed/i);
   } finally {
     await rm(dir, { recursive: true, force: true });
