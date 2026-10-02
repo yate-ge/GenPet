@@ -18,4 +18,4 @@
 
 生成提示词拆为 [九个可独立测试的单元](framework/references/generation-units.md)，明确输入、结果和检查点。`unit-request` 组装固定输入的测试请求，`verify-unit` 检查输出合同，`record-step` 将中间产物保存在内部任务／故事记录中。语义与实际图像另作检查，步骤保存不会推进宠物阶段或修改 Avatar。
 
-见 [产品设计](docs/PRODUCT_DESIGN.zh-CN.md)、[0.6.0 实现边界](docs/COMPANION_0_6.zh-CN.md)、[0.5.0 验证记录](docs/NEW_VERSION_VALIDATION.zh-CN.md)、[开发规则](CONTRIBUTING.md)和[文档索引](docs/README.md)。开发与安装检查不触碰真实宠物；生成效果、动画和宿主显示是不同的验证层次。
+见 [代码架构](docs/ARCHITECTURE.md)、[产品设计](docs/PRODUCT_DESIGN.zh-CN.md)、[0.6.0 实现边界](docs/COMPANION_0_6.zh-CN.md)、[0.5.0 验证记录](docs/NEW_VERSION_VALIDATION.zh-CN.md)、[开发规则](CONTRIBUTING.md)和[文档索引](docs/README.md)。开发与安装检查不触碰真实宠物；生成效果、动画和宿主显示是不同的验证层次。
