@@ -15,7 +15,7 @@ import { hostFor, type Command } from './hosts/index.js';
 import { recordHostResult } from './hosts/result.js';
 import { beginStory, cancelStory, finishStory, planStory, resetPet, storyOutput } from './lifecycle.js';
 import { findLegacyRecord, migrateLegacy } from './migration.js';
-import type { ArtKind, Pending } from './model.js';
+import type { ArtKind } from './model.js';
 import { markNameAsked, namePet, namingDue } from './naming.js';
 import { dueStory, setSchedule } from './schedule.js';
 import { Store } from './store.js';
@@ -43,9 +43,8 @@ const shared: Record<string, Command> = {
   },
   // Story lifecycle
   'begin-story': {
-    usage: 'begin-story [TRIGGER_ID] [initialization|story]',
-    run: ([trigger, mode, name], store) =>
-      beginStory(store, trigger || `manual:${randomUUID()}`, (mode || 'story') as Pending['mode'], name),
+    usage: 'begin-story [TRIGGER_ID]',
+    run: ([trigger], store) => beginStory(store, trigger || `manual:${randomUUID()}`),
   },
   'plan-story': {
     usage: 'plan-story OPERATION_ID PLAN_JSON',

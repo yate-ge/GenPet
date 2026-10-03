@@ -40,9 +40,8 @@ function startPending(pet: Pet, triggerId: string, mode: Pending['mode']): Pendi
 }
 
 /** `begin-story`: allocate the pet once, then open (or return) the story for this trigger. */
-export async function beginStory(store: Store, triggerId: string, mode: Pending['mode'] = 'story', name?: string) {
+export async function beginStory(store: Store, triggerId: string) {
   identifier(triggerId, 'triggerId');
-  if (!['initialization', 'story'].includes(mode)) throw new Error('Invalid story mode');
   return store.transaction(async state => {
     const completed = state.stories.find(story => story.triggerId === triggerId);
     if (completed) return { status: 'completed', story: completed };
@@ -53,8 +52,8 @@ export async function beginStory(store: Store, triggerId: string, mode: Pending[
     }
     if (!state.pet && (await findLegacyRecord(store)))
       throw new Error('Existing legacy pet found; migrate it before creating a new identity');
-    state.pet ??= createPet(name);
-    state.pending = startPending(state.pet, triggerId, state.pet.genes ? mode : 'initialization');
+    state.pet ??= createPet();
+    state.pending = startPending(state.pet, triggerId, state.pet.genes ? 'story' : 'initialization');
     return { status: 'pending', pending: state.pending, pet: state.pet, growth: growth(state) };
   });
 }
@@ -232,7 +231,9 @@ export async function resetPet(store: Store, operationId: string) {
     const completed = state.stories.find(story => story.triggerId === triggerId);
     if (completed) return { status: 'completed', story: completed };
     if (state.pending?.triggerId === triggerId) return { status: 'pending', pending: state.pending, pet: state.pet };
-    if (state.pending) throw new Error('Resume or cancel the unfinished story before an explicit reset');
+    // An unfinished initialization can be abandoned by reset (the whole record is backed up first).
+    if (state.pending && state.pending.mode !== 'initialization')
+      throw new Error('Resume or cancel the unfinished story before an explicit reset');
     if (!state.pet && (await findLegacyRecord(store)))
       throw new Error('Migrate the existing legacy pet before resetting its identity');
     const backup = path.join(store.root, 'backups', `reset-${Date.now()}-${randomUUID()}.json`);

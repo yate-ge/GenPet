@@ -33,12 +33,7 @@
 
 ## 实机测试
 
-实验脚本：`scripts/probe-native-ipc.mjs`。仅使用 Node 标准库，当前用户权限，不启动新服务器。不会读写宠物素材或状态，不记录其他 IPC 广播内容。
-
-```sh
-node scripts/probe-native-ipc.mjs probe
-node scripts/probe-native-ipc.mjs refresh
-```
+当时使用的实验脚本 `probe-native-ipc.mjs` 已删除，其逻辑已进入 `src/hosts/desktop/refresh.ts`。实验仅使用 Node 标准库，当前用户权限，不启动新服务器，不读写宠物素材或状态，不记录其他 IPC 广播内容。
 
 - `probe`：建立两个临时客户端，握手后发送仅面向测试接收者的广播，确认分帧、初始化、版本和路由链路。不会向宿主窗口发送刷新。
 - `refresh`：发送 `query-cache-invalidate`，参数为 `{"queryKey":["custom-avatars"],"reset":false}`。第二个测试连接确认路由器转发，不能代表窗口回执。
