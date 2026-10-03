@@ -2490,9 +2490,8 @@ function startPending(pet, triggerId, mode) {
     mode
   };
 }
-async function beginStory(store2, triggerId, mode = "story", name2) {
+async function beginStory(store2, triggerId) {
   identifier(triggerId, "triggerId");
-  if (!["initialization", "story"].includes(mode)) throw new Error("Invalid story mode");
   return store2.transaction(async (state) => {
     const completed = state.stories.find((story) => story.triggerId === triggerId);
     if (completed) return { status: "completed", story: completed };
@@ -2503,8 +2502,8 @@ async function beginStory(store2, triggerId, mode = "story", name2) {
     }
     if (!state.pet && await findLegacyRecord(store2))
       throw new Error("Existing legacy pet found; migrate it before creating a new identity");
-    state.pet ??= createPet(name2);
-    state.pending = startPending(state.pet, triggerId, state.pet.genes ? mode : "initialization");
+    state.pet ??= createPet();
+    state.pending = startPending(state.pet, triggerId, state.pet.genes ? "story" : "initialization");
     return { status: "pending", pending: state.pending, pet: state.pet, growth: growth(state) };
   });
 }
@@ -2660,7 +2659,8 @@ async function resetPet(store2, operationId) {
     const completed = state.stories.find((story) => story.triggerId === triggerId);
     if (completed) return { status: "completed", story: completed };
     if (state.pending?.triggerId === triggerId) return { status: "pending", pending: state.pending, pet: state.pet };
-    if (state.pending) throw new Error("Resume or cancel the unfinished story before an explicit reset");
+    if (state.pending && state.pending.mode !== "initialization")
+      throw new Error("Resume or cancel the unfinished story before an explicit reset");
     if (!state.pet && await findLegacyRecord(store2))
       throw new Error("Migrate the existing legacy pet before resetting its identity");
     const backup = path4.join(store2.root, "backups", `reset-${Date.now()}-${randomUUID4()}.json`);
@@ -4968,8 +4968,8 @@ var shared = {
   },
   // Story lifecycle
   "begin-story": {
-    usage: "begin-story [TRIGGER_ID] [initialization|story]",
-    run: ([trigger, mode, name2], store2) => beginStory(store2, trigger || `manual:${randomUUID9()}`, mode || "story", name2)
+    usage: "begin-story [TRIGGER_ID]",
+    run: ([trigger], store2) => beginStory(store2, trigger || `manual:${randomUUID9()}`)
   },
   "plan-story": {
     usage: "plan-story OPERATION_ID PLAN_JSON",

@@ -1,6 +1,6 @@
 {
   "name": "genpet",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "A lightweight story-driven Pet framework for Codex Dots and native Codex Pets.",
   "author": {
     "name": "GenPet contributors"
