@@ -1,0 +1,13 @@
+{
+  "appVersion": "26.930.3930.0",
+  "runtime": "/webview/assets/app-initial-74dc12f48352.js",
+  "originalGatePassed": false,
+  "exactExpectedString": "let r=[...n,...n,...n]",
+  "tripleSpreadMatches": [
+    {
+      "variable": "r",
+      "context": "(e,t,n=!1){let r=vGa[e];if(t)return{frames:[fGa(r,0)],loopStartIndex:null};if(e===`idle`)return{frames:_Ga,loopStartIndex:0};if(n)return{frames:r,loopStartIndex:0};let i=[...r,...r,...r];return{frames:[...i,..._Ga],loopStartIndex:i.length}}function fGa(e,t){let n=e[t];if(n==null)throw RangeError(`Codex pet animation frame is out of range`);return n}funct"
+    }
+  ],
+  "idleMultiplierContext": "c(-${e.rowIndex} * var(--codex-pet-frame-height))`:`${e.rowIndex/(t-1)*100}%`}`}var mGa,hGa,gGa,_Ga,vGa;function yGa(){return(yGa=e((()=>{uGa(),mGa=uZ.columns,hGa=6,gGa=[{rowIndex:0,columnIndex:0,frameDurationMs:280},{rowIndex:0,columnIndex:1,frameDurationMs:110},{rowIndex:0,columnIndex:2,frameDurationMs:110},{rowIndex:0,columnIndex:3,frameDurationMs:140},{rowIndex:0,columnIndex:4,frameDurationMs:140},{rowIndex:0,columnIndex:5,frameDurationMs:320}],_Ga=gGa.map(e=>({...e,frameDurationMs:e.frameDurationMs*hGa})),vGa={failed:dZ(5,8,140,240),idle:gGa,jumping:dZ(4,5,140,280),review:dZ(8,6,150,280),running:dZ(7,6,120,220),\"running-left\":dZ(2,8,120,"
+}

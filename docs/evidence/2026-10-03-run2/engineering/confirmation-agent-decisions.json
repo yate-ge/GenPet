@@ -1,0 +1,21 @@
+{
+  "mode": "independent-agent-dry-run",
+  "cases": [
+    {"command":"start","reply":"initial-request-only","decision":"wait","text":"这颗小蛋想来到你身边，愿意给它留一个位置吗？","mockTools":[]},
+    {"command":"start","reply":"yes","decision":"continue","text":null,"mockTools":["status","begin-story"]},
+    {"command":"start","reply":"no","decision":"stop","text":"小蛋安静地留在原处。","mockTools":[]},
+    {"command":"start","reply":"unanswered","decision":"wait","text":null,"mockTools":[]},
+    {"command":"story","reply":"initial-request-only","decision":"wait","text":"它想现在出去多经历一件小事，你愿意吗？","mockTools":[]},
+    {"command":"story","reply":"yes","decision":"continue","text":null,"mockTools":["status","begin-story"]},
+    {"command":"story","reply":"no","decision":"stop","text":"它收回了脚步，留在家里。","mockTools":[]},
+    {"command":"story","reply":"unanswered","decision":"wait","text":null,"mockTools":[]},
+    {"command":"grow","reply":"initial-request-only","decision":"wait","text":"它还按自己的步子长着，你想现在催它长大一些吗？","mockTools":[]},
+    {"command":"grow","reply":"yes","decision":"continue","text":null,"mockTools":["status","begin-story"]},
+    {"command":"grow","reply":"no","decision":"stop","text":"它继续按自己的步子慢慢长着。","mockTools":[]},
+    {"command":"grow","reply":"unanswered","decision":"wait","text":null,"mockTools":[]},
+    {"command":"reset","reply":"initial-request-only","decision":"wait","text":"要和现在这只告别，让一颗新的小蛋来到你身边吗？","mockTools":[]},
+    {"command":"reset","reply":"yes","decision":"continue","text":null,"mockTools":["status","reset"]},
+    {"command":"reset","reply":"no","decision":"stop","text":"它仍留在你身边。","mockTools":[]},
+    {"command":"reset","reply":"unanswered","decision":"wait","text":null,"mockTools":[]}
+  ]
+}

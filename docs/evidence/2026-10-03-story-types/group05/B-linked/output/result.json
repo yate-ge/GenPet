@@ -1,0 +1,17 @@
+{
+  "inputRefs": [
+    "B-linked.completed.json",
+    "art-1bb248054131afe058c5dd4f",
+    "independent-root-image-review-v2"
+  ],
+  "result": {
+    "text": "你过去三天晚饭后散步；今天在河边观察落叶旋转，并把三次观察的差异记进笔记。小蟹在自己的潮水洼边，也想看清一片叶怎样转弯。\n它把左钳放在水口当记号，结果叶子停住了。原来挡住水的就是它自己。钳子移开，叶子重新转起来——最后一格，它退在岸上，让叶子自己走。",
+    "mediaRefs": [
+      {
+        "artId": "art-1bb248054131afe058c5dd4f",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-story-types/group05/data/dots/pets/genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e/assets/art-1bb248054131afe058c5dd4f.png",
+        "role": "三格故事漫画"
+      }
+    ]
+  }
+}

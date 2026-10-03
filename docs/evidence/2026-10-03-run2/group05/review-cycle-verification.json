@@ -1,0 +1,48 @@
+{
+  "pass": true,
+  "stories": 7,
+  "art": 6,
+  "stableIdentity": "genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e",
+  "recoveryReusedAdultArt": "art-5ec13139970d88fb509a0cdd",
+  "specialDurationHours": 48,
+  "nextSpecialHoursAfterRecovery": 168,
+  "hashes": [
+    {
+      "stage": "egg",
+      "artId": "art-0df240f57fb68fab47cc15d3",
+      "hash": "566cb98575bc792ccf4f67cdcd75dd1bd6d3fc3c2b0edd56f0b28848c9232e2a",
+      "realFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-run2\\group05\\data\\dots\\pets\\genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e\\assets\\art-0df240f57fb68fab47cc15d3.png"
+    },
+    {
+      "stage": "hatchling",
+      "artId": "art-0f9ada5fd8df1bd8369ffe53",
+      "hash": "6a3cdad09b04d499d92f876d6fe3f0164fa2612ccd6c3b6c762824132eb70748",
+      "realFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-run2\\group05\\data\\dots\\pets\\genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e\\assets\\art-0f9ada5fd8df1bd8369ffe53.png"
+    },
+    {
+      "stage": "home",
+      "artId": "art-46e778794b1adcb70b05a0a3",
+      "hash": "83db865366e52f175a38529cf659775219d10818a8576140c71f7a8ccc4a54c3",
+      "realFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-run2\\group05\\data\\dots\\pets\\genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e\\assets\\art-46e778794b1adcb70b05a0a3.png"
+    },
+    {
+      "stage": "juvenile",
+      "artId": "art-24c266a6579af8832a8bcf8c",
+      "hash": "53ba11ff29bcd892b2bc282bf72787530c23739a18ea5d4206251bd3743bb387",
+      "realFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-run2\\group05\\data\\dots\\pets\\genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e\\assets\\art-24c266a6579af8832a8bcf8c.png"
+    },
+    {
+      "stage": "adult",
+      "artId": "art-5ec13139970d88fb509a0cdd",
+      "hash": "b7c9af68de0d20a15e7cd6d95861aae6a0cb36d4fef01acc5e60f2ccd7af170f",
+      "realFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-run2\\group05\\data\\dots\\pets\\genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e\\assets\\art-5ec13139970d88fb509a0cdd.png"
+    },
+    {
+      "stage": "special",
+      "artId": "art-82b95b9b37f73a859497b409",
+      "hash": "2f595189456e26fd04c0076d3441e503eff476f9665369a3c6259ca0fad2cbe5",
+      "realFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-run2\\group05\\data\\dots\\pets\\genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e\\assets\\art-82b95b9b37f73a859497b409.png"
+    }
+  ],
+  "semanticNegativeRetained": "Original hatchling story adds unsupported shrimp shell location; corrected candidates reviewed separately."
+}

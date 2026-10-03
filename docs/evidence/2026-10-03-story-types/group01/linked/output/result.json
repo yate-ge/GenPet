@@ -1,0 +1,15 @@
+{
+  "inputRefs": [
+    "fictional:story-types:group01:linked"
+  ],
+  "result": {
+    "text": "你连续三天晚饭后散步，今天把河边落叶旋转和三次观察的差异写进笔记。小虫这一回也不赶着把自己的小溪走完。它先站稳岸边的一块平石，只选一片落叶看：叶尖绕了一圈，碰到细枝，停了一会儿，又慢慢转开。它等到那片叶漂出视线才挪到下一块石头。寄给你的明信片上，是它站在小溪旁的这一刻。背面留下短短一句：‘我的这一片，转到这里停过。’回家后，它在空心枝旁收好明信片的副本，留着下回再比。",
+    "mediaRefs": [
+      {
+        "artId": "art-2845be0f2eb78d6c1a6225c5",
+        "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-story-types\\group01\\data\\dots\\pets\\genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af\\assets\\art-2845be0f2eb78d6c1a6225c5.png",
+        "role": "story-postcard"
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "inputRefs": [
+    "group03/linked/revision-candidate/evolution/input.json",
+    "group03/linked/negative-original/evolution/result.json"
+  ],
+  "result": {
+    "stage": "adult",
+    "state": "想把观察到的差别留个记号",
+    "basis": "leaf-note明确今天河边旋叶观察及记录三次差异，支持宠物标记自己发现的状态；三天仅指饭后散步，不假设三日均观察叶子。刚恢复两小时，required=null，普通探索不再入特殊，无身体变化。",
+    "special": null
+  }
+}

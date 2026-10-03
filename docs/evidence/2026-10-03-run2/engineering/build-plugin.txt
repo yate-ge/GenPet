@@ -1,0 +1,6 @@
+
+> genpet@0.8.1 build:plugin
+> tsx scripts/build-plugin.ts
+
+Built genpet v0.8.1
+Built genpet-dots v0.8.1

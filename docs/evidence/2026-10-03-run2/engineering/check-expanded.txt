@@ -1,0 +1,3 @@
+
+> genpet@0.8.1 check
+> tsc --noEmit -p tsconfig.tests.json

@@ -1,0 +1,11 @@
+
+> genpet@0.8.1 verify:version
+> node scripts/verify-release-version.mjs
+
+warning: in the working copy of 'plugins/genpet-dots/dist/cli.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/genpet-dots/dist/debugger-server.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/genpet-dots/package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/genpet/dist/cli.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/genpet/dist/debugger-server.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/genpet/package.json', LF will be replaced by CRLF the next time Git touches it
+Release version verified: 0.8.1 -> 0.8.1 (origin/main)

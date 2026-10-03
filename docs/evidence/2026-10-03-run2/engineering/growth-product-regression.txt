@@ -1,0 +1,72 @@
+TAP version 13
+# Subtest: egg: one millisecond before, at and after latest growth deadline
+ok 1 - egg: one millisecond before, at and after latest growth deadline
+  ---
+  duration_ms: 1.3234
+  type: 'test'
+  ...
+# Subtest: hatchling: one millisecond before, at and after latest growth deadline
+ok 2 - hatchling: one millisecond before, at and after latest growth deadline
+  ---
+  duration_ms: 0.0955
+  type: 'test'
+  ...
+# Subtest: juvenile: one millisecond before, at and after latest growth deadline
+ok 3 - juvenile: one millisecond before, at and after latest growth deadline
+  ---
+  duration_ms: 0.1053
+  type: 'test'
+  ...
+# Subtest: growth origin prefers this pet first completed stage story, then import, then adoption
+ok 4 - growth origin prefers this pet first completed stage story, then import, then adoption
+  ---
+  duration_ms: 0.1408
+  type: 'test'
+  ...
+# Subtest: adult special boundaries and recovery reset the next special deadline
+ok 5 - adult special boundaries and recovery reset the next special deadline
+  ---
+  duration_ms: 0.1207
+  type: 'test'
+  ...
+# Subtest: egg hatches by adoption plus five hours even when initialization completes one hour later
+not ok 6 - egg hatches by adoption plus five hours even when initialization completes one hour later
+  ---
+  duration_ms: 0.6474
+  type: 'test'
+  location: 'C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\tests\\growth.test.ts:68:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    null !== 'advance'
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'advance'
+  actual: ~
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (C:\Users\geyat\Documents\workingProjects\GenPet\tests\growth.test.ts:82:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: daily slots use local dates across midnight and timezone/DST transitions
+ok 7 - daily slots use local dates across midnight and timezone/DST transitions
+  ---
+  duration_ms: 10.6022
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 6
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 162.1337

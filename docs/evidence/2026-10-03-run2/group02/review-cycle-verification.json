@@ -1,0 +1,53 @@
+{
+  "pass": true,
+  "petId": "genpet-f826a101-74ce-4c9d-a637-3684da469950",
+  "stories": 7,
+  "art": 6,
+  "revision": 7,
+  "recoveryReusedAdultArt": "art-3c496af0494d3ceea7bec606",
+  "specialDurationHours": 48,
+  "nextSpecialHoursAfterRecovery": 168,
+  "matched": [
+    {
+      "original": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-run2/group02/egg/avatar.png",
+      "artId": "art-d00d4abffc6c3f91a9dde939",
+      "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-run2\\group02\\data\\dots\\pets\\genpet-f826a101-74ce-4c9d-a637-3684da469950\\assets\\art-d00d4abffc6c3f91a9dde939.png",
+      "hash": "5e40ef07a68b951b7f43bf1a62911dc5b18f173100537a74b33e24a63d0c5ff4"
+    },
+    {
+      "original": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-run2/group02/hatchling/avatar-v2.png",
+      "artId": "art-d077a84e1dc6cc392dd80ff2",
+      "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-run2\\group02\\data\\dots\\pets\\genpet-f826a101-74ce-4c9d-a637-3684da469950\\assets\\art-d077a84e1dc6cc392dd80ff2.png",
+      "hash": "25227e22a869046f30745c6a152788bc20ef181cd33504e9dad014b4c69b2ace"
+    },
+    {
+      "original": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-run2/group02/same/story.png",
+      "artId": "art-6179e6659a560370015da001",
+      "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-run2\\group02\\data\\dots\\pets\\genpet-f826a101-74ce-4c9d-a637-3684da469950\\assets\\art-6179e6659a560370015da001.png",
+      "hash": "f11cd2d9d23c025845825cc6e039bc0543af8898344abf9ed650e64bec127ed2"
+    },
+    {
+      "original": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-run2/group02/juvenile/avatar.png",
+      "artId": "art-6fc369863312fdc138453efc",
+      "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-run2\\group02\\data\\dots\\pets\\genpet-f826a101-74ce-4c9d-a637-3684da469950\\assets\\art-6fc369863312fdc138453efc.png",
+      "hash": "79146edeee606e4bfd2c3ef39bef9f9d25519fe98c87d72abfcddb54be251395"
+    },
+    {
+      "original": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-run2/group02/adult/avatar.png",
+      "artId": "art-3c496af0494d3ceea7bec606",
+      "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-run2\\group02\\data\\dots\\pets\\genpet-f826a101-74ce-4c9d-a637-3684da469950\\assets\\art-3c496af0494d3ceea7bec606.png",
+      "hash": "43cfd251746898a47519d4bdfa0746951ce9fe7a4a3838fdea2f356959f9242a"
+    },
+    {
+      "original": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-run2/group02/special/avatar.png",
+      "artId": "art-b56f0aeea8b749f9b2efa535",
+      "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-run2\\group02\\data\\dots\\pets\\genpet-f826a101-74ce-4c9d-a637-3684da469950\\assets\\art-b56f0aeea8b749f9b2efa535.png",
+      "hash": "1e98dbd115d19542ca97ff7fd203d89be8ec191d07953e537c32a0a3bda515c3"
+    }
+  ],
+  "branchRestores": 0,
+  "limitations": [
+    "Simulated clock and inactive Dots host; no actual user-visible display verification",
+    "Image rejection and repaired candidate retained separately; no claim of clean first pass"
+  ]
+}

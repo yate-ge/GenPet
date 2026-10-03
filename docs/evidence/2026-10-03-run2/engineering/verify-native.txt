@@ -1,0 +1,18 @@
+
+> genpet@0.8.1 verify:native
+> tsx scripts/verify-native-contract.ts
+
+node:internal/fs/promises:639
+  return new FileHandle(await PromisePrototypeThen(
+                        ^
+
+Error: ENOENT: no such file or directory, open 'C:\Applications\ChatGPT.app\Contents\Resources\app.asar'
+    at async open (node:internal/fs/promises:639:25)
+    at async <anonymous> (C:\Users\geyat\Documents\workingProjects\GenPet\scripts\verify-native-contract.ts:9:14) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Applications\\ChatGPT.app\\Contents\\Resources\\app.asar'
+}
+
+Node.js v22.23.2

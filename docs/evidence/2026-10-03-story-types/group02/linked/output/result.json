@@ -1,0 +1,15 @@
+{
+  "inputRefs": [
+    "fictional:story-types:group02:linked"
+  ],
+  "result": {
+    "text": "你这三天晚饭后散步，今天看河边落叶打转，记下三次观察的差异。小蛙自己的泥塘边也漂着一片叶。它把家里的歪碟推到浅水里，想让叶子绕着碟沿转，结果碟子一斜，叶片便挤到岸边不动了。它没把歪碟收走，反倒趴下来瞧叶尖碰住碟口的地方。给你带来的照片就停在这里：它低低伏在湿岸，一只前足搭着歪碟，叶尖靠在缺低的碟沿，水上还留着几圈波纹。那不是你的河边，是它自己今天蹦过的泥塘。小蛙把照片的副本夹在宽叶床旁，空碟也带回来了。",
+    "mediaRefs": [
+      {
+        "artId": "art-0c30e38d908220d5789e8c01",
+        "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-story-types\\group02\\data\\dots\\pets\\genpet-f826a101-74ce-4c9d-a637-3684da469950\\assets\\art-0c30e38d908220d5789e8c01.png",
+        "role": "story-photo"
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "inputRefs": [
+    "group04/linked/revision-candidate/evolution/input.json",
+    "group04/linked/negative-original/evolution/result.json"
+  ],
+  "result": {
+    "stage": "adult",
+    "state": "想听清转弯处的变化",
+    "basis": "leaf-note明确今天河边观察旋叶、记下三次差异，支持关注变化的状态；三天仅是饭后散步跨度，不扩为三天旋叶观察。刚恢复两小时、required=null，保留成年，不进入特殊。",
+    "special": null
+  }
+}

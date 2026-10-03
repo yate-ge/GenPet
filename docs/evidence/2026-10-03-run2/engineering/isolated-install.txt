@@ -1,0 +1,43 @@
+WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir "C:\\Users\\geyat\\AppData\\Local\\Temp\\" (codex_home: AbsolutePathBuf("C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-independent-release-6ijjbN\\codex-home"))
+Add isolated marketplace: PASS
+{
+  "marketplaceName": "genpet",
+  "installedRoot": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet",
+  "alreadyAdded": false
+}
+Source commit: PASS
+d4bc393b5724ef55ff2cb622fd10b2aeb5cf38b4
+WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir "C:\\Users\\geyat\\AppData\\Local\\Temp\\" (codex_home: AbsolutePathBuf("C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-independent-release-6ijjbN\\codex-home"))
+Install genpet: PASS
+{
+  "pluginId": "genpet@genpet",
+  "name": "genpet",
+  "marketplaceName": "genpet",
+  "version": "0.8.1",
+  "installedPath": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-independent-release-6ijjbN\\codex-home\\plugins\\cache\\genpet\\genpet\\0.8.1",
+  "authPolicy": "ON_INSTALL"
+}
+genpet hashes: PASS
+{"ok":true,"version":"0.8.1","installed":"C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-independent-release-6ijjbN\\codex-home\\plugins\\cache\\genpet\\genpet\\0.8.1","expected":"C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\plugins\\genpet","verifiedFiles":73}
+genpet installed CLI smoke: PASS
+desktop: installed initialization, stable identity, artwork, publication, reuse and reset passed (isolated fixtures).
+genpet installed debugger smoke: PASS
+Installed debugger launch, reuse, assets and read-only state: passed
+{"name":"genpet","commit":"d4bc393b5724ef55ff2cb622fd10b2aeb5cf38b4","version":"0.8.1","installed":"C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-independent-release-6ijjbN\\codex-home\\plugins\\cache\\genpet\\genpet\\0.8.1","isolated":true}
+WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir "C:\\Users\\geyat\\AppData\\Local\\Temp\\" (codex_home: AbsolutePathBuf("C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-independent-release-6ijjbN\\codex-home"))
+Install genpet-dots: PASS
+{
+  "pluginId": "genpet-dots@genpet",
+  "name": "genpet-dots",
+  "marketplaceName": "genpet",
+  "version": "0.8.1",
+  "installedPath": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-independent-release-6ijjbN\\codex-home\\plugins\\cache\\genpet\\genpet-dots\\0.8.1",
+  "authPolicy": "ON_INSTALL"
+}
+genpet-dots hashes: PASS
+{"ok":true,"version":"0.8.1","installed":"C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-independent-release-6ijjbN\\codex-home\\plugins\\cache\\genpet\\genpet-dots\\0.8.1","expected":"C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\plugins\\genpet-dots","verifiedFiles":41}
+genpet-dots installed CLI smoke: PASS
+dots: installed initialization, stable identity, artwork, publication, reuse and reset passed (isolated fixtures).
+genpet-dots installed debugger smoke: PASS
+Installed debugger launch, reuse, assets and read-only state: passed
+{"name":"genpet-dots","commit":"d4bc393b5724ef55ff2cb622fd10b2aeb5cf38b4","version":"0.8.1","installed":"C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-independent-release-6ijjbN\\codex-home\\plugins\\cache\\genpet\\genpet-dots\\0.8.1","isolated":true}

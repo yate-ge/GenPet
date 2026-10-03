@@ -1,0 +1,223 @@
+{
+  "testedBy": "engineering independent agent; manually authored decisions from actual prompts",
+  "execution": "mock recorder only; no runtime mutation or external model replay",
+  "cases": [
+    {
+      "command": "start",
+      "reply": "initial-request-only",
+      "decision": "wait",
+      "text": "这颗小蛋想来到你身边，愿意给它留一个位置吗？",
+      "mockTools": [],
+      "promptHash": "d78ff298a5393cdcaa5afe9f50be74515733762fe24d564798499a79499ed1a4",
+      "skillPath": "framework/skills/genpet-start/SKILL.md",
+      "trace": []
+    },
+    {
+      "command": "start",
+      "reply": "yes",
+      "decision": "continue",
+      "text": null,
+      "mockTools": [
+        "status",
+        "begin-story"
+      ],
+      "promptHash": "d78ff298a5393cdcaa5afe9f50be74515733762fe24d564798499a79499ed1a4",
+      "skillPath": "framework/skills/genpet-start/SKILL.md",
+      "trace": [
+        {
+          "tool": "status",
+          "mock": true,
+          "replyReceived": "yes"
+        },
+        {
+          "tool": "begin-story",
+          "mock": true,
+          "replyReceived": "yes"
+        }
+      ]
+    },
+    {
+      "command": "start",
+      "reply": "no",
+      "decision": "stop",
+      "text": "小蛋安静地留在原处。",
+      "mockTools": [],
+      "promptHash": "d78ff298a5393cdcaa5afe9f50be74515733762fe24d564798499a79499ed1a4",
+      "skillPath": "framework/skills/genpet-start/SKILL.md",
+      "trace": []
+    },
+    {
+      "command": "start",
+      "reply": "unanswered",
+      "decision": "wait",
+      "text": null,
+      "mockTools": [],
+      "promptHash": "d78ff298a5393cdcaa5afe9f50be74515733762fe24d564798499a79499ed1a4",
+      "skillPath": "framework/skills/genpet-start/SKILL.md",
+      "trace": []
+    },
+    {
+      "command": "story",
+      "reply": "initial-request-only",
+      "decision": "wait",
+      "text": "它想现在出去多经历一件小事，你愿意吗？",
+      "mockTools": [],
+      "promptHash": "63398479a3a0bef2f7a3537b0fd40fc7e8d3e300be2f48b75618903304915690",
+      "skillPath": "framework/skills/genpet-story/SKILL.md",
+      "trace": []
+    },
+    {
+      "command": "story",
+      "reply": "yes",
+      "decision": "continue",
+      "text": null,
+      "mockTools": [
+        "status",
+        "begin-story"
+      ],
+      "promptHash": "63398479a3a0bef2f7a3537b0fd40fc7e8d3e300be2f48b75618903304915690",
+      "skillPath": "framework/skills/genpet-story/SKILL.md",
+      "trace": [
+        {
+          "tool": "status",
+          "mock": true,
+          "replyReceived": "yes"
+        },
+        {
+          "tool": "begin-story",
+          "mock": true,
+          "replyReceived": "yes"
+        }
+      ]
+    },
+    {
+      "command": "story",
+      "reply": "no",
+      "decision": "stop",
+      "text": "它收回了脚步，留在家里。",
+      "mockTools": [],
+      "promptHash": "63398479a3a0bef2f7a3537b0fd40fc7e8d3e300be2f48b75618903304915690",
+      "skillPath": "framework/skills/genpet-story/SKILL.md",
+      "trace": []
+    },
+    {
+      "command": "story",
+      "reply": "unanswered",
+      "decision": "wait",
+      "text": null,
+      "mockTools": [],
+      "promptHash": "63398479a3a0bef2f7a3537b0fd40fc7e8d3e300be2f48b75618903304915690",
+      "skillPath": "framework/skills/genpet-story/SKILL.md",
+      "trace": []
+    },
+    {
+      "command": "grow",
+      "reply": "initial-request-only",
+      "decision": "wait",
+      "text": "它还按自己的步子长着，你想现在催它长大一些吗？",
+      "mockTools": [],
+      "promptHash": "1a536366879ff22cca6dac201fd5ea237eaf1e5609d55d6ace2c8e7c2b9cddc3",
+      "skillPath": "framework/skills/genpet-grow/SKILL.md",
+      "trace": []
+    },
+    {
+      "command": "grow",
+      "reply": "yes",
+      "decision": "continue",
+      "text": null,
+      "mockTools": [
+        "status",
+        "begin-story"
+      ],
+      "promptHash": "1a536366879ff22cca6dac201fd5ea237eaf1e5609d55d6ace2c8e7c2b9cddc3",
+      "skillPath": "framework/skills/genpet-grow/SKILL.md",
+      "trace": [
+        {
+          "tool": "status",
+          "mock": true,
+          "replyReceived": "yes"
+        },
+        {
+          "tool": "begin-story",
+          "mock": true,
+          "replyReceived": "yes"
+        }
+      ]
+    },
+    {
+      "command": "grow",
+      "reply": "no",
+      "decision": "stop",
+      "text": "它继续按自己的步子慢慢长着。",
+      "mockTools": [],
+      "promptHash": "1a536366879ff22cca6dac201fd5ea237eaf1e5609d55d6ace2c8e7c2b9cddc3",
+      "skillPath": "framework/skills/genpet-grow/SKILL.md",
+      "trace": []
+    },
+    {
+      "command": "grow",
+      "reply": "unanswered",
+      "decision": "wait",
+      "text": null,
+      "mockTools": [],
+      "promptHash": "1a536366879ff22cca6dac201fd5ea237eaf1e5609d55d6ace2c8e7c2b9cddc3",
+      "skillPath": "framework/skills/genpet-grow/SKILL.md",
+      "trace": []
+    },
+    {
+      "command": "reset",
+      "reply": "initial-request-only",
+      "decision": "wait",
+      "text": "要和现在这只告别，让一颗新的小蛋来到你身边吗？",
+      "mockTools": [],
+      "promptHash": "975158271c86fbf0a8b3b9239eefa3c869e9ab5028326033530093619566d7b3",
+      "skillPath": "framework/skills/genpet-reset/SKILL.md",
+      "trace": []
+    },
+    {
+      "command": "reset",
+      "reply": "yes",
+      "decision": "continue",
+      "text": null,
+      "mockTools": [
+        "status",
+        "reset"
+      ],
+      "promptHash": "975158271c86fbf0a8b3b9239eefa3c869e9ab5028326033530093619566d7b3",
+      "skillPath": "framework/skills/genpet-reset/SKILL.md",
+      "trace": [
+        {
+          "tool": "status",
+          "mock": true,
+          "replyReceived": "yes"
+        },
+        {
+          "tool": "reset",
+          "mock": true,
+          "replyReceived": "yes"
+        }
+      ]
+    },
+    {
+      "command": "reset",
+      "reply": "no",
+      "decision": "stop",
+      "text": "它仍留在你身边。",
+      "mockTools": [],
+      "promptHash": "975158271c86fbf0a8b3b9239eefa3c869e9ab5028326033530093619566d7b3",
+      "skillPath": "framework/skills/genpet-reset/SKILL.md",
+      "trace": []
+    },
+    {
+      "command": "reset",
+      "reply": "unanswered",
+      "decision": "wait",
+      "text": null,
+      "mockTools": [],
+      "promptHash": "975158271c86fbf0a8b3b9239eefa3c869e9ab5028326033530093619566d7b3",
+      "skillPath": "framework/skills/genpet-reset/SKILL.md",
+      "trace": []
+    }
+  ],
+  "passed": 16
+}

@@ -1,0 +1,440 @@
+
+> genpet@0.8.1 test
+> tsx --test tests/*.test.ts
+
+TAP version 13
+# Subtest: native atlas validation rejects wrong layout, blank cells and occupied unused cells
+ok 1 - native atlas validation rejects wrong layout, blank cells and occupied unused cells
+  ---
+  duration_ms: 487.6017
+  type: 'test'
+  ...
+# Subtest: request freshness and durable media prevent stale or temporary-file installs
+ok 2 - request freshness and durable media prevent stale or temporary-file installs
+  ---
+  duration_ms: 474.8409
+  type: 'test'
+  ...
+# Subtest: active and inactive updates retain target ID and never change selection; failed refresh can resume
+ok 3 - active and inactive updates retain target ID and never change selection; failed refresh can resume
+  ---
+  duration_ms: 387.9636
+  type: 'test'
+  ...
+# Subtest: switch-pet current and default read only the live host pet fields
+ok 4 - switch-pet current and default read only the live host pet fields
+  ---
+  duration_ms: 485.9092
+  type: 'test'
+  ...
+# Subtest: switch-pet list includes builtin and local pets without connecting to the host
+ok 5 - switch-pet list includes builtin and local pets without connecting to the host
+  ---
+  duration_ms: 194.0399
+  type: 'test'
+  ...
+# Subtest: switch-pet writes a known builtin or local ID then independently confirms it
+ok 6 - switch-pet writes a known builtin or local ID then independently confirms it
+  ---
+  duration_ms: 370.6357
+  type: 'test'
+  ...
+# Subtest: switch-pet missing pipe fails current and switch without changing config
+ok 7 - switch-pet missing pipe fails current and switch without changing config
+  ---
+  duration_ms: 343.3524
+  type: 'test'
+  ...
+# Subtest: switch-pet rejects unknown IDs before any host connection or write
+ok 8 - switch-pet rejects unknown IDs before any host connection or write
+  ---
+  duration_ms: 162.2564
+  type: 'test'
+  ...
+# Subtest: switch-pet rejects extra arguments and unknown flags without host calls
+ok 9 - switch-pet rejects extra arguments and unknown flags without host calls
+  ---
+  duration_ms: 572.2862
+  type: 'test'
+  ...
+# Subtest: switch-pet help works without a host connection
+ok 10 - switch-pet help works without a host connection
+  ---
+  duration_ms: 144.6853
+  type: 'test'
+  ...
+# Subtest: an unknown command lists the shared commands and this package host commands only
+ok 11 - an unknown command lists the shared commands and this package host commands only
+  ---
+  duration_ms: 144.3438
+  type: 'test'
+  ...
+# Subtest: new personalities use an open text unit and commit only with successful adoption
+ok 12 - new personalities use an open text unit and commit only with successful adoption
+  ---
+  duration_ms: 102.1071
+  type: 'test'
+  ...
+# Subtest: old records retain their name on read and backfill personality through one completed story
+ok 13 - old records retain their name on read and backfill personality through one completed story
+  ---
+  duration_ms: 30.5386
+  type: 'test'
+  ...
+# Subtest: a legacy saved pending plan can be retried and finished without rewriting its missing personality
+ok 14 - a legacy saved pending plan can be retried and finished without rewriting its missing personality
+  ---
+  duration_ms: 58.6927
+  type: 'test'
+  ...
+# Subtest: the completed hatch invites naming once and an unanswered invitation does not block stories
+ok 15 - the completed hatch invites naming once and an unanswered invitation does not block stories
+  ---
+  duration_ms: 104.2594
+  type: 'test'
+  ...
+# Subtest: a user name is idempotent and preserves the individual; a stale reply cannot name a reset pet
+ok 16 - a user name is idempotent and preserves the individual; a stale reply cannot name a reset pet
+  ---
+  duration_ms: 63.5083
+  type: 'test'
+  ...
+# Subtest: CLI naming and status persist an explicit name in isolated data without invoking a host
+ok 17 - CLI naming and status persist an explicit name in isolated data without invoking a host
+  ---
+  duration_ms: 907.9465
+  type: 'test'
+  ...
+# Subtest: pet group 1: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 18 - pet group 1: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 380.6538
+  type: 'test'
+  ...
+# Subtest: pet group 2: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 19 - pet group 2: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 305.9435
+  type: 'test'
+  ...
+# Subtest: pet group 3: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 20 - pet group 3: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 264.2901
+  type: 'test'
+  ...
+# Subtest: pet group 4: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 21 - pet group 4: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 249.8878
+  type: 'test'
+  ...
+# Subtest: pet group 5: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 22 - pet group 5: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 210.427
+  type: 'test'
+  ...
+# Subtest: failed initialization reset preserves exact backup and ordinary pending story protects identity
+ok 23 - failed initialization reset preserves exact backup and ordinary pending story protects identity
+  ---
+  duration_ms: 12.0882
+  type: 'test'
+  ...
+# Subtest: daily retry retains pending operation and coalesces missed local slots after completion
+ok 24 - daily retry retains pending operation and coalesces missed local slots after completion
+  ---
+  duration_ms: 34.1808
+  type: 'test'
+  ...
+# Subtest: debugger is read-only, rejects cross-origin actions and stops
+ok 25 - debugger is read-only, rejects cross-origin actions and stops
+  ---
+  duration_ms: 157.2109
+  type: 'test'
+  ...
+# Subtest: desktop IPC address follows the host platform
+ok 26 - desktop IPC address follows the host platform
+  ---
+  duration_ms: 1.2047
+  type: 'test'
+  ...
+# Subtest: IPC refresh handles fragmented frames and broadcasts only custom-avatar invalidation
+ok 27 - IPC refresh handles fragmented frames and broadcasts only custom-avatar invalidation
+  ---
+  duration_ms: 16.4146
+  type: 'test'
+  ...
+# Subtest: IPC fails boundedly on silent
+ok 28 - IPC fails boundedly on silent
+  ---
+  duration_ms: 153.7716
+  type: 'test'
+  ...
+# Subtest: IPC fails boundedly on disconnect
+ok 29 - IPC fails boundedly on disconnect
+  ---
+  duration_ms: 53.651
+  type: 'test'
+  ...
+# Subtest: IPC fails boundedly on oversized
+ok 30 - IPC fails boundedly on oversized
+  ---
+  duration_ms: 2.4391
+  type: 'test'
+  ...
+# Subtest: IPC rejects writable-by-others directories before connecting
+ok 31 - IPC rejects writable-by-others directories before connecting # SKIP
+  ---
+  duration_ms: 0.2092
+  type: 'test'
+  ...
+# Subtest: native adapter uses IPC but preserves unmeasured display status
+ok 32 - native adapter uses IPC but preserves unmeasured display status
+  ---
+  duration_ms: 6.7046
+  type: 'test'
+  ...
+# Subtest: missing IPC reports failure and no refresh request
+ok 33 - missing IPC reports failure and no refresh request
+  ---
+  duration_ms: 5.0443
+  type: 'test'
+  ...
+# Subtest: an empty Codex home lists the builtin pets without creating files
+ok 34 - an empty Codex home lists the builtin pets without creating files
+  ---
+  duration_ms: 9.4001
+  type: 'test'
+  ...
+# Subtest: catalog merges by directory ID, prefers pets, and does not need sprite files
+ok 35 - catalog merges by directory ID, prefers pets, and does not need sprite files
+  ---
+  duration_ms: 32.8027
+  type: 'test'
+  ...
+# Subtest: one broken manifest is reported without hiding valid entries
+ok 36 - one broken manifest is reported without hiding valid entries
+  ---
+  duration_ms: 16.2854
+  type: 'test'
+  ...
+# Subtest: a failed local directory read is reported without losing the builtin catalog
+ok 37 - a failed local directory read is reported without losing the builtin catalog
+  ---
+  duration_ms: 4.6709
+  type: 'test'
+  ...
+# Subtest: refresh for an isolated destination reports unconfirmed and never claims automatic refresh
+ok 38 - refresh for an isolated destination reports unconfirmed and never claims automatic refresh
+  ---
+  duration_ms: 11.1464
+  type: 'test'
+  ...
+# Subtest: isLiveDestination matches GenPet entries in the current Codex home unless skipped
+ok 39 - isLiveDestination matches GenPet entries in the current Codex home unless skipped
+  ---
+  duration_ms: 0.6024
+  type: 'test'
+  ...
+# Subtest: read projects only pet fields and handles fragmented native pipe frames
+ok 40 - read projects only pet fields and handles fragmented native pipe frames
+  ---
+  duration_ms: 11.0009
+  type: 'test'
+  ...
+# Subtest: select writes only the pet key, then confirms with an independent read
+ok 41 - select writes only the pet key, then confirms with an independent read
+  ---
+  duration_ms: 4.5402
+  type: 'test'
+  ...
+# Subtest: missing environment is explicit and cannot trigger a write
+ok 42 - missing environment is explicit and cannot trigger a write
+  ---
+  duration_ms: 0.8729
+  type: 'test'
+  ...
+# Subtest: a rejected write is not retried and never falls back to config files
+ok 43 - a rejected write is not retried and never falls back to config files
+  ---
+  duration_ms: 3.4537
+  type: 'test'
+  ...
+# Subtest: readback mismatch rejects even after a successful write response
+ok 44 - readback mismatch rejects even after a successful write response
+  ---
+  duration_ms: 2.5956
+  type: 'test'
+  ...
+# Subtest: timeouts and oversized responses return unavailable without exposing payloads
+ok 45 - timeouts and oversized responses return unavailable without exposing payloads
+  ---
+  duration_ms: 23.8951
+  type: 'test'
+  ...
+# Subtest: Dots hands the bound target to its own tools, records the result and supports reuse
+ok 46 - Dots hands the bound target to its own tools, records the result and supports reuse
+  ---
+  duration_ms: 106.5065
+  type: 'test'
+  ...
+# Subtest: a unit request requires its fixed upstream inputs and captures that exact request
+ok 47 - a unit request requires its fixed upstream inputs and captures that exact request
+  ---
+  duration_ms: 8.9284
+  type: 'test'
+  ...
+# Subtest: contract checks allow open design and extra fields while rejecting missing fields and invalid control values
+ok 48 - contract checks allow open design and extra fields while rejecting missing fields and invalid control values
+  ---
+  duration_ms: 6.204
+  type: 'test'
+  ...
+# Subtest: step retries deduplicate, revisions remain observable, and logging cannot mutate the saved plan or advance a pet
+ok 49 - step retries deduplicate, revisions remain observable, and logging cannot mutate the saved plan or advance a pet
+  ---
+  duration_ms: 48.5375
+  type: 'test'
+  ...
+# Subtest: completed stories keep their unit artifacts and accept an internal output result without changing story text
+ok 50 - completed stories keep their unit artifacts and accept an internal output result without changing story text
+  ---
+  duration_ms: 38.756
+  type: 'test'
+  ...
+# Subtest: CLI unit request and contract verification are read-only and story output excludes internal steps
+ok 51 - CLI unit request and contract verification are read-only and story output excludes internal steps
+  ---
+  duration_ms: 584.9318
+  type: 'test'
+  ...
+# Subtest: egg: one millisecond before, at and after latest growth deadline
+ok 52 - egg: one millisecond before, at and after latest growth deadline
+  ---
+  duration_ms: 2.7521
+  type: 'test'
+  ...
+# Subtest: hatchling: one millisecond before, at and after latest growth deadline
+ok 53 - hatchling: one millisecond before, at and after latest growth deadline
+  ---
+  duration_ms: 0.2358
+  type: 'test'
+  ...
+# Subtest: juvenile: one millisecond before, at and after latest growth deadline
+ok 54 - juvenile: one millisecond before, at and after latest growth deadline
+  ---
+  duration_ms: 0.1707
+  type: 'test'
+  ...
+# Subtest: growth origin prefers this pet first completed stage story, then import, then adoption
+ok 55 - growth origin prefers this pet first completed stage story, then import, then adoption
+  ---
+  duration_ms: 0.3099
+  type: 'test'
+  ...
+# Subtest: adult special boundaries and recovery reset the next special deadline
+ok 56 - adult special boundaries and recovery reset the next special deadline
+  ---
+  duration_ms: 0.326
+  type: 'test'
+  ...
+# Subtest: daily slots use local dates across midnight and timezone/DST transitions
+ok 57 - daily slots use local dates across midnight and timezone/DST transitions
+  ---
+  duration_ms: 18.4404
+  type: 'test'
+  ...
+# Subtest: each host declares its appearance format, art contract and only its own commands
+ok 58 - each host declares its appearance format, art contract and only its own commands
+  ---
+  duration_ms: 1.4358
+  type: 'test'
+  ...
+# Subtest: artwork in the other host format and host results without a bound target are rejected
+ok 59 - artwork in the other host format and host results without a bound target are rejected
+  ---
+  duration_ms: 66.0378
+  type: 'test'
+  ...
+# Subtest: identity is persisted once, reads do not age it, and competing triggers cannot create another pet
+ok 60 - identity is persisted once, reads do not age it, and competing triggers cannot create another pet
+  ---
+  duration_ms: 38.4139
+  type: 'test'
+  ...
+# Subtest: saved state art is reusable across stories; completion and retries preserve genes and story count
+ok 61 - saved state art is reusable across stories; completion and retries preserve genes and story count
+  ---
+  duration_ms: 88.2991
+  type: 'test'
+  ...
+# Subtest: host failure leaves current stage intact and active refresh is required before completion
+ok 62 - host failure leaves current stage intact and active refresh is required before completion
+  ---
+  duration_ms: 86.4204
+  type: 'test'
+  ...
+# Subtest: daily slots use user timezone, coalesce missed checks and deduplicate completion
+ok 63 - daily slots use user timezone, coalesce missed checks and deduplicate completion
+  ---
+  duration_ms: 14.995
+  type: 'test'
+  ...
+# Subtest: replacement artwork invalidates an earlier host confirmation for the same story
+ok 64 - replacement artwork invalidates an earlier host confirmation for the same story
+  ---
+  duration_ms: 54.1922
+  type: 'test'
+  ...
+# Subtest: an explicit reset changes identity once, preserving the bound surface, schedule and previous archive
+ok 65 - an explicit reset changes identity once, preserving the bound surface, schedule and previous archive
+  ---
+  duration_ms: 42.5357
+  type: 'test'
+  ...
+# Subtest: growth ceilings make the next story advance one stage, and adults enter and leave special forms
+ok 66 - growth ceilings make the next story advance one stage, and adults enter and leave special forms
+  ---
+  duration_ms: 104.5524
+  type: 'test'
+  ...
+# Subtest: an unfinished initialization that cannot be completed can be abandoned by reset, not by cancel
+ok 67 - an unfinished initialization that cannot be completed can be abandoned by reset, not by cancel
+  ---
+  duration_ms: 21.2305
+  type: 'test'
+  ...
+# Subtest: legacy migration preserves ID, stage, images and binding without aging or editing the source
+ok 68 - legacy migration preserves ID, stage, images and binding without aging or editing the source
+  ---
+  duration_ms: 45.0621
+  type: 'test'
+  ...
+# Subtest: installed verification rejects stale content, version mismatch and extra files
+ok 69 - installed verification rejects stale content, version mismatch and extra files
+  ---
+  duration_ms: 306.7672
+  type: 'test'
+  ...
+# Subtest: release gate rejects same-version payload changes and permits a consistent patch bump
+ok 70 - release gate rejects same-version payload changes and permits a consistent patch bump
+  ---
+  duration_ms: 693.9498
+  type: 'test'
+  ...
+# Subtest: two hosts have separate identities and read-only status creates no files
+ok 71 - two hosts have separate identities and read-only status creates no files
+  ---
+  duration_ms: 29.213
+  type: 'test'
+  ...
+1..71
+# tests 71
+# suites 0
+# pass 70
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 2560.4834

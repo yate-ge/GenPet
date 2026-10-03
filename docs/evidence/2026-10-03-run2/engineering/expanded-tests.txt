@@ -1,0 +1,97 @@
+TAP version 13
+# Subtest: pet group 1: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 1 - pet group 1: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 188.1944
+  type: 'test'
+  ...
+# Subtest: pet group 2: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 2 - pet group 2: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 167.7965
+  type: 'test'
+  ...
+# Subtest: pet group 3: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 3 - pet group 3: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 163.7335
+  type: 'test'
+  ...
+# Subtest: pet group 4: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 4 - pet group 4: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 170.5898
+  type: 'test'
+  ...
+# Subtest: pet group 5: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 5 - pet group 5: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 176.1664
+  type: 'test'
+  ...
+# Subtest: failed initialization reset preserves exact backup and ordinary pending story protects identity
+not ok 6 - failed initialization reset preserves exact backup and ordinary pending story protects identity
+  ---
+  duration_ms: 11.067
+  type: 'test'
+  location: 'C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\tests\\cycle.test.ts:183:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, scandir 'C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-reset-cycle-QUZtmP\\backups'"
+  code: 'ENOENT'
+  stack: |-
+    async readdir (node:internal/fs/promises:955:18)
+    async TestContext.<anonymous> (C:\Users\geyat\Documents\workingProjects\GenPet\tests\cycle.test.ts:195:19)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: daily retry retains pending operation and coalesces missed local slots after completion
+ok 7 - daily retry retains pending operation and coalesces missed local slots after completion
+  ---
+  duration_ms: 32.1314
+  type: 'test'
+  ...
+# Subtest: egg: one millisecond before, at and after latest growth deadline
+ok 8 - egg: one millisecond before, at and after latest growth deadline
+  ---
+  duration_ms: 1.4494
+  type: 'test'
+  ...
+# Subtest: hatchling: one millisecond before, at and after latest growth deadline
+ok 9 - hatchling: one millisecond before, at and after latest growth deadline
+  ---
+  duration_ms: 0.1029
+  type: 'test'
+  ...
+# Subtest: juvenile: one millisecond before, at and after latest growth deadline
+ok 10 - juvenile: one millisecond before, at and after latest growth deadline
+  ---
+  duration_ms: 0.1118
+  type: 'test'
+  ...
+# Subtest: growth origin prefers this pet first completed stage story, then import, then adoption
+ok 11 - growth origin prefers this pet first completed stage story, then import, then adoption
+  ---
+  duration_ms: 0.1552
+  type: 'test'
+  ...
+# Subtest: adult special boundaries and recovery reset the next special deadline
+ok 12 - adult special boundaries and recovery reset the next special deadline
+  ---
+  duration_ms: 0.1349
+  type: 'test'
+  ...
+# Subtest: daily slots use local dates across midnight and timezone/DST transitions
+ok 13 - daily slots use local dates across midnight and timezone/DST transitions
+  ---
+  duration_ms: 11.0612
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 12
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1113.3632

@@ -1,0 +1,277 @@
+{
+  "total": 54,
+  "crlf": 54,
+  "passAfterCRLFNormalization": 54,
+  "results": [
+    {
+      "file": "src/appearance.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/art.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/cli.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/config.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/debugger-server.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/debugger.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/generation.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/growth.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/hosts/desktop/atlas.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/hosts/desktop/frames.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/hosts/desktop/index.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/hosts/desktop/publish.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/hosts/desktop/refresh.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/hosts/desktop/switch.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/hosts/dots.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/hosts/index.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/hosts/result.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/image.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/lifecycle.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/migration.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/model.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/naming.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/schedule.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "src/store.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/art.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/cli.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/companion.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/debugger.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/desktop-ipc.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/desktop-pets.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/desktop-refresh.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/desktop-switch.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/dots.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/fake-app-tools.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/fixtures.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/generation.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/hosts.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/lifecycle.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/migration.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/release-verification.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "tests/store.test.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "scripts/build-plugin.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "scripts/clean-build.mjs",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "scripts/install.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "scripts/package.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "scripts/smoke-debugger.mjs",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "scripts/smoke-installed.mjs",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "scripts/verify-install.mjs",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "scripts/verify-native-contract.ts",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "scripts/verify-release-version.mjs",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "scripts/verify-release.mjs",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "framework/debugger-web/app.js",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "framework/debugger-web/index.html",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    },
+    {
+      "file": "framework/debugger-web/style.css",
+      "hasCRLF": true,
+      "normalizedFormatPass": true
+    }
+  ]
+}

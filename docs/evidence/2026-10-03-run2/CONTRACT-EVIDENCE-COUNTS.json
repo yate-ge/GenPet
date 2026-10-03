@@ -1,0 +1,2157 @@
+{
+  "scope": "Saved unit contract validation records, including revised/revalidated candidates; not unique generation calls or semantic passes. Archives and intentional probes separated.",
+  "primary": {
+    "total": 248,
+    "passed": 248,
+    "failed": 0
+  },
+  "primaryByGroup": {
+    "group01": {
+      "total": 48,
+      "passed": 48,
+      "failed": 0
+    },
+    "group02": {
+      "total": 52,
+      "passed": 52,
+      "failed": 0
+    },
+    "group03": {
+      "total": 46,
+      "passed": 46,
+      "failed": 0
+    },
+    "group04": {
+      "total": 47,
+      "passed": 47,
+      "failed": 0
+    },
+    "group05": {
+      "total": 55,
+      "passed": 55,
+      "failed": 0
+    }
+  },
+  "primaryByUnit": {
+    "appearance": {
+      "total": 41,
+      "passed": 41,
+      "failed": 0
+    },
+    "context": {
+      "total": 40,
+      "passed": 40,
+      "failed": 0
+    },
+    "encounter": {
+      "total": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    "evolution": {
+      "total": 36,
+      "passed": 36,
+      "failed": 0
+    },
+    "genes": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    "image-review": {
+      "total": 32,
+      "passed": 32,
+      "failed": 0
+    },
+    "output": {
+      "total": 45,
+      "passed": 45,
+      "failed": 0
+    },
+    "personality": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    "story": {
+      "total": 38,
+      "passed": 38,
+      "failed": 0
+    }
+  },
+  "archived": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0
+  },
+  "intentionalProbes": {
+    "total": 2,
+    "passed": 1,
+    "failed": 1
+  },
+  "all": {
+    "total": 256,
+    "passed": 255,
+    "failed": 1
+  },
+  "failed": [
+    {
+      "path": "group05/negative-no-news-output.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": false,
+      "archived": false,
+      "intentionalProbe": true
+    }
+  ],
+  "records": [
+    {
+      "path": "group01/adult/appearance/verify.json",
+      "group": "group01",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/adult/context/verify.json",
+      "group": "group01",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/adult/evolution/verify.json",
+      "group": "group01",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/adult/image-review.verify.json",
+      "group": "group01",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/adult/output/verify.json",
+      "group": "group01",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/adult/story/verify.json",
+      "group": "group01",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/common-event/appearance/verify.json",
+      "group": "group01",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/common-event/context/verify.json",
+      "group": "group01",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/common-event/evolution/verify.json",
+      "group": "group01",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/common-event/story/verify.json",
+      "group": "group01",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/egg/appearance/verify.json",
+      "group": "group01",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/egg/context/verify.json",
+      "group": "group01",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/egg/encounter/verify.json",
+      "group": "group01",
+      "unit": "encounter",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/egg/genes/verify.json",
+      "group": "group01",
+      "unit": "genes",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/egg/image-review.verify.json",
+      "group": "group01",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/egg/output/verify-after-review.json",
+      "group": "group01",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/egg/output/verify.json",
+      "group": "group01",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/egg/personality/verify.json",
+      "group": "group01",
+      "unit": "personality",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/hatchling/appearance/verify.json",
+      "group": "group01",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/hatchling/context/verify.json",
+      "group": "group01",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/hatchling/evolution/verify.json",
+      "group": "group01",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/hatchling/image-review.verify.json",
+      "group": "group01",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/hatchling/output/verify-after-review.json",
+      "group": "group01",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/hatchling/output/verify.json",
+      "group": "group01",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/hatchling/story/verify.json",
+      "group": "group01",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/juvenile/appearance/verify.json",
+      "group": "group01",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/juvenile/context/verify.json",
+      "group": "group01",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/juvenile/evolution/verify.json",
+      "group": "group01",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/juvenile/image-review.verify.json",
+      "group": "group01",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/juvenile/output/verify.json",
+      "group": "group01",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/juvenile/story/verify.json",
+      "group": "group01",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/restore/appearance/verify.json",
+      "group": "group01",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/restore/context/verify.json",
+      "group": "group01",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/restore/evolution/verify.json",
+      "group": "group01",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/restore/output/verify.json",
+      "group": "group01",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/restore/story/verify.json",
+      "group": "group01",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/same/appearance/verify.json",
+      "group": "group01",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/same/context/verify.json",
+      "group": "group01",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/same/evolution/verify.json",
+      "group": "group01",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/same/image-review.verify.json",
+      "group": "group01",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/same/output/verify.json",
+      "group": "group01",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/same/story/verify.json",
+      "group": "group01",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/special/appearance/verify.json",
+      "group": "group01",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/special/context/verify.json",
+      "group": "group01",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/special/evolution/verify.json",
+      "group": "group01",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/special/image-review.verify.json",
+      "group": "group01",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/special/output/verify.json",
+      "group": "group01",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group01/special/story/verify.json",
+      "group": "group01",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/adult/appearance/verify.json",
+      "group": "group02",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/adult/context/verify.json",
+      "group": "group02",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/adult/evolution/verify.json",
+      "group": "group02",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/adult/image-review.verify.json",
+      "group": "group02",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/adult/output/verify.json",
+      "group": "group02",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/adult/story/verify.json",
+      "group": "group02",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/common-event/appearance/verify-negative-v1.json",
+      "group": "group02",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/common-event/appearance/verify.json",
+      "group": "group02",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/common-event/context/verify.json",
+      "group": "group02",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/common-event/evolution/verify-negative-v1.json",
+      "group": "group02",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/common-event/evolution/verify.json",
+      "group": "group02",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/common-event/story/verify-negative-v1.json",
+      "group": "group02",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/common-event/story/verify.json",
+      "group": "group02",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/egg/appearance/verify.json",
+      "group": "group02",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/egg/context/verify.json",
+      "group": "group02",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/egg/encounter/verify-reviewed.json",
+      "group": "group02",
+      "unit": "encounter",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/egg/encounter/verify.json",
+      "group": "group02",
+      "unit": "encounter",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/egg/genes/verify.json",
+      "group": "group02",
+      "unit": "genes",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/egg/image-review.verify.json",
+      "group": "group02",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/egg/output/verify-reviewed.json",
+      "group": "group02",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/egg/output/verify.json",
+      "group": "group02",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/egg/personality/verify.json",
+      "group": "group02",
+      "unit": "personality",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/hatchling/appearance/verify.json",
+      "group": "group02",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/hatchling/context/verify.json",
+      "group": "group02",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/hatchling/evolution/verify.json",
+      "group": "group02",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/hatchling/image-review-negative-v1.verify.json",
+      "group": "group02",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/hatchling/image-review-v2.verify.json",
+      "group": "group02",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/hatchling/output/verify.json",
+      "group": "group02",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/hatchling/story/verify.json",
+      "group": "group02",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/juvenile/appearance/verify.json",
+      "group": "group02",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/juvenile/context/verify.json",
+      "group": "group02",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/juvenile/evolution/verify.json",
+      "group": "group02",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/juvenile/image-review.verify.json",
+      "group": "group02",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/juvenile/output/verify.json",
+      "group": "group02",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/juvenile/story/verify.json",
+      "group": "group02",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/restore/appearance/verify.json",
+      "group": "group02",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/restore/context/verify.json",
+      "group": "group02",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/restore/evolution/verify.json",
+      "group": "group02",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/restore/output/verify.json",
+      "group": "group02",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/restore/story/verify.json",
+      "group": "group02",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/same/appearance/verify.json",
+      "group": "group02",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/same/context/verify.json",
+      "group": "group02",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/same/evolution/verify.json",
+      "group": "group02",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/same/image-review.verify.json",
+      "group": "group02",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/same/output/verify.json",
+      "group": "group02",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/same/story/verify.json",
+      "group": "group02",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/special/appearance/verify.json",
+      "group": "group02",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/special/context/verify.json",
+      "group": "group02",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/special/evolution/verify.json",
+      "group": "group02",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/special/image-review.verify.json",
+      "group": "group02",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/special/output/verify.json",
+      "group": "group02",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group02/special/story/verify.json",
+      "group": "group02",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/adult/appearance/verify.json",
+      "group": "group03",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/adult/context/verify.json",
+      "group": "group03",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/adult/evolution/verify.json",
+      "group": "group03",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/adult/image-review.verify.json",
+      "group": "group03",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/adult/output/verify.json",
+      "group": "group03",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/adult/story/verify.json",
+      "group": "group03",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/common-event/appearance/verify.json",
+      "group": "group03",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/common-event/context/verify.json",
+      "group": "group03",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/common-event/evolution/verify.json",
+      "group": "group03",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/common-event/story/verify.json",
+      "group": "group03",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/egg/appearance/verify.json",
+      "group": "group03",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/egg/context/verify.json",
+      "group": "group03",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/egg/encounter/verify.json",
+      "group": "group03",
+      "unit": "encounter",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/egg/genes/verify.json",
+      "group": "group03",
+      "unit": "genes",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/egg/image-review-verify.json",
+      "group": "group03",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/egg/output/verify.json",
+      "group": "group03",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/egg/personality/verify.json",
+      "group": "group03",
+      "unit": "personality",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/hatchling/appearance/verify.json",
+      "group": "group03",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/hatchling/context/verify.json",
+      "group": "group03",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/hatchling/evolution/verify.json",
+      "group": "group03",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/hatchling/image-review-verify.json",
+      "group": "group03",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/hatchling/output/verify.json",
+      "group": "group03",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/hatchling/story/verify.json",
+      "group": "group03",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/juvenile/appearance/verify.json",
+      "group": "group03",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/juvenile/context/verify.json",
+      "group": "group03",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/juvenile/evolution/verify.json",
+      "group": "group03",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/juvenile/image-review.verify.json",
+      "group": "group03",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/juvenile/output/verify.json",
+      "group": "group03",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/juvenile/story/verify.json",
+      "group": "group03",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/ordinary/appearance/verify.json",
+      "group": "group03",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/ordinary/context/verify.json",
+      "group": "group03",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/ordinary/evolution/verify.json",
+      "group": "group03",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/ordinary/image-review.verify.json",
+      "group": "group03",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/ordinary/output/verify.json",
+      "group": "group03",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/ordinary/story/verify.json",
+      "group": "group03",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/recovery/appearance/verify.json",
+      "group": "group03",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/recovery/context/verify.json",
+      "group": "group03",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/recovery/evolution/verify.json",
+      "group": "group03",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/recovery/output/verify.json",
+      "group": "group03",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/recovery/story/verify.json",
+      "group": "group03",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/special/appearance/verify.json",
+      "group": "group03",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/special/context/verify.json",
+      "group": "group03",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/special/evolution/verify.json",
+      "group": "group03",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/special/image-review.verify.json",
+      "group": "group03",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/special/output/verify.json",
+      "group": "group03",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group03/special/story/verify.json",
+      "group": "group03",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/adult/appearance/verify.json",
+      "group": "group04",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/adult/context/verify.json",
+      "group": "group04",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/adult/evolution/verify.json",
+      "group": "group04",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/adult/image-review-v2.verify.json",
+      "group": "group04",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/adult/image-review.verify.json",
+      "group": "group04",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/adult/output/verify.json",
+      "group": "group04",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/adult/story/verify.json",
+      "group": "group04",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/common-event/appearance/verify.json",
+      "group": "group04",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/common-event/context/verify.json",
+      "group": "group04",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/common-event/evolution/verify.json",
+      "group": "group04",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/common-event/story/verify.json",
+      "group": "group04",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/egg/appearance/verify.json",
+      "group": "group04",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/egg/context/verify.json",
+      "group": "group04",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/egg/encounter/verify.json",
+      "group": "group04",
+      "unit": "encounter",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/egg/genes/verify.json",
+      "group": "group04",
+      "unit": "genes",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/egg/image-review.verify.json",
+      "group": "group04",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/egg/output/verify.json",
+      "group": "group04",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/egg/personality/verify.json",
+      "group": "group04",
+      "unit": "personality",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/failures/adult-v1/adult/appearance/verify.json",
+      "group": "group04",
+      "unit": "appearance",
+      "passed": true,
+      "archived": true,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/failures/adult-v1/adult/context/verify.json",
+      "group": "group04",
+      "unit": "context",
+      "passed": true,
+      "archived": true,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/failures/adult-v1/adult/evolution/verify.json",
+      "group": "group04",
+      "unit": "evolution",
+      "passed": true,
+      "archived": true,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/failures/adult-v1/adult/image-review.verify.json",
+      "group": "group04",
+      "unit": "image-review",
+      "passed": true,
+      "archived": true,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/failures/adult-v1/adult/output/verify.json",
+      "group": "group04",
+      "unit": "output",
+      "passed": true,
+      "archived": true,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/failures/adult-v1/adult/story/verify.json",
+      "group": "group04",
+      "unit": "story",
+      "passed": true,
+      "archived": true,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/hatchling/appearance/verify.json",
+      "group": "group04",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/hatchling/context/verify.json",
+      "group": "group04",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/hatchling/evolution/verify.json",
+      "group": "group04",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/hatchling/image-review.verify.json",
+      "group": "group04",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/hatchling/output/verify.json",
+      "group": "group04",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/hatchling/story/verify.json",
+      "group": "group04",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/juvenile/appearance/verify.json",
+      "group": "group04",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/juvenile/context/verify.json",
+      "group": "group04",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/juvenile/evolution/verify.json",
+      "group": "group04",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/juvenile/image-review.verify.json",
+      "group": "group04",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/juvenile/output/verify.json",
+      "group": "group04",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/juvenile/story/verify.json",
+      "group": "group04",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/ordinary/appearance/verify.json",
+      "group": "group04",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/ordinary/context/verify.json",
+      "group": "group04",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/ordinary/evolution/verify.json",
+      "group": "group04",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/ordinary/image-review.verify.json",
+      "group": "group04",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/ordinary/output/verify.json",
+      "group": "group04",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/ordinary/story/verify.json",
+      "group": "group04",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/recovery/appearance/verify.json",
+      "group": "group04",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/recovery/context/verify.json",
+      "group": "group04",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/recovery/evolution/verify.json",
+      "group": "group04",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/recovery/output/verify.json",
+      "group": "group04",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/recovery/story/verify.json",
+      "group": "group04",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/special/appearance/verify.json",
+      "group": "group04",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/special/context/verify.json",
+      "group": "group04",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/special/evolution/verify.json",
+      "group": "group04",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/special/image-review.verify.json",
+      "group": "group04",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/special/output/verify.json",
+      "group": "group04",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group04/special/story/verify.json",
+      "group": "group04",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/01-context.verify.json",
+      "group": "group05",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/02-encounter.verify.json",
+      "group": "group05",
+      "unit": "encounter",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/03-genes.verify.json",
+      "group": "group05",
+      "unit": "genes",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/04-personality.verify.json",
+      "group": "group05",
+      "unit": "personality",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/05-egg-appearance.verify.json",
+      "group": "group05",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/05-egg-image-review.verify.json",
+      "group": "group05",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/06-egg-output.reviewed.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/06-egg-output.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/10-context.verify.json",
+      "group": "group05",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/11-story.corrected.verify.json",
+      "group": "group05",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/11-story.verify.json",
+      "group": "group05",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/12-evolution.verify.json",
+      "group": "group05",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/13-appearance.verify.json",
+      "group": "group05",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/13-hatchling-image-review.verify.json",
+      "group": "group05",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/14-output.corrected.reviewed.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/14-output.corrected.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/14-output.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/20-context.verify.json",
+      "group": "group05",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/21-story.verify.json",
+      "group": "group05",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/22-evolution.verify.json",
+      "group": "group05",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/23-appearance.verify.json",
+      "group": "group05",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/23-home-image-review.verify.json",
+      "group": "group05",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/24-output.reviewed.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/24-output.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/30-context.verify.json",
+      "group": "group05",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/31-story.verify.json",
+      "group": "group05",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/32-evolution.verify.json",
+      "group": "group05",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/33-appearance.verify.json",
+      "group": "group05",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/33-juvenile-image-review.verify.json",
+      "group": "group05",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/34-output.reviewed.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/34-output.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/40-context.verify.json",
+      "group": "group05",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/41-story.verify.json",
+      "group": "group05",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/42-evolution.verify.json",
+      "group": "group05",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/43-adult-image-review.verify.json",
+      "group": "group05",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/43-appearance.verify.json",
+      "group": "group05",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/44-output.reviewed.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/44-output.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/50-context.verify.json",
+      "group": "group05",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/51-story.verify.json",
+      "group": "group05",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/52-evolution.verify.json",
+      "group": "group05",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/53-appearance.verify.json",
+      "group": "group05",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/53-special-image-review.verify.json",
+      "group": "group05",
+      "unit": "image-review",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/54-output.reviewed.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/54-output.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/60-context.verify.json",
+      "group": "group05",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/61-story.verify.json",
+      "group": "group05",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/62-evolution.verify.json",
+      "group": "group05",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/63-appearance.verify.json",
+      "group": "group05",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/64-output.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/common-appearance.verify.json",
+      "group": "group05",
+      "unit": "appearance",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/common-context.verify.json",
+      "group": "group05",
+      "unit": "context",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/common-evolution.verify.json",
+      "group": "group05",
+      "unit": "evolution",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/common-story.corrected.verify.json",
+      "group": "group05",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/common-story.verify.json",
+      "group": "group05",
+      "unit": "story",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": false
+    },
+    {
+      "path": "group05/negative-hatch-output.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": true,
+      "archived": false,
+      "intentionalProbe": true
+    },
+    {
+      "path": "group05/negative-no-news-output.verify.json",
+      "group": "group05",
+      "unit": "output",
+      "passed": false,
+      "archived": false,
+      "intentionalProbe": true
+    }
+  ]
+}

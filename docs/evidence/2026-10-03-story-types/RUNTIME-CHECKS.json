@@ -1,0 +1,186 @@
+{
+  "checksPassed": true,
+  "groups": [
+    {
+      "group": "group01",
+      "identityUnchanged": true,
+      "originalCycleStateUnchanged": true,
+      "actualAdditionalStories": 2,
+      "revision": 9,
+      "art": 7,
+      "newArtKind": "story",
+      "avatarUnchanged": true,
+      "namingUnchanged": true,
+      "silence": {
+        "due": false,
+        "pending": null,
+        "required": null
+      },
+      "hostAckFailure": {
+        "rejected": true,
+        "unfinishedKept": true,
+        "noCommit": true
+      },
+      "actualStoryKeys": [
+        "id",
+        "triggerId",
+        "petId",
+        "at",
+        "text",
+        "basis",
+        "stage",
+        "state",
+        "home",
+        "appearanceId",
+        "mediaIds",
+        "steps"
+      ]
+    },
+    {
+      "group": "group02",
+      "identityUnchanged": true,
+      "originalCycleStateUnchanged": true,
+      "actualAdditionalStories": 2,
+      "revision": 9,
+      "art": 7,
+      "newArtKind": "story",
+      "avatarUnchanged": true,
+      "namingUnchanged": true,
+      "silence": {
+        "due": false,
+        "pending": null,
+        "required": null
+      },
+      "hostAckFailure": {
+        "rejected": true,
+        "unfinishedKept": true,
+        "noCommit": true
+      },
+      "actualStoryKeys": [
+        "id",
+        "triggerId",
+        "petId",
+        "at",
+        "text",
+        "basis",
+        "stage",
+        "state",
+        "home",
+        "appearanceId",
+        "mediaIds",
+        "steps"
+      ]
+    },
+    {
+      "group": "group03",
+      "identityUnchanged": true,
+      "originalCycleStateUnchanged": true,
+      "actualAdditionalStories": 2,
+      "revision": 9,
+      "art": 7,
+      "newArtKind": "story",
+      "avatarUnchanged": true,
+      "namingUnchanged": true,
+      "silence": {
+        "due": false,
+        "pending": null,
+        "required": null
+      },
+      "hostAckFailure": {
+        "rejected": true,
+        "unfinishedKept": true,
+        "noCommit": true
+      },
+      "actualStoryKeys": [
+        "id",
+        "triggerId",
+        "petId",
+        "at",
+        "text",
+        "basis",
+        "stage",
+        "state",
+        "home",
+        "appearanceId",
+        "mediaIds",
+        "steps"
+      ]
+    },
+    {
+      "group": "group04",
+      "identityUnchanged": true,
+      "originalCycleStateUnchanged": true,
+      "actualAdditionalStories": 2,
+      "revision": 9,
+      "art": 7,
+      "newArtKind": "story",
+      "avatarUnchanged": true,
+      "namingUnchanged": true,
+      "silence": {
+        "due": false,
+        "pending": null,
+        "required": null
+      },
+      "hostAckFailure": {
+        "rejected": true,
+        "unfinishedKept": true,
+        "noCommit": true
+      },
+      "actualStoryKeys": [
+        "id",
+        "triggerId",
+        "petId",
+        "at",
+        "text",
+        "basis",
+        "stage",
+        "state",
+        "appearanceId",
+        "mediaIds",
+        "steps"
+      ]
+    },
+    {
+      "group": "group05",
+      "identityUnchanged": true,
+      "originalCycleStateUnchanged": true,
+      "actualAdditionalStories": 2,
+      "revision": 9,
+      "art": 7,
+      "newArtKind": "story",
+      "avatarUnchanged": true,
+      "namingUnchanged": true,
+      "silence": {
+        "due": false,
+        "pending": null,
+        "required": null
+      },
+      "hostAckFailure": {
+        "rejected": true,
+        "unfinishedKept": true,
+        "noCommit": true
+      },
+      "actualStoryKeys": [
+        "id",
+        "triggerId",
+        "petId",
+        "at",
+        "text",
+        "basis",
+        "stage",
+        "state",
+        "appearanceId",
+        "mediaIds",
+        "steps"
+      ]
+    }
+  ],
+  "newArtworkMissing": {
+    "rejected": true,
+    "error": "Error: Appearance artwork is unfinished",
+    "revision": 9,
+    "stories": 9,
+    "art": 7
+  },
+  "limits": "Isolated simulated state and Agent decision/expressive outputs; no real host, scheduler or model universal compliance guarantee."
+}
