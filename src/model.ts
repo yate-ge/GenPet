@@ -116,6 +116,14 @@ export interface Pending {
   steps?: GenerationStep[];
 }
 
+/** A brief record of what the user told the pet in conversation; context for later stories. */
+export interface Chat {
+  id: string;
+  petId: string;
+  at: number;
+  text: string;
+}
+
 export interface State {
   version: 2;
   host: Host;
@@ -123,6 +131,7 @@ export interface State {
   stories: Story[];
   art: ArtRecord[];
   pending: Pending | null;
+  chats?: Chat[];
   schedule?: { timezone: string; reference: string };
   legacy?: { backup: string; importedAt: number };
   replacesPetId?: string;
