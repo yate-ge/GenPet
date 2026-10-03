@@ -6,7 +6,6 @@ import { switchPet } from './switch.js';
 
 export const desktop: HostAdapter = {
   appearanceKind: 'atlas',
-  referenceKinds: ['portrait'],
   artContract: ATLAS_CONTRACT,
   commands: {
     publish: { usage: 'publish', run: (_, store) => installNative(store) },

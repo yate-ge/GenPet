@@ -22,12 +22,11 @@ export function dueStory(
   const get = (key: string) => parts.find(part => part.type === key)!.value;
   const date = `${get('year')}-${get('month')}-${get('day')}`;
   const time = `${get('hour')}:${get('minute')}`;
-  const times = state.schedule?.times ?? DAILY_TIMES;
-  const slot = times.filter(slot => slot <= time).at(-1);
+  const slot = DAILY_TIMES.filter(slot => slot <= time).at(-1);
   const triggerId = slot ? `daily:${date}:${slot}:${timezone.replace(/\//g, '.')}` : null;
   return {
     timezone,
-    times,
+    times: DAILY_TIMES,
     triggerId,
     due: !!triggerId && !state.stories.some(story => story.triggerId === triggerId),
     pending: state.pending?.id ?? null,
@@ -38,6 +37,6 @@ export function dueStory(
 export async function setSchedule(store: Store, timezone: string, reference: string) {
   const zone = text(timezone, 'timezone');
   new Intl.DateTimeFormat('en', { timeZone: zone }); // Throws on an unknown timezone.
-  const schedule = { timezone: zone, reference: text(reference, 'schedule reference'), times: DAILY_TIMES };
+  const schedule = { timezone: zone, reference: text(reference, 'schedule reference') };
   return store.transaction(state => (state.schedule = schedule));
 }

@@ -45,7 +45,6 @@ export function hostRequest(state: State) {
 
 export const dots: HostAdapter = {
   appearanceKind: 'avatar',
-  referenceKinds: ['portrait', 'avatar'],
   artContract: null,
   commands: {
     'bind-avatar': { usage: 'bind-avatar AVATAR_ID', run: (args, store) => bindAvatar(store, args[0]) },
