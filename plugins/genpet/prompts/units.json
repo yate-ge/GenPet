@@ -29,7 +29,7 @@
     "evolution": {
       "designer": "StoryDesigner",
       "inputs": ["context", "pet", "growth", "story"],
-      "result": {"stage": "string", "state": "string", "basis": "string", "special": "nullable-string"},
+      "result": {"stage": "string", "state": "string", "basis": "string", "special": "nullable-string", "visibleState": "nullable-string"},
       "choices": {"stage": ["egg", "hatchling", "juvenile", "adult"]}
     },
     "appearance": {
@@ -46,6 +46,11 @@
       "designer": "StoryDesigner",
       "inputs": ["context", "pet", "story", "savedArt"],
       "result": {"reason": "string", "carrier": "nullable-object"}
+    },
+    "chat": {
+      "designer": "StoryDesigner",
+      "inputs": ["pet", "message"],
+      "result": {"text": "string", "note": "nullable-string"}
     },
     "image-review": {
       "designer": "shared",
