@@ -69,7 +69,7 @@ test('contract checks allow open design and extra fields while rejecting missing
           stage: 'ancient',
           state: 'Resting',
           basis: 'Test',
-          specialChange: null,
+          special: null,
         },
       }),
     /Invalid evolution.stage/,

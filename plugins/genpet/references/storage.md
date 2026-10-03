@@ -4,7 +4,7 @@ Default roots: `~/.genpet/desktop` and `~/.genpet/dots`, within each host's own 
 
 `state.json` holds the current pet, stories, assets, pending operation, and optional actual schedule reference. Pending operations and completed stories may contain `steps`: append-only generation results with a step ID, unit name, time, input references and an open result object. These are internal artifacts under the existing continuation/history records, not another copy of all user data. Existing v2 records without steps remain readable. Each pet's files live in `pets/PET_ID/assets/`. An explicit reset saves the full previous record to `backups/` and creates a new pet identity while transferring the existing host surface, so it does not add another Avatar entry.
 
-The six persisted contents are identity/binding, open genes/acquisition, current phase/state, story/change history, reusable assets, and operation/continuation. User data is read as needed; store only the relevant brief facts and decision basis. There is no fixed profile, activity taxonomy, growth clock or face schema.
+The persisted contents are identity/binding, open genes/acquisition, current phase/state (including any adult special form), the open home description, story/change history, reusable assets, and operation/continuation. User data is read as needed; store only the relevant brief facts and decision basis. There is no fixed profile, activity taxonomy, item catalog or face schema. Growth uses only the pace ceilings in `src/growth.ts`, computed from story history rather than a stored clock.
 
 The genes unit's `designBasis` is saved within its internal step, and the open `genes` text carries the same basis, so later stories can use the persisted genes alone. Read existing records and old steps without rewriting their origin; missing historical design grounds remain unknown.
 
@@ -20,11 +20,13 @@ Plan JSON fields (content is chosen by Agent):
   "place": "Initialization only: where the egg was acquired",
   "connection": "Initialization only: why the encounter matters to the user",
   "personality": "An open description of character, how it relates to the user, state expression and brief creative grounds",
+  "home": "After hatching, when changed: the complete home description, referring to saved media IDs for items kept there",
+  "special": "Adults: the special form after this story, or null when an active form ends",
   "appearance": {"description": "Appearance implied by this story"}
 }
 ```
 
-For later stories, omit genes/place/connection and reuse the persisted personality. Story/state judgments and source references stay in the existing generation steps and brief basis; no new story classifier is required. Stage may stay unchanged. Omit appearance when no Avatar change is needed; add `appearance.reuseArtId` to select a saved compatible appearance. `mediaIds` can reuse existing story pictures/artifacts.
+For later stories, omit genes/place/connection and reuse the persisted personality. Story/state judgments and source references stay in the existing generation steps and brief basis; no new story classifier is required. Stage may stay unchanged or advance one stage. Omit `home` when it is unchanged (story unit `home: null`). Set `special` from the evolution unit: its text while in a form, `null` only to end an active form, omitted otherwise. A due `growth.required` change must be in the plan. Stage changes and entering or leaving a special form need an appearance. Omit appearance when no other Avatar change is needed; add `appearance.reuseArtId` to select a saved compatible appearance. `mediaIds` can reuse existing story pictures/artifacts.
 
 Personality and naming fields are additive. Old v2 records remain readable without being rewritten; an existing name is preserved. Old saved pending plans can finish as saved. A pet lacking personality can supply it in a new story plan and receives it only on successful completion. Later plans cannot replace it. New initialization requires a personality. `name-pet` and `name-asked` act on an explicit Pet ID; see [naming](naming.md).
 

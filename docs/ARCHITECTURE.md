@@ -35,6 +35,7 @@ skill ─▶ begin-story ─▶ unit prompts (Agent) ─▶ record-step ─▶ p
 | `store.ts` | `state.json` per host: side-effect-free `peek`, locked `transaction`, atomic writes. |
 | `config.ts` | Plugin root, package host, data root, Codex home, prompt and unit files. |
 | `lifecycle.ts` | `begin`, `plan`, `finish`, `cancel`, `reset` and `story-output`. |
+| `growth.ts` | Pace ceilings: which stage advance or special-form change the next story must carry. |
 | `appearance.ts` | Request ID of the current plan; which saved artwork a plan's appearance refers to. |
 | `art.ts` | `art-request` (what to draw) and `accept-art` (structural checks, copy into assets). |
 | `generation.ts` | `unit-request`, `verify-unit` (data contract only) and `record-step`. |

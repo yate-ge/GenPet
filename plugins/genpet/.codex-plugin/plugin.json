@@ -1,6 +1,6 @@
 {
   "name": "genpet",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "A lightweight story-driven Pet framework for Codex Dots and native Codex Pets.",
   "author": {
     "name": "GenPet contributors"
@@ -25,8 +25,7 @@
       "Write"
     ],
     "defaultPrompt": [
-      "使用 $genpet-start 开始或继续我的宠物故事",
-      "使用 $genpet-story 生成新的宠物故事"
+      "使用 $genpet-start 开始或继续我的宠物故事"
     ],
     "brandColor": "#78934E"
   }
