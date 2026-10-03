@@ -4962,6 +4962,26 @@ async function setSchedule(store2, timezone, reference) {
   return store2.transaction((state) => state.schedule = schedule);
 }
 
+// src/status.ts
+var RECENT = { stories: 5, art: 30, chats: 10 };
+function statusView(state) {
+  const chats = state.chats ?? [];
+  return {
+    version: state.version,
+    host: state.host,
+    pet: state.pet,
+    pending: state.pending,
+    ...state.schedule ? { schedule: state.schedule } : {},
+    ...state.legacy ? { legacy: state.legacy } : {},
+    storyCount: state.stories.length,
+    stories: state.stories.slice(-RECENT.stories).map(({ steps, hostResult, ...story }) => story),
+    artCount: state.art.length,
+    art: state.art.slice(-RECENT.art).map(({ id, stage, kind, description, file }) => ({ id, stage, kind, description, file })),
+    chatCount: chats.length,
+    chats: chats.slice(-RECENT.chats).map(({ at, text: text2 }) => ({ at, text: text2 }))
+  };
+}
+
 // src/cli.ts
 async function jsonFile(file) {
   if (!path10.isAbsolute(file ?? "")) throw new Error("JSON input requires an absolute file");
@@ -4969,12 +4989,12 @@ async function jsonFile(file) {
 }
 var shared = {
   status: {
-    usage: "status",
-    run: async (_, store2) => {
+    usage: "status [--full]",
+    run: async ([flag], store2) => {
       const state = await store2.peek();
       const legacyFile = state.pet ? null : await findLegacyRecord(store2);
       return {
-        ...state,
+        ...flag === "--full" ? state : statusView(state),
         namingDue: namingDue(state),
         growth: growth(state),
         dataDirectory: store2.root,

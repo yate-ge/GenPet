@@ -51,7 +51,7 @@ Every unit writes an internal JSON result:
 
 `units.json` specifies required input names, result fields and basic types. Additional result fields are allowed. Lists and descriptions carry open content; identity is still stored as natural language. Input references identify saved steps, facts, artifacts or the unit fixture. They do not mean copying all raw user data.
 
-Normal runtime: allocate/resume the operation, save each unit envelope to an absolute file, then `record-step OPERATION_ID UNIT RESULT_FILE`. The returned step ID can be used by later units. Results are append-only and identical retries deduplicate; a revised result adds a new step, keeping the earlier observation. Completed stories keep these internal steps. `status` exposes them for inspection; `story-output` emits only story/media data. Output-unit results may be recorded against the completed story ID.
+Normal runtime: allocate/resume the operation, save each unit envelope to an absolute file, then `record-step OPERATION_ID UNIT RESULT_FILE`. The returned step ID can be used by later units. Results are append-only and identical retries deduplicate; a revised result adds a new step, keeping the earlier observation. Completed stories keep these internal steps. `status --full` exposes them for inspection; `story-output` emits only story/media data. Output-unit results may be recorded against the completed story ID.
 
 The saved StoryPlan remains the authoritative update plan. Step recording does not change genes, stage, appearance or completion. Once that plan exists, resume its exact content; visual repair changes the visual request/review, not the pet identity. Refer to previous completed steps rather than rerunning all units.
 
