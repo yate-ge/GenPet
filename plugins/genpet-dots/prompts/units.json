@@ -19,11 +19,11 @@
     },
     "story": {
       "inputs": ["context", "pet"],
-      "result": {"text": "string", "connection": "string", "evidenceIds": "array", "personalityExpression": "string", "stateIntent": "string", "visualIntent": "string"}
+      "result": {"text": "string", "connection": "string", "evidenceIds": "array", "stateIntent": "string", "visualIntent": "string"}
     },
     "evolution": {
       "inputs": ["context", "pet", "story"],
-      "result": {"stage": "string", "state": "string", "basis": "string", "specialChange": "nullable-string", "personalityEffect": "string"},
+      "result": {"stage": "string", "state": "string", "basis": "string", "specialChange": "nullable-string"},
       "choices": {"stage": ["egg", "hatchling", "juvenile", "adult"]}
     },
     "appearance": {

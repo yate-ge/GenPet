@@ -1,29 +1,10 @@
 # 领养流程 · initialization
 
-共同规则见 meta.md。各单元的输入、结果与独立测试方式见 ../references/generation-units.md。中间结果只保存在内部，对话遵循 output.md。
+本文件只编排各单元，不是另一个创作单元。规则见 meta.md；单元合同与测试见 ../references/generation-units.md；对话遵循 output.md。
 
-## 流程与中间产物
+1. **context** → **encounter** → **genes** → **personality**：依次使用前一步的结果。
+2. **appearance**：以获得故事、genes 与 eggAppearance、egg 阶段、已保存素材及宿主要求，决定蛋的视觉方案。
+3. **计划**：组装 StoryPlan——text、place、connection 来自 encounter；genes 来自 genes，stage 为 egg；personality 来自 personality；state 与 appearance 由获得故事和蛋的形象形成；basis 摘要记录采用的依据与不足。保存后完成图像生成、image-review 与宿主更新。
+4. **output**：基于实际完成的结果表达获得故事；孵化前不发命名邀请。
 
-1. **context**：从实际可用资料形成 facts 与 unknowns，保留来源。
-2. **encounter**：使用 context，形成有意义的获得故事、地点与 connection；用户事实通过 evidenceIds 关联。
-3. **genes**：使用同一 context 与 encounter，先形成 designBasis，再形成自包含的 genes 与 eggAppearance。
-4. **personality**：使用同一 context、encounter 与 genes 形成该个体的长期性格，单独保存，不放入身体基因。
-5. **appearance**：以获得故事、genes 和 eggAppearance、egg 阶段、已保存素材及实际宿主要求，决定蛋的视觉方案和故事图文配合方式。
-6. **计划**：把上述产物组装成 StoryPlan，保存后完成图像生成、image-review 与宿主更新。
-7. **output**：基于实际完成的结果与可用素材表达获得故事；用户命名时机见 meta.md「用户命名」。
-
-每步使用前一步已经形成的结果；相遇地点和身份在图像阶段保持不变。已有中间结果时继续使用；有问题可在计划保存前修订对应单元，并重新核对下游关系。计划保存后的图像修正继续同一份基因与故事。
-
-## StoryPlan 的来源
-
-- text、place、connection 来自 encounter。
-- genes 来自 genes 单元，stage 为 egg。designBasis 与单元结果作为内部步骤保存。
-- personality 来自 personality 单元，事实引用保留在 encounter 步骤中。初始化不由 Agent 起专名。
-- state、appearance 根据获得故事和 eggAppearance 形成；appearance 单元决定复用或生成方式。初始化必须有当前蛋的形象。
-- basis 摘要记录采用的 context 依据与不足，只保存相关摘要。
-
-保存各单元简短的输入引用和结果，使用 record-step；保存完整计划使用 plan-story。具体 CLI 见执行流程。单元记录不替代完整计划，计划中的变化在实际完成前仍是计划。
-
-## 检查点
-
-各单元可以分别固定上游结果单独测试：固定资料测相遇，固定领养故事测设计依据与基因，固定基因测形象，固定完成结果测故事输出。检查顺序见 meta.md。偏差记录到具体单元及其输入，而非给整段流程一个总评；每一步都用当次个体的具体内容填写。
+各单元结果用 record-step 保存，完整计划用 plan-story 保存。计划保存前可修订某个单元并重新核对下游；保存后的图像修正继续同一份基因与故事。偏差记录到具体单元及其输入，而非给整段流程一个总评。

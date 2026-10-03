@@ -15,15 +15,6 @@ export function artRequest(state: State) {
   if (!state.pet || !state.pending?.plan) return null;
   const pet = state.pet;
   const plan = state.pending.plan;
-  const host = hostFor(state.host);
-  const own = state.art.filter(art => art.petId === pet.id);
-  const references = own.filter(art => host.referenceKinds.includes(art.kind));
-  // Identity references: the egg, the first hatched form and the latest image.
-  const referenceFiles = [
-    references.find(art => art.stage === 'egg')?.file,
-    references.find(art => art.stage !== 'egg')?.file,
-    references.at(-1)?.file,
-  ].filter((file): file is string => !!file);
   return {
     id: requestId(state)!,
     operationId: state.pending.id,
@@ -37,10 +28,10 @@ export function artRequest(state: State) {
     genes: pet.genes ?? plan.genes,
     story: plan.text,
     appearance: plan.appearance,
-    reusableAppearances: own.filter(art => art.kind === 'atlas' || art.kind === 'avatar'),
-    referenceFiles: [...new Set(referenceFiles)],
+    // The Agent chooses identity references and reusable appearances from this pet's accepted art.
+    savedArt: state.art.filter(art => art.petId === pet.id),
     prompt: readPrompt('meta') + '\n' + readPrompt('appearance'),
-    contract: host.artContract,
+    contract: hostFor(state.host).artContract,
     target: pet.binding ?? null,
   };
 }

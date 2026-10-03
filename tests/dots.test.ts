@@ -36,7 +36,7 @@ test('Dots hands the bound target to its own tools, records the result and suppo
       kind: 'avatar',
       provenance: 'Synthetic Dots protocol fixture',
     });
-    assert.deepEqual(artRequest(await store.peek())!.referenceFiles, [art.file]);
+    assert.deepEqual(artRequest(await store.peek())!.savedArt, [art]);
     const unbound = await store.peek();
     assert.throws(() => hostRequest(unbound), /Bind/);
     await bindAvatar(store, 'dots:self');

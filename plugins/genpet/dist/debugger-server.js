@@ -2796,7 +2796,6 @@ async function installNative(store, options = {}) {
 // src/hosts/desktop/index.ts
 var desktop = {
   appearanceKind: "atlas",
-  referenceKinds: ["portrait"],
   artContract: ATLAS_CONTRACT,
   commands: {
     publish: { usage: "publish", run: (_, store) => installNative(store) },
@@ -2838,7 +2837,6 @@ function hostRequest(state) {
 }
 var dots = {
   appearanceKind: "avatar",
-  referenceKinds: ["portrait", "avatar"],
   artContract: null,
   commands: {
     "bind-avatar": { usage: "bind-avatar AVATAR_ID", run: (args, store) => bindAvatar(store, args[0]) },
@@ -4356,14 +4354,6 @@ function artRequest(state) {
   if (!state.pet || !state.pending?.plan) return null;
   const pet = state.pet;
   const plan = state.pending.plan;
-  const host = hostFor(state.host);
-  const own = state.art.filter((art) => art.petId === pet.id);
-  const references = own.filter((art) => host.referenceKinds.includes(art.kind));
-  const referenceFiles = [
-    references.find((art) => art.stage === "egg")?.file,
-    references.find((art) => art.stage !== "egg")?.file,
-    references.at(-1)?.file
-  ].filter((file) => !!file);
   return {
     id: requestId(state),
     operationId: state.pending.id,
@@ -4377,10 +4367,10 @@ function artRequest(state) {
     genes: pet.genes ?? plan.genes,
     story: plan.text,
     appearance: plan.appearance,
-    reusableAppearances: own.filter((art) => art.kind === "atlas" || art.kind === "avatar"),
-    referenceFiles: [...new Set(referenceFiles)],
+    // The Agent chooses identity references and reusable appearances from this pet's accepted art.
+    savedArt: state.art.filter((art) => art.petId === pet.id),
     prompt: readPrompt("meta") + "\n" + readPrompt("appearance"),
-    contract: host.artContract,
+    contract: hostFor(state.host).artContract,
     target: pet.binding ?? null
   };
 }

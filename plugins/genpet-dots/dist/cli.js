@@ -3111,7 +3111,6 @@ async function installNative(store2, options = {}) {
 // src/hosts/desktop/index.ts
 var desktop = {
   appearanceKind: "atlas",
-  referenceKinds: ["portrait"],
   artContract: ATLAS_CONTRACT,
   commands: {
     publish: { usage: "publish", run: (_, store2) => installNative(store2) },
@@ -3153,7 +3152,6 @@ function hostRequest(state) {
 }
 var dots = {
   appearanceKind: "avatar",
-  referenceKinds: ["portrait", "avatar"],
   artContract: null,
   commands: {
     "bind-avatar": { usage: "bind-avatar AVATAR_ID", run: (args2, store2) => bindAvatar(store2, args2[0]) },
@@ -4671,14 +4669,6 @@ function artRequest(state) {
   if (!state.pet || !state.pending?.plan) return null;
   const pet = state.pet;
   const plan = state.pending.plan;
-  const host = hostFor(state.host);
-  const own = state.art.filter((art) => art.petId === pet.id);
-  const references2 = own.filter((art) => host.referenceKinds.includes(art.kind));
-  const referenceFiles = [
-    references2.find((art) => art.stage === "egg")?.file,
-    references2.find((art) => art.stage !== "egg")?.file,
-    references2.at(-1)?.file
-  ].filter((file) => !!file);
   return {
     id: requestId(state),
     operationId: state.pending.id,
@@ -4692,10 +4682,10 @@ function artRequest(state) {
     genes: pet.genes ?? plan.genes,
     story: plan.text,
     appearance: plan.appearance,
-    reusableAppearances: own.filter((art) => art.kind === "atlas" || art.kind === "avatar"),
-    referenceFiles: [...new Set(referenceFiles)],
+    // The Agent chooses identity references and reusable appearances from this pet's accepted art.
+    savedArt: state.art.filter((art) => art.petId === pet.id),
     prompt: readPrompt("meta") + "\n" + readPrompt("appearance"),
-    contract: host.artContract,
+    contract: hostFor(state.host).artContract,
     target: pet.binding ?? null
   };
 }
@@ -4871,12 +4861,11 @@ function dueStory(state, now = Date.now(), timezone = state.schedule?.timezone ?
   const get = (key) => parts.find((part) => part.type === key).value;
   const date = `${get("year")}-${get("month")}-${get("day")}`;
   const time = `${get("hour")}:${get("minute")}`;
-  const times = state.schedule?.times ?? DAILY_TIMES;
-  const slot = times.filter((slot2) => slot2 <= time).at(-1);
+  const slot = DAILY_TIMES.filter((slot2) => slot2 <= time).at(-1);
   const triggerId = slot ? `daily:${date}:${slot}:${timezone.replace(/\//g, ".")}` : null;
   return {
     timezone,
-    times,
+    times: DAILY_TIMES,
     triggerId,
     due: !!triggerId && !state.stories.some((story) => story.triggerId === triggerId),
     pending: state.pending?.id ?? null
@@ -4885,7 +4874,7 @@ function dueStory(state, now = Date.now(), timezone = state.schedule?.timezone ?
 async function setSchedule(store2, timezone, reference) {
   const zone = text(timezone, "timezone");
   new Intl.DateTimeFormat("en", { timeZone: zone });
-  const schedule = { timezone: zone, reference: text(reference, "schedule reference"), times: DAILY_TIMES };
+  const schedule = { timezone: zone, reference: text(reference, "schedule reference") };
   return store2.transaction((state) => state.schedule = schedule);
 }
 

@@ -70,7 +70,6 @@ test('contract checks allow open design and extra fields while rejecting missing
           state: 'Resting',
           basis: 'Test',
           specialChange: null,
-          personalityEffect: 'Keeps its own expression',
         },
       }),
     /Invalid evolution.stage/,

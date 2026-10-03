@@ -113,7 +113,7 @@ export interface State {
   stories: Story[];
   art: ArtRecord[];
   pending: Pending | null;
-  schedule?: { timezone: string; reference: string; times: string[] };
+  schedule?: { timezone: string; reference: string };
   legacy?: { backup: string; importedAt: number };
   replacesPetId?: string;
 }
