@@ -41,6 +41,8 @@ export function readPrompt(name: string) {
 }
 
 export interface UnitDefinition {
+  /** The role that owns the unit (documentation; see framework/references/generation-units.md). */
+  designer?: string;
   inputs: string[];
   result: Record<string, 'string' | 'array' | 'object' | 'nullable-string' | 'nullable-object'>;
   choices?: Record<string, string[]>;

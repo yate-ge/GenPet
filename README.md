@@ -1,6 +1,6 @@
 # GenPet
 
-A lightweight, story-driven pixel Pet framework inspired by GenFaceUI meta-design. Version 0.8.1 is the local development revision.
+A lightweight, story-driven pixel Pet framework inspired by GenFaceUI meta-design. Version 0.9.0 is the local development revision.
 
 Two independent packages: **GenPet Dots** (`plugins/genpet-dots`, primary) and ordinary **GenPet** (`plugins/genpet`). Each keeps its own identity, genes, stories, assets and Avatar binding in its own host environment.
 

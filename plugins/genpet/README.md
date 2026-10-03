@@ -1,6 +1,6 @@
 # GenPet
 
-Version 0.8.1. Lightweight story-driven pixel Pet framework.
+Version 0.9.0. Lightweight story-driven pixel Pet framework.
 
 Each Pet starts as a literal egg designed from its adoption story and hatches into a living creature. Product rules are in [prompts/meta.md](prompts/meta.md).
 

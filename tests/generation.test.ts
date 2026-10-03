@@ -87,6 +87,25 @@ test('contract checks allow open design and extra fields while rejecting missing
     { appearance: null, visuals: [] },
   );
 });
+test('home and carrier units: a text-only story and an unchanged home are valid, and their prompts carry the designer rules', () => {
+  assert.deepEqual(
+    validateUnitResult('carrier', { inputRefs: [], result: { reason: 'Nothing new to hand over.', carrier: null } })
+      .result,
+    { reason: 'Nothing new to hand over.', carrier: null },
+  );
+  assert.throws(() => validateUnitResult('carrier', { inputRefs: [], result: { carrier: null } }), /carrier.reason/);
+  assert.deepEqual(validateUnitResult('home', { inputRefs: [], result: { home: null, visual: null } }).result, {
+    home: null,
+    visual: null,
+  });
+  const inputs = { context: {}, pet: {}, story: {}, savedArt: [] };
+  for (const unit of ['carrier', 'home']) {
+    const request = unitRequest(unit, { inputs });
+    assert.match(request.prompt, /何时配图|家的设计/);
+    assert.match(request.prompt, /mustShow|必须出现的特征/);
+  }
+  assert.throws(() => unitRequest('home', { inputs: { context: {} } }), /Missing home input/);
+});
 test('step retries deduplicate, revisions remain observable, and logging cannot mutate the saved plan or advance a pet', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-step-')),
     store = new Store(root, 'dots');

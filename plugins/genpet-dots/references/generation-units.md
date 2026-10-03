@@ -4,21 +4,36 @@ Prompts define observable inputs, intermediate results and review points; creati
 
 Product rules (grounded design, literal eggs, living creatures, continuity and the review order) live only in [`prompts/meta.md`](../prompts/meta.md). `unit-request` always prepends it to the selected unit. This file covers unit contracts, orchestration and testing.
 
+## Designers
+
+Units are grouped by who owns the decision. A designer is a role with its own prompts and review points, not a separate process.
+
+| Designer | Decides | Units | Used when |
+| --- | --- | --- | --- |
+| GeneDesigner | Who the pet is: the adoption encounter, genes with their design basis, personality | encounter, genes, personality | Adoption, reset, legacy migration only; the result is immutable |
+| PetDesigner | What the pet looks like: egg, each stage and special form as an Avatar | appearance | Every Avatar change |
+| StoryDesigner | What happens: the story, state, evolution and special-form decisions, and the carrier the story hands the user (or none) | context, story, evolution, carrier, output | Every story |
+| HomeDesigner | The pet's home: layout, zones, rearranging, moving, the home view | home | When the story changes the home |
+
+`image-review` is shared: it checks each visual against its designer's declared `mustShow` features.
+
 | Unit | Fixed input for an isolated test | Observable result | Example failure to locate |
 | --- | --- | --- | --- |
 | context | Provided available context | Facts with source IDs; unknowns | Invented user facts |
 | encounter | A saved context result | Encounter, place, connection, evidence IDs | Generic encounter without meaningful connection |
 | genes | The same context and encounter | Design basis, self-contained creature genes and literal egg-shell appearance | A source name attached to an arbitrary body; no story-based reason for the source |
 | personality | The same context, encounter and genes | Stable temperament, relationship style, state expression and basis | A label that never changes actions; inferred user personality |
-| story | Saved context, pet including personality and home, growth, and relevant history | New experience, visible connection, state, home and visual intent | Connection exists only in internal notes; all temperaments behave identically |
+| story | Saved context, pet including personality and home, growth, and relevant history | New experience, visible connection, state, home intent and visual intent | Connection exists only in internal notes; all temperaments behave identically |
 | evolution | The saved story, context, growth and current pet including personality | Stage, state, sourced basis and special form | A state changes without a user event; a single event treated as accumulated growth; a due change missing |
 | appearance | Genes, story, change, saved art, host requirements | Reuse/new/unchanged appearance and actual visual requests | Source copied as realistic mature anatomy instead of a cartoon hatchling Avatar |
+| home | Context, pet including home, story with its home intent, saved art | Complete home description (or null) and a home-view plan (or null) | A corner close-up instead of a livable home; no zones; moving treated as a rename |
+| carrier | Context, pet with recent stories, story, saved art | Reason for an image or text only; a designed carrier with purpose, viewpoint, form, must-show features and exact text | A postcard without text or postmark; a photo that is only a scene; images on every story |
 | image-review | One visual request and an actual image | Boundary, design, cartoon Avatar and phase observations; accept/repair | Source recognizable but young phase or small-size character design missing |
-| output | Story, actual completion, available media | Story text and actual media references | Unfinished evolution claimed complete |
+| output | Story, actual completion, available media (a story without a carrier has no image) | Story text and actual media references | Unfinished evolution claimed complete |
 
 Initialization: context → encounter → genes → personality → appearance → saved plan → actual visual creation → image-review → host update → completion → output.
 
-New story: context → saved personality (or a one-time legacy backfill) → story → evolution → appearance → saved plan → actual visual creation/reuse → image-review → host update if needed → completion → output → user naming invitation if due. When reusing a previously reviewed file, refer to its actual acceptance record; do not invent a new image inspection. Unchanged appearances require no host update.
+New story: context → saved personality (or a one-time legacy backfill) → story → evolution → appearance (only for an Avatar change) → home (only when the home changes) → carrier → saved plan → actual visual creation/reuse → image-review → host update if needed → completion → output → user naming invitation if due. When reusing a previously reviewed file, refer to its actual acceptance record; do not invent a new image inspection. Unchanged appearances require no host update.
 
 Modules are read separately. Initialization is an orchestration prompt, not another creative unit. An Agent may complete several units in one turn, but keeps their results separate. A unit test fixes upstream results and runs only its selected unit; it does not perform the complete lifecycle.
 
