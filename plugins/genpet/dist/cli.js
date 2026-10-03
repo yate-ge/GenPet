@@ -2258,7 +2258,9 @@ var SPECIAL_DURATION = 2 * DAY;
 var iso = (time) => new Date(time).toISOString();
 function stageSince(state) {
   const pet = state.pet;
-  return state.stories.find((story) => story.petId === pet.id && story.stage === pet.stage)?.at ?? state.legacy?.importedAt ?? pet.adoptedAt;
+  const origin = state.legacy?.importedAt ?? pet.adoptedAt;
+  if (pet.stage === "egg") return origin;
+  return state.stories.find((story) => story.petId === pet.id && story.stage === pet.stage)?.at ?? origin;
 }
 function growth(state, now = Date.now()) {
   const pet = state.pet;

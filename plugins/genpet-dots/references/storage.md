@@ -20,7 +20,7 @@ Plan JSON fields (content is chosen by Agent):
   "place": "Initialization only: where the egg was acquired",
   "connection": "Initialization only: why the encounter matters to the user",
   "personality": "An open description of character, how it relates to the user, state expression and brief creative grounds",
-  "home": "After hatching, when changed: the complete home description, referring to saved media IDs for items kept there",
+  "home": "After hatching, when changed: the complete home description from the home unit (location, zones, items), referring to saved media IDs for items kept there",
   "special": "Adults: the special form after this story, or null when an active form ends",
   "appearance": {"description": "Appearance implied by this story"}
 }
