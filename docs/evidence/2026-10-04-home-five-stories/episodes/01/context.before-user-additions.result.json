@@ -1,0 +1,18 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/timeline.json"
+  ],
+  "result": {
+    "facts": [
+      {
+        "source": "test-user-message:home-01 / home-message-1 / 2026-11-09T23:00:00Z",
+        "id": "home-fact-01-adjust",
+        "text": "用户当次明确想看宠物调整家中一处不顺手的小地方，允许本篇只用文字。"
+      }
+    ],
+    "unknowns": [
+      "没有用户自身住房、实际天气、地点或生活习惯资料；宠物家里的具体不便由已有家与新故事形成。"
+    ]
+  }
+}

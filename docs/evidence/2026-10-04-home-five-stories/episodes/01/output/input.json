@@ -1,0 +1,183 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/actual-completed.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/actual-output.json"
+  ],
+  "inputs": {
+    "story": {
+      "homeIntent": "将旧草垫中戳身子的硬草梗末端弯回垫边，用床边一根软干草编扣固定，睡卧面贴平；原浅黄小圆叶帽从头上收回床边原铺平干草处，帽顶朝上、窄檐展开。全套收藏及其他分区不动。",
+      "connection": "home-fact-01-rest的当次明确请求进入正文，形成宠物在原家睡觉、修整再睡和醒后休息的经历；草梗问题、动作和叶檐声音是宠物世界内容，不补造用户作息、天气或住房。",
+      "stateIntent": "在调平的旧草垫上歇着，浅黄小圆叶帽已收在床边",
+      "evidenceIds": [
+        "home-fact-01-rest"
+      ],
+      "text": "奶白肚皮才落到草垫上，刺猬又把自己抬了起来。它刚把浅黄小圆叶帽收在床边干草上，伸过前足，准备在家睡一觉；垫里却有一根硬草梗，正好戳在身子下面。你想看看它睡觉、休息，也想看它调整一处影响睡觉的小地方，它便先把那一角按平。躺下，草梗又顶起来。它停了一会儿，顺着草梗摸到翘起的末端，把末端弯回草垫边，再用床边一根软干草编扣固定。没有添床，也没有搬动右侧的小发现。它重新落下肚皮，慢慢侧过身，鼻尖贴在前足旁，这次睡到自己醒来。醒了也没急着出门，只在窝里舒展两只前足，听叶檐外的细响。帽子帽顶朝上待在老位置，窄檐没有压折。",
+      "visualIntent": "文字讲述睡觉、休息与一处床垫小调整，不另送故事图或家全景；脱下原帽的持续状态交appearance优先复用已存普通成年无附件Avatar，不把睡姿固定为常态形象。"
+    },
+    "completed": {
+      "id": "story-65393fed-4d51-4d2e-a998-0487989a7c05",
+      "triggerId": "daily:2026-11-10:07:00:Asia.Shanghai",
+      "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "at": 1794265200000,
+      "text": "奶白肚皮才落到草垫上，刺猬又把自己抬了起来。它刚把浅黄小圆叶帽收在床边干草上，伸过前足，准备在家睡一觉；垫里却有一根硬草梗，正好戳在身子下面。你想看看它睡觉、休息，也想看它调整一处影响睡觉的小地方，它便先把那一角按平。躺下，草梗又顶起来。它停了一会儿，顺着草梗摸到翘起的末端，把末端弯回草垫边，再用床边一根软干草编扣固定。没有添床，也没有搬动右侧的小发现。它重新落下肚皮，慢慢侧过身，鼻尖贴在前足旁，这次睡到自己醒来。醒了也没急着出门，只在窝里舒展两只前足，听叶檐外的细响。帽子帽顶朝上待在老位置，窄檐没有压折。",
+      "basis": "home-fact-01-rest明确请求睡觉、休息及调整睡卧小问题；故事先按草垫、停下摸清草梗再换编扣，延续原性格。脱帽后睡觉并醒后歇着形成这次状态。growth.required为空，当前成年普通形态未发生新器官变化，special保持null。睡姿与伸足是短暂叙事动作，帽子则仍收在床边，需要Avatar恢复已有普通成年无附件样子。",
+      "stage": "adult",
+      "state": "在调平的旧草垫上歇着，浅黄小圆叶帽已收在床边",
+      "home": "家仍在草坡较高处的大树拱根干高台，后上方有拱根遮护，前沿敞开，草坡小路向下接旧苔石地标与草根蜗牛小路。左后为睡觉和醒后休息的角落：乳白浅褐斑半蛋壳风墙、大叶雨檐、原草垫小窝及床边干草延续。本次将旧草垫中一根硬草梗的翘起末端弯回垫边，用床边一根软干草编扣固定，睡卧面调平；原草垫仍在原位。原浅黄小圆叶帽从穿戴收回床边原铺平干草处，帽顶朝上、窄檐展开，绕行空位保留。右侧较高干台为收藏区：前左凹叶盛原种子，前中泥点弯木片旁是天然半月凹口浅灰扁石；后左干草垫上的苔石坡明信片在上、标本屋照片错开露窄白边、最下折好的四格漫画略露折边，左侧留取纸空位；后右短枝两端支撑，淡琥珀空蝉蜕六足扣枝悬空、裂背不受压，与纸物保持间隔。中央及前沿大块活动空地、通往两侧宽路线继续留空。全套原物延续，旧址只留苔石，相机已归还。",
+      "appearanceId": "art-688ff9d8a4b753b8906f1e8f",
+      "mediaIds": [],
+      "steps": [
+        {
+          "id": "step-c9cbacd5f68f25920f4df5a0",
+          "unit": "context",
+          "at": 1794265200000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/timeline.json"
+          ],
+          "result": {
+            "unknowns": [
+              "没有用户自身住房、实际天气、地点或生活习惯资料；不把宠物的睡觉内容解释为用户作息。"
+            ],
+            "facts": [
+              {
+                "text": "用户当次明确想看宠物在家睡觉、休息的日常，并调整一处影响睡觉的小地方；允许只用文字。",
+                "source": "test-user-message:home-01 / home-message-1 / 2026-11-09T23:00:00Z",
+                "id": "home-fact-01-rest"
+              }
+            ]
+          }
+        },
+        {
+          "id": "step-3c05667fd07e67737b30a8e1",
+          "unit": "story",
+          "at": 1794265200000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/context.result.json"
+          ],
+          "result": {
+            "homeIntent": "将旧草垫中戳身子的硬草梗末端弯回垫边，用床边一根软干草编扣固定，睡卧面贴平；原浅黄小圆叶帽从头上收回床边原铺平干草处，帽顶朝上、窄檐展开。全套收藏及其他分区不动。",
+            "connection": "home-fact-01-rest的当次明确请求进入正文，形成宠物在原家睡觉、修整再睡和醒后休息的经历；草梗问题、动作和叶檐声音是宠物世界内容，不补造用户作息、天气或住房。",
+            "stateIntent": "在调平的旧草垫上歇着，浅黄小圆叶帽已收在床边",
+            "evidenceIds": [
+              "home-fact-01-rest"
+            ],
+            "text": "奶白肚皮才落到草垫上，刺猬又把自己抬了起来。它刚把浅黄小圆叶帽收在床边干草上，伸过前足，准备在家睡一觉；垫里却有一根硬草梗，正好戳在身子下面。你想看看它睡觉、休息，也想看它调整一处影响睡觉的小地方，它便先把那一角按平。躺下，草梗又顶起来。它停了一会儿，顺着草梗摸到翘起的末端，把末端弯回草垫边，再用床边一根软干草编扣固定。没有添床，也没有搬动右侧的小发现。它重新落下肚皮，慢慢侧过身，鼻尖贴在前足旁，这次睡到自己醒来。醒了也没急着出门，只在窝里舒展两只前足，听叶檐外的细响。帽子帽顶朝上待在老位置，窄檐没有压折。",
+            "visualIntent": "文字讲述睡觉、休息与一处床垫小调整，不另送故事图或家全景；脱下原帽的持续状态交appearance优先复用已存普通成年无附件Avatar，不把睡姿固定为常态形象。"
+          }
+        },
+        {
+          "id": "step-91daa73fb4e1cc51a9a84414",
+          "unit": "evolution",
+          "at": 1794265200000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/context.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/story.result.json"
+          ],
+          "result": {
+            "state": "在调平的旧草垫上歇着，浅黄小圆叶帽已收在床边",
+            "basis": "home-fact-01-rest明确请求睡觉、休息及调整睡卧小问题；故事先按草垫、停下摸清草梗再换编扣，延续原性格。脱帽后睡觉并醒后歇着形成这次状态。growth.required为空，当前成年普通形态未发生新器官变化，special保持null。睡姿与伸足是短暂叙事动作，帽子则仍收在床边，需要Avatar恢复已有普通成年无附件样子。",
+            "stage": "adult",
+            "visibleState": "脱下原浅黄小圆叶帽，无穿戴或手持；两只圆耳完全露出，暖棕低矮拱背、奶白短吻腹、亮眼、四短肉足和普通成年钝圆软刺簇延续。不固定睡姿或另加草垫道具。",
+            "special": null
+          }
+        },
+        {
+          "id": "step-abb9d5baa5e69d1c957aee55",
+          "unit": "home",
+          "at": 1794265200000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/context.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/story.result.json"
+          ],
+          "result": {
+            "visual": null,
+            "home": "家仍在草坡较高处的大树拱根干高台，后上方有拱根遮护，前沿敞开，草坡小路向下接旧苔石地标与草根蜗牛小路。左后为睡觉和醒后休息的角落：乳白浅褐斑半蛋壳风墙、大叶雨檐、原草垫小窝及床边干草延续。本次将旧草垫中一根硬草梗的翘起末端弯回垫边，用床边一根软干草编扣固定，睡卧面调平；原草垫仍在原位。原浅黄小圆叶帽从穿戴收回床边原铺平干草处，帽顶朝上、窄檐展开，绕行空位保留。右侧较高干台为收藏区：前左凹叶盛原种子，前中泥点弯木片旁是天然半月凹口浅灰扁石；后左干草垫上的苔石坡明信片在上、标本屋照片错开露窄白边、最下折好的四格漫画略露折边，左侧留取纸空位；后右短枝两端支撑，淡琥珀空蝉蜕六足扣枝悬空、裂背不受压，与纸物保持间隔。中央及前沿大块活动空地、通往两侧宽路线继续留空。全套原物延续，旧址只留苔石，相机已归还。",
+            "basis": "故事只修整原睡垫内的一根草梗并将原帽收回既有位置；睡觉与休息功能已有，本篇具体使用它们。小调整文字可明白呈现，home-fact-01-rest也允许文字，故不另作全景。savedArt中真实已有家全景art-9ff4809751d62286284059fa仍作为原布局依据。"
+          }
+        },
+        {
+          "id": "step-35fb36d54b4788468f66b089",
+          "unit": "carrier",
+          "at": 1794265200000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/story.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/evolution.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/home.result.json"
+          ],
+          "result": {
+            "reason": "本篇睡觉、醒后休息与编扣一根旧草梗的经历由文字即可呈现，用户也允许仅文字；没有交给用户新的视觉物件，home无全景需要。脱帽由appearance复用原无帽Avatar体现，不额外画睡姿或普通场景图。",
+            "carrier": null
+          }
+        },
+        {
+          "id": "step-0224acd31ffbe7a4d55dfaae",
+          "unit": "appearance",
+          "at": 1794265200000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/story.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/evolution.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/home.result.json"
+          ],
+          "result": {
+            "appearance": {
+              "description": "同一普通成年暖棕刺猬，帽子收在床边，露出双圆耳，无穿戴或手持；原奶白短吻腹、亮眼、四短肉足与钝圆软刺簇延续。",
+              "reuseArtId": "art-688ff9d8a4b753b8906f1e8f"
+            },
+            "visuals": [
+              {
+                "purpose": "avatar",
+                "description": "复用已存普通成年无帽形象，体现持续脱帽状态。",
+                "reuseArtId": "art-688ff9d8a4b753b8906f1e8f",
+                "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png",
+                "requirements": {
+                  "format": "PNG",
+                  "transparent": true,
+                  "displaySize": [
+                    192,
+                    208
+                  ],
+                  "scope": "Only static transparent Avatar"
+                }
+              }
+            ],
+            "basis": "实际查看本run该无帽Avatar，普通成年身体与本次change一致。只有帽子的持续穿戴结束，身体无阶段或特殊变化；睡姿、醒后伸足是短暂动作，不固定为新形象，不为修草梗添加草垫道具。"
+          }
+        }
+      ],
+      "hostResult": {
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "operationId": "story-65393fed-4d51-4d2e-a998-0487989a7c05",
+        "appearanceId": "art-688ff9d8a4b753b8906f1e8f",
+        "avatarId": "dots:isolated:group03",
+        "updated": true,
+        "active": false,
+        "refreshRequested": false,
+        "displayStatus": "unconfirmed",
+        "evidence": "Simulated inactive host acknowledgement; no live display verified"
+      },
+      "namingDue": false,
+      "appearanceUpdated": true,
+      "hostAcknowledgement": "Simulated inactive only"
+    },
+    "availableMedia": [
+      {
+        "id": "art-688ff9d8a4b753b8906f1e8f",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "c48edd36e9682e8ae53210c7",
+        "stage": "adult",
+        "description": "成年暖棕刺猬，完整围背钝圆软刺簇，清楚稍长奶白短吻，圆耳立稳，四足稳固。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png",
+        "kind": "avatar",
+        "createdAt": 1792213200000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      }
+    ]
+  }
+}

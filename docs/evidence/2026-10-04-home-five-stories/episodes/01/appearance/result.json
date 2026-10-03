@@ -1,0 +1,32 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/home.result.json"
+  ],
+  "result": {
+    "appearance": {
+      "description": "同一普通成年暖棕刺猬，帽子收在床边，露出双圆耳，无穿戴或手持；原奶白短吻腹、亮眼、四短肉足与钝圆软刺簇延续。",
+      "reuseArtId": "art-688ff9d8a4b753b8906f1e8f"
+    },
+    "visuals": [
+      {
+        "purpose": "avatar",
+        "description": "复用已存普通成年无帽形象，体现持续脱帽状态。",
+        "reuseArtId": "art-688ff9d8a4b753b8906f1e8f",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png",
+        "requirements": {
+          "format": "PNG",
+          "transparent": true,
+          "displaySize": [
+            192,
+            208
+          ],
+          "scope": "Only static transparent Avatar"
+        }
+      }
+    ],
+    "basis": "实际查看本run该无帽Avatar，普通成年身体与本次change一致。只有帽子的持续穿戴结束，身体无阶段或特殊变化；睡姿、醒后伸足是短暂动作，不固定为新形象，不为修草梗添加草垫道具。"
+  }
+}

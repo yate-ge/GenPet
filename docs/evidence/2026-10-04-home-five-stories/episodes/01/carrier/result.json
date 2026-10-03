@@ -1,0 +1,12 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/home.result.json"
+  ],
+  "result": {
+    "reason": "本篇睡觉、醒后休息与编扣一根旧草梗的经历由文字即可呈现，用户也允许仅文字；没有交给用户新的视觉物件，home无全景需要。脱帽由appearance复用原无帽Avatar体现，不额外画睡姿或普通场景图。",
+    "carrier": null
+  }
+}

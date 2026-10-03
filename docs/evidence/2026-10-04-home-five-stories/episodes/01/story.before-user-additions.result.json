@@ -1,0 +1,16 @@
+{
+  "result": {
+    "text": "走出草窝时，刺猬又回头看了看后足。不是谁在拉它，是草垫入口翘起的一小撮草，每次迈出去都扫一下脚跟。你想看看它调整家里一处不顺手的小地方，它便戴着浅黄小圆叶帽，蹲下来用前足把那撮草按平。松开，草又翘起来。它没有继续用力，先顺着草梗摸到根部，再从床边取一根干草，弯成小扣，把翘边与草垫里侧的草梗编在一起。那撮草终于贴住垫面了。它进窝、出窝，各走了一回，后足只碰到平平的草垫。旁边空着的收帽位置没占，右侧收藏台也没动；它留在入口低头看了一会儿，才放心走向高台前沿。",
+    "evidenceIds": [
+      "home-fact-01-adjust"
+    ],
+    "visualIntent": "只有文字，呈现一处小修整；原帽与普通成年身体保持，前足修整动作是临时剧情，不新增Avatar变化或视觉礼物。",
+    "stateIntent": "戴着原浅黄小圆叶帽，调平草窝入口的小翘边",
+    "homeIntent": "用床边一根原干草弯扣编入旧草垫，固定草窝入口翘起草梗，使入口垫边贴平；保留床边收帽空位、全套收藏及现有分区。",
+    "connection": "仅采用home-fact-01-adjust的当次小幅调整请求；草垫翘边和修整属于宠物世界的新经历，不推断用户自己的家、天气或生活习惯。"
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/context.result.json"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "result": {
+    "visibleState": null,
+    "special": null,
+    "state": "在芦苇湾高岸石洞新家做完饭、收拾后休息，浅黄小圆叶帽仍收在床边",
+    "stage": "adult",
+    "basis": "home-fact-04-move-cook明确要求迁居与新家做饭；故事实际搬全旧物、切薯剥豆、烹煮、吃饭并清洗收拾，形成做完饭后居家休息的状态，等豆软再吃延续遇到难处放慢的性格。帽子从上游起已收好，本篇延续，炊具已放在晾架，切料和持勺都是临时动作。growth.required为空，新经历没有器官变化，维持普通成年与special=null。"
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/04/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/04/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/04/story.result.json"
+  ]
+}

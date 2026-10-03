@@ -1,0 +1,14 @@
+{
+  "result": {
+    "special": null,
+    "stage": "adult",
+    "state": "在芦苇湾石洞睡醒休息后调好原叶檐、查看并归还原芦苇筒，浅黄小圆叶帽仍收在床边",
+    "visibleState": null,
+    "basis": "home-fact-05-stay-adjust明确请求先住下来、睡眠休息后调整并重访带回发现，故事实际完成睡眠休息、移稳旧叶檐和取看归还同一个芦苇筒，状态由这些经历形成；既有性格在观察光缝、试用托盘与保留发现中延续。短暂手举芦苇筒已经结束，帽子仍收好，身体与常态姿态无持续可见变化。growth.required为空、未到特殊形态兜底时间，本篇积累未形成特殊身体变体，维持普通成年。"
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/05/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/05/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/05/story.result.json"
+  ]
+}

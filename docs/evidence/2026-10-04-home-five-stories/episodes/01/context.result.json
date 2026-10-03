@@ -1,0 +1,18 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/timeline.json"
+  ],
+  "result": {
+    "unknowns": [
+      "没有用户自身住房、实际天气、地点或生活习惯资料；不把宠物的睡觉内容解释为用户作息。"
+    ],
+    "facts": [
+      {
+        "text": "用户当次明确想看宠物在家睡觉、休息的日常，并调整一处影响睡觉的小地方；允许只用文字。",
+        "source": "test-user-message:home-01 / home-message-1 / 2026-11-09T23:00:00Z",
+        "id": "home-fact-01-rest"
+      }
+    ]
+  }
+}

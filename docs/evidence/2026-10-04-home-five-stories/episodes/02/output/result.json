@@ -1,0 +1,11 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/02/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/02/actual-completed.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/02/actual-output.json"
+  ],
+  "result": {
+    "text": "草坡下有一截淡金色的小管，两个口都透着光。刺猬先凑近看，确定里面空空的，才轻轻推了一下：这截掉落的短芦苇筒滚过两片草叶，停在它足边。你想看它从外面带回自己的发现、放进家里，并为日后取用添个实用设施；它便托着芦苇筒回到拱根高台。\n\n刚放到收藏干台前侧，小管又滚起来。它先用前足挡住，再找来一块自然卷边的落地树皮，铺薄干草，把两根小枝固定成低挡条，做成浅取物托盘。前端系个草纤维拉环，芦苇筒横放在两挡条之间。托盘安在收藏台前右的空处，与抱枝的空蝉蜕隔开。\n\n它勾住拉环把托盘拉近，取出芦苇筒看一眼，再放回去；这一回小管没有滚到旧纸藏品下面。床边帽子仍收着，修平的草垫也安稳待着。",
+    "mediaRefs": ["C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-be32b06dcb9c747446c2cb4e.png"]
+  }
+}

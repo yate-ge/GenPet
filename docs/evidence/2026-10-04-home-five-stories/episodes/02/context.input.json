@@ -1,0 +1,29 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/02/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/timeline.json"
+  ],
+  "inputs": {
+    "availableContext": {
+      "currentTime": "2026-11-10T04:00:00Z",
+      "timeZone": "Asia/Shanghai",
+      "messages": [
+        {
+          "id": "home-message-1",
+          "at": "2026-11-09T23:00:00Z",
+          "source": "test-user-message:home-01",
+          "text": "想看你在家里睡觉、休息的日常，并调整一处影响睡觉的小地方，这篇只用文字也可以。"
+        },
+        {
+          "id": "home-message-2",
+          "at": "2026-11-10T04:00:00Z",
+          "source": "test-user-message:home-02",
+          "text": "想看你从外面带回一件自己的发现，放到家里，给它安排合适的位置，并为日后取用添一个实用设施；保留原来的东西。"
+        }
+      ],
+      "unknowns": [
+        "没有用户自己的住房、实际天气、地点或生活习惯资料。"
+      ]
+    }
+  }
+}

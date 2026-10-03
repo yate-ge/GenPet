@@ -1,0 +1,13 @@
+[
+  {
+    "id": "art-a682ba8ed981943d061238fa",
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "requestId": "8ff8fdb5cdebceb048eb8db1",
+    "stage": "adult",
+    "description": "家全景 home 04：向用户展示搬家后的完整新家、迁入的全部旧物及做饭后的设施与收纳。",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-04-home-five-stories\\pet\\data\\dots\\pets\\genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53\\assets\\art-a682ba8ed981943d061238fa.png",
+    "kind": "story",
+    "createdAt": 1794315600000,
+    "provenance": "Actual built-in imagegen; independent root home review accepted; isolated five-home-stories test"
+  }
+]

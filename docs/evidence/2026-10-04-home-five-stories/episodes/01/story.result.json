@@ -1,0 +1,16 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/context.result.json"
+  ],
+  "result": {
+    "homeIntent": "将旧草垫中戳身子的硬草梗末端弯回垫边，用床边一根软干草编扣固定，睡卧面贴平；原浅黄小圆叶帽从头上收回床边原铺平干草处，帽顶朝上、窄檐展开。全套收藏及其他分区不动。",
+    "connection": "home-fact-01-rest的当次明确请求进入正文，形成宠物在原家睡觉、修整再睡和醒后休息的经历；草梗问题、动作和叶檐声音是宠物世界内容，不补造用户作息、天气或住房。",
+    "stateIntent": "在调平的旧草垫上歇着，浅黄小圆叶帽已收在床边",
+    "evidenceIds": [
+      "home-fact-01-rest"
+    ],
+    "text": "奶白肚皮才落到草垫上，刺猬又把自己抬了起来。它刚把浅黄小圆叶帽收在床边干草上，伸过前足，准备在家睡一觉；垫里却有一根硬草梗，正好戳在身子下面。你想看看它睡觉、休息，也想看它调整一处影响睡觉的小地方，它便先把那一角按平。躺下，草梗又顶起来。它停了一会儿，顺着草梗摸到翘起的末端，把末端弯回草垫边，再用床边一根软干草编扣固定。没有添床，也没有搬动右侧的小发现。它重新落下肚皮，慢慢侧过身，鼻尖贴在前足旁，这次睡到自己醒来。醒了也没急着出门，只在窝里舒展两只前足，听叶檐外的细响。帽子帽顶朝上待在老位置，窄檐没有压折。",
+    "visualIntent": "文字讲述睡觉、休息与一处床垫小调整，不另送故事图或家全景；脱下原帽的持续状态交appearance优先复用已存普通成年无附件Avatar，不把睡姿固定为常态形象。"
+  }
+}

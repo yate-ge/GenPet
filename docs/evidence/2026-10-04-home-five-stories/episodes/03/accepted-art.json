@@ -1,0 +1,13 @@
+[
+  {
+    "id": "art-ad98ff92a21df9dff6105557",
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "requestId": "43f4dd04bdd7c6bfbdb6c4a7",
+    "stage": "adult",
+    "description": "家全景 home 03：展示同一家的独立工作区与休息区布局，以及工作后原收藏归位。",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-04-home-five-stories\\pet\\data\\dots\\pets\\genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53\\assets\\art-ad98ff92a21df9dff6105557.png",
+    "kind": "story",
+    "createdAt": 1794297600000,
+    "provenance": "Actual built-in imagegen; independent root home review accepted; isolated five-home-stories test"
+  }
+]

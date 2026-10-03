@@ -1,0 +1,23 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/timeline.json"
+  ],
+  "inputs": {
+    "availableContext": {
+      "currentTime": "2026-11-09T23:00:00Z",
+      "timeZone": "Asia/Shanghai",
+      "messages": [
+        {
+          "id": "home-message-1",
+          "at": "2026-11-09T23:00:00Z",
+          "source": "test-user-message:home-01",
+          "text": "想看看你调整家里一处不顺手的小地方，这篇只用文字也可以。"
+        }
+      ],
+      "unknowns": [
+        "没有用户自己的住房、实际天气、地点或生活习惯资料。"
+      ]
+    }
+  }
+}

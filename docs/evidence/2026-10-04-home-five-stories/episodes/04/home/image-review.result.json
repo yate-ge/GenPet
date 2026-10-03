@@ -1,0 +1,15 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/04/home/image-review.input.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/04/home/image-review.request.json"
+  ],
+  "result": {
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/04/home-generated.png",
+    "verdict": "repair",
+    "observations": [
+      "新址浅洞高岸及水湾明确，右后睡眠、左收藏、右前工作、门外左做饭四区可见，全套旧物可区分。",
+      "灶台画成五六块石围成的环，和正文及home明确的三石小灶不一致。"
+    ],
+    "repair": "仅将门外左侧灶改为恰好三块清楚分开的支撑石，围成三点支撑，中央熄灭冷灰；保留新家全景及其余全部物品位置，不要增加火、剩饭或新器物。"
+  }
+}

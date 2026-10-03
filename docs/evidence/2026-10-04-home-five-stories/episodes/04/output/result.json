@@ -1,0 +1,13 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/04/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/04/actual-completed.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/04/actual-output.json"
+  ],
+  "result": {
+    "text": "新门口照进来的光里，芦苇影子轻轻晃着。你想看刺猬搬到不同的地方、带上旧东西，并在新家做一顿饭；它挑中芦苇湾高岸的一处浅石洞，洞前有干燥石坪，往下才是水。\n\n半蛋壳、叶檐、修好的草窝、床边帽子和整套收藏一件件搬来，芦苇筒连取物托盘一起迁入，木工作台与轮廓册、炭枝、压纸石也带来了。它把睡觉的角落安排到洞内右后，收藏放左侧干台，工作台安在右前；门外左边空石坪留作做饭处。\n\n它洗净一颗新小黄薯，在小石砧上切成丁，又剥出几粒新鲜豆子，倒进小陶锅，加水放上三石小灶。豆子还硬时它差点先舀一勺，停下来尝看，便继续慢煮；等薯丁和豆子都软了，它把灶火灭掉，用木勺盛到新叶碗里，坐在门前一口口吃完。\n\n原种子仍在收藏凹叶里，没下锅。它把薯皮豆壳埋到岸边土里，冲洗锅、勺和叶碗，将它们放在灶旁小枝架上晾着，再擦净石砧。收拾完，它回洞里看了一眼抱枝的空蝉蜕，闻着留下的一点薯香，在原草窝旁歇下来。",
+    "mediaRefs": [
+      "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-a682ba8ed981943d061238fa.png"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "reviewer": "root",
+  "verdict": "accept",
+  "observations": [
+    "使用实际已存 home 03 图片，正文仅分段。",
+    "纸状态歧义原文保留；用户输出未声称测试结论、宿主刷新或重复命名。"
+  ],
+  "allReferencesActuallyAvailable": true
+}

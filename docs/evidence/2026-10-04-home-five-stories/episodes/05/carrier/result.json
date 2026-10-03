@@ -1,0 +1,12 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/05/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/05/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/05/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/05/home.result.json"
+  ],
+  "result": {
+    "reason": "本篇是住下后的睡眠休息、挪稳原叶檐与取看原芦苇筒后归位，没有新增视觉礼物；最近02、03、04已经连续呈现整家变化，05无需再送全景。home.visual为空，小调整及同一发现的后续由文字可读。",
+    "carrier": null
+  }
+}

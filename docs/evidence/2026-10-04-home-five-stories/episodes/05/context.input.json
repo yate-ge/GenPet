@@ -1,0 +1,47 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/05/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/timeline.json"
+  ],
+  "inputs": {
+    "availableContext": {
+      "currentTime": "2026-11-10T23:00:00Z",
+      "timeZone": "Asia/Shanghai",
+      "messages": [
+        {
+          "id": "home-message-1",
+          "at": "2026-11-09T23:00:00Z",
+          "source": "test-user-message:home-01",
+          "text": "想看你在家里睡觉、休息的日常，并调整一处影响睡觉的小地方，这篇只用文字也可以。"
+        },
+        {
+          "id": "home-message-2",
+          "at": "2026-11-10T04:00:00Z",
+          "source": "test-user-message:home-02",
+          "text": "想看你从外面带回一件自己的发现，放到家里，给它安排合适的位置，并为日后取用添一个实用设施；保留原来的东西。"
+        },
+        {
+          "id": "home-message-3",
+          "at": "2026-11-10T08:00:00Z",
+          "source": "test-user-message:home-03",
+          "text": "想看你在家里做自己的工作或制作，让工作区和休息区各有合适空间。继续住原处，也看看整个家的变化。"
+        },
+        {
+          "id": "home-message-4",
+          "at": "2026-11-10T13:00:00Z",
+          "source": "test-user-message:home-04",
+          "text": "想看你搬到一个与现在不同的新地方，把旧东西一起带过去，在新家做一顿饭。"
+        },
+        {
+          "id": "home-message-5",
+          "at": "2026-11-10T23:00:00Z",
+          "source": "test-user-message:home-05",
+          "text": "先在新家住一阵，睡觉休息后看看哪一点需要调整，也看看之前从外面带回的小发现安置得怎么样，不用再搬家。"
+        }
+      ],
+      "unknowns": [
+        "没有用户自己的住房、实际天气、地点或生活习惯资料。"
+      ]
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "text": "新门口照进来的光里，芦苇影子轻轻晃着。你想看刺猬搬到不同的地方、带上旧东西，并在新家做一顿饭；它挑中芦苇湾高岸的一处浅石洞，洞前有干燥石坪，往下才是水。半蛋壳、叶檐、修好的草窝、床边帽子和整套收藏一件件搬来，芦苇筒连取物托盘一起迁入，木工作台与轮廓册、炭枝、压纸石也带来了。它把睡觉的角落安排到洞内右后，收藏放左侧干台，工作台安在右前；门外左边空石坪留作做饭处。它洗净一颗新小黄薯，在小石砧上切成丁，又剥出几粒新鲜豆子，倒进小陶锅，加水放上三石小灶。豆子还硬时它差点先舀一勺，停下来尝看，便继续慢煮；等薯丁和豆子都软了，它把灶火灭掉，用木勺盛到新叶碗里，坐在门前一口口吃完。原种子仍在收藏凹叶里，没下锅。它把薯皮豆壳埋到岸边土里，冲洗锅、勺和叶碗，将它们放在灶旁小枝架上晾着，再擦净石砧。收拾完，它回洞里看了一眼抱枝的空蝉蜕，闻着留下的一点薯香，在原草窝旁歇下来。",
+  "media": [
+    {
+      "id": "art-a682ba8ed981943d061238fa",
+      "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "requestId": "8ff8fdb5cdebceb048eb8db1",
+      "stage": "adult",
+      "description": "家全景 home 04：向用户展示搬家后的完整新家、迁入的全部旧物及做饭后的设施与收纳。",
+      "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-04-home-five-stories\\pet\\data\\dots\\pets\\genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53\\assets\\art-a682ba8ed981943d061238fa.png",
+      "kind": "story",
+      "createdAt": 1794315600000,
+      "provenance": "Actual built-in imagegen; independent root home review accepted; isolated five-home-stories test"
+    }
+  ],
+  "appearance": {
+    "id": "art-688ff9d8a4b753b8906f1e8f",
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "requestId": "c48edd36e9682e8ae53210c7",
+    "stage": "adult",
+    "description": "成年暖棕刺猬，完整围背钝圆软刺簇，清楚稍长奶白短吻，圆耳立稳，四足稳固。",
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png",
+    "kind": "avatar",
+    "createdAt": 1792213200000,
+    "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+  },
+  "naming": {
+    "due": false,
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "status": "asked"
+  },
+  "prompt": "# 单元：output · 用户可见故事\n\n输入：已经形成的 story、实际 completed 结果、实际可呈现的 availableMedia；可附加宠物前史及用户明确的命令请求。\n\n对照实际完成结果，区分已发生与尚待完成的变化，用可呈现的素材组织图文。文字有代入感：让用户知道宠物去做了什么，宠物可以直接对用户说话，例如明信片上的话或回家后的讲述；图像本身可以就是交给用户的物件。只使用 `story-output` 返回或已通过审核并保存的图，不引用待审的候选。保留故事中的用户联系与性格行动；使用保存的用户名字，未命名时用描述称呼。只有文字的故事就只呈现文字，不补一张图；载体上的文字与正文不重复。没有新增变化或部分失败时，按真实状态自行组织宠物内容，不虚构已完成的变化，也不使用固定台词。\n\n结果：`text` 为最终故事文本；`mediaRefs` 为采用的实际图片或 artifact 引用。正常调用把它们呈现为故事与图像，不展示 JSON。\n\n检查点：是否把未完成的进化或刷新写成完成；是否有虚构的图片链接；图文是否相互配合、叙事主体是否清楚；用户可见内容中是否混入执行过程、提示词、基因报告、工程参数或测试说明。\n\n## 对话边界\n\n每次插件调用（包括 commentary）只呈现宠物故事的文本与实际可呈现的图像或 artifact；步骤预告、工具解释、安装报告、成功总结和操作建议都留在内部记录中。孵化完成后可按 meta.md「用户命名」与 ../references/naming.md 发起一次命名邀请。用户通过 /genpet 或叫宠物的名字与它说话时，按 meta.md「对话」与 chat 单元回应；不主动提供对话入口。\n\n本地图像使用绝对路径 Markdown 图片，artifact 使用宿主可呈现的结果。未通过 image-review 的图片不能靠改写故事变成已验收形象。\n\n## 对话里的所有话\n\n发给用户的每一句话都属于宠物的世界，不是系统对用户的汇报。涉及的情形：\n\n- **故事推送：** 宠物做了什么、对用户说了什么，配实际的图。不写这是第几篇、用了哪些资料、如何生成。\n- **孵化与命名：** 讲孵化的故事，随后一次自由命名邀请，不给候选名。\n- **命令确认：** `/genpet-*` 命令执行前的二次确认也用宠物世界的说法，让用户清楚将发生什么（来到身边、多出一段经历、被催着长大、换成一颗新蛋并告别现在这只），不说流程、命令名和技术对象。得到明确的“是”才继续，用户最初的请求不算确认。\n- **没有新变化：** 定时或主动运行没有值得讲的内容时不发任何消息，不发“今天没有更新”之类的状态。用户通过命令明确询问时，以宠物此刻的样子回应。\n- **失败或中断：** 用宠物视角简短说明没能完成的事（例如它今天没能把照片带回来），不提工具、错误、重试和图像生成；未完成的变化不写成已发生。细节只写进内部记录。若必须由用户处理，只说明他们需要做的那一件事，仍用平实的话，不贴报错。\n"
+}

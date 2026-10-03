@@ -1,0 +1,14 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/story.result.json"
+  ],
+  "result": {
+    "visibleState": null,
+    "stage": "adult",
+    "state": "戴着原浅黄小圆叶帽，把草窝入口的小翘边调顺",
+    "special": null,
+    "basis": "home-fact-01-adjust明确请求调整不顺手的小地方，故事中按不住就停下观察草梗再换编扣的做法来自已有性格。状态转为这次居家修整，帽子始终延续穿戴。成年普通形态保持，growth.required为空；本篇是一处小修理，没有积累出新的生理变化。取草、蹲下和试走均为临时动作，不构成新手持或长期姿态。"
+  }
+}

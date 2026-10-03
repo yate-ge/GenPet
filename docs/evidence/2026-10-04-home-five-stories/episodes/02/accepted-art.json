@@ -1,0 +1,13 @@
+[
+  {
+    "id": "art-be32b06dcb9c747446c2cb4e",
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "requestId": "a34eeaf77d90abf6a3c19983",
+    "stage": "adult",
+    "description": "家全景 home 02：展示新增实用取物托盘、带回芦苇筒的存放位置及整套旧收藏的延续。",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-04-home-five-stories\\pet\\data\\dots\\pets\\genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53\\assets\\art-be32b06dcb9c747446c2cb4e.png",
+    "kind": "story",
+    "createdAt": 1794283200000,
+    "provenance": "Actual built-in imagegen; independent root home review accepted; isolated five-home-stories test"
+  }
+]

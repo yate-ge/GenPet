@@ -1,0 +1,14 @@
+{
+  "result": {
+    "special": null,
+    "visibleState": null,
+    "stage": "adult",
+    "state": "在家做完两页收藏轮廓记录后休息，浅黄小圆叶帽仍收在床边",
+    "basis": "home-fact-03-work明确请求自己的工作和分区，故事由画不稳圆口引出平木台制作、两页轮廓记录及做完后休息，延续先观察再换方法的性格。原物各放回原位，帽子仍收着，持炭枝与拿芦苇筒均已结束。growth.required为空，尚没有新的生理转变故事，保持普通成年及special=null，不把短时工作的姿势固化成Avatar。"
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/03/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/03/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/03/story.result.json"
+  ]
+}

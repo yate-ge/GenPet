@@ -1,0 +1,12 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/story.result.json"
+  ],
+  "result": {
+    "home": "家继续在草坡较高处的大树拱根干高台，后上方拱根挡护，前沿敞开，草坡小路向下接旧苔石地标与草根蜗牛小路。左后休息角保留乳白浅褐斑半蛋壳风墙、大叶雨檐、旧草垫小窝和床边干草。本次只修整草垫入口：从床边取一根原干草弯成小扣，编连入口翘起草梗与草垫里侧，让入口边贴平、不再扫脚跟。床边铺平的收帽空位保留，浅黄小圆叶帽仍戴在宠物头上。右側较高干台收藏区原位延续：前左凹叶盛原种子，前中泥点弯木片旁是天然半月凹口浅灰扁石；后左干草垫上的苔石坡明信片在上、标本屋照片错开露窄白边、最下折好四格漫画略露折边，左侧留取纸空位；后右短枝两端支撑，淡琥珀空蝉蜕六足扣枝悬空，背裂不受挤压，与纸物隔开。中央及前沿的大块活动空地、通往两侧的宽路线保持，不搬家、不添第二套物件，相机已归还。",
+    "visual": null,
+    "basis": "这是旧草垫的一处编扣修整，分区、物件位置及活动空间均延续；home-fact-01-adjust允许文字呈现，小改动用文字足够。已有全景art-9ff4809751d62286284059fa可作为家记录，暂不为这一根编扣另画全景。"
+  }
+}

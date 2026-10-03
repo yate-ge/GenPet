@@ -1,0 +1,298 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/03/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/03/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/03/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/03/home.result.json"
+  ],
+  "inputs": {
+    "context": {
+      "facts": [
+        {
+          "id": "home-fact-03-work",
+          "source": "test-user-message:home-03 / home-message-3 / 2026-11-10T08:00:00Z",
+          "text": "用户当次想看宠物在家做自己的工作或制作，给工作区和休息区安排合适空间；要求继续住原处并看到整个家的变化。"
+        }
+      ],
+      "unknowns": [
+        "未指定宠物工作、材料或设施；由个体经历与原家形成。",
+        "没有用户职业、住房、实际天气、地点或生活习惯资料。"
+      ]
+    },
+    "pet": {
+      "id": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "name": "GenPet",
+      "adoptedAt": 1790985600000,
+      "revision": 22,
+      "naming": {
+        "status": "asked",
+        "askedAt": 1791003600000
+      },
+      "genes": "依据：育幼棚草垫与种子般壳斑引出刺猬灵感，不推断用户偏好。身体是低矮紧凑的暖棕圆拱躯干，奶白短吻与腹部，四只短肉足，深色亮眼、两只圆小耳；背上是几簇钝圆的浅褐软刺。幼年背刺仅几个绒芽，身体柔软、足短、耳还没立稳；少年背刺逐渐成簇、步态稳；成年形成围背的清楚软刺簇和更长而仍卡通的短吻。始终是可亲近的生物同伴，少量清晰像素色块，奶白面腹与棕色拱背是身份线索。",
+      "stage": "adult",
+      "state": "在家安放带回的短芦苇筒，浅黄小圆叶帽仍收在床边",
+      "binding": {
+        "host": "dots",
+        "avatarId": "dots:isolated:group03"
+      },
+      "acquisition": {
+        "place": "宠物世界的苔石育幼棚",
+        "connection": "唯一已知联系是用户主动提出领养；育幼棚与送蛋属于虚构宠物世界，不推断用户的兴趣或经历。",
+        "storyId": "story-c2d37e9d-0c9b-4ec2-a024-65da2e6e4203"
+      },
+      "personality": "喜欢先把陌生东西放在面前观察，再试着摸一下；遇到难处愿意停下来换一种做法，得意时会留下小小的证据给同伴看。它也珍惜独处，会在自己的家里慢慢整理发现。创作依据是这场有限资料的领养：让它有可以自己推进的生活，不把缺失用户资料变成用户人格，也不从刺猬物种推出胆怯。",
+      "home": "家延续草坡较高处大树拱根下的干高台，后上方拱根遮护，前沿敞开，草坡路通往下方旧苔石与草根蜗牛小路。左后睡觉休息角保留乳白浅褐斑半蛋壳风墙、大叶雨檐、原草垫窝和床边干草；草垫硬草梗末端仍弯回垫边、由软草编扣固定，睡卧面贴平。浅黄小圆叶帽帽顶朝上收在床边原铺平干草处，窄檐展开。右侧较高收藏干台旧物原位：前左凹叶盛原种子，前中泥点弯木片及紧邻的天然半月凹口浅灰扁石，后左干草上三纸藏品从上至下为苔石坡明信片、露窄白边的标本屋照片、略露折边的折好四格漫画，留左侧取纸空位；后右短枝两端支撑，淡琥珀空蝉蜕六足扣枝悬空、裂背不受压。本次在收藏台前右原空处新增自然卷边树皮浅取物托盘：薄干草垫底，两根小枝作并行低挡条，前端草纤维拉环朝活动空地，带回的淡金短芦苇空筒横卧两挡条间，两端开口可见。托盘可向前拉近取物、放回原位，与后右脆空蜕及后左纸物隔开；平时不突出到中央行走路线。中央及前沿的大块活动空地、通往两侧宽路线继续留空。原物全保留，旧址只留苔石地标，相机已归还。",
+      "special": null,
+      "stories": [
+        {
+          "id": "story-5a555c66-c8b5-485d-bf6d-75640f782b84",
+          "at": "2026-11-06T08:00:00.000Z",
+          "text": "半片蛋壳里，最容易拿起的东西反而挡住了最怕碰的东西。刺猬伸足去取木片后的明信片，腕边差一点擦到抱枝的空蝉蜕。它缩回足，先坐着看了一会儿。你昨天把上周那次公园蜗牛观察整理成了一页笔记，也想看它在自己家里整理小发现；它便把自己的这一小堆慢慢摊开。泥点弯木片和半月凹口石留在半壳内侧，能摸得到；纸藏品移到它们后方更靠左的干处，明信片在上，照片露一条白边，漫画折在最下面。它试着从左侧抽出明信片，右侧短枝上的空蝉蜕纹丝不动，这才把明信片送回去。凹叶里的原种子没挪，草窝口的小圆叶帽也仍在床边干草上。最后它从两边藏品中间走了一趟：这回鼻尖不必替脚找路了。",
+          "state": "在家慢慢整理好小发现，浅黄小圆叶帽仍收在床边",
+          "illustrated": false
+        },
+        {
+          "id": "story-3e576a82-3f06-4bdb-bea7-ea9e054de4db",
+          "at": "2026-11-08T08:00:00.000Z",
+          "text": "刺猬把前足伸直，转了个圈，又转了半圈。大树拱根下面这块高台够宽，转到第三圈，鼻尖还没撞上东西。你想看它搬到活动空间更开阔的新家，它就沿草坡挑中了这里：背后挡风，前面能望见旧苔石。它先用一片落叶试了试地面的潮气，才请路过的甲虫帮忙，用宽叶拖着半片蛋壳慢慢上坡。旧草垫、大叶雨檐也跟着搬来，左边成了睡觉的角落；收藏在右边另占一块干台，凹叶里的种子、泥点木片和凹口石先放稳，三件纸藏品垫在后方，空蝉蜕连短枝一起轻轻架好。帽子最后搬，还是帽顶朝上安在床边干草上。中间一整片空地没有藏品。刺猬试着快走，又停住，回头看看：这一回，它的发现们待在各自的地方，它却能从它们面前一路走到门外。",
+          "state": "在拱根高台新家安顿下来，浅黄小圆叶帽继续收在床边",
+          "illustrated": true
+        },
+        {
+          "id": "story-2b55ab01-9734-42a8-9b29-509939033c2f",
+          "at": "2026-11-09T08:00:00.000Z",
+          "text": "收藏台上像是多了一只小东西，伏在短枝下面。刺猬停在远处，鼻尖往前探了探，才看清那是空蝉蜕的影子：新家前沿的光穿过它裂开的背，把六只扣枝的细足投在干台上。你想再看它戴之前的小帽子，也想知道先前的小发现后来怎样了。它回到草窝边，拿起昨天一起搬来的浅黄小圆叶帽，按原来的草纤维圈戴稳，两只圆耳仍从两边露着；再回来时，帽檐的影子盖住了那六只小足。它退一步，让光重新照进去。空蜕没有醒来，也没有长出别的东西，还是抱着原先那段枝，只是搬家后，里面能落进一线亮光。刺猬没碰脆壳，在旁边等影子一点点移开，最后戴着旧帽走到高台前沿。床边那块铺平的干草空着，给帽子留着位置。",
+          "state": "重新戴着原浅黄小圆叶帽，看看迁入新家的小发现",
+          "illustrated": false
+        },
+        {
+          "id": "design-home-1",
+          "at": "2026-11-09T23:00:00.000Z",
+          "text": "奶白肚皮才落到草垫上，刺猬又把自己抬了起来。它刚把浅黄小圆叶帽收在床边干草上，伸过前足，准备在家睡一觉；垫里却有一根硬草梗，正好戳在身子下面。你想看看它睡觉、休息，也想看它调整一处影响睡觉的小地方，它便先把那一角按平。躺下，草梗又顶起来。它停了一会儿，顺着草梗摸到翘起的末端，把末端弯回草垫边，再用床边一根软干草编扣固定。没有添床，也没有搬动右侧的小发现。它重新落下肚皮，慢慢侧过身，鼻尖贴在前足旁，这次睡到自己醒来。醒了也没急着出门，只在窝里舒展两只前足，听叶檐外的细响。帽子帽顶朝上待在老位置，窄檐没有压折。",
+          "state": "在调平的旧草垫上歇着，浅黄小圆叶帽已收在床边",
+          "illustrated": false,
+          "status": "uncommitted-design",
+          "visualIntent": "文字讲述睡觉、休息与一处床垫小调整，不另送故事图或家全景；脱下原帽的持续状态交appearance优先复用已存普通成年无附件Avatar，不把睡姿固定为常态形象。"
+        },
+        {
+          "id": "design-home-2",
+          "at": "2026-11-10T04:00:00.000Z",
+          "text": "草坡下有一截淡金色的小管，两个口都透着光。刺猬先凑近看，确定里面空空的，才轻轻推了一下：这截掉落的短芦苇筒滚过两片草叶，停在它足边。你想看它从外面带回自己的发现、放进家里，并为日后取用添个实用设施；它便托着芦苇筒回到拱根高台。刚放到收藏干台前侧，小管又滚起来。它先用前足挡住，再找来一块自然卷边的落地树皮，铺薄干草，把两根小枝固定成低挡条，做成浅取物托盘。前端系个草纤维拉环，芦苇筒横放在两挡条之间。托盘安在收藏台前右的空处，与抱枝的空蝉蜕隔开。它勾住拉环把托盘拉近，取出芦苇筒看一眼，再放回去；这一回小管没有滚到旧纸藏品下面。床边帽子仍收着，修平的草垫也安稳待着。",
+          "state": "在家安放带回的短芦苇筒，浅黄小圆叶帽仍收在床边",
+          "illustrated": false,
+          "status": "uncommitted-design",
+          "visualIntent": "文字与调整后的家完整全景，展示新增取物托盘如何安在旧收藏区前右、芦苇筒得到存放而旧物延续。载体采用home视觉，不另重复画物件礼物；普通成年无附件身体保持。"
+        }
+      ],
+      "designInputPhase": "uncommitted-design"
+    },
+    "story": {
+      "evidenceIds": [
+        "home-fact-03-work"
+      ],
+      "text": "芦苇筒的口明明是圆的，刺猬画出的圈却长得像一颗歪豆子。它把炭枝搁下，看了看那张空白折纸：放在凹凸的根面上，连纸都站不稳。你想看它在家做自己的工作、让工作和休息各有空间，它就开始给小发现做一本轮廓册。它在拱根后中那条空处放一块平木板，用两块新平石垫稳，台高正好够前足落上去；草窝仍在左边，带拉环的取物托盘仍在右边。它把纸铺平，用一颗小卵石压住纸角，再从托盘取芦苇筒，对着两个开口慢慢画。第二个圈闭合了。它又画了凹口石的弯边，待炭迹不蹭足，把芦苇筒和原凹口石各放回原位。折好的新轮廓册、炭枝和压纸小卵石留在木台上。做完这两页，它退到中央空地伸伸前足，走回睡觉的草窝歇一阵；工作台上那颗圆圈不会被它的肚皮压扁了。",
+      "connection": "home-fact-03-work在正文中推动宠物自己的收藏轮廓册制作和分区；纸、炭枝、木台及新垫石属于这次宠物世界创作材料，不推断用户职业或制作习惯。",
+      "visualIntent": "文字与home设计的完整家全景，展示后中工作台、左后睡觉休息角和右收藏区各有空间，原屋原物延续。轮廓册是留家的工作成果，不另送第二张册页载体图；炭枝与观测物已放下，无Avatar新附件。",
+      "stateIntent": "在家做完两页收藏轮廓记录后休息，浅黄小圆叶帽仍收在床边",
+      "homeIntent": "原处添置工作区：后中根下窄空带安平木板低工作台，两块新平石垫稳；台面存折好收藏轮廓册、一小炭枝与压纸小卵石。纸上只有芦苇筒圆口和凹口石弯边的手画图形，无标题或用户文字。左后原休息角保留，右收藏区含拉环托盘及所有旧物原位，中央前沿仍留活动与往返通路。"
+    },
+    "savedArt": [
+      {
+        "id": "art-b19202088b6e37fa3f1e590d",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "a0afc7c17e38fbf75cd9db30",
+        "stage": "egg",
+        "description": "完整乳白卵形蛋，浅褐种子小斑，无附件。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-b19202088b6e37fa3f1e590d.png",
+        "kind": "avatar",
+        "createdAt": 1790985600000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      },
+      {
+        "id": "art-d8564ffc9914072cdf4771ac",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "7760e6a7a55aeed778118046",
+        "stage": "hatchling",
+        "description": "刚孵化暖棕软刺幼体，奶白短吻与腹，四只短软肉足，几颗绒芽，耳未立稳。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-d8564ffc9914072cdf4771ac.png",
+        "kind": "avatar",
+        "createdAt": 1791003600000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      },
+      {
+        "id": "art-9585d48ea0d21f0c07529324",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "ba2a54f1e85c4d9ff3a9045b",
+        "stage": "hatchling",
+        "description": "安静等待",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-9585d48ea0d21f0c07529324.png",
+        "kind": "story",
+        "createdAt": 1791090000000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      },
+      {
+        "id": "art-bb3a29e98d80cb37f47446e8",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "1dac2760d0605eb83702f830",
+        "stage": "juvenile",
+        "description": "少年刺猬，耳稍立起，肉足撑稳身体，暖棕拱背软刺开始成簇，奶白面腹与短吻持续。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-bb3a29e98d80cb37f47446e8.png",
+        "kind": "avatar",
+        "createdAt": 1791608400000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      },
+      {
+        "id": "art-688ff9d8a4b753b8906f1e8f",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "c48edd36e9682e8ae53210c7",
+        "stage": "adult",
+        "description": "成年暖棕刺猬，完整围背钝圆软刺簇，清楚稍长奶白短吻，圆耳立稳，四足稳固。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png",
+        "kind": "avatar",
+        "createdAt": 1792213200000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      },
+      {
+        "id": "art-4b29ef2dfc0c9d62aaf8dce4",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "0b0a4ff94fc98454eb52b655",
+        "stage": "adult",
+        "description": "蓝灰蓬软刺成年变体，背刺膨宽成扇，耳垂眼半睁，奶白短吻腹和四只肉足持续。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-4b29ef2dfc0c9d62aaf8dce4.png",
+        "kind": "avatar",
+        "createdAt": 1792818000000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      },
+      {
+        "id": "art-d537ebfa229a2118252ac154",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "27219a619e874be681a543b3",
+        "stage": "adult",
+        "description": "想把观察到的差别留个记号",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-d537ebfa229a2118252ac154.png",
+        "kind": "story",
+        "createdAt": 1792998000000,
+        "provenance": "Built-in imagegen; independent root review accepted; isolated story asset only"
+      },
+      {
+        "id": "art-57f7a274608adcab94d4b235",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "697eb28486a61cccaa9c4a3d",
+        "stage": "adult",
+        "description": "想把观察到的差别留个记号",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-57f7a274608adcab94d4b235.png",
+        "kind": "story",
+        "createdAt": 1793001600000,
+        "provenance": "Actual built-in imagegen; root original and 192x208 review accepted; isolated test"
+      },
+      {
+        "id": "art-e3c62439d38996b54721b215",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "4b0a92ed32e5f48b699a6d47",
+        "stage": "adult",
+        "description": "想把自己晚到一步的观察写给你",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-e3c62439d38996b54721b215.png",
+        "kind": "story",
+        "createdAt": 1793174400000,
+        "provenance": "Built-in imagegen; independent root carrier review accepted; isolated longitudinal test"
+      },
+      {
+        "id": "art-5a28a6ca55c3c26789e4ce0b",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "1da34fcc9eabd5398481804d",
+        "stage": "adult",
+        "description": "想把自己的发现拍给你看",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-5a28a6ca55c3c26789e4ce0b.png",
+        "kind": "story",
+        "createdAt": 1793347200000,
+        "provenance": "Built-in imagegen; independent root carrier review accepted; isolated longitudinal test"
+      },
+      {
+        "id": "art-5107b1187a398ccbb54a47a5",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "f9adbf9110d795b3973b957b",
+        "stage": "adult",
+        "description": "想把脆弱的小发现完整交给你看",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-5107b1187a398ccbb54a47a5.png",
+        "kind": "story",
+        "createdAt": 1793433600000,
+        "provenance": "Built-in imagegen; independent root carrier review accepted; isolated longitudinal test"
+      },
+      {
+        "id": "art-c6d178ff4e0890241944c0ee",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "bdd6e4cc2caf422b21b9904f",
+        "stage": "adult",
+        "description": "同一成年暖棕刺猬，持续戴浅黄低圆叶帽，窄檐与草纤维固定圈，两只耳露出；奶白短吻腹部、亮眼、四短肉足及软刺簇延续。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-c6d178ff4e0890241944c0ee.png",
+        "kind": "avatar",
+        "createdAt": 1793520000000,
+        "provenance": "Built-in imagegen; independent root visual review accepted; isolated longitudinal test"
+      },
+      {
+        "id": "art-5243027577d9f7ed01f8d2ed",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "b653e859464753b55583d266",
+        "stage": "adult",
+        "description": "同一成年戴浅黄低圆叶帽刺猬；暖棕拱背原钝圆软刺卷成三团独立的大圆螺旋软簇，奶白短吻腹、四足、圆耳和亮眼延续。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-5243027577d9f7ed01f8d2ed.png",
+        "kind": "avatar",
+        "createdAt": 1793606400000,
+        "provenance": "Built-in imagegen; independent root visual review accepted; isolated longitudinal test"
+      },
+      {
+        "id": "art-12b92a2b933bc2332d110cfa",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "b653e859464753b55583d266",
+        "stage": "adult",
+        "description": "同一成年戴浅黄低圆叶帽刺猬；暖棕拱背原钝圆软刺卷成三团独立的大圆螺旋软簇，奶白短吻腹、四足、圆耳和亮眼延续。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-12b92a2b933bc2332d110cfa.png",
+        "kind": "story",
+        "createdAt": 1793606400000,
+        "provenance": "Built-in imagegen; independent root carrier review accepted; isolated longitudinal test"
+      },
+      {
+        "id": "art-9ff4809751d62286284059fa",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "3d7409a62e2ae22e9a06454b",
+        "stage": "adult",
+        "description": "在拱根高台新家安顿下来，浅黄小圆叶帽继续收在床边",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-9ff4809751d62286284059fa.png",
+        "kind": "story",
+        "createdAt": 1794124800000,
+        "provenance": "Built-in imagegen; independent root home panorama review accepted; isolated longitudinal test"
+      },
+      {
+        "id": "art-be32b06dcb9c747446c2cb4e",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "a34eeaf77d90abf6a3c19983",
+        "stage": "adult",
+        "description": "家全景 home 02：展示新增实用取物托盘、带回芦苇筒的存放位置及整套旧收藏的延续。",
+        "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-04-home-five-stories\\pet\\data\\dots\\pets\\genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53\\assets\\art-be32b06dcb9c747446c2cb4e.png",
+        "kind": "story",
+        "createdAt": 1794283200000,
+        "provenance": "Actual built-in imagegen; independent root home review accepted; isolated five-home-stories test"
+      }
+    ],
+    "home": {
+      "visual": {
+        "mustShow": [
+          "延续最新home 02全景的拱根、高台、草坡、旧苔石路径及开阔中央活动空地",
+          "左后半蛋壳叶檐草窝与床边收着唯一浅黄帽",
+          "后中新增平木板低工作台，由两块新平石托稳；台面折册、炭枝、压纸小卵石，和休息角分开",
+          "右收藏台整套原种子木片凹口石三旧纸物抱枝空蝉蜕不丢失",
+          "前右完整被台面承托的原拉环树皮托盘，挡条间淡金芦苇筒已放回",
+          "普通成年无帽无手持小刺猬只占家中一小部分"
+        ],
+        "references": [
+          "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-be32b06dcb9c747446c2cb4e.png"
+        ],
+        "form": "横向16:9完整家园全景，非透明，无边框",
+        "request": "以所附最新home 02家全景为参考，延续这只宠物的原家、原物位置及卡通像素风格。画完整横向16:9家园全景，有不透明背景、无框，无标题标注文字。前方略高视角，整个拱根高台、周围草坡、通向旧苔石的路入画，家园和环境占大部分，不作工作台特写。保留左后半片乳白浅褐斑蛋壳风墙、大叶雨檐及平草窝、睡垫边的小软草编扣；唯一浅黄低圆叶帽仍帽顶朝上在床边平干草上。只在后中根下原空处增加低工作台：一块平木板，两块新平石分别承托两端，台面一册新折好的轮廓册、一小黑炭枝、一颗压纸小卵石；不用椅子、不加电脑。工作台与左侧睡窝、右侧藏品明显分开，前方够短足站立，有通路。右收藏干台完整延续前左原种子凹叶、前中两端一与二泥点弯木片及旁边天然半月凹口灰石、后左三件旧纸（上明信片、中照片露白边、下折漫画露折边）、后右两端支撑的枯枝和六足扣枝的淡琥珀裂背空蝉蜕。前右卷边树皮取物浅托盘仍平放并完整承托于收藏台面内，薄干草底、两低枝挡条、前端草拉环；短淡金芦苇筒横卧两挡条间、开口可见，不悬空，不占中央通路。所有旧物都只有原来的一件/组，工作台新增支撑石不能替换凹口收藏石。中央前沿仍是大块活动空地，暖棕拱背奶白短吻腹、圆耳亮眼四短肉足和普通钝圆软刺簇的小刺猬在空地，只占小部分，无帽无手持。少量清楚像素色块，温暖、功能区易辨。无相机、活蝉、新衣服、卷刺形态、UI或第二套家。",
+        "purpose": "展示同一家的独立工作区与休息区布局，以及工作后原收藏归位。"
+      },
+      "home": "家继续在草坡较高处大树拱根下的干高台，后上方根拱遮护，前沿敞开，草坡路向下通往旧苔石地标及草根蜗牛小路。左后睡觉、醒后休息角保留乳白浅褐斑半蛋壳风墙、大叶雨檐、原草垫窝及床边干草；睡垫硬草梗末端弯回垫边、软草编扣固定，睡卧面贴平。唯一浅黄小圆叶帽帽顶朝上收在床边原铺平干草处，窄檐展开。本次在后中根下原空窄带增加独立工作区：一块平木板以两块新平石垫稳，台高适合短前足；台面留折好的新收藏轮廓册、一小炭枝、压纸小卵石，册页记录芦苇圆口和凹口石弯边，不与三件旧纸藏品混放。工作台同草窝隔开，前方留站立和往返空间。右侧较高干台收藏区原位保留：前左凹叶原种子，前中泥点弯木片和相邻天然半月凹口浅灰扁石；后左三旧纸物从上到下为苔石坡明信片、露窄白边的标本屋照片、略露折边的折好四格漫画，左侧留取纸空位；后右短枝两端支撑、淡琥珀空蝉蜕六足扣枝悬空，裂背不受压。收藏台前右的卷边树皮取物浅托盘完整放在台面上，薄干草底、两小枝挡条与前朝草纤维拉环延续，淡金短芦苇空筒已归还横卧两挡条间。工作时取出的原凹口石也归原位。中央和前沿大块活动空地、通往左休息后中工作右收藏的路线保持开阔；不搬家，原物全延续，相机已归还。",
+      "basis": "home-fact-03-work要求继续住原处且看到整个家；新增独立工作台、制作材料与休息区的分离值得整体展示。引用实际保存的最新home 02家图 art-be32b06dcb9c747446c2cb4e，延续已有托盘及全部旧物后补充后中工作区。"
+    }
+  }
+}

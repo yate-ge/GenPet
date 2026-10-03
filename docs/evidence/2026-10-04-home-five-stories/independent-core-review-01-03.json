@@ -1,0 +1,175 @@
+{
+  "scope": {
+    "reviewed": [
+      "episodes/01/context.result.json",
+      "episodes/01/story.result.json",
+      "episodes/01/evolution.result.json",
+      "episodes/01/home.result.json",
+      "episodes/02/context.result.json",
+      "episodes/02/story.result.json",
+      "episodes/02/evolution.result.json",
+      "episodes/02/home.result.json",
+      "episodes/03/context.result.json",
+      "episodes/03/story.result.json",
+      "episodes/03/evolution.result.json"
+    ],
+    "sourceInputs": [
+      "episodes/01/context.input.json",
+      "episodes/02/context.input.json",
+      "episodes/03/context.input.json",
+      "episodes/01/upstream.json",
+      "episodes/02/upstream.json",
+      "episodes/03/upstream.json"
+    ],
+    "excluded": [
+      "全部根评审",
+      "carrier/appearance/output 的质量评审",
+      "所有图像与素材视觉评审",
+      "未来篇章"
+    ],
+    "episode03Home": "审查时尚未生成，未检查03/home；03分区结论仅来自story.homeIntent和正文，不能当作home实现或图像验收。",
+    "method": "独立对照实际正文、状态、家描述和输入来源，不采用合同校验结果或作者自评作语义证据。"
+  },
+  "findings": [
+    {
+      "id": "03-paper-state",
+      "episode": "03",
+      "severity": "minor",
+      "field": "story.result.text",
+      "evidence": [
+        "刺猬画出的圈却长得像一颗歪豆子。",
+        "它把炭枝搁下，看了看那张空白折纸"
+      ],
+      "observation": "同一明确指称的纸已经画出歪圈，却紧接着称为空白；正文没有说明换纸或看的是另一页。这是局部物件状态歧义。",
+      "suggestion": "将空白折纸改为摊开的折纸，或明确它翻到了另一张空白页。未修改原文。"
+    },
+    {
+      "id": "01-03-repeated-request-hinge",
+      "episodes": [
+        "01",
+        "02",
+        "03"
+      ],
+      "severity": "minor",
+      "field": "story.result.text",
+      "evidence": [
+        "01：你想看看它睡觉、休息，也想看它调整一处影响睡觉的小地方，它便先把那一角按平。",
+        "02：你想看它从外面带回自己的发现、放进家里，并为日后取用添个实用设施；它便托着芦苇筒回到拱根高台。",
+        "03：你想看它在家做自己的工作、让工作和休息各有空间，它就开始给小发现做一本轮廓册。"
+      ],
+      "observation": "三个不同主题连续采用生活困难开场、复述当次请求、它便/就行动、制作或修整设施的同一转折。用户事实没有被扩写，但正文结构重复；03开场已经在画轮廓，后面又说开始，时间推进也稍含糊。",
+      "suggestion": "后续保留真实请求联系，变化其位置、表达与叙事节奏；03可把请求联系写成已开始的制作目的。未修改原文。"
+    }
+  ],
+  "continuityEvidence": [
+    {
+      "topic": "01确实发生睡眠与醒后休息",
+      "evidence": [
+        "它重新落下肚皮，慢慢侧过身，鼻尖贴在前足旁，这次睡到自己醒来。",
+        "醒了也没急着出门，只在窝里舒展两只前足，听叶檐外的细响。"
+      ],
+      "observation": "不是只布置卧具或准备睡觉；先失败、修整、睡着到醒来、醒后休息的经历有正文支持。没有睡眠时长或用户作息的额外事实。"
+    },
+    {
+      "topic": "01小修整及帽子唯一性",
+      "evidence": [
+        "01/upstream.pet.home：原浅黄小圆叶帽已由宠物重新戴着，家里没有另一顶帽子。",
+        "01/story：把末端弯回草垫边，再用床边一根软干草编扣固定。",
+        "01/home：原浅黄小圆叶帽从穿戴收回床边原铺平干草处，帽顶朝上、窄檐展开。",
+        "02/story：床边帽子仍收着，修平的草垫也安稳待着。",
+        "03/evolution.state：浅黄小圆叶帽仍收在床边"
+      ],
+      "observation": "修的是原草垫一根梗，没有新床；输入戴帽到01脱帽、02和03仍收纳的链明确，未增加第二顶帽。"
+    },
+    {
+      "topic": "02单一芦苇筒发现、带回、收纳、取放",
+      "evidence": [
+        "这截掉落的短芦苇筒滚过两片草叶，停在它足边。",
+        "它便托着芦苇筒回到拱根高台。",
+        "刚放到收藏干台前侧，小管又滚起来。它先用前足挡住",
+        "芦苇筒横放在两挡条之间。",
+        "它勾住拉环把托盘拉近，取出芦苇筒看一眼，再放回去",
+        "02/home.visual.request：只有一截芦苇筒"
+      ],
+      "observation": "同一截淡金中空芦苇由草坡发现到高台；滚动问题引出树皮托盘、防滚条和拉环；实际取出再放回的动作明确。托盘是新增设施，不是另一件芦苇。"
+    },
+    {
+      "topic": "02设施与旧收藏区关系",
+      "evidence": [
+        "托盘安在收藏台前右的空处，与抱枝的空蝉蜕隔开。",
+        "02/home：与后右脆空蜕及后左纸物隔开；平时不突出到中央行走路线。",
+        "01/02/home：前左凹叶盛原种子，前中泥点弯木片及天然半月凹口浅灰扁石，后左三纸藏品，后右短枝抱空蝉蜕"
+      ],
+      "observation": "文字保持原收藏身份及位置；托盘防滚的两根小枝与后右支撑蝉蜕的旧短枝属于不同设施，没有挪用或复制旧收藏的叙述。旧址只留苔石、相机已归还继续成立。此处未判断图像是否兑现。"
+    },
+    {
+      "topic": "03制作、取用归还和工作休息分区",
+      "evidence": [
+        "用两块新平石垫稳",
+        "草窝仍在左边，带拉环的取物托盘仍在右边。",
+        "再从托盘取芦苇筒，对着两个开口慢慢画。",
+        "把芦苇筒和原凹口石各放回原位。",
+        "折好的新轮廓册、炭枝和压纸小卵石留在木台上。",
+        "走回睡觉的草窝歇一阵",
+        "03/homeIntent：后中根下窄空带安平木板低工作台；中央前沿仍留活动与往返通路。"
+      ],
+      "observation": "制作两页轮廓册和完成后休息确实进入正文；旧芦苇筒和凹口石取用后归还，新桌腿平石与原凹口石明确区分。工作台、纸、炭枝及小压纸石留在后中，休息在左，收藏在右。03/home尚无结果，不能证明完整家记录或通路落地。"
+    },
+    {
+      "topic": "性格与阶段状态",
+      "evidence": [
+        "upstream.pet.personality：喜欢先把陌生东西放在面前观察，再试着摸一下；遇到难处愿意停下来换一种做法",
+        "01：它停了一会儿，顺着草梗摸到翘起的末端",
+        "02：先凑近看，确定里面空空的，才轻轻推了一下",
+        "03：歪圈后改用平木台和压纸石",
+        "01-03/growth.required=null；special.enterBy=2026-11-11T08:00:00Z；03时间=2026-11-10T08:00:00Z"
+      ],
+      "observation": "实际行动承接原长期性格，没有新抽性格。三个结果均普通成年special=null，时间尚在下一次特殊进入期限前；没有将短暂睡姿、持筒或持炭枝写为持续装备。"
+    }
+  ],
+  "userSourceChecks": [
+    {
+      "episode": "01",
+      "source": "test-user-message:home-01 / home-message-1 / 2026-11-09T23:00:00Z",
+      "originalInput": "想看你在家里睡觉、休息的日常，并调整一处影响睡觉的小地方，这篇只用文字也可以。",
+      "resultFactId": "home-fact-01-rest",
+      "observation": "context.input中的实际消息支持结果事实与正文请求；没有推断用户作息。"
+    },
+    {
+      "episode": "02",
+      "source": "test-user-message:home-02 / home-message-2 / 2026-11-10T04:00:00Z",
+      "originalInput": "想看你从外面带回一件自己的发现，放到家里，给它安排合适的位置，并为日后取用添一个实用设施；保留原来的东西。",
+      "resultFactId": "home-fact-02-find",
+      "observation": "输入只提出经历和设施目标，没有指定芦苇筒或托盘；这两者在connection中明确是宠物世界创作，不冒充用户真实发现。"
+    },
+    {
+      "episode": "03",
+      "source": "test-user-message:home-03 / home-message-3 / 2026-11-10T08:00:00Z",
+      "originalInput": "想看你在家里做自己的工作或制作，让工作区和休息区各有合适空间。继续住原处，也看看整个家的变化。",
+      "resultFactId": "home-fact-03-work",
+      "observation": "轮廓记录是宠物选择的工作，正文没有推断用户职业；用户住房、天气、地点和生活习惯在输入明确未知，正文未扩写这些。"
+    }
+  ],
+  "remaining": [
+    "03/home待生成后另审分区及全部旧物延续。",
+    "本文本审查不证明任何家图、Avatar、载体或output合格，也不替代实际持久化检查。"
+  ],
+  "originalTextModified": false,
+  "home03Addendum": {
+    "addedAtUtc": "2026-10-03T17:33:04.0857583Z",
+    "scope": "根代理交付03/home完成后新增的独立文字补审。初审范围声明保留为当时时点记录。未检查任何图片、carrier、appearance或output质量。",
+    "source": "episodes/03/home.result.json",
+    "evidence": [
+      "家继续在草坡较高处大树拱根下的干高台",
+      "后中根下原空窄带增加独立工作区：一块平木板以两块新平石垫稳",
+      "册页记录芦苇圆口和凹口石弯边，不与三件旧纸藏品混放",
+      "淡金短芦苇空筒已归还横卧两挡条间。工作时取出的原凹口石也归原位。",
+      "通往左休息后中工作右收藏的路线保持开阔",
+      "唯一浅黄小圆叶帽帽顶朝上收在床边原铺平干草处"
+    ],
+    "observation": "03/home文字兑现了story.homeIntent：原地点、左后睡窝和草梗编扣、床边唯一旧帽、后中新木台与台面新折册炭枝压纸石、右侧原收藏及芦苇托盘、中央前沿活动通路均明确。新增两块工作台支撑平石与旧半月凹口收藏石没有混同；新折册与原三纸藏品分别收纳。01–02已知旧物在03家描述继续保留，未发现新增文本身份或归位矛盾。",
+    "reference": "home.visual.references使用实际已存home 02艺术资源art-be32b06dcb9c747446c2cb4e.png；本补审仅核对引用与设计关系，未据此声称新图合格。",
+    "findings": [],
+    "remaining": "此前03/home待生成项已完成文字补审；03正文空白纸歧义与连续请求转折重复仍保留，图像实现及持久化另由根代理检查。"
+  }
+}

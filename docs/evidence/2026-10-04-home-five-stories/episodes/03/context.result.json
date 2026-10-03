@@ -1,0 +1,19 @@
+{
+  "result": {
+    "facts": [
+      {
+        "id": "home-fact-03-work",
+        "source": "test-user-message:home-03 / home-message-3 / 2026-11-10T08:00:00Z",
+        "text": "用户当次想看宠物在家做自己的工作或制作，给工作区和休息区安排合适空间；要求继续住原处并看到整个家的变化。"
+      }
+    ],
+    "unknowns": [
+      "未指定宠物工作、材料或设施；由个体经历与原家形成。",
+      "没有用户职业、住房、实际天气、地点或生活习惯资料。"
+    ]
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/03/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/timeline.json"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "result": {
+    "unknowns": [
+      "新地点、设施、食材与做饭过程未指定，由宠物世界形成，不推断用户住房、天气、职业、口味或生活习惯。"
+    ],
+    "facts": [
+      {
+        "source": "test-user-message:home-04 / home-message-4 / 2026-11-10T13:00:00Z",
+        "text": "用户当次明确想看宠物搬到一个与当前不同的新地方，把旧东西一起迁过去，并在新家做一顿饭。",
+        "id": "home-fact-04-move-cook"
+      }
+    ]
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/04/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/timeline.json"
+  ]
+}

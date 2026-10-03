@@ -1,0 +1,14 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/story.result.json"
+  ],
+  "result": {
+    "state": "在调平的旧草垫上歇着，浅黄小圆叶帽已收在床边",
+    "basis": "home-fact-01-rest明确请求睡觉、休息及调整睡卧小问题；故事先按草垫、停下摸清草梗再换编扣，延续原性格。脱帽后睡觉并醒后歇着形成这次状态。growth.required为空，当前成年普通形态未发生新器官变化，special保持null。睡姿与伸足是短暂叙事动作，帽子则仍收在床边，需要Avatar恢复已有普通成年无附件样子。",
+    "stage": "adult",
+    "visibleState": "脱下原浅黄小圆叶帽，无穿戴或手持；两只圆耳完全露出，暖棕低矮拱背、奶白短吻腹、亮眼、四短肉足和普通成年钝圆软刺簇延续。不固定睡姿或另加草垫道具。",
+    "special": null
+  }
+}

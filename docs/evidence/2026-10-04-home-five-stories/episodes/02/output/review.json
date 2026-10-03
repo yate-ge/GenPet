@@ -1,0 +1,9 @@
+{
+  "reviewer": "root",
+  "verdict": "accept",
+  "observations": [
+    "只使用实际入库 v2 家图，原文物件和取物过程完整保留。",
+    "未输出测试元数据、真实宿主更新或重复命名邀请。"
+  ],
+  "allReferencesActuallyAvailable": true
+}

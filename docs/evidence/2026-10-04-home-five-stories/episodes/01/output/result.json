@@ -1,0 +1,13 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/actual-completed.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/01/actual-output.json"
+  ],
+  "result": {
+    "text": "奶白肚皮才落到草垫上，刺猬又把自己抬了起来。它刚把浅黄小圆叶帽收在床边干草上，伸过前足，准备在家睡一觉；垫里却有一根硬草梗，正好戳在身子下面。\n\n你想看看它睡觉、休息，也想看它调整一处影响睡觉的小地方，它便先把那一角按平。躺下，草梗又顶起来。它停了一会儿，顺着草梗摸到翘起的末端，把末端弯回草垫边，再用床边一根软干草编扣固定。\n\n它重新落下肚皮，慢慢侧过身，鼻尖贴在前足旁，这次睡到自己醒来。醒了也没急着出门，只在窝里舒展两只前足，听叶檐外的细响。床边的小帽子帽顶朝上，窄檐舒展着。",
+    "mediaRefs": [
+      "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png"
+    ]
+  }
+}

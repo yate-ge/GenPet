@@ -1,0 +1,18 @@
+{
+  "result": {
+    "facts": [
+      {
+        "id": "home-fact-02-find",
+        "text": "用户当次想看宠物从外面带回自己的发现、放进家里并安排合适位置，为日后取用增添一个实用设施，明确要求保留原物。",
+        "source": "test-user-message:home-02 / home-message-2 / 2026-11-10T04:00:00Z"
+      }
+    ],
+    "unknowns": [
+      "没有指定新发现或设施形制，均从宠物世界故事形成；没有用户住房、实际天气、地点或生活习惯资料。"
+    ]
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/02/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/timeline.json"
+  ]
+}

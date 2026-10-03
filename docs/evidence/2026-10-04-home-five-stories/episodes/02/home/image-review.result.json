@@ -1,0 +1,15 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/02/home/image-review.input.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/02/home/image-review.request.json"
+  ],
+  "result": {
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/02/home-generated.png",
+    "verdict": "repair",
+    "observations": [
+      "完整家的位置和旧物大体保持；新芦苇筒、挡条和拉环可见。",
+      "托盘明显悬在收藏台前沿之外，未落在故事要求的台面前右空处；存放时不能突出行走路线。"
+    ],
+    "repair": "将整个托盘缩小并向后移到收藏台顶面前右空处，完整底面有支撑、不悬在外沿；保持芦苇筒、两条挡条、前拉环及其他所有区域物品。"
+  }
+}

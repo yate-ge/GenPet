@@ -1,0 +1,14 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/02/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/02/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-04-home-five-stories/episodes/02/story.result.json"
+  ],
+  "result": {
+    "stage": "adult",
+    "state": "在家安放带回的短芦苇筒，浅黄小圆叶帽仍收在床边",
+    "special": null,
+    "visibleState": null,
+    "basis": "home-fact-02-find明确请求带回发现、存放和设施，故事由先看空筒再推、回家遇到滚动而改用托盘形成状态；没有改变性格或基因。growth.required为空，普通成年器官与无附件形象延续，special仍为空；芦苇筒已经回到托盘，拉取与手持只在叙事中发生，不写成持续拿着道具。"
+  }
+}
