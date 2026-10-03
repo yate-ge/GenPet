@@ -16,8 +16,6 @@ export interface Command {
 export interface HostAdapter {
   /** The saved artwork kind that becomes this host's Pet/Avatar appearance. */
   appearanceKind: Extract<ArtKind, 'atlas' | 'avatar'>;
-  /** Saved kinds usable as this pet's identity references for new artwork. */
-  referenceKinds: ArtKind[];
   /** Format handed to art generation; null when the host's own tools define it. */
   artContract: object | null;
   /** Host-only CLI commands, for example publishing to the bound target. */

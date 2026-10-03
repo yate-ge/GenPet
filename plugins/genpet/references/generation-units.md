@@ -10,8 +10,8 @@ Product rules (grounded design, literal eggs, living creatures, continuity and t
 | encounter | A saved context result | Encounter, place, connection, evidence IDs | Generic encounter without meaningful connection |
 | genes | The same context and encounter | Design basis, self-contained creature genes and literal egg-shell appearance | A source name attached to an arbitrary body; no story-based reason for the source |
 | personality | The same context, encounter and genes | Stable temperament, relationship style, state expression and basis | A label that never changes actions; inferred user personality |
-| story | Saved context, pet including personality, and relevant history | New experience, visible connection, personality action, state and visual intent | Connection exists only in internal notes; all temperaments behave identically |
-| evolution | The saved story, context and current pet including personality | Stage, state, sourced basis, special change and personality effect | A state changes without a user event; elapsed time treated as evolution evidence |
+| story | Saved context, pet including personality, and relevant history | New experience, visible connection, state and visual intent | Connection exists only in internal notes; all temperaments behave identically |
+| evolution | The saved story, context and current pet including personality | Stage, state, sourced basis and special change | A state changes without a user event; elapsed time treated as evolution evidence |
 | appearance | Genes, story, change, saved art, host requirements | Reuse/new/unchanged appearance and actual visual requests | Source copied as realistic mature anatomy instead of a cartoon hatchling Avatar |
 | image-review | One visual request and an actual image | Boundary, design, cartoon Avatar and phase observations; accept/repair | Source recognizable but young phase or small-size character design missing |
 | output | Story, actual completion, available media | Story text and actual media references | Unfinished evolution claimed complete |
