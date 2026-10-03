@@ -19,6 +19,7 @@ import { findLegacyRecord, migrateLegacy } from './migration.js';
 import type { ArtKind } from './model.js';
 import { markNameAsked, namePet, namingDue } from './naming.js';
 import { dueStory, setSchedule } from './schedule.js';
+import { statusView } from './status.js';
 import { Store } from './store.js';
 
 /** JSON inputs are passed as absolute file paths, never inline. */
@@ -29,12 +30,12 @@ async function jsonFile(file: string) {
 
 const shared: Record<string, Command> = {
   status: {
-    usage: 'status',
-    run: async (_, store) => {
+    usage: 'status [--full]',
+    run: async ([flag], store) => {
       const state = await store.peek();
       const legacyFile = state.pet ? null : await findLegacyRecord(store);
       return {
-        ...state,
+        ...(flag === '--full' ? state : statusView(state)),
         namingDue: namingDue(state),
         growth: growth(state),
         dataDirectory: store.root,

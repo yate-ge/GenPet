@@ -1,8 +1,8 @@
 # GenPet
 
-A lightweight, story-driven pixel Pet framework inspired by GenFaceUI meta-design. Version 0.9.1 is the local development revision.
+A lightweight, story-driven pixel Pet framework inspired by GenFaceUI meta-design. Version 0.9.2 is the local development revision.
 
-Two independent packages: **GenPet Dots** (`plugins/genpet-dots`, primary) and ordinary **GenPet** (`plugins/genpet`). Each keeps its own identity, genes, stories, assets and Avatar binding in its own host environment.
+**GenPet** (`plugins/genpet`) is the primary package: install it in your local Codex. **GenPet Dots** (`plugins/genpet-dots`) is being reworked: Dots users are meant to use the pet made in Codex, not a separate one (see `docs/evidence/README.md`). Each package keeps its own identity, genes, stories, assets and Avatar binding in its own host environment.
 
 `/genpet-start` adopts or resumes the pet and, after its first story, sets up daily story triggers (07:00, 12:00, 16:00, 21:00 by default). From then on Codex/Dots scheduled runs and Dots proactive work drive new stories, states and evolution — this is the core loop. A completed hatch invites naming once; `/genpet-name` names or renames at any time. `/genpet-story` (run a story now), `/genpet-grow` (force a later stage) and `/genpet-reset` are testing and cheat-code shortcuts, not the core loop. `/genpet` (or simply addressing the pet by name) talks with the pet: an egg only moves, a hatchling only makes sounds, juveniles and adults speak in their own voice, and what the user says can inform later stories. Ordinary Pet also provides `/genpet-switch` and an opt-in `/genpet-debugger`.
 
@@ -17,9 +17,9 @@ Published marketplace installation:
 ```sh
 codex plugin marketplace add yate-ge/GenPet
 codex plugin marketplace upgrade genpet
-codex plugin add genpet-dots@genpet
-# In the ordinary desktop environment instead:
 codex plugin add genpet@genpet
+# GenPet Dots is being reworked; install it only to experiment:
+# codex plugin add genpet-dots@genpet
 ```
 
 Refresh an existing marketplace even if the plugin is uninstalled. Verify installed versions and hashes against its refreshed source with `scripts/verify-install.mjs`. A new chat loads updated skills. Installation never adopts, resets or generates a Pet. An unpublished local revision is not available through the remote marketplace; use the local validation instructions for this revision.
