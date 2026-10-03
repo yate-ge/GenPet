@@ -273,7 +273,7 @@ test('growth ceilings make the next story advance one stage, and adults enter an
     assert.equal(growth(await store.peek())!.required, null);
     await assert.rejects(() => planStory(store, next, { ...story, home: 'A nest' }), /home begins after hatching/);
     await assert.rejects(() => planStory(store, next, { ...story, stage: 'juvenile', ...look }), /at most one stage/);
-    await store.transaction(state => void (state.stories[0].at = ago(6 * HOUR)));
+    await store.transaction(state => void (state.pet!.adoptedAt = ago(6 * HOUR))); // The egg counts from adoption.
     assert.equal(growth(await store.peek())!.required, 'advance');
     await assert.rejects(() => planStory(store, next, story), /Growth is due: this story advances to hatchling/);
     await planStory(store, next, { ...story, stage: 'hatchling', home: 'A moss nest', ...look });

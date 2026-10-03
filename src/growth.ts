@@ -17,14 +17,15 @@ export type GrowthChange = 'advance' | 'enter-special' | 'end-special';
 
 const iso = (time: number) => new Date(time).toISOString();
 
-/** When the current stage began: its first completed story, else the import or adoption time. */
+/**
+ * When the current stage began: the egg from adoption (a late-finishing initialization must not push its
+ * deadline back), later stages from their first completed story; otherwise the import or adoption time.
+ */
 function stageSince(state: State): number {
   const pet = state.pet!;
-  return (
-    state.stories.find(story => story.petId === pet.id && story.stage === pet.stage)?.at ??
-    state.legacy?.importedAt ??
-    pet.adoptedAt
-  );
+  const origin = state.legacy?.importedAt ?? pet.adoptedAt;
+  if (pet.stage === 'egg') return origin;
+  return state.stories.find(story => story.petId === pet.id && story.stage === pet.stage)?.at ?? origin;
 }
 
 /** Where this pet stands against its pace ceilings, and which change the next story must carry, if any. */

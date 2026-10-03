@@ -2,40 +2,59 @@
   "version": 2,
   "units": {
     "context": {
+      "designer": "StoryDesigner",
       "inputs": ["availableContext"],
       "result": {"facts": "array", "unknowns": "array"}
     },
     "encounter": {
+      "designer": "GeneDesigner",
       "inputs": ["context"],
       "result": {"text": "string", "place": "string", "connection": "string", "evidenceIds": "array"}
     },
     "genes": {
+      "designer": "GeneDesigner",
       "inputs": ["context", "encounter"],
       "result": {"genes": "string", "eggAppearance": "string", "designBasis": "string"}
     },
     "personality": {
+      "designer": "GeneDesigner",
       "inputs": ["context", "encounter", "genes"],
       "result": {"personality": "string"}
     },
     "story": {
+      "designer": "StoryDesigner",
       "inputs": ["context", "pet", "growth"],
-      "result": {"text": "string", "connection": "string", "evidenceIds": "array", "stateIntent": "string", "visualIntent": "string", "home": "nullable-string"}
+      "result": {"text": "string", "connection": "string", "evidenceIds": "array", "stateIntent": "string", "visualIntent": "string", "homeIntent": "nullable-string"}
     },
     "evolution": {
+      "designer": "StoryDesigner",
       "inputs": ["context", "pet", "growth", "story"],
       "result": {"stage": "string", "state": "string", "basis": "string", "special": "nullable-string"},
       "choices": {"stage": ["egg", "hatchling", "juvenile", "adult"]}
     },
     "appearance": {
+      "designer": "PetDesigner",
       "inputs": ["genes", "story", "change", "savedArt", "hostRequirements"],
       "result": {"appearance": "nullable-object", "visuals": "array"}
     },
+    "home": {
+      "designer": "HomeDesigner",
+      "inputs": ["context", "pet", "story", "savedArt"],
+      "result": {"home": "nullable-string", "visual": "nullable-object"}
+    },
+    "carrier": {
+      "designer": "StoryDesigner",
+      "inputs": ["context", "pet", "story", "savedArt"],
+      "result": {"reason": "string", "carrier": "nullable-object"}
+    },
     "image-review": {
+      "designer": "shared",
       "inputs": ["visual", "actualFile"],
       "result": {"file": "string", "verdict": "string", "observations": "array", "repair": "nullable-string"},
       "choices": {"verdict": ["accept", "repair"]}
     },
     "output": {
+      "designer": "StoryDesigner",
       "inputs": ["story", "completed", "availableMedia"],
       "result": {"text": "string", "mediaRefs": "array"}
     }

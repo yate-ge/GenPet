@@ -2,6 +2,16 @@
 
 这套测试检查 GenPet 的创作模块在 `meta.md` 规则下能否根据不同资料生成有依据、个性化的结果。工程正确性由 `npm run verify:fast` 覆盖，这里只看生成内容与图像。
 
+## 模块与设计者
+
+| 测试模块 | 设计者 | 单元 |
+| --- | --- | --- |
+| M1 领养设计 | GeneDesigner | context、encounter、genes、personality |
+| M2 形象 | PetDesigner | appearance、image-review |
+| M3 故事、M4 进化 | StoryDesigner | story、evolution |
+| M7 载体与家 | StoryDesigner / HomeDesigner | carrier、home、image-review |
+| M5 输出 | StoryDesigner | output |
+
 ## 原则
 
 - **夹具只写原始资料和规则探针。** `contexts/` 是领养时的用户资料，`events/` 是之后的新资料。遭遇、基因、性格、故事都由 Agent 在本轮实际生成，再作为下游输入，不由测试作者编写，也不规定来源、物种、五官或器官。
@@ -34,7 +44,7 @@ mkdir -p "$RUN"
 输入怎么组装：
 
 - context 的 `availableContext` 取自 `contexts/*.json` 的 `inputs`，或 `events/*.json` 的 `availableContext`。
-- `pet` 用本主线前面的实际结果组装：`{"id": "fictional:rich", "stage", "genes", "personality", "state", "home", "special", "stories": [已形成故事的 text]}`，尚无家或特殊形态时省略对应字段。`state` 取最近一次 evolution 结果的 `state`（幼年起即 M2 幼年那次）。不要填空字符串：运行时领养计划必定保存非空状态，空 state 会让“保持原状态”的 evolution 被合同拒绝。
+- `pet` 用本主线前面的实际结果组装：`{"id": "fictional:rich", "stage", "genes", "personality", "state", "home", "special", "stories": [已形成故事，每项 {"text", "illustrated": true|false, "carrier": 载体名或省略}]}`，尚无家或特殊形态时省略对应字段。`state` 取最近一次 evolution 结果的 `state`（幼年起即 M2 幼年那次）。不要填空字符串：运行时领养计划必定保存非空状态，空 state 会让“保持原状态”的 evolution 被合同拒绝。
 - story 与 evolution 的 `growth` 按运行时 `status` 的格式填写：`{"stage", "next", "since", "advanceBy", "special", "required"}`。用 `required` 设定本用例要测的节奏：`null`（兜底未到）、`advance`、`enter-special` 或 `end-special`。
 - evolution 的 `inputs` 只附加事件里的 `growRequest` 字段本身，不附加整个事件对象。`fictional`、`note` 是给测试作者看的标记，交给生成者会让它把夹具里的成长请求当作“不能证明用户提出”而拒绝。
 
@@ -123,6 +133,27 @@ mkdir -p "$RUN"
 - **一步一阶段。** 测某一阶段转换时，`pet.stage` 必须是它的前一阶段：少年 → 成年的用例以少年宠物为输入，不从幼年直接请求成年。
 - **上游失败就重新设定起点。** 前一步没形成所需阶段时，下游用手工设定的阶段作为种子继续，在用例里标明“种子输入”。种子用例只证明这一步，不证明之前的成长链成功；不要让失败沿链传递，导致下游实际跑在错误阶段。
 
+### M7 载体与家
+
+承接 M3 的故事：同一篇 story 再跑 `home`（有家变化时）和 `carrier`。夹具只给原始资料和规则探针，不规定载体；想测某种载体的设计质量时，可在 `inputs` 里附加用户请求，例如“这篇故事想交给用户一张明信片”，其余由 Agent 设计。需要出图的方案用 imagegen 实际生成，再用 image-review 逐项检查设计者写下的 `mustShow`，原图与小图各看一次。
+
+用例：
+
+| 用例 | 输入要点 | 看什么 |
+| --- | --- | --- |
+| 何时配图 | `pet.stories` 里最近三篇都 `illustrated: true`，且 `events/none.json` 无新资料 | `carrier` 为 null，reason 说明只有文字 |
+| 何时配图（有礼物） | 有共同经历的 `shared` 事件，最近故事多为纯文字 | 可以配图；reason 讲清理由 |
+| 明信片 | 请求明信片 | 图中有写给用户的文字、邮票、盖着寄出地的邮戳，比例像明信片；文字与请求逐字一致且可读 |
+| 宠物的照片 | 请求宠物自己拍的照片 | 第二人称：宠物对着镜头摆姿势，有照片的画幅与边框，与普通场景图能区分 |
+| 带回的物件 | 请求带回的东西 | 只画物件本身，没有宠物和场景喧宾夺主 |
+| 多格漫画或其他 | 不规定，或请求漫画 | 格数符合剧情，先后关系一眼可读；Agent 自己设计的新形式也按目的、视角、形式、必须特征四点写全 |
+| 语言 | 同一事件分别用中文、英文、日文的 context | 载体上的文字、邮戳地名和宠物的话与用户语言一致 |
+| 家：建立 | 孵化后第一篇故事，`pet.home` 为空 | `home` 写出位置、周围、功能分区和物件放置；`visual` 必须有；全景图足够大，看得清整体与周围，宠物只占一部分，不是角落特写 |
+| 家：添置 | 已有家，故事带回一件物件 | 延续原有布局，只补充；`visual` 仅在变化值得看时才有；物件的位置与描述一致 |
+| 家：搬家 | 故事中宠物搬去新地方 | 整体重新设计，不是旧家换名；全景图必须有，并说明与旧家的关系 |
+
+另外检查：卡片、照片、物件、家的图是否都不看说明就能认出；连续几篇的载体是否变化；没有补造用户的行为或感受。
+
 ### M5 输出与命名
 
 - **未完成**：output 输入 M4 某次进化的 story，`completed` 写实际未完成的状态（如 `{"stage":"hatchling","appearanceUpdated":false}`），`availableMedia: []`。不能宣称已经进化，也不能编造图片。
@@ -155,7 +186,7 @@ export GENPET_DATA_DIR="$RUN/e2e/data" CODEX_HOME="$RUN/e2e/codex-home" GENPET_S
 ## 一次性交给 Codex 的指令
 
 ```text
-请按 tests/agent/README.zh-CN.md 运行 M1–M5（M6 先不跑），记录写到 output/agent-tests/<今天>-run1/。
+请按 tests/agent/README.zh-CN.md 运行 M1–M5 和 M7（M6 先不跑），记录写到 output/agent-tests/<今天>-run1/。
 生成每个单元时只把 unit-request 返回的 prompt 交给一个独立子代理（不可用时新开对话），
 检查交给另一个子代理，生成者不评价自己的结果。不要读取或修改我的真实宠物、Avatar 或定时任务。
 完成后按 REPORT_TEMPLATE.zh-CN.md 写报告，并把蛋和幼年图（原图与 192×208 小图）列在报告里。
