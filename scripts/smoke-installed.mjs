@@ -33,7 +33,7 @@ try {
   const status = call('status'),
     host = status.host;
   assert.equal(status.pet, null);
-  const op = call('begin-story', 'smoke:init', 'initialization'),
+  const op = call('begin-story', 'smoke:init'),
     petId = op.pet.id;
   assert.equal(call('begin-story', 'smoke:init').pet.id, petId);
   const plan = {

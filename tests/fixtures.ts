@@ -21,7 +21,7 @@ export const initialPlan = {
   appearance: { description: 'A complete conventional pixel egg shell with curved gray-blue markings.' },
 };
 export async function initialization(store: Store, trigger = 'test:init') {
-  const result = await beginStory(store, trigger, 'initialization');
+  const result = await beginStory(store, trigger);
   if (result.status !== 'pending' || !result.pending) throw new Error('Expected pending initialization');
   await planStory(store, result.pending.id, initialPlan);
   return result.pending.id;

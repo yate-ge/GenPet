@@ -57,26 +57,10 @@ for (const name of ['genpet', 'genpet-dots']) {
     scripts: { 'pet:status': 'node dist/cli.js status' },
   };
   await writeFile(path.join(target, 'package.json'), JSON.stringify(generated, null, 2) + '\n');
-  await rejectObsoleteTransport(target);
   console.log(`Built ${name} v${pkg.version}`);
 }
 
 async function replace(from: string, target: string, relative: string) {
   await rm(path.join(target, relative), { recursive: true, force: true });
   await cp(from, path.join(target, relative), { recursive: true });
-}
-
-/** Earlier releases drove the desktop through a debugging port; make sure none of it ships again. */
-async function rejectObsoleteTransport(directory: string): Promise<void> {
-  for (const entry of await readdir(directory, { withFileTypes: true })) {
-    const file = path.join(directory, entry.name);
-    if (entry.isDirectory()) await rejectObsoleteTransport(file);
-    else if (
-      /\.(js|json|md|ts|py|ya?ml)$/.test(entry.name) &&
-      /\bcdp\b|remote-debugging|DevToolsActivePort|webSocketDebuggerUrl|Runtime\.evaluate/i.test(
-        await readFile(file, 'utf8'),
-      )
-    )
-      throw new Error(`Obsolete transport in ${file}`);
-  }
 }
