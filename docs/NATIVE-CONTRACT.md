@@ -1,6 +1,6 @@
 # Native Codex Pet compatibility
 
-Verified read-only against the installed desktop app **26.908.70816 (build 9275)** on 2026-09-24, including its actual sprite renderer, custom-Pet loader, and bundled Hatch Pet utilities. Run `npm run verify:native` to compare the installed runtime with GenPet's table again. The check never executes or modifies app code.
+Verified read-only against the installed desktop app **26.908.70816 (build 9275)** on 2026-09-24, including its actual sprite renderer, custom-Pet loader, and bundled Hatch Pet utilities.
 
 ## V2 layout
 

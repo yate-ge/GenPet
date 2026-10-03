@@ -7,6 +7,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { acceptArt, artRequest } from './art.js';
+import { noteChat } from './chat.js';
 import { packageHost, readPrompt } from './config.js';
 import { launchDebugger } from './debugger.js';
 import { recordStep, unitRequest, validateUnitResult } from './generation.js';
@@ -68,6 +69,8 @@ const shared: Record<string, Command> = {
   // Naming
   'name-pet': { usage: 'name-pet PET_ID USER_NAME', run: ([id, name], store) => namePet(store, id, name) },
   'name-asked': { usage: 'name-asked PET_ID', run: ([id], store) => markNameAsked(store, id) },
+  // Conversation
+  'note-chat': { usage: 'note-chat PET_ID NOTE', run: ([id, note], store) => noteChat(store, id, note) },
   // Generation units
   prompt: { usage: 'prompt MODULE', run: ([name]) => ({ prompt: readPrompt(name) }) },
   'unit-request': {
