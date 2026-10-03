@@ -5,7 +5,8 @@ import { PNG } from 'pngjs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Store } from '../src/store.js';
-import { beginStory, planStory, finishStory, resetPet } from '../src/lifecycle.js';
+import { beginStory, cancelStory, planStory, finishStory, resetPet } from '../src/lifecycle.js';
+import { growth } from '../src/growth.js';
 import { recordHostResult } from '../src/hosts/result.js';
 import { dueStory } from '../src/schedule.js';
 import { artRequest, acceptArt } from '../src/art.js';
@@ -243,6 +244,66 @@ test('an explicit reset changes identity once, preserving the bound surface, sch
     assert.equal((await resetPet(store, 'reset-unit')).pet!.id, next.pet!.id);
     assert.equal((await readdir(path.join(store.root, 'backups'))).length, 1);
     await assert.rejects(() => resetPet(store, 'competing-reset'), /unfinished/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+test('growth ceilings make the next story advance one stage, and adults enter and leave special forms', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'genpet-growth-')),
+    store = new Store(root, 'dots');
+  const ago = (ms: number) => Date.now() - ms,
+    HOUR = 3_600_000,
+    DAY = 24 * HOUR;
+  const story = { text: 'A new day.', basis: 'Test', state: 'Calm' };
+  const look = { appearance: { description: 'Planned appearance' } };
+  try {
+    const op = await initialization(store),
+      file = path.join(root, 'avatar.png');
+    await image(file);
+    await acceptArt(store, {
+      requestId: artRequest(await store.peek())!.id,
+      file,
+      kind: 'avatar',
+      provenance: 'Fixture',
+    });
+    await hostDone(store, op);
+    await finishStory(store, op);
+    const begin = async (trigger: string) => (await beginStory(store, trigger)).pending!.id;
+
+    let next = await begin('manual:egg');
+    assert.equal(growth(await store.peek())!.required, null);
+    await assert.rejects(() => planStory(store, next, { ...story, home: 'A nest' }), /home begins after hatching/);
+    await assert.rejects(() => planStory(store, next, { ...story, stage: 'juvenile', ...look }), /at most one stage/);
+    await store.transaction(state => void (state.stories[0].at = ago(6 * HOUR)));
+    assert.equal(growth(await store.peek())!.required, 'advance');
+    await assert.rejects(() => planStory(store, next, story), /Growth is due: this story advances to hatchling/);
+    await planStory(store, next, { ...story, stage: 'hatchling', home: 'A moss nest', ...look });
+    await cancelStory(store, next);
+
+    await store.transaction(state => void (state.pet!.stage = 'adult'));
+    assert.equal(growth(await store.peek())!.required, null); // An adult first has its own interval.
+    await store.transaction(state => void (state.pet!.adoptedAt = ago(8 * DAY))); // No adult story: adoption time.
+    assert.equal(growth(await store.peek())!.required, 'enter-special');
+    next = await begin('manual:adult');
+    await assert.rejects(() => planStory(store, next, story), /special form is due/);
+    await assert.rejects(() => planStory(store, next, { ...story, special: 'Shadowed' }), /requires an appearance/);
+    await assert.rejects(() => planStory(store, next, { ...story, special: null }), /no special form to end/);
+    await planStory(store, next, { ...story, special: 'Shadowed after long nights', ...look });
+    await cancelStory(store, next);
+
+    await store.transaction(state => {
+      state.pet!.special = { description: 'Shadowed', since: ago(3 * DAY), storyId: 'test' };
+    });
+    assert.equal(growth(await store.peek())!.required, 'end-special');
+    next = await begin('manual:return');
+    await assert.rejects(() => planStory(store, next, { ...story, special: 'Still shadowed' }), /due to end/);
+    await planStory(store, next, { ...story, special: null, ...look });
+    await cancelStory(store, next);
+
+    await store.transaction(state => {
+      state.pet!.special = { description: 'Shadowed', since: ago(3 * DAY), storyId: 'test', endedAt: ago(HOUR) };
+    });
+    assert.equal(growth(await store.peek())!.required, null);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

@@ -10,6 +10,7 @@ import { acceptArt, artRequest } from './art.js';
 import { packageHost, readPrompt } from './config.js';
 import { launchDebugger } from './debugger.js';
 import { recordStep, unitRequest, validateUnitResult } from './generation.js';
+import { growth } from './growth.js';
 import { hostFor, type Command } from './hosts/index.js';
 import { recordHostResult } from './hosts/result.js';
 import { beginStory, cancelStory, finishStory, planStory, resetPet, storyOutput } from './lifecycle.js';
@@ -34,6 +35,7 @@ const shared: Record<string, Command> = {
       return {
         ...state,
         namingDue: namingDue(state),
+        growth: growth(state),
         dataDirectory: store.root,
         ...(legacyFile ? { legacyFile } : {}),
       };
@@ -41,7 +43,7 @@ const shared: Record<string, Command> = {
   },
   // Story lifecycle
   'begin-story': {
-    usage: 'begin-story [TRIGGER_ID] [initialization|story|grow]',
+    usage: 'begin-story [TRIGGER_ID] [initialization|story]',
     run: ([trigger, mode, name], store) =>
       beginStory(store, trigger || `manual:${randomUUID()}`, (mode || 'story') as Pending['mode'], name),
   },

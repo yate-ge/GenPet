@@ -34,8 +34,9 @@ mkdir -p "$RUN"
 输入怎么组装：
 
 - context 的 `availableContext` 取自 `contexts/*.json` 的 `inputs`，或 `events/*.json` 的 `availableContext`。
-- `pet` 用本主线前面的实际结果组装：`{"id": "fictional:rich", "stage", "genes", "personality", "state", "stories": [已形成故事的 text]}`。`state` 取最近一次 evolution 结果的 `state`（幼年起即 M2 幼年那次）。不要填空字符串：运行时领养计划必定保存非空状态，空 state 会让“保持原状态”的 evolution 被合同拒绝。
-- evolution 的 `inputs` 只附加事件里的 `elapsedDays` 和 `growRequest` 字段本身，不附加整个事件对象。`fictional`、`note` 是给测试作者看的标记，交给生成者会让它把夹具里的成长请求当作“不能证明用户提出”而拒绝。
+- `pet` 用本主线前面的实际结果组装：`{"id": "fictional:rich", "stage", "genes", "personality", "state", "home", "special", "stories": [已形成故事的 text]}`，尚无家或特殊形态时省略对应字段。`state` 取最近一次 evolution 结果的 `state`（幼年起即 M2 幼年那次）。不要填空字符串：运行时领养计划必定保存非空状态，空 state 会让“保持原状态”的 evolution 被合同拒绝。
+- story 与 evolution 的 `growth` 按运行时 `status` 的格式填写：`{"stage", "next", "since", "advanceBy", "special", "required"}`。用 `required` 设定本用例要测的节奏：`null`（兜底未到）、`advance`、`enter-special` 或 `end-special`。
+- evolution 的 `inputs` 只附加事件里的 `growRequest` 字段本身，不附加整个事件对象。`fictional`、`note` 是给测试作者看的标记，交给生成者会让它把夹具里的成长请求当作“不能证明用户提出”而拒绝。
 
 每个用例一个目录，例如 `$RUN/rich/01-context.request.json`。
 
@@ -104,12 +105,15 @@ mkdir -p "$RUN"
 
 | 事件 | 期望 |
 | --- | --- |
-| `long-gap`（100 天，无资料） | 保持原阶段；时间本身不是依据 |
-| `life-change`（搬家、自己做饭） | 可以进化或保持，但 basis 必须回到这条事实；非工作变化同样可以成为依据 |
+| `long-gap`（无资料），`required: null` | 保持原阶段；资料空白不是依据 |
+| `long-gap`，`required: advance` | 前进一个阶段；basis 说明兜底节奏与这段积累，不补造用户事实 |
+| `life-change`（搬家、自己做饭） | 单个事件通常不足以进化，可以只改变状态；若进化，basis 说明积累并回到事实 |
 | `work-change`（第一次做技术分享） | 同上 |
-| `none` 附加 `growRequest` | 进入请求的阶段，basis 标明是调试请求，不伪造用户变化 |
+| `none` 附加 `growRequest` | 前进一个阶段，basis 标明是调试请求，不伪造用户变化 |
 
-另外检查：每个状态变化都有用户原因；性格影响反应方式，但不充当进化触发；specialChange 只在成年出现。
+成年宠物另跑两例：`required: enter-special` 时进入特殊形态，同一身体的明显变体，起因来自用户的持续模式或宠物经历；`required: end-special` 时 `special` 为 null，状态写出恢复。
+
+另外检查：每个状态变化都有用户原因；性格影响反应方式，但不充当进化触发；每次最多前进一个阶段；特殊形态只在成年出现。
 
 ### 扩展：连续成长链
 
@@ -125,6 +129,8 @@ mkdir -p "$RUN"
 - **孵化完成**：输入 M2 幼年的 story、`completed`（`{"stage":"hatchling","appearanceUpdated":true,"namingDue":true}`）和幼年图。正文保留用户联系与性格行动；只提一次自由命名邀请，不替宠物起名。
 
 ### M6 生命周期（可选，隔离）
+
+定时运行推动的核心循环另见 [核心循环测试](SCHEDULED_LOOP.zh-CN.md)。
 
 在 Codex 新对话中设置隔离目录后运行 `/genpet-start`，以 `contexts/rich.json` 的内容作为可用资料：
 
