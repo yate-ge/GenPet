@@ -145,8 +145,8 @@ try {
   assert.equal(call('art-request').status, 'ready');
   await publishFixture();
   call('finish-story', next);
-  assert.equal(call('status').art.length, 2);
-  assert.equal(call('status').stories.length, 2);
+  assert.equal(call('status').artCount, 2);
+  assert.equal(call('status').storyCount, 2);
   const reset = call('reset', 'smoke-reset');
   assert.notEqual(reset.pet.id, petId);
   assert.equal(reset.pet.binding.avatarId, published.avatarId);
