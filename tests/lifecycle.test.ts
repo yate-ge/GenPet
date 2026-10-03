@@ -223,7 +223,6 @@ test('an explicit reset changes identity once, preserving the bound surface, sch
       state.schedule = {
         timezone: 'Asia/Taipei',
         reference: 'test-only-task',
-        times: ['07:00', '12:00', '16:00', '21:00'],
       };
       state.legacy = { backup: 'test-only-legacy', importedAt: 0 };
     });

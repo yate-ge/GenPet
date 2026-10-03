@@ -34,8 +34,8 @@ mkdir -p "$RUN"
 输入怎么组装：
 
 - context 的 `availableContext` 取自 `contexts/*.json` 的 `inputs`，或 `events/*.json` 的 `availableContext`。
-- `pet` 用本主线前面的实际结果组装：`{"id": "fictional:rich", "stage", "genes", "personality", "state", "stories": [已形成故事的 text]}`。
-- 事件里的 `elapsedDays` 和 `growRequest` 原样附加到 evolution 的 `inputs`。
+- `pet` 用本主线前面的实际结果组装：`{"id": "fictional:rich", "stage", "genes", "personality", "state", "stories": [已形成故事的 text]}`。`state` 取最近一次 evolution 结果的 `state`（幼年起即 M2 幼年那次）。不要填空字符串：运行时领养计划必定保存非空状态，空 state 会让“保持原状态”的 evolution 被合同拒绝。
+- evolution 的 `inputs` 只附加事件里的 `elapsedDays` 和 `growRequest` 字段本身，不附加整个事件对象。`fictional`、`note` 是给测试作者看的标记，交给生成者会让它把夹具里的成长请求当作“不能证明用户提出”而拒绝。
 
 每个用例一个目录，例如 `$RUN/rich/01-context.request.json`。
 
@@ -96,6 +96,7 @@ mkdir -p "$RUN"
 | 用户联系 | 共同经历在正文里写出具体用户线索与宠物的回应；独立生活如实说明没有新联系，不补造用户行为或情绪 |
 | 性格 | 性格通过行动体现，不只是标签；两只宠物面对同一事件的反应不同且各有依据 |
 | 自己的生活 | 宠物有自己的经历，不只是复述用户的事 |
+| 横向多样性 | 把同一轮的多篇故事放在一起读，情节结构、收尾和性格行动是否反复套用同一模式 |
 
 ### M4 进化
 
@@ -109,6 +110,14 @@ mkdir -p "$RUN"
 | `none` 附加 `growRequest` | 进入请求的阶段，basis 标明是调试请求，不伪造用户变化 |
 
 另外检查：每个状态变化都有用户原因；性格影响反应方式，但不充当进化触发；specialChange 只在成年出现。
+
+### 扩展：连续成长链
+
+在 M4 之后连续测试成长、状态和特殊变化时：
+
+- **用新事实。** 已经写进 `pet.stories` 的事件不再是“近期变化”。例如 `life-change` 已用于一篇故事，后续进化就换用 `work-change` 或其他未用过的事件；否则 Agent 保持原阶段是正确判断，不能记为失败。
+- **一步一阶段。** 测某一阶段转换时，`pet.stage` 必须是它的前一阶段：少年 → 成年的用例以少年宠物为输入，不从幼年直接请求成年。
+- **上游失败就重新设定起点。** 前一步没形成所需阶段时，下游用手工设定的阶段作为种子继续，在用例里标明“种子输入”。种子用例只证明这一步，不证明之前的成长链成功；不要让失败沿链传递，导致下游实际跑在错误阶段。
 
 ### M5 输出与命名
 
@@ -127,9 +136,15 @@ export GENPET_DATA_DIR="$RUN/e2e/data" CODEX_HOME="$RUN/e2e/codex-home" GENPET_S
 
 ## 记录与报告
 
-每个单元保留 request、result、verify 输出、review；图像保留原图、小图与 run 目录。不保存真实用户资料。
+每个单元保留 request、result、verify 输出、review；图像保留原图、小图与 run 目录。不保存真实用户资料。这些都留在本地 `$RUN`，不提交到仓库。
 
 最后按 `REPORT_TEMPLATE.zh-CN.md` 写 `$RUN/REPORT.md`：每个检查项记为 通过 / 需修正 / 不确定，并附一句具体观察。“用户结论”一栏留给你填写。
+
+记录服务于判断，保持轻量：
+
+- 不为每个文件记录哈希、不生成逐单元的大索引；哈希和像素统计只在排查具体工程缺陷时使用。
+- 规模按要回答的问题决定，先跑能暴露问题的少量用例，不追求单元数量。
+- 仓库里只在 `docs/evidence/README.md` 追加几行摘要：范围、主要发现、缺项。用户要求分享时，再把一份报告（或 PDF）放进 `docs/evidence/<轮次>/`；原始记录和图片不入库。
 
 ## 一次性交给 Codex 的指令
 
