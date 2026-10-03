@@ -2216,11 +2216,6 @@ import { randomUUID as randomUUID4 } from "node:crypto";
 import { access } from "node:fs/promises";
 import path4 from "node:path";
 
-// src/migration.ts
-import { readFile as readFile2, copyFile, mkdir as mkdir2 } from "node:fs/promises";
-import path3 from "node:path";
-import { randomUUID as randomUUID3 } from "node:crypto";
-
 // src/model.ts
 import { randomUUID } from "node:crypto";
 var stages = ["egg", "hatchling", "juvenile", "adult"];
@@ -2253,6 +2248,50 @@ function validateStage(current, target2) {
     throw new Error("Evolution cannot reverse the current stage");
   return target2;
 }
+
+// src/growth.ts
+var HOUR = 36e5;
+var DAY = 24 * HOUR;
+var STAGE_CEILING = { egg: 5 * HOUR, hatchling: 7 * DAY, juvenile: 7 * DAY };
+var SPECIAL_INTERVAL = 7 * DAY;
+var SPECIAL_DURATION = 2 * DAY;
+var iso = (time) => new Date(time).toISOString();
+function stageSince(state) {
+  const pet = state.pet;
+  return state.stories.find((story) => story.petId === pet.id && story.stage === pet.stage)?.at ?? state.legacy?.importedAt ?? pet.adoptedAt;
+}
+function growth(state, now = Date.now()) {
+  const pet = state.pet;
+  if (!pet?.genes) return null;
+  const since = stageSince(state), ceiling = STAGE_CEILING[pet.stage], deadline = ceiling === void 0 ? null : since + ceiling;
+  let required = deadline !== null && now >= deadline ? "advance" : null;
+  let special = null;
+  if (pet.stage === "adult") {
+    const active = !!pet.special && pet.special.endedAt === void 0;
+    const start = active ? pet.special.since : Math.max(since, pet.special?.endedAt ?? 0);
+    const due = start + (active ? SPECIAL_DURATION : SPECIAL_INTERVAL);
+    if (now >= due) required = active ? "end-special" : "enter-special";
+    special = {
+      active,
+      ...active ? { description: pet.special.description } : {},
+      since: iso(start),
+      [active ? "endBy" : "enterBy"]: iso(due)
+    };
+  }
+  return {
+    stage: pet.stage,
+    next: stages[stages.indexOf(pet.stage) + 1] ?? null,
+    since: iso(since),
+    advanceBy: deadline === null ? null : iso(deadline),
+    special,
+    required
+  };
+}
+
+// src/migration.ts
+import { readFile as readFile2, copyFile, mkdir as mkdir2 } from "node:fs/promises";
+import path3 from "node:path";
+import { randomUUID as randomUUID3 } from "node:crypto";
 
 // src/store.ts
 import { mkdir, readFile, rename, writeFile, rm, stat } from "node:fs/promises";
@@ -2453,20 +2492,20 @@ function startPending(pet, triggerId, mode) {
 }
 async function beginStory(store2, triggerId, mode = "story", name2) {
   identifier(triggerId, "triggerId");
-  if (!["initialization", "story", "grow"].includes(mode)) throw new Error("Invalid story mode");
+  if (!["initialization", "story"].includes(mode)) throw new Error("Invalid story mode");
   return store2.transaction(async (state) => {
     const completed = state.stories.find((story) => story.triggerId === triggerId);
     if (completed) return { status: "completed", story: completed };
     if (state.pending) {
       if (state.pending.triggerId !== triggerId)
         throw new Error(`Unfinished story ${state.pending.id}; resume it first`);
-      return { status: "pending", pending: state.pending, pet: state.pet };
+      return { status: "pending", pending: state.pending, pet: state.pet, growth: growth(state) };
     }
     if (!state.pet && await findLegacyRecord(store2))
       throw new Error("Existing legacy pet found; migrate it before creating a new identity");
     state.pet ??= createPet(name2);
     state.pending = startPending(state.pet, triggerId, state.pet.genes ? mode : "initialization");
-    return { status: "pending", pending: state.pending, pet: state.pet };
+    return { status: "pending", pending: state.pending, pet: state.pet, growth: growth(state) };
   });
 }
 function validatePlan(state, input) {
@@ -2477,6 +2516,20 @@ function validatePlan(state, input) {
     state: text(input.state, "state"),
     stage: validateStage(pet.stage, input.stage ?? pet.stage)
   };
+  if (plan.stage !== pet.stage && plan.stage !== stages[stages.indexOf(pet.stage) + 1])
+    throw new Error("A story advances at most one stage");
+  if (input.home !== void 0) {
+    plan.home = text(input.home, "home");
+    if (plan.stage === "egg") throw new Error("The home begins after hatching");
+  }
+  const specialActive = !!pet.special && pet.special.endedAt === void 0;
+  if (input.special === null) {
+    if (!specialActive) throw new Error("There is no special form to end");
+    plan.special = null;
+  } else if (input.special !== void 0) {
+    plan.special = text(input.special, "special form");
+    if (pet.stage !== "adult") throw new Error("Special forms begin in adulthood");
+  }
   if (input.personality !== void 0) {
     plan.personality = text(input.personality, "personality");
     if (pet.personality && pet.personality !== plan.personality)
@@ -2498,6 +2551,15 @@ function validatePlan(state, input) {
     };
   if (plan.stage !== pet.stage && !plan.appearance)
     throw new Error("Evolution requires an appearance for the new stage");
+  if ((plan.special === null || plan.special !== void 0 && !specialActive) && !plan.appearance)
+    throw new Error("Entering or leaving a special form requires an appearance");
+  const required = growth(state)?.required;
+  if (required === "advance" && plan.stage === pet.stage)
+    throw new Error(`Growth is due: this story advances to ${stages[stages.indexOf(pet.stage) + 1]}`);
+  if (required === "enter-special" && typeof plan.special !== "string")
+    throw new Error("A special form is due: this story enters one");
+  if (required === "end-special" && plan.special !== null)
+    throw new Error("The special form is due to end in this story");
   if (plan.appearance?.reuseArtId) appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
   if (input.mediaIds !== void 0) {
     if (!Array.isArray(input.mediaIds)) throw new Error("mediaIds must be an array");
@@ -2554,6 +2616,8 @@ async function finishStory(store2, id) {
       basis: plan.basis,
       stage: plan.stage,
       state: plan.state,
+      ...plan.home !== void 0 ? { home: plan.home } : {},
+      ...plan.special !== void 0 ? { special: plan.special } : {},
       ...appearance ? { appearanceId: appearance.id } : {},
       mediaIds,
       ...pending.steps?.length ? { steps: pending.steps } : {},
@@ -2565,6 +2629,10 @@ async function finishStory(store2, id) {
     }
     if (plan.personality) pet.personality ??= plan.personality;
     pet.stage = plan.stage;
+    if (plan.home !== void 0) pet.home = plan.home;
+    if (plan.special === null) pet.special.endedAt = story.at;
+    else if (plan.special !== void 0)
+      pet.special = pet.special && pet.special.endedAt === void 0 ? { ...pet.special, description: plan.special } : { description: plan.special, since: story.at, storyId: id };
     pet.revision++;
     pet.state = {
       description: plan.state,
@@ -4892,6 +4960,7 @@ var shared = {
       return {
         ...state,
         namingDue: namingDue(state),
+        growth: growth(state),
         dataDirectory: store2.root,
         ...legacyFile ? { legacyFile } : {}
       };
@@ -4899,7 +4968,7 @@ var shared = {
   },
   // Story lifecycle
   "begin-story": {
-    usage: "begin-story [TRIGGER_ID] [initialization|story|grow]",
+    usage: "begin-story [TRIGGER_ID] [initialization|story]",
     run: ([trigger, mode, name2], store2) => beginStory(store2, trigger || `manual:${randomUUID9()}`, mode || "story", name2)
   },
   "plan-story": {

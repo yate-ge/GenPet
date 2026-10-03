@@ -7,8 +7,9 @@ import { access } from 'node:fs/promises';
 import path from 'node:path';
 import { appearanceFor, desiredAppearance, requestId } from './appearance.js';
 import { readPrompt } from './config.js';
+import { growth } from './growth.js';
 import { findLegacyRecord } from './migration.js';
-import { createPet, fresh, identifier, text, validateStage } from './model.js';
+import { createPet, fresh, identifier, stages, text, validateStage } from './model.js';
 import type { HostResult, Pending, Pet, State, Story, StoryPlan } from './model.js';
 import { namingDue } from './naming.js';
 import { atomicJson, type Store } from './store.js';
@@ -41,24 +42,27 @@ function startPending(pet: Pet, triggerId: string, mode: Pending['mode']): Pendi
 /** `begin-story`: allocate the pet once, then open (or return) the story for this trigger. */
 export async function beginStory(store: Store, triggerId: string, mode: Pending['mode'] = 'story', name?: string) {
   identifier(triggerId, 'triggerId');
-  if (!['initialization', 'story', 'grow'].includes(mode)) throw new Error('Invalid story mode');
+  if (!['initialization', 'story'].includes(mode)) throw new Error('Invalid story mode');
   return store.transaction(async state => {
     const completed = state.stories.find(story => story.triggerId === triggerId);
     if (completed) return { status: 'completed', story: completed };
     if (state.pending) {
       if (state.pending.triggerId !== triggerId)
         throw new Error(`Unfinished story ${state.pending.id}; resume it first`);
-      return { status: 'pending', pending: state.pending, pet: state.pet };
+      return { status: 'pending', pending: state.pending, pet: state.pet, growth: growth(state) };
     }
     if (!state.pet && (await findLegacyRecord(store)))
       throw new Error('Existing legacy pet found; migrate it before creating a new identity');
     state.pet ??= createPet(name);
     state.pending = startPending(state.pet, triggerId, state.pet.genes ? mode : 'initialization');
-    return { status: 'pending', pending: state.pending, pet: state.pet };
+    return { status: 'pending', pending: state.pending, pet: state.pet, growth: growth(state) };
   });
 }
 
-/** Engineering checks on the Agent's plan. Identity (genes, personality) is fixed once saved. */
+/**
+ * Engineering checks on the Agent's plan. Identity (genes, personality) is fixed once saved; a story
+ * advances at most one stage and must carry any change its growth ceiling has made due.
+ */
 function validatePlan(state: State, input: StoryPlan): StoryPlan {
   const pet = state.pet!;
   const plan: StoryPlan = {
@@ -67,6 +71,20 @@ function validatePlan(state: State, input: StoryPlan): StoryPlan {
     state: text(input.state, 'state'),
     stage: validateStage(pet.stage, input.stage ?? pet.stage),
   };
+  if (plan.stage !== pet.stage && plan.stage !== stages[stages.indexOf(pet.stage) + 1])
+    throw new Error('A story advances at most one stage');
+  if (input.home !== undefined) {
+    plan.home = text(input.home, 'home');
+    if (plan.stage === 'egg') throw new Error('The home begins after hatching');
+  }
+  const specialActive = !!pet.special && pet.special.endedAt === undefined;
+  if (input.special === null) {
+    if (!specialActive) throw new Error('There is no special form to end');
+    plan.special = null;
+  } else if (input.special !== undefined) {
+    plan.special = text(input.special, 'special form');
+    if (pet.stage !== 'adult') throw new Error('Special forms begin in adulthood');
+  }
   if (input.personality !== undefined) {
     plan.personality = text(input.personality, 'personality');
     if (pet.personality && pet.personality !== plan.personality)
@@ -90,6 +108,15 @@ function validatePlan(state: State, input: StoryPlan): StoryPlan {
     };
   if (plan.stage !== pet.stage && !plan.appearance)
     throw new Error('Evolution requires an appearance for the new stage');
+  if ((plan.special === null || (plan.special !== undefined && !specialActive)) && !plan.appearance)
+    throw new Error('Entering or leaving a special form requires an appearance');
+  const required = growth(state)?.required;
+  if (required === 'advance' && plan.stage === pet.stage)
+    throw new Error(`Growth is due: this story advances to ${stages[stages.indexOf(pet.stage) + 1]}`);
+  if (required === 'enter-special' && typeof plan.special !== 'string')
+    throw new Error('A special form is due: this story enters one');
+  if (required === 'end-special' && plan.special !== null)
+    throw new Error('The special form is due to end in this story');
   if (plan.appearance?.reuseArtId) appearanceFor(state, plan.stage!, plan.appearance.reuseArtId);
 
   if (input.mediaIds !== undefined) {
@@ -154,6 +181,8 @@ export async function finishStory(store: Store, id: string) {
       basis: plan.basis,
       stage: plan.stage!,
       state: plan.state,
+      ...(plan.home !== undefined ? { home: plan.home } : {}),
+      ...(plan.special !== undefined ? { special: plan.special } : {}),
       ...(appearance ? { appearanceId: appearance.id } : {}),
       mediaIds,
       ...(pending.steps?.length ? { steps: pending.steps } : {}),
@@ -165,6 +194,13 @@ export async function finishStory(store: Store, id: string) {
     }
     if (plan.personality) pet.personality ??= plan.personality;
     pet.stage = plan.stage!;
+    if (plan.home !== undefined) pet.home = plan.home;
+    if (plan.special === null) pet.special!.endedAt = story.at;
+    else if (plan.special !== undefined)
+      pet.special =
+        pet.special && pet.special.endedAt === undefined
+          ? { ...pet.special, description: plan.special }
+          : { description: plan.special, since: story.at, storyId: id };
     pet.revision++;
     pet.state = {
       description: plan.state,

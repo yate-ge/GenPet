@@ -2305,6 +2305,13 @@ import { copyFile, mkdir as mkdir2, readFile as readFile4, rename as rename2, wr
 import { createHash as createHash2, randomUUID as randomUUID4 } from "node:crypto";
 import path5 from "node:path";
 
+// src/growth.ts
+var HOUR = 36e5;
+var DAY = 24 * HOUR;
+var STAGE_CEILING = { egg: 5 * HOUR, hatchling: 7 * DAY, juvenile: 7 * DAY };
+var SPECIAL_INTERVAL = 7 * DAY;
+var SPECIAL_DURATION = 2 * DAY;
+
 // src/lifecycle.ts
 function pendingFor(state, id) {
   const pending = state.pending;

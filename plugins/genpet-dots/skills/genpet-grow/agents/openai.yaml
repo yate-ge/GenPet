@@ -1,6 +1,6 @@
 interface:
   display_name: "genpet-grow"
-  short_description: "显式验证同一宠物的后续阶段，以基因延续形象并形成进化故事"
-  default_prompt: "使用 $genpet-grow 为我的宠物形成下一阶段的进化故事与形象。"
+  short_description: "测试用：立即成长一个阶段，或让成年宠物进入特殊形态"
+  default_prompt: "使用 $genpet-grow 让我的宠物立即成长一个阶段。"
 policy:
   allow_implicit_invocation: false
