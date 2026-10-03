@@ -1,6 +1,6 @@
 # GenPet
 
-轻量的故事驱动像素宠物框架，采用 GenFaceUI 元设计思路。本地开发版本为 0.8.0。
+轻量的故事驱动像素宠物框架，采用 GenFaceUI 元设计思路。本地开发版本为 0.8.1。
 
 主要版本是 `plugins/genpet-dots`，普通 Pet 版本是 `plugins/genpet`。它们在各自环境中管理独立的编号、基因、故事、素材和 Avatar 绑定。
 

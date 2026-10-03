@@ -16,7 +16,7 @@ test('identity is persisted once, reads do not age it, and competing triggers ca
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-story-'));
   const store = new Store(root);
   try {
-    const first = await beginStory(store, 'manual:first', 'initialization');
+    const first = await beginStory(store, 'manual:first');
     const before = await readFile(store.file, 'utf8');
     assert.equal((await store.peek()).pet!.stage, 'egg');
     assert.equal(await readFile(store.file, 'utf8'), before);
@@ -243,7 +243,6 @@ test('an explicit reset changes identity once, preserving the bound surface, sch
     assert.equal(next.art.length, 0);
     assert.equal((await resetPet(store, 'reset-unit')).pet!.id, next.pet!.id);
     assert.equal((await readdir(path.join(store.root, 'backups'))).length, 1);
-    await assert.rejects(() => resetPet(store, 'competing-reset'), /unfinished/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -304,6 +303,24 @@ test('growth ceilings make the next story advance one stage, and adults enter an
       state.pet!.special = { description: 'Shadowed', since: ago(3 * DAY), storyId: 'test', endedAt: ago(HOUR) };
     });
     assert.equal(growth(await store.peek())!.required, null);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+test('an unfinished initialization that cannot be completed can be abandoned by reset, not by cancel', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'genpet-abandon-'));
+  const store = new Store(root);
+  try {
+    const op = await initialization(store);
+    const stuck = (await store.peek()).pet!.id;
+    await assert.rejects(() => cancelStory(store, op), /reset the pet/);
+    const reset = await resetPet(store, 'abandon-1');
+    assert.equal(reset.status, 'pending');
+    const state = await store.peek();
+    assert.notEqual(state.pet!.id, stuck);
+    assert.equal(state.pending!.mode, 'initialization');
+    assert.ok(reset.backup);
+    await assert.rejects(() => beginStory(store, 'manual:other-trigger'), /Unfinished/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

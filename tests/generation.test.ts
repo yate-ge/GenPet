@@ -91,7 +91,7 @@ test('step retries deduplicate, revisions remain observable, and logging cannot 
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-step-')),
     store = new Store(root, 'dots');
   try {
-    const operation = (await beginStory(store, 'unit:logging', 'initialization')).pending!.id;
+    const operation = (await beginStory(store, 'unit:logging')).pending!.id;
     await planStory(store, operation, initialPlan);
     const before = await store.peek(),
       hash = requestId(before);
