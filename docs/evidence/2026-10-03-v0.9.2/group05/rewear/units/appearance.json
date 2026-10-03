@@ -1,0 +1,33 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rest.snapshot.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rewear/context/result.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rewear/story/result.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rewear/evolution/result.json"
+  ],
+  "result": {
+    "appearance": {
+      "description": "同一奶白双青绿弧纹成年小蟹，戴低矮浅绿阔叶雨帽；帽檐外翻向两侧排水，短眼柄露在檐下，细草纤沿甲侧固定，圆左钳、尖右钳和四侧足保留。",
+      "reuseArtId": "art-c3e3bf89b897c12687a03747"
+    },
+    "visuals": [
+      {
+        "purpose": "avatar",
+        "reuseArtId": "art-c3e3bf89b897c12687a03747",
+        "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\data\\dots\\pets\\genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e\\assets\\art-c3e3bf89b897c12687a03747.png",
+        "description": "再次佩戴真实收藏中原叶帽的同一成年身体状态，采用该Pet已保存戴帽素材。",
+        "requirements": {
+          "host": "dots",
+          "format": "PNG",
+          "transparent": true,
+          "displaySize": [
+            192,
+            208
+          ],
+          "scope": "复用静态基础Avatar；没有新生成图或整套动作验证声明"
+        }
+      }
+    ],
+    "basis": "story从实际rest.snapshot的干燥石沿取回原叶帽与草纤，change.visibleState指定同一帽檐、固定方式和成年身体，未改帽或添物。savedArt中art-c3e3bf89b897c12687a03747属于当前petId，已保存为adult avatar，实际文件呈叶帽及沿甲侧草纤、露出的短眼柄、奶白双青绿弧纹身体和原两钳四足，符合此次恢复的戴帽状态；普通无帽成年图不表示这次穿戴，故复用该已有变体。"
+  }
+}

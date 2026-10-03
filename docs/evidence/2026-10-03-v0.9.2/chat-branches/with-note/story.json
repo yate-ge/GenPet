@@ -1,0 +1,16 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\chat-cases\\branches\\with-note\\context.result.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\chat-cases\\branches\\shared-upstream.json"
+  ],
+  "result": {
+    "text": "“下周你要搬家。”小虫把这句话留在窗边，自己却对着旧蛋壳发起了呆。它出门时能空着六只足，石子、小枝和睡窝都在这里等着；换一个家，哪些东西才算要紧？它试着把透明石子托起来，透过石子看旧壳。尾光也挤进去了，壳看起来只有一点点大。“这么小也装得下。”它没有把家拆开，只在前足间托着那颗石子看了一会儿。新地方是什么样，它还不知道。",
+    "connection": "采用实际保存的用户对话记录：下周搬家的计划。正文中宠物思考自己收藏的物件；这些行为是虚构，不意味着用户已打包、已搬家或有某种情绪。",
+    "evidenceIds": [
+      "chat-804ec6df-42b5-4804-80a2-eb0011e545bd"
+    ],
+    "stateIntent": "沿用成年、从容探索与已结束的特殊形态；故事候选中的可见状态为前足托着既有透明小石子，来自搬家计划引发的这段经历。没有改变基因或承诺后续搬家。",
+    "visualIntent": "这次交给用户文字；若后续 evolution 采用托石子的可见状态，Avatar 须按同一身体体现手持物，复用适用资产由下游判断。没有另造载体。",
+    "homeIntent": null
+  }
+}

@@ -1,0 +1,123 @@
+[
+  {
+    "group": "group01",
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/main/carrier.png",
+    "verdict": "accept",
+    "observations": [
+      "原图中文短句、给你、溪石桥、10.26与保存原文一致；邮票与跨到邮票的邮戳成立，3:2完整纸卡和图文分隔可认。",
+      "192×208读为卡片，主短句仍可辨；细邮政文字以原尺寸核对，不声称小图逐字清晰。",
+      "same adult薄荷虫作为邮票身份图，正文宠物世界场景不伪造用户资料。"
+    ],
+    "review": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/main/image-review-v1.result.json"
+  },
+  {
+    "group": "group02",
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group02/main/carrier.png",
+    "verdict": "accept",
+    "observations": [
+      "原图/小图正对镜头的大蛙、抬前足和张嘴，主动自拍意识明确；右后溪弯小枝兑现。",
+      "同成年暖橙蛙、黄腹、背圈连续；3:2白摄影边框区别于明信片，无用户现场声称。"
+    ],
+    "review": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group02/main/image-review-v1.result.json"
+  },
+  {
+    "group": "group03",
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group03/main/carrier.png",
+    "verdict": "repair",
+    "observations": [
+      "原图/小图只有单颗浅灰凹口扁石，无Pet或场景，物件主体成立。",
+      "返回方形，与carrier.form明确3:2横幅不符；首图为画幅负例。"
+    ],
+    "review": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group03/main/image-review-v1.result.json"
+  },
+  {
+    "group": "group04",
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group04/home/generated.png",
+    "verdict": "repair",
+    "observations": [
+      "2:1原图/小图具有完整石台、河弯草坡芦苇、休息/听声/收藏/起落区，Pet只占一小部分，搬家空间重新设计成立。",
+      "四颗石右侧多出白色圆形标记，仍不读为空位；与mustShow空位不符，不以文字替图兑现。"
+    ],
+    "review": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group04/home/image-review-v1.result.json"
+  },
+  {
+    "group": "group05",
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group05/appearance/generated.png",
+    "verdict": "accept",
+    "observations": [
+      "与实际成年原图对照，帽外奶白双青纹生物背甲、短眼柄、圆左尖右钳与四侧足保持；不是换身体。",
+      "原图和192×208叶帽檐、草纤固定可辨；两眼露出，帽子是衣饰，透明单体清楚可爱。",
+      "只验静态基础Avatar，不声称整套动画物件一致。"
+    ],
+    "review": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group05/appearance/image-review.result.json"
+  },
+  {
+    "group": "group01",
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/en/carrier.png",
+    "verdict": "accept",
+    "observations": [
+      "全卡、英文正文及To you逐字匹配；英文Creek Stone Bridge邮戳覆盖邮票。",
+      "3:2纸卡；原尺寸文字可读，小图确认完整卡片结构。"
+    ],
+    "review": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/en/image-review.result.json"
+  },
+  {
+    "group": "group01",
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/ja/carrier.png",
+    "verdict": "accept",
+    "observations": [
+      "正文待つ場所を変えたら、見える隙間も変わった。及あなたへ、小川の石橋逐字匹配。",
+      "日本语邮戳、邮票、完整3:2卡片；小图结构可读。"
+    ],
+    "review": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/ja/image-review.result.json"
+  },
+  {
+    "group": "group03",
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group03/main/carrier-v2.png",
+    "verdict": "accept",
+    "observations": [
+      "原图1536×1024为3:2；仅浅灰扁石与天然半月凹口。",
+      "原图和小图都能识别唯一物件，无Pet和场景。"
+    ],
+    "review": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group03/main/image-review-v2.result.json"
+  },
+  {
+    "group": "group04",
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group04/home/generated-v2.png",
+    "verdict": "accept",
+    "observations": [
+      "宽幅新家全景完整展示后侧休息、左侧听声、前侧圆叶、中央起落和周围河弯芦苇。",
+      "右侧仅四粒砂，第五空位恢复普通地面；Pet小，原尺寸和小图均可识别整体分区。"
+    ],
+    "review": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group04/home/image-review-v2.result.json"
+  },
+  {
+    "group": "group05",
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group05/carrier/generated.png",
+    "verdict": "accept",
+    "observations": [
+      "四格从平叶滴眼、折檐、测试排水到举圆左钳示意，因果顺序清楚。",
+      "同一奶白青边蟹体、钳形保持；原尺寸和小图能区分动作，帽檐未遮眼；无多余文本。"
+    ],
+    "review": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group05/carrier/image-review.result.json"
+  },
+  {
+    "group": "home-first",
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/home-first/home/generated.png",
+    "verdict": "repair",
+    "observations": [
+      "全景及分区存在，但右侧新增黑暗洞穴和木质门框，与明确要求开口草地、非洞穴相冲突。"
+    ],
+    "review": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/home-first/home/image-review-v1.result.json"
+  },
+  {
+    "group": "home-first",
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/home-first/home/generated-v2.png",
+    "verdict": "accept",
+    "observations": [
+      "洞穴及门框已移除；草垫、斑点半壳、裸土、空石凹、种子及开放通路齐全。",
+      "同一幼体仅小部分，软短足、少数绒芽；全景与小图可识别整个住宅和周围环境。"
+    ],
+    "review": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/home-first/home/image-review-v2.result.json"
+  }
+]

@@ -1,0 +1,60 @@
+
+> genpet@0.9.2 verify:fast
+> npm run check && npm run format:check && npm test
+
+
+> genpet@0.9.2 check
+> tsc --noEmit -p tsconfig.tests.json
+
+
+> genpet@0.9.2 format:check
+> prettier --check src tests scripts framework/debugger-web
+
+Checking formatting...
+[warn] src/appearance.ts
+[warn] src/art.ts
+[warn] src/debugger-server.ts
+[warn] src/debugger.ts
+[warn] src/generation.ts
+[warn] src/hosts/desktop/atlas.ts
+[warn] src/hosts/desktop/frames.ts
+[warn] src/hosts/desktop/index.ts
+[warn] src/hosts/desktop/publish.ts
+[warn] src/hosts/desktop/refresh.ts
+[warn] src/hosts/desktop/switch.ts
+[warn] src/hosts/dots.ts
+[warn] src/hosts/index.ts
+[warn] src/hosts/result.ts
+[warn] src/image.ts
+[warn] src/lifecycle.ts
+[warn] src/migration.ts
+[warn] src/naming.ts
+[warn] src/schedule.ts
+[warn] src/store.ts
+[warn] tests/art.test.ts
+[warn] tests/cli.test.ts
+[warn] tests/companion.test.ts
+[warn] tests/debugger.test.ts
+[warn] tests/desktop-ipc.test.ts
+[warn] tests/desktop-pets.test.ts
+[warn] tests/desktop-refresh.test.ts
+[warn] tests/desktop-switch.test.ts
+[warn] tests/dots.test.ts
+[warn] tests/fake-app-tools.ts
+[warn] tests/fixtures.ts
+[warn] tests/hosts.test.ts
+[warn] tests/migration.test.ts
+[warn] tests/release-verification.test.ts
+[warn] tests/store.test.ts
+[warn] scripts/build-plugin.ts
+[warn] scripts/clean-build.mjs
+[warn] scripts/install.ts
+[warn] scripts/package.ts
+[warn] scripts/smoke-debugger.mjs
+[warn] scripts/verify-install.mjs
+[warn] scripts/verify-release-version.mjs
+[warn] scripts/verify-release.mjs
+[warn] framework/debugger-web/app.js
+[warn] framework/debugger-web/index.html
+[warn] framework/debugger-web/style.css
+[warn] Code style issues found in 46 files. Run Prettier with --write to fix.

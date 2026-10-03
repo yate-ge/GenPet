@@ -1,0 +1,20 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group01\\ja\\case.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group01\\status.json"
+  ],
+  "result": {
+    "facts": [
+      {
+        "id": "new-river-note",
+        "text": "この四日間、夕食の後に散歩しています。今日は小川のそばで小枝が曲がる様子を観察し、二回の観察の違いをノートに記録しました。",
+        "source": "fictional:0.9.2:river-note:ja"
+      }
+    ],
+    "unknowns": [
+      "二回の具体的な違いとペットとのやり取りは不明です。"
+    ],
+    "language": "日本語",
+    "userRequest": "このお話を絵葉書で受け取りたいです。"
+  }
+}

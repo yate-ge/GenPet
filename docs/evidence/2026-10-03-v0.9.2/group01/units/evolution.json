@@ -1,0 +1,14 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group01\\main\\context.result.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group01\\main\\story.result.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group01\\status.json"
+  ],
+  "result": {
+    "stage": "adult",
+    "state": "专注比较落叶旋转的小停顿",
+    "basis": "new-river-note延续自然观察；恢复后三小时，growth.required=null，无足够积累再进入特殊形态。沿用当前成年、状态和身份。",
+    "special": null,
+    "visibleState": null
+  }
+}

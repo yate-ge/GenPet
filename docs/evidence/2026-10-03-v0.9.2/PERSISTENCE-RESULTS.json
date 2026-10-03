@@ -1,0 +1,62 @@
+[
+  {
+    "group": "group01",
+    "petId": "genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af",
+    "storyId": "story-f308cca4-e224-4466-8ac3-00f1dabed17c",
+    "stories": 10,
+    "art": 8,
+    "appearanceId": "art-13b80abac4ca6d39cd945b7b",
+    "mediaIds": [
+      "art-6349464c9db65c093a05c35c"
+    ],
+    "hostAcknowledgement": "no appearance change"
+  },
+  {
+    "group": "group02",
+    "petId": "genpet-f826a101-74ce-4c9d-a637-3684da469950",
+    "storyId": "story-9b207cd9-8f2f-4184-b7e4-9487ff4391b2",
+    "stories": 10,
+    "art": 8,
+    "appearanceId": "art-3c496af0494d3ceea7bec606",
+    "mediaIds": [
+      "art-4869fa37a9a30129f0fe6882"
+    ],
+    "hostAcknowledgement": "no appearance change"
+  },
+  {
+    "group": "group03",
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "storyId": "story-3d4abe94-2f75-463b-b8f6-260a9c78cd4e",
+    "stories": 10,
+    "art": 8,
+    "appearanceId": "art-688ff9d8a4b753b8906f1e8f",
+    "mediaIds": [
+      "art-57f7a274608adcab94d4b235"
+    ],
+    "hostAcknowledgement": "no appearance change"
+  },
+  {
+    "group": "group04",
+    "petId": "genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be",
+    "storyId": "story-d46bc8ea-05df-43ef-89f6-78541572970c",
+    "stories": 10,
+    "art": 8,
+    "appearanceId": "art-9050c2f8ed9a80baaa9412b5",
+    "mediaIds": [
+      "art-be77b1cb84e7d27a4de633d7"
+    ],
+    "hostAcknowledgement": "no appearance change"
+  },
+  {
+    "group": "group05",
+    "petId": "genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e",
+    "storyId": "story-e4d6ba72-08d4-4676-9adc-ba1c9de8f40b",
+    "stories": 10,
+    "art": 9,
+    "appearanceId": "art-c3e3bf89b897c12687a03747",
+    "mediaIds": [
+      "art-8cc5104824869df9e5e37fb6"
+    ],
+    "hostAcknowledgement": "simulated inactive"
+  }
+]

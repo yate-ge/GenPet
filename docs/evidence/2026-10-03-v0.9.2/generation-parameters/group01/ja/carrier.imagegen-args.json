@@ -1,0 +1,7 @@
+{
+  "prompt": "Use case: illustration-story. Create exactly ONE complete opaque landscape 3:2 mailed postcard, alone flat front-on, cream paper, thin simple paper border. Left half a small crisp cartoon pixel sketch of a stone lip above a narrow creek water opening and a twig passing through, drawn by the fantasy firefly in its own world. Right half personal writing addressed to the user. A perforated postage stamp at upper right contains the SAME adult mint firefly as reference image 1, rounded joined head and abdomen, black eyes, two short antennae, six short feet, broad leaf wings, warm gold tail tip; no blue form. Circular postal ink cancellation visibly overlaps stamp, with readable place name and date 10.26 and cancellation lines. A postal divider. All message writing must be exact and legible, with no added prose. Not a plain scene illustration: writing, stamp, postmark and full rectangular postcard must be visible. Few clean pixel color blocks in sketch and stamp, dark readable letterforms on cream paper. No human, no desk or envelope. Render all writing in Japanese only. Exact personal message: 「待つ場所を変えたら、見える隙間も変わった。」 Exact recipient: 「あなたへ」. Exact cancellation place name: 「小川の石橋」. Date exactly 「10.26」. No English lettering or Chinese-specific text.",
+  "referenced_image_paths": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/data/dots/pets/genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af/assets/art-13b80abac4ca6d39cd945b7b.png"
+  ],
+  "transparent_background": false
+}

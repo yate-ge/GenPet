@@ -1,0 +1,13 @@
+[
+  {
+    "id": "art-be77b1cb84e7d27a4de633d7",
+    "petId": "genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be",
+    "requestId": "e4b6fa6f0021332a3d3091bb",
+    "stage": "adult",
+    "description": "在更开阔的新家里愿意把活动空间留给不同的声音。",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group04\\data\\dots\\pets\\genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be\\assets\\art-be77b1cb84e7d27a4de633d7.png",
+    "kind": "story",
+    "createdAt": 1793001600000,
+    "provenance": "Actual built-in imagegen; root original and 192x208 review accepted; isolated test"
+  }
+]

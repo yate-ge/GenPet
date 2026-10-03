@@ -1,0 +1,24 @@
+
+> genpet@0.9.2 verify:release
+> node scripts/verify-release.mjs
+
+Source checks: passed (7.7s)
+Build committed plugin: passed (0.8s)
+Release version: passed (0.4s)
+Register repository marketplace: passed (0.1s)
+WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir "C:\\Users\\geyat\\AppData\\Local\\Temp\\" (codex_home: AbsolutePathBuf("C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-release-check-ylyXh8\\codex-home"))
+Marketplace source commit: passed (0.0s)
+WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir "C:\\Users\\geyat\\AppData\\Local\\Temp\\" (codex_home: AbsolutePathBuf("C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-release-check-ylyXh8\\codex-home"))
+Install genpet: passed (0.1s)
+genpet package integrity: passed (0.3s)
+{"ok":true,"version":"0.9.2","installed":"C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-release-check-ylyXh8\\codex-home\\plugins\\cache\\genpet\\genpet\\0.9.2","expected":"C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\lf-checkout\\plugins\\genpet","verifiedFiles":76}
+Installed CLI smoke: passed (2.3s)
+Installed optional debugger: passed (0.4s)
+genpet: source commit a90f998d44948dacfbde2512abfae064ed51f571, version 0.9.2, installed path C:\Users\geyat\AppData\Local\Temp\genpet-release-check-ylyXh8\codex-home\plugins\cache\genpet\genpet\0.9.2 (isolated).
+WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir "C:\\Users\\geyat\\AppData\\Local\\Temp\\" (codex_home: AbsolutePathBuf("C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-release-check-ylyXh8\\codex-home"))
+Install genpet-dots: passed (0.1s)
+genpet-dots package integrity: passed (0.3s)
+{"ok":true,"version":"0.9.2","installed":"C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-release-check-ylyXh8\\codex-home\\plugins\\cache\\genpet\\genpet-dots\\0.9.2","expected":"C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\lf-checkout\\plugins\\genpet-dots","verifiedFiles":44}
+Installed CLI smoke: passed (2.0s)
+Installed optional debugger: passed (0.4s)
+genpet-dots: source commit a90f998d44948dacfbde2512abfae064ed51f571, version 0.9.2, installed path C:\Users\geyat\AppData\Local\Temp\genpet-release-check-ylyXh8\codex-home\plugins\cache\genpet\genpet-dots\0.9.2 (isolated).

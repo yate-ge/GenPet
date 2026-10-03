@@ -1,0 +1,17 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rest/case.json"
+  ],
+  "result": {
+    "facts": [
+      {
+        "id": "hat-rest",
+        "text": "下一篇想看宠物摘下帽子在家休息。",
+        "source": "fictional:test:hat-rest"
+      }
+    ],
+    "unknowns": [
+      "用户天气、感受和近期活动未知；只收到摘帽在家休息的明确请求，不能说用户累了或当地雨停了。"
+    ]
+  }
+}

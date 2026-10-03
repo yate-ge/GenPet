@@ -1,0 +1,24 @@
+[
+  {
+    "id": "art-c3e3bf89b897c12687a03747",
+    "petId": "genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e",
+    "requestId": "b2ee8cc80d749c9bdd51eed4",
+    "stage": "adult",
+    "description": "同一奶白双青绿弧纹成年小蟹，戴低矮浅绿阔叶雨帽；帽檐外翻向两侧排水，短眼柄露在檐下，细草纤沿甲侧固定，圆左钳、尖右钳和四侧足保留。",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\data\\dots\\pets\\genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e\\assets\\art-c3e3bf89b897c12687a03747.png",
+    "kind": "avatar",
+    "createdAt": 1793001600000,
+    "provenance": "Actual built-in imagegen; root original and 192x208 review accepted; isolated test"
+  },
+  {
+    "id": "art-8cc5104824869df9e5e37fb6",
+    "petId": "genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e",
+    "requestId": "b2ee8cc80d749c9bdd51eed4",
+    "stage": "adult",
+    "description": "同一奶白双青绿弧纹成年小蟹，戴低矮浅绿阔叶雨帽；帽檐外翻向两侧排水，短眼柄露在檐下，细草纤沿甲侧固定，圆左钳、尖右钳和四侧足保留。",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\data\\dots\\pets\\genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e\\assets\\art-8cc5104824869df9e5e37fb6.png",
+    "kind": "story",
+    "createdAt": 1793001600000,
+    "provenance": "Actual built-in imagegen; root original and 192x208 review accepted; isolated test"
+  }
+]

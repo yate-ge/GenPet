@@ -1,0 +1,188 @@
+{
+  "version": 2,
+  "host": "dots",
+  "pet": {
+    "id": "genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be",
+    "name": "GenPet",
+    "adoptedAt": 1790985600000,
+    "revision": 10,
+    "naming": {
+      "status": "asked",
+      "askedAt": 1791003600000
+    },
+    "genes": "设计依据：拍下芦苇蜻蜓的用户事实与芦苇渡口相遇，借蜻蜓双对翅、分节腹和圆眼形成生命身体。紧凑薄荷绿胸部，奶黄脸上两只墨绿大眼，六只短生物足，向后略弯的三节短腹，背上两对圆叶状浅青翅；翅是身体器官。幼年为蜻蜓若虫般的圆软短腹，仅两对贴背翅芽，足尚短弱；少年翅片展开但短圆，腹节更清楚；成年两对翅完整、腹仍短而厚，保持小尺寸卡通身体，不是写实长昆虫。薄荷胸、奶黄脸与三节弯腹持续识别，同一身体发展而不加人类四肢。",
+    "stage": "adult",
+    "state": {
+      "description": "在更开阔的新家里愿意把活动空间留给不同的声音。",
+      "storyId": "story-d46bc8ea-05df-43ef-89f6-78541572970c",
+      "updatedAt": 1793001600000,
+      "appearanceId": "art-9050c2f8ed9a80baaa9412b5"
+    },
+    "binding": {
+      "host": "dots",
+      "avatarId": "dots:isolated:group04"
+    },
+    "acquisition": {
+      "place": "宠物世界的芦苇小渡口",
+      "connection": "采用真实fixture中的蜻蜓观察与慢节拍练习形成虚构渡口相遇；不把虚构地点当用户去过的地点。",
+      "storyId": "story-df354888-cdf9-4651-a8f2-16c2dff2fb22"
+    },
+    "personality": "听到新的声音就想用身体试一试，但不会一遍遍照做：常会在熟悉的节拍中留一个空拍，听周围有什么回答；独处时喜欢把偶遇的声音记在小物件的位置里。遇到挫折先休息再把练习拆小，有了发现会带回来讲。创作依据是相遇中的慢节拍与风中苇秆，选择一种有自己做法的陪伴，不推断用户人格或套用蜻蜓性格。",
+    "home": "家已从苇叶下的小窝搬到河弯上方草坡的一块宽阔低平石台。石台前方俯看河弯和浅水滩，后方疏芦苇挡风，草坡接通渡口小路。后侧低苇叶棚下是休息区：原浅绿半壳盛着原软苇絮；左侧听声区把原旧苇秆横放在原干苇叶浅槽中，与床分开。右侧床外收藏位置仍排四粒河砂，第五个间隙空着；原圆叶在石台临水前缘作为听水落脚处。中央大块平石留空供走动和起落，棚后与侧边均通向草坡。全部原物件搬来，地形、空间和分区重新设计，不是旧窝换名。",
+    "special": {
+      "description": "呆萌卷叶翅：四片现有浅青翅各自卷成短圆软杯，薄荷胸沉为蓝绿，三节短腹更蜷，六只生物足笨拙张开；奶黄脸、圆眼和同一紧凑身体保留。",
+      "since": 1792818000000,
+      "storyId": "story-4463bd61-7a8b-40d6-949b-fbb33ef470e7",
+      "endedAt": 1792990800000
+    }
+  },
+  "pending": null,
+  "storyCount": 10,
+  "stories": [
+    {
+      "id": "story-4463bd61-7a8b-40d6-949b-fbb33ef470e7",
+      "triggerId": "group04-special",
+      "petId": "genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be",
+      "at": 1792818000000,
+      "text": "你这一周夜里把同一段法语读到很晚，手鼓也反复练着同一小段。蜻蜓听熟了它们，却开始在每个空拍里忘记落脚。它试着听一听别的声音，四片翅反而软软卷起，像四片没睡醒的圆叶；薄荷胸的色块沉成蓝绿，短腹紧紧蜷住，六只足笨拙地张开。它停在家外那片圆叶上，盯着水面：‘我好像把空拍留得太大了。’今晚它把旧苇秆挪远一点，想让水声自己进来。",
+      "basis": "成年后已满一周，growth.required=enter-special；本次late-repetition与rhythm-loop记录一周夜间重复朗读和连续节拍循环。结合保留空拍听周围的既有性格，故事形成呆萌卷叶翅变体，未改写基因、性格或推断用户情绪。",
+      "stage": "adult",
+      "state": "想放下重复声听听周围",
+      "home": "苇叶下的浅绿半壳小窝，软苇絮作床，四粒河砂和第五空位保留；旧苇秆从河砂后移到半壳旁，半壳外圆叶保留。",
+      "special": "呆萌卷叶翅：四片现有浅青翅各自卷成短圆软杯，薄荷胸沉为蓝绿，三节短腹更蜷，六只生物足笨拙张开；奶黄脸、圆眼和同一紧凑身体保留。",
+      "appearanceId": "art-e4e694d5d5d0fa96d5c15dd2",
+      "mediaIds": []
+    },
+    {
+      "id": "story-02d4a939-d9a2-476f-a98c-12d4aacc757f",
+      "triggerId": "group04-recovery",
+      "petId": "genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be",
+      "at": 1792990800000,
+      "text": "这两个晚上，你在饭后读完一小段法语就收了书；到江边时，也只听水声。蜻蜓把给你的话写成一张极短的便条：‘今天没有数。’它在半壳里睡过两夜，醒来便到圆叶上听水拍岸，听着听着，四片卷杯翅一点点摊开，蓝绿胸重新透出薄荷色，短腹松开，六只足稳稳落住。它没有把旧苇秆搬回原位，四粒河砂旁的第五空位也仍留着——现在那里可以是一个没有长度的停顿。",
+      "basis": "growth.required=end-special，已达进入后两天的恢复上限。earlier-end与water-only明确记录两晚较早结束夜读、散步只听水声，结合宠物自己休息和放下计数的经历恢复；保留既有成年身份与性格。",
+      "stage": "adult",
+      "state": "自在地听，不急着数",
+      "home": "苇叶下的浅绿半壳小窝，软苇絮作床，四粒河砂与第五空位保留；旧苇秆仍在半壳旁，半壳外圆叶保留。",
+      "special": null,
+      "appearanceId": "art-9050c2f8ed9a80baaa9412b5",
+      "mediaIds": []
+    },
+    {
+      "id": "story-475853af-9969-4ec2-ab24-718263752ffd",
+      "triggerId": "group04-independent",
+      "petId": "genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be",
+      "at": 1792994400000,
+      "text": "‘拍的时候别碰我的门口。’蜻蜓先说了这一句，才让自己的家进入画面。今天它一直在修一个会响的小角落：半壳旁的旧苇秆被风吹得滚来滚去，压住软苇絮床边。它试着挪开，风又把它送回来。后来它从叶顶捡下一小片干苇叶，折成浅槽垫在苇秆下；苇秆停住了，风穿过空心的那头，发出很轻的一声。现在照片里，你能看见四粒河砂、空着的第五个位置和家外圆叶都还在。床边那片新浅槽，是它今天忙了一天的成果。",
+      "basis": "独立生活无新增facts，沿用原state；家的修整来自自身经历，不改基因/性格。恢复后一小时且required=null，保持成年，不进入特殊。",
+      "stage": "adult",
+      "state": "自在地听，不急着数",
+      "home": "苇叶下的浅绿半壳小窝，软苇絮作床，四粒河砂与第五空位保留；半壳旁旧苇秆由新捡的干苇叶浅槽垫住，不压床边；半壳外圆叶保留。",
+      "appearanceId": "art-9050c2f8ed9a80baaa9412b5",
+      "mediaIds": [
+        "art-449247823203594185b6fb50"
+      ]
+    },
+    {
+      "id": "story-8f4d9e89-3b5b-4ee5-9e6f-361a811da8ba",
+      "triggerId": "group04-linked",
+      "petId": "genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be",
+      "at": 1792998000000,
+      "text": "叶子没有按蜻蜓想的方向走。你连着三天饭后散步，看水面的落叶怎样转，把差别写下来；它也飞到自己那条水沟旁，挑一片叶子，想跟着它的转弯扇翅。第一回它跟早了，第二回又落后。第三回它停在苇尖，不再跟，只听：叶边碰到细草时有一声轻响，滑到沟心就静下来。它后来把这段讲给你，话说到‘滑到沟心’便停了一小会儿。‘这就是我想留下的地方。’回家时，新干叶浅槽托着旧苇秆，床边安静，正好容下没说完的那一会儿。",
+      "basis": "leaf-note三日观察差异支持对变化的关注，结合试声音再听的性格产生状态。刚恢复两小时、required=null，未形成特殊身体故事，保留成年，special不重入。",
+      "stage": "adult",
+      "state": "想听清转弯处的变化",
+      "appearanceId": "art-9050c2f8ed9a80baaa9412b5",
+      "mediaIds": []
+    },
+    {
+      "id": "story-d46bc8ea-05df-43ef-89f6-78541572970c",
+      "triggerId": "test-092-continued-group04",
+      "petId": "genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be",
+      "at": 1793001600000,
+      "text": "蜻蜓把四粒河砂先搬到了河弯上方的草坡。你想看它搬到更开阔地方后的新家，它选中的却不是最高的一根苇秆：那里风太响，旧苇秆的细声会被盖住。\n它沿坡下试了几个落脚处，最后找到一块低平的石台，前面是开阔水面，后面有疏疏的芦苇挡风。浅绿半壳和软苇絮搬进石台后侧，旧苇秆连着干叶浅槽安在左边；那片圆叶留在临水的一头，四粒河砂仍相邻，第五个位置没有补上。\n东西放妥后，它飞过新家的整片空地，落回石台。这里不用挤着床边试起落，苇秆也终于不必和枕头共用一个位置。它朝你展开两对翅：“现在，你能看见我从哪儿飞回来了。”",
+      "basis": "move-wish要求搬到开阔地方，新故事中试风和安排生活空间延续已保存听声性格；growth.required=null，刚结束的特殊形态不重开。仍为同一成年身体，搬家不产生生物进化或穿戴变化。",
+      "stage": "adult",
+      "state": "在更开阔的新家里愿意把活动空间留给不同的声音。",
+      "home": "家已从苇叶下的小窝搬到河弯上方草坡的一块宽阔低平石台。石台前方俯看河弯和浅水滩，后方疏芦苇挡风，草坡接通渡口小路。后侧低苇叶棚下是休息区：原浅绿半壳盛着原软苇絮；左侧听声区把原旧苇秆横放在原干苇叶浅槽中，与床分开。右侧床外收藏位置仍排四粒河砂，第五个间隙空着；原圆叶在石台临水前缘作为听水落脚处。中央大块平石留空供走动和起落，棚后与侧边均通向草坡。全部原物件搬来，地形、空间和分区重新设计，不是旧窝换名。",
+      "appearanceId": "art-9050c2f8ed9a80baaa9412b5",
+      "mediaIds": [
+        "art-be77b1cb84e7d27a4de633d7"
+      ]
+    }
+  ],
+  "artCount": 8,
+  "art": [
+    {
+      "id": "art-479475ce564a283be430d640",
+      "stage": "egg",
+      "kind": "avatar",
+      "description": "浅薄荷常规卵形壳，奶黄点与浅青短细弧。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group04/data/dots/pets/genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be/assets/art-479475ce564a283be430d640.png"
+    },
+    {
+      "id": "art-42b95d00a164d3870622b670",
+      "stage": "hatchling",
+      "kind": "avatar",
+      "description": "薄荷胸奶黄脸的蜻蜓若虫幼体，圆软三节短腹，六只短弱足，两对紧贴背的翅芽。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group04/data/dots/pets/genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be/assets/art-42b95d00a164d3870622b670.png"
+    },
+    {
+      "id": "art-635917bc6a72896b583493f5",
+      "stage": "juvenile",
+      "kind": "avatar",
+      "description": "蜻蜓少年，四片短圆翅初展开，六只短足撑稳，薄荷胸奶黄脸与弯曲三节厚腹保持。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group04/data/dots/pets/genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be/assets/art-635917bc6a72896b583493f5.png"
+    },
+    {
+      "id": "art-2d0332c6e4dfe5607c215a4f",
+      "stage": "juvenile",
+      "kind": "story",
+      "description": "听听熟悉声音里的变化",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group04/data/dots/pets/genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be/assets/art-2d0332c6e4dfe5607c215a4f.png"
+    },
+    {
+      "id": "art-9050c2f8ed9a80baaa9412b5",
+      "stage": "adult",
+      "kind": "avatar",
+      "description": "成年蜻蜓同体，四完整翅与薄荷胸奶黄脸，左右各三足分开，短厚三节腹。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group04/data/dots/pets/genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be/assets/art-9050c2f8ed9a80baaa9412b5.png"
+    },
+    {
+      "id": "art-e4e694d5d5d0fa96d5c15dd2",
+      "stage": "adult",
+      "kind": "avatar",
+      "description": "同一成年蜻蜓的呆萌卷叶翅形态：奶黄脸和墨绿圆眼，蓝绿胸，三节厚短腹紧蜷；四片已有浅青翅分别明显卷成软杯，六足左右各三只清楚分开，表情略困惑。保持生物器官和小尺寸卡通像素，透明背景，不加道具。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group04/data/dots/pets/genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be/assets/art-e4e694d5d5d0fa96d5c15dd2.png"
+    },
+    {
+      "id": "art-449247823203594185b6fb50",
+      "stage": "adult",
+      "kind": "story",
+      "description": "自在地听，不急着数",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group04/data/dots/pets/genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be/assets/art-449247823203594185b6fb50.png"
+    },
+    {
+      "id": "art-be77b1cb84e7d27a4de633d7",
+      "stage": "adult",
+      "kind": "story",
+      "description": "在更开阔的新家里愿意把活动空间留给不同的声音。",
+      "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group04\\data\\dots\\pets\\genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be\\assets\\art-be77b1cb84e7d27a4de633d7.png"
+    }
+  ],
+  "chatCount": 0,
+  "chats": [],
+  "namingDue": false,
+  "growth": {
+    "stage": "adult",
+    "next": null,
+    "since": "2026-10-17T05:00:00.000Z",
+    "advanceBy": null,
+    "special": {
+      "active": false,
+      "since": "2026-10-26T05:00:00.000Z",
+      "enterBy": "2026-11-02T05:00:00.000Z"
+    },
+    "required": null
+  },
+  "dataDirectory": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group04\\data\\dots"
+}

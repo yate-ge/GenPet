@@ -1,0 +1,13 @@
+[
+  {
+    "id": "art-4869fa37a9a30129f0fe6882",
+    "petId": "genpet-f826a101-74ce-4c9d-a637-3684da469950",
+    "requestId": "6069727e66aaae2b1d3e599b",
+    "stage": "adult",
+    "description": "专注查看歪碟留住的叶尖",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group02\\data\\dots\\pets\\genpet-f826a101-74ce-4c9d-a637-3684da469950\\assets\\art-4869fa37a9a30129f0fe6882.png",
+    "kind": "story",
+    "createdAt": 1793001600000,
+    "provenance": "Actual built-in imagegen; root original and 192x208 review accepted; isolated test"
+  }
+]

@@ -1,0 +1,186 @@
+{
+  "version": 2,
+  "host": "dots",
+  "pet": {
+    "id": "genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af",
+    "name": "GenPet",
+    "adoptedAt": 1790985600000,
+    "revision": 10,
+    "naming": {
+      "status": "asked",
+      "askedAt": 1791003600000
+    },
+    "genes": "来源与依据：露水山谷的萤火虫；流星雨与薄荷日常引出暖金尾光及薄荷绿叶形翅。身体为圆润薄荷绿昆虫，头与软躯干相连，黑色小眼、两根短触角、六只短足，尾端是小而清楚的暖黄色发光腹节。幼年身体短胖，触角只有嫩芽，翅只是两小片未展开的浅绿色翅芽，尾光微弱；少年身体更协调，叶形短翅展开，足更稳；成年依然紧凑，完整叶形双翅包覆圆腹，两短触角，尾部暖金光块增强。各阶段保留薄荷绿身体、腹末暖金光块和叶形翅的相同身份。形象采用少量平涂像素色块，不照搬真实昆虫纹理或细长比例。",
+    "stage": "adult",
+    "state": {
+      "description": "专注比较落叶旋转的小停顿",
+      "storyId": "story-f308cca4-e224-4466-8ac3-00f1dabed17c",
+      "updatedAt": 1793001600000,
+      "appearanceId": "art-13b80abac4ca6d39cd945b7b"
+    },
+    "binding": {
+      "host": "dots",
+      "avatarId": "dots:isolated:group01"
+    },
+    "acquisition": {
+      "place": "宠物世界的露水山谷，薄荷叶下",
+      "connection": "取自城郊观星与晨间照料薄荷两条事实；山谷探险与获得蛋是虚构经历，不推断用户偏好。",
+      "storyId": "story-6758102b-dc9d-4ed2-940c-376d2f1bf855"
+    },
+    "personality": "它喜欢把陌生事情拆成小尝试，宁可先摸清一块石头的坡度再出门；遇见正在忙碌的人不会催促，常留下观察到的小细节。它也会为了自己想看的东西离家，不把陪伴理解为时时守候。创作依据是露水山谷初次试探的晃动与细小线索；这是宠物的创作性格，不推断用户人格，也不从萤火虫物种套性格。",
+    "home": "家仍在窗边石台，薄荷叶映下光影。石台内侧的落叶睡窝用来休息，门边空蛋壳仍留着；透明小石子靠窝边，映着尾光。石台外沿留作走动与观察，空心小枝旁是收藏处：已有的小溪落叶明信片副本与本次溪石桥明信片副本并排保存，只补充一张卡片，不搬家。",
+    "special": {
+      "description": "夜露墨蓝形态：圆头圆腹墨蓝，完整叶翅保留薄荷绿翅脉，暖金腹末膨亮；两短触角和六短足原样延续。",
+      "since": 1792818000000,
+      "storyId": "story-032cac64-73c6-4e68-8213-4f38ba6dc3a9",
+      "endedAt": 1792990800000
+    }
+  },
+  "pending": null,
+  "storyCount": 10,
+  "stories": [
+    {
+      "id": "story-032cac64-73c6-4e68-8213-4f38ba6dc3a9",
+      "triggerId": "g01-special",
+      "petId": "genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af",
+      "at": 1792818000000,
+      "text": "四个深夜，你记录天空亮点的位置，小虫也把自己的夜路拆成一段段。它先去看溪边一颗反光石，再飞到芦苇尽头，没有催你收起记录。夜露一层层挂上叶翅，身体渐渐染成墨蓝，翅脉却仍是熟悉的薄荷绿；暖金尾光涨成一颗明亮的小灯，映出那些它亲自走过的弯。它回到落叶窝，把六只足收稳，黑眼从墨蓝身上亮出来：今天想带给你的，是这一身意外留住的夜色。",
+      "basis": "成年满一周，growth.required=enter-special。四晚夜空记录的持续模式与宠物分段探索性格引出夜露墨蓝变体；暂时改变同一身体皮色及腹末亮度，不改阶段、基因或长期性格。",
+      "stage": "adult",
+      "state": "夜路探查中专注又安稳",
+      "special": "夜露墨蓝形态：圆头圆腹墨蓝，完整叶翅保留薄荷绿翅脉，暖金腹末膨亮；两短触角和六短足原样延续。",
+      "appearanceId": "art-73e8da2b6eae606174cd6a3f",
+      "mediaIds": []
+    },
+    {
+      "id": "story-83522726-3c26-4ef2-99cb-716bb8879194",
+      "triggerId": "g01-restore",
+      "petId": "genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af",
+      "at": 1792990800000,
+      "text": "这两晚你没有再记夜空，改在早餐后看看薄荷枝的根。小虫也把夜路暂时放下，在窗边一段一段试着等露水干。两天过去，墨蓝从圆头和叶翅上退开，薄荷绿又透出来，尾端暖光回到原来的大小。它把空心枝转向晨光，透过枝孔看透明石子，把那条自己走过的夜路留在心里。今天它不必带着夜色，也仍认得回落叶窝的方向。",
+      "basis": "特殊形态自10月24日05:00Z起满两天，growth.required=end-special；夜空记录停止与晨间生根观察有来源。故事露干退色承载恢复；special=null，阶段、基因、性格保留。",
+      "stage": "adult",
+      "state": "回到日间从容的探索",
+      "special": null,
+      "appearanceId": "art-13b80abac4ca6d39cd945b7b",
+      "mediaIds": []
+    },
+    {
+      "id": "story-fe05b530-64b2-46b1-a9e5-2b69ce086068",
+      "triggerId": "g01-independent",
+      "petId": "genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af",
+      "at": 1792994400000,
+      "text": "空心小枝今天把风声留住了。小虫没急着钻进去，先把一根触角凑到枝口，再绕到另一头听了一会儿。枝孔太窄，它就坐在透明石子边，把六只足一只只收好，等下一阵风。声响有时像细哨，有时只是一声短短的呼气。到了午后，它把小枝放回落叶窝旁，自己出门看石台另一头的细缝。今天没有带回新东西，口袋一样的枝孔却已经够它听很久。",
+      "basis": "context没有用户事实，独立文字生活不新增变化依据；实际growth.required=null，特殊形态已结束，沿用成年阶段及原状态，不改基因或长期性格。",
+      "stage": "adult",
+      "state": "回到日间从容的探索",
+      "appearanceId": "art-13b80abac4ca6d39cd945b7b",
+      "mediaIds": []
+    },
+    {
+      "id": "story-bc6ee2a7-2308-4e68-923e-bdbf260a139a",
+      "triggerId": "g01-linked",
+      "petId": "genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af",
+      "at": 1792998000000,
+      "text": "你连续三天晚饭后散步，今天把河边落叶旋转和三次观察的差异写进笔记。小虫这一回也不赶着把自己的小溪走完。它先站稳岸边的一块平石，只选一片落叶看：叶尖绕了一圈，碰到细枝，停了一会儿，又慢慢转开。它等到那片叶漂出视线才挪到下一块石头。寄给你的明信片上，是它站在小溪旁的这一刻。背面留下短短一句：‘我的这一片，转到这里停过。’回家后，它在空心枝旁收好明信片的副本，留着下回再比。",
+      "basis": "leaf-note的连续散步观察引出性格一致的分段比较与明信片状态；恢复后才两小时，growth.required=null，这段自然观察没有足够依据再进入特殊形态。成年、原基因和性格保持。",
+      "stage": "adult",
+      "state": "专注比较落叶旋转的小停顿",
+      "home": "窗边石台上的落叶睡窝，门边保留空蛋壳，旁边有映着尾光的透明小石子和一截空心小枝；空心枝旁新增一张小溪落叶明信片副本。",
+      "appearanceId": "art-13b80abac4ca6d39cd945b7b",
+      "mediaIds": [
+        "art-2845be0f2eb78d6c1a6225c5"
+      ]
+    },
+    {
+      "id": "story-f308cca4-e224-4466-8ac3-00f1dabed17c",
+      "triggerId": "test-092-continued-group01",
+      "petId": "genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af",
+      "at": 1793001600000,
+      "text": "小虫把上一张小溪明信片翻过来，发现它只留住了叶子停下的一刻。你已经连续四天晚饭后散步，今天又在小溪旁观察小树枝转弯，记下两次观察的差异；它也想看看，拐弯前后究竟隔着什么。它来到自己世界的溪石桥边，先绕过一块凸石，再沿着窄水道走回上游。漂来的细枝碰到石侧，尾端慢慢摆过去，小虫这才看见先前没留意的水缝。它把这道小弯画进寄给你的明信片，写上：‘这次，我到弯的另一边看了看。’回家时，明信片副本与上回那张并排放好。",
+      "basis": "new-river-note延续自然观察；恢复后三小时，growth.required=null，无足够积累再进入特殊形态。沿用当前成年、状态和身份。",
+      "stage": "adult",
+      "state": "专注比较落叶旋转的小停顿",
+      "home": "家仍在窗边石台，薄荷叶映下光影。石台内侧的落叶睡窝用来休息，门边空蛋壳仍留着；透明小石子靠窝边，映着尾光。石台外沿留作走动与观察，空心小枝旁是收藏处：已有的小溪落叶明信片副本与本次溪石桥明信片副本并排保存，只补充一张卡片，不搬家。",
+      "appearanceId": "art-13b80abac4ca6d39cd945b7b",
+      "mediaIds": [
+        "art-6349464c9db65c093a05c35c"
+      ]
+    }
+  ],
+  "artCount": 8,
+  "art": [
+    {
+      "id": "art-b42594b7f507db3f316d3e6a",
+      "stage": "egg",
+      "kind": "avatar",
+      "description": "完整奶油白卵形蛋，稀疏薄荷绿短纹与三四颗暖金点，未裂的连续壳面。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/data/dots/pets/genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af/assets/art-b42594b7f507db3f316d3e6a.png"
+    },
+    {
+      "id": "art-663a5a99dd3559a2beb99c36",
+      "stage": "hatchling",
+      "kind": "avatar",
+      "description": "薄荷绿软胖幼虫，短触角芽、六短足、两片贴背未展开的浅绿翅芽、尾末米粒暖金光。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/data/dots/pets/genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af/assets/art-663a5a99dd3559a2beb99c36.png"
+    },
+    {
+      "id": "art-3ca205f624b5c7a6f4c41911",
+      "stage": "hatchling",
+      "kind": "story",
+      "description": "初次出壳，安静试探窗边的新地方",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/data/dots/pets/genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af/assets/art-3ca205f624b5c7a6f4c41911.png"
+    },
+    {
+      "id": "art-fd41b66a649d783fdb62b82b",
+      "stage": "juvenile",
+      "kind": "avatar",
+      "description": "薄荷绿少年萤火虫，圆头与协调短腹、两短触角、六短足；原有翅芽展开成两片短叶形翅，尾末暖金光。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/data/dots/pets/genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af/assets/art-fd41b66a649d783fdb62b82b.png"
+    },
+    {
+      "id": "art-13b80abac4ca6d39cd945b7b",
+      "stage": "adult",
+      "kind": "avatar",
+      "description": "成年薄荷绿萤火虫，圆头接圆腹、两短触角六短足，完整叶形双翅包覆腹部，暖金腹末增强。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/data/dots/pets/genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af/assets/art-13b80abac4ca6d39cd945b7b.png"
+    },
+    {
+      "id": "art-73e8da2b6eae606174cd6a3f",
+      "stage": "adult",
+      "kind": "avatar",
+      "description": "夜露墨蓝成年萤火虫，原圆頭圆腹、两短触角六足与叶形双翅延续，墨蓝身、薄荷翅脉及膨亮暖金腹末。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/data/dots/pets/genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af/assets/art-73e8da2b6eae606174cd6a3f.png"
+    },
+    {
+      "id": "art-2845be0f2eb78d6c1a6225c5",
+      "stage": "adult",
+      "kind": "story",
+      "description": "专注比较落叶旋转的小停顿",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group01/data/dots/pets/genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af/assets/art-2845be0f2eb78d6c1a6225c5.png"
+    },
+    {
+      "id": "art-6349464c9db65c093a05c35c",
+      "stage": "adult",
+      "kind": "story",
+      "description": "专注比较落叶旋转的小停顿",
+      "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group01\\data\\dots\\pets\\genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af\\assets\\art-6349464c9db65c093a05c35c.png"
+    }
+  ],
+  "chatCount": 0,
+  "chats": [],
+  "namingDue": false,
+  "growth": {
+    "stage": "adult",
+    "next": null,
+    "since": "2026-10-17T05:00:00.000Z",
+    "advanceBy": null,
+    "special": {
+      "active": false,
+      "since": "2026-10-26T05:00:00.000Z",
+      "enterBy": "2026-11-02T05:00:00.000Z"
+    },
+    "required": null
+  },
+  "dataDirectory": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group01\\data\\dots"
+}

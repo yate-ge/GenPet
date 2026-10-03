@@ -1,0 +1,12 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rest.snapshot.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rewear/context/result.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rewear/story/result.json"
+  ],
+  "result": {
+    "home": "仍在礁石缝旁的浅石窝，周围是退潮礁石和门前低坎；奶白旧壳遮住入口一侧，门间保留细沙，两颗浅蓝石分列门边，第三颗仍在壳后。石窝深处供休息，旧壳后收藏，门前细沙路线连接到低坎，出口仍畅通。壳门内侧干燥石沿保留原四格试帽漫画；原先错开放置的完整阔叶帽和软草纤已取出，由宠物重新佩戴，漫画旁原存帽位置暂时空着。其余物件和布局沿用已保存脱帽后的家，未搬家。",
+    "visual": null,
+    "basis": "严格由真实rest.snapshot的帽与软草纤收在漫画旁继续，这次故事将两者取走佩戴。只更新收藏存放状态，整体家景未发生值得另画全景的变化。"
+  }
+}

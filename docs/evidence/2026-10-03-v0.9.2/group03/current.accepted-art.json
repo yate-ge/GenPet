@@ -1,0 +1,13 @@
+[
+  {
+    "id": "art-57f7a274608adcab94d4b235",
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "requestId": "697eb28486a61cccaa9c4a3d",
+    "stage": "adult",
+    "description": "想把观察到的差别留个记号",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group03\\data\\dots\\pets\\genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53\\assets\\art-57f7a274608adcab94d4b235.png",
+    "kind": "story",
+    "createdAt": 1793001600000,
+    "provenance": "Actual built-in imagegen; root original and 192x208 review accepted; isolated test"
+  }
+]

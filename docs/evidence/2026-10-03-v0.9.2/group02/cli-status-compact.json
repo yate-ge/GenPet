@@ -1,0 +1,186 @@
+{
+  "version": 2,
+  "host": "dots",
+  "pet": {
+    "id": "genpet-f826a101-74ce-4c9d-a637-3684da469950",
+    "name": "GenPet",
+    "adoptedAt": 1790985600000,
+    "revision": 10,
+    "naming": {
+      "status": "asked",
+      "askedAt": 1791003600000
+    },
+    "genes": "设计依据为泥塘花圃中的青蛙脚印和向日葵影子。主要身体是一只软软的幻想小蛙，暖陶橙皮色，奶油黄腹面，宽嘴、两只凸起的小眼、四条有肉感的腿，后足有蹼；背上生长一圈少量短浅黄色花瓣状皮褶，器官属于身体，不是穿戴花帽或壳。幼年是短胖小蛙，后腿细短、蹼很小，只有两三片贴背的嫩皮褶，眼睛仍小，行动靠蹭跳；少年后腿与蹼逐渐长开、皮褶形成半圈；成年有强壮而短圆的后腿和完整的短皮褶圈，保持紧凑低伏的蛙轮廓。采用清晰平涂像素块，省略真实两栖动物皮肤纹理。暖橙软身、黄腹与背部皮褶在整个生命周期延续。",
+    "stage": "adult",
+    "state": {
+      "description": "专注查看歪碟留住的叶尖",
+      "storyId": "story-9b207cd9-8f2f-4184-b7e4-9487ff4391b2",
+      "updatedAt": 1793001600000,
+      "appearanceId": "art-3c496af0494d3ceea7bec606"
+    },
+    "binding": {
+      "host": "dots",
+      "avatarId": "dots:isolated:group02"
+    },
+    "acquisition": {
+      "place": "宠物世界的泥塘花圃，向日葵影下",
+      "connection": "菜园种植与陶艺学习引出虚构花圃湿泥地点；不虚构用户跟随探险、不把烧裂解读为难过。",
+      "storyId": "story-07a219e2-2c2d-417a-b2c7-38cd8e498b48"
+    },
+    "personality": "它做事常先动手，再边做边调；失败后愿意把成品改作别的用途，不急着抹去痕迹。热闹时会主动招呼来客，忙完却喜欢躲到自己的小角落发呆；遇到用户专注练习会去找一件自己也能试的事，不把每件事都变成鼓励口号。创作依据是泥地脚印的前行和带离积水泥窝的改道；这是独立宠物性格，不推断学陶艺用户的情绪或人格。",
+    "home": "家仍在泥塘花圃边的低棚，两根细枝支起棚顶，花圃与浅水围在外侧。棚下宽叶床是休息处，床旁的脚印扁泥垫可活动，歪口小碟带回原处；门口第一次蹭跳的泥印与空蛋壳保留。宽叶床旁的收藏处并存旧泥塘叶尖照片副本与本次延时自拍副本，只添照片，不搬家。",
+    "special": {
+      "description": "青绿鼓泡形态：软活成年蛙肤呈青绿并留暖橙斑，奶油黄腹；脸颊鼓软，完整浅黄背皮褶膨圆，原宽嘴凸眼四肉腿和蹼保留。",
+      "since": 1792818000000,
+      "storyId": "story-91966712-5765-45d6-8c4e-221f800497fb",
+      "endedAt": 1792990800000
+    }
+  },
+  "pending": null,
+  "storyCount": 10,
+  "stories": [
+    {
+      "id": "story-91966712-5765-45d6-8c4e-221f800497fb",
+      "triggerId": "g02-special",
+      "petId": "genpet-f826a101-74ce-4c9d-a637-3684da469950",
+      "at": 1792818000000,
+      "text": "你这一周把青绿和淡黄釉色试片并排记了三次，小蛙也想亲手看颜色怎么相处。它去宠物世界的泡沫泥塘，一次次把花粉搅进小水洼，没调出一样的色，就留着看看下一次。今天花粉的泡泡忽然贴进了它的皮肤：暖橙圆身透出青绿色，两颊鼓得软软，背上一圈浅黄皮褶也膨成圆润的小褶瓣。它仍用自己的四只足蹲在泥垫旁，先照了照歪碟里的倒影，忍不住把脸往另一边歪：试色倒先试到自己身上了。",
+      "basis": "成年满一周growth.required=enter-special；三次釉色记录的持续模式呼应动手后调整的宠物性格，引出虚构花粉试色经历。暂时改变原身体皮色和原有皮褶/脸颊形状，不改物种基因或长期性格。",
+      "stage": "adult",
+      "state": "试色后对自身鼓泡变化好奇",
+      "special": "青绿鼓泡形态：软活成年蛙肤呈青绿并留暖橙斑，奶油黄腹；脸颊鼓软，完整浅黄背皮褶膨圆，原宽嘴凸眼四肉腿和蹼保留。",
+      "appearanceId": "art-b56f0aeea8b749f9b2efa535",
+      "mediaIds": []
+    },
+    {
+      "id": "story-eb90f5ac-4ea8-413e-ad0f-17ece0e0b735",
+      "triggerId": "g02-restore",
+      "petId": "genpet-f826a101-74ce-4c9d-a637-3684da469950",
+      "at": 1792990800000,
+      "text": "你把青绿和淡黄试片晾好，暂停调色，回菜园看向日葵。小蛙也没有继续往泡沫泥塘里搅花粉。它这两天在低棚下用歪碟盛清水，扑出来就让水流过自己原来的皮褶，做不成浴盆也照样能洗净身上的花粉。第二天末，鼓颊消了，膨圆的浅黄褶瓣回到完整短皮褶圈，暖橙色重新透出。它趴到脚印泥垫旁歇下：还是那张歪碟，只是今天换了个用法。",
+      "basis": "特殊形态满两天，growth.required=end-special，暂停调色模式及虚构清洗经历承载恢复；special=null，不改变原成年阶段、暖橙蛙基因和试做改用的长期性格。",
+      "stage": "adult",
+      "state": "洗净花粉后自在地歇在家中",
+      "special": null,
+      "appearanceId": "art-3c496af0494d3ceea7bec606",
+      "mediaIds": []
+    },
+    {
+      "id": "story-076cdc05-eba6-4946-8114-82d148ea30de",
+      "triggerId": "g02-independent",
+      "petId": "genpet-f826a101-74ce-4c9d-a637-3684da469950",
+      "at": 1792994400000,
+      "text": "小蛙今天在自己的低棚里歇着，忽然觉得宽叶床的一边太翘，就扑上去压了一下。叶角弹起来，把它推回脚印泥垫旁。它没有再压第二下，干脆顺着叶子的弯窝进去：一边当靠背，一边遮住半只足。歪碟还是空的，蛋壳还是门边那一块。它盯着棚缝漏下来的光发了好久的呆，直到肚皮下的叶子暖起来才翻了个身。今日的家没有添东西，只是它发现原来的床还可以这样躺。",
+      "basis": "context没有用户事实，独立文字生活不新增变化依据；实际growth.required=null，特殊形态已结束，沿用成年阶段及原状态，不改基因或长期性格。",
+      "stage": "adult",
+      "state": "洗净花粉后自在地歇在家中",
+      "appearanceId": "art-3c496af0494d3ceea7bec606",
+      "mediaIds": []
+    },
+    {
+      "id": "story-9392b104-977a-45b9-88bc-c93ffcfd259b",
+      "triggerId": "g02-linked",
+      "petId": "genpet-f826a101-74ce-4c9d-a637-3684da469950",
+      "at": 1792998000000,
+      "text": "你这三天晚饭后散步，今天看河边落叶打转，记下三次观察的差异。小蛙自己的泥塘边也漂着一片叶。它把家里的歪碟推到浅水里，想让叶子绕着碟沿转，结果碟子一斜，叶片便挤到岸边不动了。它没把歪碟收走，反倒趴下来瞧叶尖碰住碟口的地方。给你带来的照片就停在这里：它低低伏在湿岸，一只前足搭着歪碟，叶尖靠在缺低的碟沿，水上还留着几圈波纹。那不是你的河边，是它自己今天蹦过的泥塘。小蛙把照片的副本夹在宽叶床旁，空碟也带回来了。",
+      "basis": "leaf-note的连续观察与本次宠物实验引出临时专注状态；growth.required=null，恢复仅两小时，散步观察不构成明显特殊身体变化依据。保留成年阶段、原暖橙蛙基因和长期性格。",
+      "stage": "adult",
+      "state": "专注查看歪碟留住的叶尖",
+      "home": "泥塘花圃边，两根细枝搭的低棚，棚下宽叶床，门口有第一次蹭跳泥印和空蛋壳；宽叶床旁保留脚印扁泥垫、歪口小碟，新增一张泥塘叶尖照片副本。",
+      "appearanceId": "art-3c496af0494d3ceea7bec606",
+      "mediaIds": [
+        "art-0c30e38d908220d5789e8c01"
+      ]
+    },
+    {
+      "id": "story-9b207cd9-8f2f-4184-b7e4-9487ff4391b2",
+      "triggerId": "test-092-continued-group02",
+      "petId": "genpet-f826a101-74ce-4c9d-a637-3684da469950",
+      "at": 1793001600000,
+      "text": "小蛙一开始把歪碟架在岸边当三脚架，碟口却让画面全歪了。它索性换到低处，把小相机稳在一根横枝后，设好延时，自己蹦到镜头前。你连续四天饭后散步，今天记下小溪边小树枝转弯的两次观察差异；它这一回想让你看看自己的泥塘弯道。小蛙朝镜头张开宽嘴，一只前足抬起来，身后的水面上，一截小枝正经过弯口。咔嗒。它跑回来瞧，发现照片里自己占得比弯道还大，便留下这张：‘先看见我，再看右边那个小弯！’歪碟带回低棚，照片副本夹在上一张泥塘叶尖照片旁。",
+      "basis": "new-river-note延续自然观察；恢复后三小时，growth.required=null，无足够积累再进入特殊形态。沿用当前成年、状态和身份。",
+      "stage": "adult",
+      "state": "专注查看歪碟留住的叶尖",
+      "home": "家仍在泥塘花圃边的低棚，两根细枝支起棚顶，花圃与浅水围在外侧。棚下宽叶床是休息处，床旁的脚印扁泥垫可活动，歪口小碟带回原处；门口第一次蹭跳的泥印与空蛋壳保留。宽叶床旁的收藏处并存旧泥塘叶尖照片副本与本次延时自拍副本，只添照片，不搬家。",
+      "appearanceId": "art-3c496af0494d3ceea7bec606",
+      "mediaIds": [
+        "art-4869fa37a9a30129f0fe6882"
+      ]
+    }
+  ],
+  "artCount": 8,
+  "art": [
+    {
+      "id": "art-d00d4abffc6c3f91a9dde939",
+      "stage": "egg",
+      "kind": "avatar",
+      "description": "暖浅陶橙常规卵形蛋，完整未裂壳面，浅奶油黄弧纹与少量深橙细点。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group02/data/dots/pets/genpet-f826a101-74ce-4c9d-a637-3684da469950/assets/art-d00d4abffc6c3f91a9dde939.png"
+    },
+    {
+      "id": "art-d077a84e1dc6cc392dd80ff2",
+      "stage": "hatchling",
+      "kind": "avatar",
+      "description": "软胖暖陶橙幼蛙，奶油黄腹，小凸眼、宽嘴、四只短软腿与小蹼，背上只有两三片贴背嫩黄皮褶。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group02/data/dots/pets/genpet-f826a101-74ce-4c9d-a637-3684da469950/assets/art-d077a84e1dc6cc392dd80ff2.png"
+    },
+    {
+      "id": "art-6179e6659a560370015da001",
+      "stage": "hatchling",
+      "kind": "story",
+      "description": "出壳后急于试跳，又愿意改作搭棚",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group02/data/dots/pets/genpet-f826a101-74ce-4c9d-a637-3684da469950/assets/art-6179e6659a560370015da001.png"
+    },
+    {
+      "id": "art-6fc369863312fdc138453efc",
+      "stage": "juvenile",
+      "kind": "avatar",
+      "description": "暖陶橙少年蛙、奶油黄腹、四足；后腿蹼初步长开，背皮褶展开为不完整的浅黄半圈，仍非成年完整圈。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group02/data/dots/pets/genpet-f826a101-74ce-4c9d-a637-3684da469950/assets/art-6fc369863312fdc138453efc.png"
+    },
+    {
+      "id": "art-3c496af0494d3ceea7bec606",
+      "stage": "adult",
+      "kind": "avatar",
+      "description": "暖陶橙成年蛙，奶油黄腹、宽嘴凸眼、四肉腿和成熟蹼，强壮短圆后腿，背上完整一圈短浅黄花瓣状生物皮褶。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group02/data/dots/pets/genpet-f826a101-74ce-4c9d-a637-3684da469950/assets/art-3c496af0494d3ceea7bec606.png"
+    },
+    {
+      "id": "art-b56f0aeea8b749f9b2efa535",
+      "stage": "adult",
+      "kind": "avatar",
+      "description": "同一成年蛙青绿鼓泡形态，暖橙斑与奶油黄腹保留，原脸颊软鼓，浅黄完整背皮褶膨圆；宽嘴凸眼四肉腿和蹼仍为原身体。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group02/data/dots/pets/genpet-f826a101-74ce-4c9d-a637-3684da469950/assets/art-b56f0aeea8b749f9b2efa535.png"
+    },
+    {
+      "id": "art-0c30e38d908220d5789e8c01",
+      "stage": "adult",
+      "kind": "story",
+      "description": "专注查看歪碟留住的叶尖",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group02/data/dots/pets/genpet-f826a101-74ce-4c9d-a637-3684da469950/assets/art-0c30e38d908220d5789e8c01.png"
+    },
+    {
+      "id": "art-4869fa37a9a30129f0fe6882",
+      "stage": "adult",
+      "kind": "story",
+      "description": "专注查看歪碟留住的叶尖",
+      "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group02\\data\\dots\\pets\\genpet-f826a101-74ce-4c9d-a637-3684da469950\\assets\\art-4869fa37a9a30129f0fe6882.png"
+    }
+  ],
+  "chatCount": 0,
+  "chats": [],
+  "namingDue": false,
+  "growth": {
+    "stage": "adult",
+    "next": null,
+    "since": "2026-10-17T05:00:00.000Z",
+    "advanceBy": null,
+    "special": {
+      "active": false,
+      "since": "2026-10-26T05:00:00.000Z",
+      "enterBy": "2026-11-02T05:00:00.000Z"
+    },
+    "required": null
+  },
+  "dataDirectory": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group02\\data\\dots"
+}

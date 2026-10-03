@@ -1,0 +1,13 @@
+{
+  "reviewer": "root",
+  "verdict": "通过",
+  "observations": [
+    "由实际脱帽快照取回原帽和草纤，未编造新天气、帽或用户感受。",
+    "实际plan-ready及finish复用同Pet帽子Avatar原artId，9个素材没有增加；身体基因、性格与绑定不变。",
+    "原帽子图已由root按原尺寸和192x208独立接受；宿主确认仅模拟inactive。"
+  ],
+  "artRequestStatus": "ready",
+  "appearanceId": "art-c3e3bf89b897c12687a03747",
+  "artCountBefore": 9,
+  "artCountAfter": 9
+}

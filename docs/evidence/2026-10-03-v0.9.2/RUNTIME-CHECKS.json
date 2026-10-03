@@ -1,0 +1,82 @@
+[
+  {
+    "group": "group01",
+    "petSame": true,
+    "pendingSame": true,
+    "storyCount": true,
+    "recent5": true,
+    "stepsOmitted": true,
+    "artCount": true,
+    "artSlim": true,
+    "originalHistoryUnchanged": true,
+    "namingSame": true,
+    "bytes": {
+      "compact": 7126,
+      "full": 39685
+    }
+  },
+  {
+    "group": "group02",
+    "petSame": true,
+    "pendingSame": true,
+    "storyCount": true,
+    "recent5": true,
+    "stepsOmitted": true,
+    "artCount": true,
+    "artSlim": true,
+    "originalHistoryUnchanged": true,
+    "namingSame": true,
+    "bytes": {
+      "compact": 7264,
+      "full": 42371
+    }
+  },
+  {
+    "group": "group03",
+    "petSame": true,
+    "pendingSame": true,
+    "storyCount": true,
+    "recent5": true,
+    "stepsOmitted": true,
+    "artCount": true,
+    "artSlim": true,
+    "originalHistoryUnchanged": true,
+    "namingSame": true,
+    "bytes": {
+      "compact": 7049,
+      "full": 43806
+    }
+  },
+  {
+    "group": "group04",
+    "petSame": true,
+    "pendingSame": true,
+    "storyCount": true,
+    "recent5": true,
+    "stepsOmitted": true,
+    "artCount": true,
+    "artSlim": true,
+    "originalHistoryUnchanged": true,
+    "namingSame": true,
+    "bytes": {
+      "compact": 7655,
+      "full": 49336
+    }
+  },
+  {
+    "group": "group05",
+    "petSame": true,
+    "pendingSame": true,
+    "storyCount": true,
+    "recent5": true,
+    "stepsOmitted": true,
+    "artCount": true,
+    "artSlim": true,
+    "originalHistoryUnchanged": true,
+    "namingSame": true,
+    "bytes": {
+      "compact": 7889,
+      "full": 51832
+    }
+  }
+]

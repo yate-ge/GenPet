@@ -1,0 +1,11 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group02/main/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group02/status.json"
+  ],
+  "result": {
+    "home": "家仍在泥塘花圃边的低棚，两根细枝支起棚顶，花圃与浅水围在外侧。棚下宽叶床是休息处，床旁的脚印扁泥垫可活动，歪口小碟带回原处；门口第一次蹭跳的泥印与空蛋壳保留。宽叶床旁的收藏处并存旧泥塘叶尖照片副本与本次延时自拍副本，只添照片，不搬家。",
+    "visual": null,
+    "basis": "小幅添置收藏，未建立新家或搬家，不需要另出全景图。"
+  }
+}

@@ -1,0 +1,48 @@
+[
+  {
+    "unit": "appearance",
+    "tool": "built-in image_gen.imagegen",
+    "parametersFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\appearance\\imagegen-parameters.json",
+    "sourceFile": "C:/Users/geyat/.codex/generated_images/01a1023f-a89f-7303-b7df-bd32bd1bfb54/exec-0ab7c049-929a-4969-82bd-4c1249a77c57.png",
+    "originalFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\appearance\\generated.png",
+    "originalSize": [
+      1204,
+      1306
+    ],
+    "originalSha256": "8c1e822428185941f92e0945787c694bf0f27dfd2acfd8f3e6f089bedb5b037c",
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "reviewFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\appearance\\generated-review-192x208.png",
+    "reviewTransform": "PIL ImageOps.contain NEAREST, aspect ratio preserved, centered on transparent 192x208 canvas; original unchanged",
+    "containedSize": [
+      192,
+      208
+    ],
+    "reviewStatus": "not assessed by generating agent"
+  },
+  {
+    "unit": "carrier",
+    "tool": "built-in image_gen.imagegen",
+    "parametersFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\carrier\\imagegen-parameters.json",
+    "sourceFile": "C:/Users/geyat/.codex/generated_images/01a1023f-a89f-7303-b7df-bd32bd1bfb54/exec-a899f1d7-8cd2-489b-962b-4e96865be1b1.png",
+    "originalFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\carrier\\generated.png",
+    "originalSize": [
+      1536,
+      1024
+    ],
+    "originalSha256": "91ddb53c8cb12e8395596495454d19210c0215aa3350380ef2791507f55cc3de",
+    "alphaExtrema": [
+      255,
+      255
+    ],
+    "reviewFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\carrier\\generated-review-192x208.png",
+    "reviewTransform": "PIL ImageOps.contain NEAREST, aspect ratio preserved, centered on transparent 192x208 canvas; original unchanged",
+    "containedSize": [
+      192,
+      128
+    ],
+    "reviewStatus": "not assessed by generating agent"
+  }
+]

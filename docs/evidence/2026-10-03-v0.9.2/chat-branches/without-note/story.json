@@ -1,0 +1,14 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\chat-cases\\branches\\without-note\\context.result.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\chat-cases\\branches\\shared-upstream.json"
+  ],
+  "result": {
+    "text": "空心枝里传出很细的沙沙声。小虫伏在枝口听了一会儿，一只灰色小飞蛾倒着爬出来，翅边沾了一点木屑。它们隔着半截枝对望，谁也没往前挤。“里面窄吗？”小虫问。飞蛾抖掉木屑，绕过枝头就飞走了。小虫没有追，沿着枝外侧爬到另一头，发现那里的孔更小。它忽然不想钻了：今天知道一根枝有两个不一样的门，已经够有意思。",
+    "connection": "本次没有新的用户资料；这是延续现有家中空心小枝与宠物性格的独立生活草案，不新增用户事实或搬家计划。",
+    "evidenceIds": [],
+    "stateIntent": "独立生活沿用当前成年及“回到日间从容的探索”状态，不进入特殊形态，不添加穿戴或手持物。",
+    "visualIntent": "只有文字。来客和发现没有给家留下新物件，也没有需要专门交付的视觉载体。",
+    "homeIntent": null
+  }
+}

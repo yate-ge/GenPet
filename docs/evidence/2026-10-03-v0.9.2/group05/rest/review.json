@@ -1,0 +1,13 @@
+{
+  "reviewer": "root",
+  "verdict": "通过",
+  "observations": [
+    "摘帽故事只响应虚构显式请求，未虚构用户累了或雨停。",
+    "实际查看同Pet普通成年原图，未戴帽，双弧纹、左右钳和四足符合脱帽状态。",
+    "实际plan-ready及finish后使用原成年artId，素材数量仍为9，身体基因、性格与绑定不变；宿主ack仅模拟inactive。"
+  ],
+  "artRequestStatus": "ready",
+  "appearanceId": "art-5ec13139970d88fb509a0cdd",
+  "artCountBefore": 9,
+  "artCountAfter": 9
+}

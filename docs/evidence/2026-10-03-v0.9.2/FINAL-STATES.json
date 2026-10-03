@@ -1,0 +1,52 @@
+[
+  {
+    "group": "group01",
+    "petId": "genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af",
+    "stage": "adult",
+    "stories": 10,
+    "art": 8,
+    "pending": null,
+    "appearanceId": "art-13b80abac4ca6d39cd945b7b",
+    "identityRetained": true
+  },
+  {
+    "group": "group02",
+    "petId": "genpet-f826a101-74ce-4c9d-a637-3684da469950",
+    "stage": "adult",
+    "stories": 10,
+    "art": 8,
+    "pending": null,
+    "appearanceId": "art-3c496af0494d3ceea7bec606",
+    "identityRetained": true
+  },
+  {
+    "group": "group03",
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "stage": "adult",
+    "stories": 10,
+    "art": 8,
+    "pending": null,
+    "appearanceId": "art-688ff9d8a4b753b8906f1e8f",
+    "identityRetained": true
+  },
+  {
+    "group": "group04",
+    "petId": "genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be",
+    "stage": "adult",
+    "stories": 10,
+    "art": 8,
+    "pending": null,
+    "appearanceId": "art-9050c2f8ed9a80baaa9412b5",
+    "identityRetained": true
+  },
+  {
+    "group": "group05",
+    "petId": "genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e",
+    "stage": "adult",
+    "stories": 12,
+    "art": 9,
+    "pending": null,
+    "appearanceId": "art-c3e3bf89b897c12687a03747",
+    "identityRetained": true
+  }
+]

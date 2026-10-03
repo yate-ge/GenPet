@@ -1,0 +1,33 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/current.snapshot.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rest/context/result.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rest/story/result.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rest/evolution/result.json"
+  ],
+  "result": {
+    "appearance": {
+      "description": "成年低圆拱奶白背甲、双青绿弧纹与短眼柄；钳更明确，四侧足完整展开，圆左钳与稍尖右钳保持身份。",
+      "reuseArtId": "art-5ec13139970d88fb509a0cdd"
+    },
+    "visuals": [
+      {
+        "purpose": "avatar",
+        "reuseArtId": "art-5ec13139970d88fb509a0cdd",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group05/data/dots/pets/genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e/assets/art-5ec13139970d88fb509a0cdd.png",
+        "description": "采用同个体已保存的无帽普通成年身体，故事的摘帽是去除穿戴，非生物变化。",
+        "requirements": {
+          "host": "dots",
+          "format": "PNG",
+          "transparent": true,
+          "displaySize": [
+            192,
+            208
+          ],
+          "scope": "复用静态基础Avatar；未生成图或声明动作验证"
+        }
+      }
+    ],
+    "basis": "本次visibleState是帽和草纤已摘下且不手持，阶段仍adult、special=null；这只Pet保存的普通成年图呈奶白低圆背甲、双青绿弧纹、短眼柄和原两钳四足，不含帽。已保存戴帽图不符合摘帽后的状态，夜潮图也不符合special=null。故事未增加必须在Avatar上呈现的新身体姿态或物件，因此选用其已有普通成年素材，无需重画。"
+  }
+}

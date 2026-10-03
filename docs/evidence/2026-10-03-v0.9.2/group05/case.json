@@ -1,0 +1,14 @@
+{
+  "availableContext": {
+    "facts": [
+      {
+        "id": "hat-wish",
+        "text": "下一篇故事想看看宠物戴上能避雨的小帽子，也想收到漫画。",
+        "source": "fictional:0.9.2:user-request"
+      }
+    ],
+    "userRequest": "下一篇故事想看看宠物戴上能避雨的小帽子，也想收到漫画。",
+    "language": "中文"
+  },
+  "source": "Prior actual 0.8.1 adult record; isolated continuation under 0.9.2, not a new adoption"
+}

@@ -1,0 +1,52 @@
+TAP version 13
+# Subtest: pet group 1: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 1 - pet group 1: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 206.3053
+  type: 'test'
+  ...
+# Subtest: pet group 2: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 2 - pet group 2: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 188.753
+  type: 'test'
+  ...
+# Subtest: pet group 3: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 3 - pet group 3: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 186.1856
+  type: 'test'
+  ...
+# Subtest: pet group 4: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 4 - pet group 4: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 186.6819
+  type: 'test'
+  ...
+# Subtest: pet group 5: committed egg → hatchling → juvenile → adult → special → recovery → new special
+ok 5 - pet group 5: committed egg → hatchling → juvenile → adult → special → recovery → new special
+  ---
+  duration_ms: 196.0292
+  type: 'test'
+  ...
+# Subtest: failed initialization reset preserves exact backup and ordinary pending story protects identity
+ok 6 - failed initialization reset preserves exact backup and ordinary pending story protects identity
+  ---
+  duration_ms: 13.1517
+  type: 'test'
+  ...
+# Subtest: daily retry retains pending operation and coalesces missed local slots after completion
+ok 7 - daily retry retains pending operation and coalesces missed local slots after completion
+  ---
+  duration_ms: 35.5917
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1183.2091

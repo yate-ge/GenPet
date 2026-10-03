@@ -1,0 +1,14 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rest.snapshot.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rewear/context/result.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rewear/story/result.json"
+  ],
+  "result": {
+    "stage": "adult",
+    "state": "再次佩戴原阔叶雨帽与软草纤，恢复原帽的低矮轮廓和两侧外翻帽檐，身体保持普通奶白成年形态。",
+    "basis": "hat-again明确请求重新戴之前叶帽，已写出的故事从真实收藏位置取出并佩戴，支持从无帽变回戴帽普通状态。growth.required=null；没有要求新的特殊形态，也无长期变化资料，adult和special=null沿用，基因性格不变。",
+    "special": null,
+    "visibleState": "戴原来的低矮浅绿叶帽，两侧帽檐外翻，软草纤按原位置绕甲侧固定；短眼柄仍露在檐下，奶白背甲双青绿弧纹及两钳四足关系不变，不持其他物件。"
+  }
+}

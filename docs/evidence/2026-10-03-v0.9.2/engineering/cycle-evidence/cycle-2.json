@@ -1,0 +1,1447 @@
+{
+  "synthetic": true,
+  "snapshots": [
+    {
+      "version": 2,
+      "host": "dots",
+      "pet": {
+        "id": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+        "name": "GenPet",
+        "adoptedAt": 1790820000000,
+        "revision": 1,
+        "naming": {
+          "status": "unasked"
+        },
+        "genes": "A faceless, low-bodied creature with four short clawed feet, two tactile feelers and a left-curving tail; its back folds develop across stages while these body relationships persist. Test identity 2.",
+        "stage": "egg",
+        "state": {
+          "description": "A quiet intact egg.",
+          "storyId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+          "updatedAt": 1790820000000,
+          "appearanceId": "art-827cb916b0d010756b4c35de"
+        },
+        "binding": {
+          "host": "dots",
+          "avatarId": "dots:test"
+        },
+        "acquisition": {
+          "place": "Beside an unfinished drawing",
+          "connection": "A meaningful encounter around an ongoing creative task",
+          "storyId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce"
+        },
+        "personality": "Patient and curious. Offers quiet company without assuming the user needs help. Draws its feelers close when listening and unfolds them when exploring. A fictional individual met beside an unfinished drawing; not a claim about user personality."
+      },
+      "stories": [
+        {
+          "id": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+          "triggerId": "group:2:adopt",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790820000000,
+          "text": "You found an egg beside the unfinished drawing.",
+          "basis": "The user is working on a drawing; the encounter is fictional.",
+          "stage": "egg",
+          "state": "A quiet intact egg.",
+          "appearanceId": "art-827cb916b0d010756b4c35de",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+            "appearanceId": "art-827cb916b0d010756b4c35de",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        }
+      ],
+      "art": [
+        {
+          "id": "art-827cb916b0d010756b4c35de",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "ca61ec7d180d2badf05237c0",
+          "stage": "egg",
+          "description": "A complete conventional pixel egg shell with curved gray-blue markings.",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-827cb916b0d010756b4c35de.png",
+          "kind": "avatar",
+          "createdAt": 1790820000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        }
+      ],
+      "pending": null
+    },
+    {
+      "version": 2,
+      "host": "dots",
+      "pet": {
+        "id": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+        "name": "GenPet",
+        "adoptedAt": 1790820000000,
+        "revision": 2,
+        "naming": {
+          "status": "unasked"
+        },
+        "genes": "A faceless, low-bodied creature with four short clawed feet, two tactile feelers and a left-curving tail; its back folds develop across stages while these body relationships persist. Test identity 2.",
+        "stage": "hatchling",
+        "state": {
+          "description": "Resting",
+          "storyId": "story-2f158242-eca7-418b-9e65-e384129af7db",
+          "updatedAt": 1790838000000,
+          "appearanceId": "art-608b3e830bfde2cf7ff42995"
+        },
+        "binding": {
+          "host": "dots",
+          "avatarId": "dots:test"
+        },
+        "acquisition": {
+          "place": "Beside an unfinished drawing",
+          "connection": "A meaningful encounter around an ongoing creative task",
+          "storyId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce"
+        },
+        "personality": "Patient and curious. Offers quiet company without assuming the user needs help. Draws its feelers close when listening and unfolds them when exploring. A fictional individual met beside an unfinished drawing; not a claim about user personality.",
+        "home": "Moss nest 2"
+      },
+      "stories": [
+        {
+          "id": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+          "triggerId": "group:2:adopt",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790820000000,
+          "text": "You found an egg beside the unfinished drawing.",
+          "basis": "The user is working on a drawing; the encounter is fictional.",
+          "stage": "egg",
+          "state": "A quiet intact egg.",
+          "appearanceId": "art-827cb916b0d010756b4c35de",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+            "appearanceId": "art-827cb916b0d010756b4c35de",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-2f158242-eca7-418b-9e65-e384129af7db",
+          "triggerId": "group:2:hatch",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790838000000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "hatchling",
+          "state": "Resting",
+          "home": "Moss nest 2",
+          "appearanceId": "art-608b3e830bfde2cf7ff42995",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-2f158242-eca7-418b-9e65-e384129af7db",
+            "appearanceId": "art-608b3e830bfde2cf7ff42995",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        }
+      ],
+      "art": [
+        {
+          "id": "art-827cb916b0d010756b4c35de",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "ca61ec7d180d2badf05237c0",
+          "stage": "egg",
+          "description": "A complete conventional pixel egg shell with curved gray-blue markings.",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-827cb916b0d010756b4c35de.png",
+          "kind": "avatar",
+          "createdAt": 1790820000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-608b3e830bfde2cf7ff42995",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "6f4e60102c5dcc1c59a096d0",
+          "stage": "hatchling",
+          "description": "Undeveloped synthetic hatchling",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-608b3e830bfde2cf7ff42995.png",
+          "kind": "avatar",
+          "createdAt": 1790838000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        }
+      ],
+      "pending": null
+    },
+    {
+      "version": 2,
+      "host": "dots",
+      "pet": {
+        "id": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+        "name": "GenPet",
+        "adoptedAt": 1790820000000,
+        "revision": 3,
+        "naming": {
+          "status": "unasked"
+        },
+        "genes": "A faceless, low-bodied creature with four short clawed feet, two tactile feelers and a left-curving tail; its back folds develop across stages while these body relationships persist. Test identity 2.",
+        "stage": "juvenile",
+        "state": {
+          "description": "Resting",
+          "storyId": "story-395f28a2-5a64-46c4-a8be-c8031c79a147",
+          "updatedAt": 1791442800000,
+          "appearanceId": "art-87c31c8fd2e0c27789322fba"
+        },
+        "binding": {
+          "host": "dots",
+          "avatarId": "dots:test"
+        },
+        "acquisition": {
+          "place": "Beside an unfinished drawing",
+          "connection": "A meaningful encounter around an ongoing creative task",
+          "storyId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce"
+        },
+        "personality": "Patient and curious. Offers quiet company without assuming the user needs help. Draws its feelers close when listening and unfolds them when exploring. A fictional individual met beside an unfinished drawing; not a claim about user personality.",
+        "home": "Moss nest 2 with a sheltered alcove"
+      },
+      "stories": [
+        {
+          "id": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+          "triggerId": "group:2:adopt",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790820000000,
+          "text": "You found an egg beside the unfinished drawing.",
+          "basis": "The user is working on a drawing; the encounter is fictional.",
+          "stage": "egg",
+          "state": "A quiet intact egg.",
+          "appearanceId": "art-827cb916b0d010756b4c35de",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+            "appearanceId": "art-827cb916b0d010756b4c35de",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-2f158242-eca7-418b-9e65-e384129af7db",
+          "triggerId": "group:2:hatch",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790838000000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "hatchling",
+          "state": "Resting",
+          "home": "Moss nest 2",
+          "appearanceId": "art-608b3e830bfde2cf7ff42995",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-2f158242-eca7-418b-9e65-e384129af7db",
+            "appearanceId": "art-608b3e830bfde2cf7ff42995",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-395f28a2-5a64-46c4-a8be-c8031c79a147",
+          "triggerId": "group:2:juvenile",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1791442800000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "juvenile",
+          "state": "Resting",
+          "home": "Moss nest 2 with a sheltered alcove",
+          "appearanceId": "art-87c31c8fd2e0c27789322fba",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-395f28a2-5a64-46c4-a8be-c8031c79a147",
+            "appearanceId": "art-87c31c8fd2e0c27789322fba",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        }
+      ],
+      "art": [
+        {
+          "id": "art-827cb916b0d010756b4c35de",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "ca61ec7d180d2badf05237c0",
+          "stage": "egg",
+          "description": "A complete conventional pixel egg shell with curved gray-blue markings.",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-827cb916b0d010756b4c35de.png",
+          "kind": "avatar",
+          "createdAt": 1790820000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-608b3e830bfde2cf7ff42995",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "6f4e60102c5dcc1c59a096d0",
+          "stage": "hatchling",
+          "description": "Undeveloped synthetic hatchling",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-608b3e830bfde2cf7ff42995.png",
+          "kind": "avatar",
+          "createdAt": 1790838000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-87c31c8fd2e0c27789322fba",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "519cdc79b3ab1315e0603f4f",
+          "stage": "juvenile",
+          "description": "Synthetic juvenile",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-87c31c8fd2e0c27789322fba.png",
+          "kind": "avatar",
+          "createdAt": 1791442800000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        }
+      ],
+      "pending": null
+    },
+    {
+      "version": 2,
+      "host": "dots",
+      "pet": {
+        "id": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+        "name": "GenPet",
+        "adoptedAt": 1790820000000,
+        "revision": 4,
+        "naming": {
+          "status": "unasked"
+        },
+        "genes": "A faceless, low-bodied creature with four short clawed feet, two tactile feelers and a left-curving tail; its back folds develop across stages while these body relationships persist. Test identity 2.",
+        "stage": "adult",
+        "state": {
+          "description": "Resting",
+          "storyId": "story-a07449e9-a5d1-45a1-9134-5d1122a23445",
+          "updatedAt": 1792047600000,
+          "appearanceId": "art-d8d4da7a4c775efd75cb65cb"
+        },
+        "binding": {
+          "host": "dots",
+          "avatarId": "dots:test"
+        },
+        "acquisition": {
+          "place": "Beside an unfinished drawing",
+          "connection": "A meaningful encounter around an ongoing creative task",
+          "storyId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce"
+        },
+        "personality": "Patient and curious. Offers quiet company without assuming the user needs help. Draws its feelers close when listening and unfolds them when exploring. A fictional individual met beside an unfinished drawing; not a claim about user personality.",
+        "home": "Moss nest 2 with a sheltered alcove"
+      },
+      "stories": [
+        {
+          "id": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+          "triggerId": "group:2:adopt",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790820000000,
+          "text": "You found an egg beside the unfinished drawing.",
+          "basis": "The user is working on a drawing; the encounter is fictional.",
+          "stage": "egg",
+          "state": "A quiet intact egg.",
+          "appearanceId": "art-827cb916b0d010756b4c35de",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+            "appearanceId": "art-827cb916b0d010756b4c35de",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-2f158242-eca7-418b-9e65-e384129af7db",
+          "triggerId": "group:2:hatch",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790838000000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "hatchling",
+          "state": "Resting",
+          "home": "Moss nest 2",
+          "appearanceId": "art-608b3e830bfde2cf7ff42995",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-2f158242-eca7-418b-9e65-e384129af7db",
+            "appearanceId": "art-608b3e830bfde2cf7ff42995",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-395f28a2-5a64-46c4-a8be-c8031c79a147",
+          "triggerId": "group:2:juvenile",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1791442800000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "juvenile",
+          "state": "Resting",
+          "home": "Moss nest 2 with a sheltered alcove",
+          "appearanceId": "art-87c31c8fd2e0c27789322fba",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-395f28a2-5a64-46c4-a8be-c8031c79a147",
+            "appearanceId": "art-87c31c8fd2e0c27789322fba",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-a07449e9-a5d1-45a1-9134-5d1122a23445",
+          "triggerId": "group:2:adult",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792047600000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-a07449e9-a5d1-45a1-9134-5d1122a23445",
+            "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        }
+      ],
+      "art": [
+        {
+          "id": "art-827cb916b0d010756b4c35de",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "ca61ec7d180d2badf05237c0",
+          "stage": "egg",
+          "description": "A complete conventional pixel egg shell with curved gray-blue markings.",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-827cb916b0d010756b4c35de.png",
+          "kind": "avatar",
+          "createdAt": 1790820000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-608b3e830bfde2cf7ff42995",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "6f4e60102c5dcc1c59a096d0",
+          "stage": "hatchling",
+          "description": "Undeveloped synthetic hatchling",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-608b3e830bfde2cf7ff42995.png",
+          "kind": "avatar",
+          "createdAt": 1790838000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-87c31c8fd2e0c27789322fba",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "519cdc79b3ab1315e0603f4f",
+          "stage": "juvenile",
+          "description": "Synthetic juvenile",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-87c31c8fd2e0c27789322fba.png",
+          "kind": "avatar",
+          "createdAt": 1791442800000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-d8d4da7a4c775efd75cb65cb",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "1f0f8bbc0ec9b3ca2bd87f87",
+          "stage": "adult",
+          "description": "Synthetic adult",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-d8d4da7a4c775efd75cb65cb.png",
+          "kind": "avatar",
+          "createdAt": 1792047600000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        }
+      ],
+      "pending": null
+    },
+    {
+      "version": 2,
+      "host": "dots",
+      "pet": {
+        "id": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+        "name": "GenPet",
+        "adoptedAt": 1790820000000,
+        "revision": 5,
+        "naming": {
+          "status": "unasked"
+        },
+        "genes": "A faceless, low-bodied creature with four short clawed feet, two tactile feelers and a left-curving tail; its back folds develop across stages while these body relationships persist. Test identity 2.",
+        "stage": "adult",
+        "state": {
+          "description": "Resting",
+          "storyId": "story-de0982a6-909b-4163-94fc-7a334972572a",
+          "updatedAt": 1792652400000,
+          "appearanceId": "art-8c06be57e65e499410f27cf1"
+        },
+        "binding": {
+          "host": "dots",
+          "avatarId": "dots:test"
+        },
+        "acquisition": {
+          "place": "Beside an unfinished drawing",
+          "connection": "A meaningful encounter around an ongoing creative task",
+          "storyId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce"
+        },
+        "personality": "Patient and curious. Offers quiet company without assuming the user needs help. Draws its feelers close when listening and unfolds them when exploring. A fictional individual met beside an unfinished drawing; not a claim about user personality.",
+        "home": "Moss nest 2 with a sheltered alcove",
+        "special": {
+          "description": "Lantern glow",
+          "since": 1792652400000,
+          "storyId": "story-de0982a6-909b-4163-94fc-7a334972572a"
+        }
+      },
+      "stories": [
+        {
+          "id": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+          "triggerId": "group:2:adopt",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790820000000,
+          "text": "You found an egg beside the unfinished drawing.",
+          "basis": "The user is working on a drawing; the encounter is fictional.",
+          "stage": "egg",
+          "state": "A quiet intact egg.",
+          "appearanceId": "art-827cb916b0d010756b4c35de",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+            "appearanceId": "art-827cb916b0d010756b4c35de",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-2f158242-eca7-418b-9e65-e384129af7db",
+          "triggerId": "group:2:hatch",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790838000000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "hatchling",
+          "state": "Resting",
+          "home": "Moss nest 2",
+          "appearanceId": "art-608b3e830bfde2cf7ff42995",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-2f158242-eca7-418b-9e65-e384129af7db",
+            "appearanceId": "art-608b3e830bfde2cf7ff42995",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-395f28a2-5a64-46c4-a8be-c8031c79a147",
+          "triggerId": "group:2:juvenile",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1791442800000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "juvenile",
+          "state": "Resting",
+          "home": "Moss nest 2 with a sheltered alcove",
+          "appearanceId": "art-87c31c8fd2e0c27789322fba",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-395f28a2-5a64-46c4-a8be-c8031c79a147",
+            "appearanceId": "art-87c31c8fd2e0c27789322fba",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-a07449e9-a5d1-45a1-9134-5d1122a23445",
+          "triggerId": "group:2:adult",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792047600000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-a07449e9-a5d1-45a1-9134-5d1122a23445",
+            "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-de0982a6-909b-4163-94fc-7a334972572a",
+          "triggerId": "group:2:special",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792652400000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "special": "Lantern glow",
+          "appearanceId": "art-8c06be57e65e499410f27cf1",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-de0982a6-909b-4163-94fc-7a334972572a",
+            "appearanceId": "art-8c06be57e65e499410f27cf1",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        }
+      ],
+      "art": [
+        {
+          "id": "art-827cb916b0d010756b4c35de",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "ca61ec7d180d2badf05237c0",
+          "stage": "egg",
+          "description": "A complete conventional pixel egg shell with curved gray-blue markings.",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-827cb916b0d010756b4c35de.png",
+          "kind": "avatar",
+          "createdAt": 1790820000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-608b3e830bfde2cf7ff42995",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "6f4e60102c5dcc1c59a096d0",
+          "stage": "hatchling",
+          "description": "Undeveloped synthetic hatchling",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-608b3e830bfde2cf7ff42995.png",
+          "kind": "avatar",
+          "createdAt": 1790838000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-87c31c8fd2e0c27789322fba",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "519cdc79b3ab1315e0603f4f",
+          "stage": "juvenile",
+          "description": "Synthetic juvenile",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-87c31c8fd2e0c27789322fba.png",
+          "kind": "avatar",
+          "createdAt": 1791442800000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-d8d4da7a4c775efd75cb65cb",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "1f0f8bbc0ec9b3ca2bd87f87",
+          "stage": "adult",
+          "description": "Synthetic adult",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-d8d4da7a4c775efd75cb65cb.png",
+          "kind": "avatar",
+          "createdAt": 1792047600000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-8c06be57e65e499410f27cf1",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "8ea5ba243515083e08347445",
+          "stage": "adult",
+          "description": "Synthetic glowing adult",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-8c06be57e65e499410f27cf1.png",
+          "kind": "avatar",
+          "createdAt": 1792652400000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        }
+      ],
+      "pending": null
+    },
+    {
+      "version": 2,
+      "host": "dots",
+      "pet": {
+        "id": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+        "name": "GenPet",
+        "adoptedAt": 1790820000000,
+        "revision": 6,
+        "naming": {
+          "status": "unasked"
+        },
+        "genes": "A faceless, low-bodied creature with four short clawed feet, two tactile feelers and a left-curving tail; its back folds develop across stages while these body relationships persist. Test identity 2.",
+        "stage": "adult",
+        "state": {
+          "description": "Resting",
+          "storyId": "story-caf1bea7-5ab4-4085-8aa7-71980147f936",
+          "updatedAt": 1792656000000,
+          "appearanceId": "art-8c06be57e65e499410f27cf1"
+        },
+        "binding": {
+          "host": "dots",
+          "avatarId": "dots:test"
+        },
+        "acquisition": {
+          "place": "Beside an unfinished drawing",
+          "connection": "A meaningful encounter around an ongoing creative task",
+          "storyId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce"
+        },
+        "personality": "Patient and curious. Offers quiet company without assuming the user needs help. Draws its feelers close when listening and unfolds them when exploring. A fictional individual met beside an unfinished drawing; not a claim about user personality.",
+        "home": "Moss nest 2 with a sheltered alcove",
+        "special": {
+          "description": "Lantern glow with quiet sparks",
+          "since": 1792652400000,
+          "storyId": "story-de0982a6-909b-4163-94fc-7a334972572a"
+        }
+      },
+      "stories": [
+        {
+          "id": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+          "triggerId": "group:2:adopt",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790820000000,
+          "text": "You found an egg beside the unfinished drawing.",
+          "basis": "The user is working on a drawing; the encounter is fictional.",
+          "stage": "egg",
+          "state": "A quiet intact egg.",
+          "appearanceId": "art-827cb916b0d010756b4c35de",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+            "appearanceId": "art-827cb916b0d010756b4c35de",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-2f158242-eca7-418b-9e65-e384129af7db",
+          "triggerId": "group:2:hatch",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790838000000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "hatchling",
+          "state": "Resting",
+          "home": "Moss nest 2",
+          "appearanceId": "art-608b3e830bfde2cf7ff42995",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-2f158242-eca7-418b-9e65-e384129af7db",
+            "appearanceId": "art-608b3e830bfde2cf7ff42995",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-395f28a2-5a64-46c4-a8be-c8031c79a147",
+          "triggerId": "group:2:juvenile",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1791442800000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "juvenile",
+          "state": "Resting",
+          "home": "Moss nest 2 with a sheltered alcove",
+          "appearanceId": "art-87c31c8fd2e0c27789322fba",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-395f28a2-5a64-46c4-a8be-c8031c79a147",
+            "appearanceId": "art-87c31c8fd2e0c27789322fba",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-a07449e9-a5d1-45a1-9134-5d1122a23445",
+          "triggerId": "group:2:adult",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792047600000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-a07449e9-a5d1-45a1-9134-5d1122a23445",
+            "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-de0982a6-909b-4163-94fc-7a334972572a",
+          "triggerId": "group:2:special",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792652400000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "special": "Lantern glow",
+          "appearanceId": "art-8c06be57e65e499410f27cf1",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-de0982a6-909b-4163-94fc-7a334972572a",
+            "appearanceId": "art-8c06be57e65e499410f27cf1",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-caf1bea7-5ab4-4085-8aa7-71980147f936",
+          "triggerId": "group:2:special-update",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792656000000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "special": "Lantern glow with quiet sparks",
+          "appearanceId": "art-8c06be57e65e499410f27cf1",
+          "mediaIds": []
+        }
+      ],
+      "art": [
+        {
+          "id": "art-827cb916b0d010756b4c35de",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "ca61ec7d180d2badf05237c0",
+          "stage": "egg",
+          "description": "A complete conventional pixel egg shell with curved gray-blue markings.",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-827cb916b0d010756b4c35de.png",
+          "kind": "avatar",
+          "createdAt": 1790820000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-608b3e830bfde2cf7ff42995",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "6f4e60102c5dcc1c59a096d0",
+          "stage": "hatchling",
+          "description": "Undeveloped synthetic hatchling",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-608b3e830bfde2cf7ff42995.png",
+          "kind": "avatar",
+          "createdAt": 1790838000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-87c31c8fd2e0c27789322fba",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "519cdc79b3ab1315e0603f4f",
+          "stage": "juvenile",
+          "description": "Synthetic juvenile",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-87c31c8fd2e0c27789322fba.png",
+          "kind": "avatar",
+          "createdAt": 1791442800000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-d8d4da7a4c775efd75cb65cb",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "1f0f8bbc0ec9b3ca2bd87f87",
+          "stage": "adult",
+          "description": "Synthetic adult",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-d8d4da7a4c775efd75cb65cb.png",
+          "kind": "avatar",
+          "createdAt": 1792047600000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-8c06be57e65e499410f27cf1",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "8ea5ba243515083e08347445",
+          "stage": "adult",
+          "description": "Synthetic glowing adult",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-8c06be57e65e499410f27cf1.png",
+          "kind": "avatar",
+          "createdAt": 1792652400000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        }
+      ],
+      "pending": null
+    },
+    {
+      "version": 2,
+      "host": "dots",
+      "pet": {
+        "id": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+        "name": "GenPet",
+        "adoptedAt": 1790820000000,
+        "revision": 7,
+        "naming": {
+          "status": "unasked"
+        },
+        "genes": "A faceless, low-bodied creature with four short clawed feet, two tactile feelers and a left-curving tail; its back folds develop across stages while these body relationships persist. Test identity 2.",
+        "stage": "adult",
+        "state": {
+          "description": "Resting",
+          "storyId": "story-4aa2f0b5-5fd3-42d7-b12b-c9cc90f28032",
+          "updatedAt": 1792825200000,
+          "appearanceId": "art-d8d4da7a4c775efd75cb65cb"
+        },
+        "binding": {
+          "host": "dots",
+          "avatarId": "dots:test"
+        },
+        "acquisition": {
+          "place": "Beside an unfinished drawing",
+          "connection": "A meaningful encounter around an ongoing creative task",
+          "storyId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce"
+        },
+        "personality": "Patient and curious. Offers quiet company without assuming the user needs help. Draws its feelers close when listening and unfolds them when exploring. A fictional individual met beside an unfinished drawing; not a claim about user personality.",
+        "home": "Moss nest 2 with a sheltered alcove",
+        "special": {
+          "description": "Lantern glow with quiet sparks",
+          "since": 1792652400000,
+          "storyId": "story-de0982a6-909b-4163-94fc-7a334972572a",
+          "endedAt": 1792825200000
+        }
+      },
+      "stories": [
+        {
+          "id": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+          "triggerId": "group:2:adopt",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790820000000,
+          "text": "You found an egg beside the unfinished drawing.",
+          "basis": "The user is working on a drawing; the encounter is fictional.",
+          "stage": "egg",
+          "state": "A quiet intact egg.",
+          "appearanceId": "art-827cb916b0d010756b4c35de",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+            "appearanceId": "art-827cb916b0d010756b4c35de",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-2f158242-eca7-418b-9e65-e384129af7db",
+          "triggerId": "group:2:hatch",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790838000000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "hatchling",
+          "state": "Resting",
+          "home": "Moss nest 2",
+          "appearanceId": "art-608b3e830bfde2cf7ff42995",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-2f158242-eca7-418b-9e65-e384129af7db",
+            "appearanceId": "art-608b3e830bfde2cf7ff42995",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-395f28a2-5a64-46c4-a8be-c8031c79a147",
+          "triggerId": "group:2:juvenile",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1791442800000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "juvenile",
+          "state": "Resting",
+          "home": "Moss nest 2 with a sheltered alcove",
+          "appearanceId": "art-87c31c8fd2e0c27789322fba",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-395f28a2-5a64-46c4-a8be-c8031c79a147",
+            "appearanceId": "art-87c31c8fd2e0c27789322fba",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-a07449e9-a5d1-45a1-9134-5d1122a23445",
+          "triggerId": "group:2:adult",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792047600000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-a07449e9-a5d1-45a1-9134-5d1122a23445",
+            "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-de0982a6-909b-4163-94fc-7a334972572a",
+          "triggerId": "group:2:special",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792652400000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "special": "Lantern glow",
+          "appearanceId": "art-8c06be57e65e499410f27cf1",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-de0982a6-909b-4163-94fc-7a334972572a",
+            "appearanceId": "art-8c06be57e65e499410f27cf1",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-caf1bea7-5ab4-4085-8aa7-71980147f936",
+          "triggerId": "group:2:special-update",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792656000000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "special": "Lantern glow with quiet sparks",
+          "appearanceId": "art-8c06be57e65e499410f27cf1",
+          "mediaIds": []
+        },
+        {
+          "id": "story-4aa2f0b5-5fd3-42d7-b12b-c9cc90f28032",
+          "triggerId": "group:2:recover",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792825200000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "special": null,
+          "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-4aa2f0b5-5fd3-42d7-b12b-c9cc90f28032",
+            "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        }
+      ],
+      "art": [
+        {
+          "id": "art-827cb916b0d010756b4c35de",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "ca61ec7d180d2badf05237c0",
+          "stage": "egg",
+          "description": "A complete conventional pixel egg shell with curved gray-blue markings.",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-827cb916b0d010756b4c35de.png",
+          "kind": "avatar",
+          "createdAt": 1790820000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-608b3e830bfde2cf7ff42995",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "6f4e60102c5dcc1c59a096d0",
+          "stage": "hatchling",
+          "description": "Undeveloped synthetic hatchling",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-608b3e830bfde2cf7ff42995.png",
+          "kind": "avatar",
+          "createdAt": 1790838000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-87c31c8fd2e0c27789322fba",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "519cdc79b3ab1315e0603f4f",
+          "stage": "juvenile",
+          "description": "Synthetic juvenile",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-87c31c8fd2e0c27789322fba.png",
+          "kind": "avatar",
+          "createdAt": 1791442800000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-d8d4da7a4c775efd75cb65cb",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "1f0f8bbc0ec9b3ca2bd87f87",
+          "stage": "adult",
+          "description": "Synthetic adult",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-d8d4da7a4c775efd75cb65cb.png",
+          "kind": "avatar",
+          "createdAt": 1792047600000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-8c06be57e65e499410f27cf1",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "8ea5ba243515083e08347445",
+          "stage": "adult",
+          "description": "Synthetic glowing adult",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-8c06be57e65e499410f27cf1.png",
+          "kind": "avatar",
+          "createdAt": 1792652400000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        }
+      ],
+      "pending": null
+    },
+    {
+      "version": 2,
+      "host": "dots",
+      "pet": {
+        "id": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+        "name": "GenPet",
+        "adoptedAt": 1790820000000,
+        "revision": 8,
+        "naming": {
+          "status": "unasked"
+        },
+        "genes": "A faceless, low-bodied creature with four short clawed feet, two tactile feelers and a left-curving tail; its back folds develop across stages while these body relationships persist. Test identity 2.",
+        "stage": "adult",
+        "state": {
+          "description": "Resting",
+          "storyId": "story-2d283614-ec22-42c6-a345-bd93ba0654f5",
+          "updatedAt": 1793430000000,
+          "appearanceId": "art-0321a722fb3b69a861757eee"
+        },
+        "binding": {
+          "host": "dots",
+          "avatarId": "dots:test"
+        },
+        "acquisition": {
+          "place": "Beside an unfinished drawing",
+          "connection": "A meaningful encounter around an ongoing creative task",
+          "storyId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce"
+        },
+        "personality": "Patient and curious. Offers quiet company without assuming the user needs help. Draws its feelers close when listening and unfolds them when exploring. A fictional individual met beside an unfinished drawing; not a claim about user personality.",
+        "home": "Moss nest 2 with a sheltered alcove",
+        "special": {
+          "description": "Dew glow",
+          "since": 1793430000000,
+          "storyId": "story-2d283614-ec22-42c6-a345-bd93ba0654f5"
+        }
+      },
+      "stories": [
+        {
+          "id": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+          "triggerId": "group:2:adopt",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790820000000,
+          "text": "You found an egg beside the unfinished drawing.",
+          "basis": "The user is working on a drawing; the encounter is fictional.",
+          "stage": "egg",
+          "state": "A quiet intact egg.",
+          "appearanceId": "art-827cb916b0d010756b4c35de",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-08f34ab5-a6a6-43ee-af51-0440ef8c03ce",
+            "appearanceId": "art-827cb916b0d010756b4c35de",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-2f158242-eca7-418b-9e65-e384129af7db",
+          "triggerId": "group:2:hatch",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1790838000000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "hatchling",
+          "state": "Resting",
+          "home": "Moss nest 2",
+          "appearanceId": "art-608b3e830bfde2cf7ff42995",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-2f158242-eca7-418b-9e65-e384129af7db",
+            "appearanceId": "art-608b3e830bfde2cf7ff42995",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-395f28a2-5a64-46c4-a8be-c8031c79a147",
+          "triggerId": "group:2:juvenile",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1791442800000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "juvenile",
+          "state": "Resting",
+          "home": "Moss nest 2 with a sheltered alcove",
+          "appearanceId": "art-87c31c8fd2e0c27789322fba",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-395f28a2-5a64-46c4-a8be-c8031c79a147",
+            "appearanceId": "art-87c31c8fd2e0c27789322fba",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-a07449e9-a5d1-45a1-9134-5d1122a23445",
+          "triggerId": "group:2:adult",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792047600000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-a07449e9-a5d1-45a1-9134-5d1122a23445",
+            "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-de0982a6-909b-4163-94fc-7a334972572a",
+          "triggerId": "group:2:special",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792652400000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "special": "Lantern glow",
+          "appearanceId": "art-8c06be57e65e499410f27cf1",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-de0982a6-909b-4163-94fc-7a334972572a",
+            "appearanceId": "art-8c06be57e65e499410f27cf1",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-caf1bea7-5ab4-4085-8aa7-71980147f936",
+          "triggerId": "group:2:special-update",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792656000000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "special": "Lantern glow with quiet sparks",
+          "appearanceId": "art-8c06be57e65e499410f27cf1",
+          "mediaIds": []
+        },
+        {
+          "id": "story-4aa2f0b5-5fd3-42d7-b12b-c9cc90f28032",
+          "triggerId": "group:2:recover",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1792825200000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "special": null,
+          "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-4aa2f0b5-5fd3-42d7-b12b-c9cc90f28032",
+            "appearanceId": "art-d8d4da7a4c775efd75cb65cb",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        },
+        {
+          "id": "story-2d283614-ec22-42c6-a345-bd93ba0654f5",
+          "triggerId": "group:2:special-again",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "at": 1793430000000,
+          "text": "A fixture story from this pet.",
+          "basis": "Synthetic cycle",
+          "stage": "adult",
+          "state": "Resting",
+          "special": "Dew glow",
+          "appearanceId": "art-0321a722fb3b69a861757eee",
+          "mediaIds": [],
+          "hostResult": {
+            "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+            "operationId": "story-2d283614-ec22-42c6-a345-bd93ba0654f5",
+            "appearanceId": "art-0321a722fb3b69a861757eee",
+            "avatarId": "dots:test",
+            "updated": true,
+            "active": false,
+            "refreshRequested": false,
+            "displayStatus": "unconfirmed"
+          }
+        }
+      ],
+      "art": [
+        {
+          "id": "art-827cb916b0d010756b4c35de",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "ca61ec7d180d2badf05237c0",
+          "stage": "egg",
+          "description": "A complete conventional pixel egg shell with curved gray-blue markings.",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-827cb916b0d010756b4c35de.png",
+          "kind": "avatar",
+          "createdAt": 1790820000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-608b3e830bfde2cf7ff42995",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "6f4e60102c5dcc1c59a096d0",
+          "stage": "hatchling",
+          "description": "Undeveloped synthetic hatchling",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-608b3e830bfde2cf7ff42995.png",
+          "kind": "avatar",
+          "createdAt": 1790838000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-87c31c8fd2e0c27789322fba",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "519cdc79b3ab1315e0603f4f",
+          "stage": "juvenile",
+          "description": "Synthetic juvenile",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-87c31c8fd2e0c27789322fba.png",
+          "kind": "avatar",
+          "createdAt": 1791442800000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-d8d4da7a4c775efd75cb65cb",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "1f0f8bbc0ec9b3ca2bd87f87",
+          "stage": "adult",
+          "description": "Synthetic adult",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-d8d4da7a4c775efd75cb65cb.png",
+          "kind": "avatar",
+          "createdAt": 1792047600000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-8c06be57e65e499410f27cf1",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "8ea5ba243515083e08347445",
+          "stage": "adult",
+          "description": "Synthetic glowing adult",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-8c06be57e65e499410f27cf1.png",
+          "kind": "avatar",
+          "createdAt": 1792652400000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        },
+        {
+          "id": "art-0321a722fb3b69a861757eee",
+          "petId": "genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6",
+          "requestId": "51965170c3ddf4d22a611b38",
+          "stage": "adult",
+          "description": "Second synthetic special form",
+          "file": "C:\\Users\\geyat\\AppData\\Local\\Temp\\genpet-cycle-2-Wz07Zk\\dots\\pets\\genpet-6ae3fb6f-c1a5-429c-a31b-b3abb2a3c3d6\\assets\\art-0321a722fb3b69a861757eee.png",
+          "kind": "avatar",
+          "createdAt": 1793430000000,
+          "provenance": "Synthetic lifecycle fixture; not visual acceptance"
+        }
+      ],
+      "pending": null
+    }
+  ]
+}

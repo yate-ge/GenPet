@@ -1,0 +1,14 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/home-first/home/image-review-v1.input.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/home-first/home/image-review-v1.request.json"
+  ],
+  "result": {
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/home-first/home/generated.png",
+    "verdict": "repair",
+    "observations": [
+      "全景及分区存在，但右侧新增黑暗洞穴和木质门框，与明确要求开口草地、非洞穴相冲突。"
+    ],
+    "repair": "移除洞穴和门框，保留普通苔石与开放通路。"
+  }
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "file": "src/growth.ts",
+    "workingCRLF": false,
+    "cleanCRLF": false,
+    "sameContentAfterLF": true
+  },
+  {
+    "file": "src/lifecycle.ts",
+    "workingCRLF": true,
+    "cleanCRLF": false,
+    "sameContentAfterLF": true
+  },
+  {
+    "file": "src/status.ts",
+    "workingCRLF": false,
+    "cleanCRLF": false,
+    "sameContentAfterLF": true
+  },
+  {
+    "file": "framework/prompts/meta.md",
+    "workingCRLF": false,
+    "cleanCRLF": false,
+    "sameContentAfterLF": true
+  }
+]

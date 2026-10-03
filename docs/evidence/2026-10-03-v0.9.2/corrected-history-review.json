@@ -1,0 +1,10 @@
+{
+  "reviewer": "root",
+  "accepted": true,
+  "observations": [
+    "移除旧记录不支持的载体标签后，六案依据改为实际正文或显式探针。",
+    "五个有图案的carrier设计完全相同，现有图可按修订后的真实输入复用。",
+    "无新资料且最近三篇有图的探针carrier仍为null。"
+  ],
+  "fixtureError": "初次输入将历史有图记录误标成postcard，原输入保留为负例，不视为运行时缺陷。"
+}

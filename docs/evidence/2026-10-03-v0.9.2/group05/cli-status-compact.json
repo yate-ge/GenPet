@@ -1,0 +1,192 @@
+{
+  "version": 2,
+  "host": "dots",
+  "pet": {
+    "id": "genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e",
+    "name": "GenPet",
+    "adoptedAt": 1790985600000,
+    "revision": 10,
+    "naming": {
+      "status": "asked",
+      "askedAt": 1791003600000
+    },
+    "genes": "依据：海边骑车途中观察礁石小蟹，引出石窝中的蛋；主要身体由小蟹转化，水草线索体现在两道青绿背甲弧纹。孵化后的生命有柔圆奶白背甲、两根短眼柄、左右各一只小钳和四只短侧足；左钳略圆、右钳略尖是稳定识别线索。眼、钳、足都属于身体，背甲不做容器。幼年甲壳柔软、钳与足短而未展开，弧纹浅淡；少年甲壳更完整、足展开但仍紧凑；成年钳更明确、甲壳呈低圆拱形，仍保留同一眼柄、钳形差与双弧纹。少量奶白、青绿、深蓝像素色块，无真实甲壳毛刺与解剖质感。",
+    "stage": "adult",
+    "state": {
+      "description": "戴着阔叶折成的小雨帽，宽帽檐向两侧排水，软草纤固定并绕开眼柄、钳和四侧足。",
+      "storyId": "story-e4d6ba72-08d4-4676-9adc-ba1c9de8f40b",
+      "updatedAt": 1793001600000,
+      "appearanceId": "art-c3e3bf89b897c12687a03747"
+    },
+    "binding": {
+      "host": "dots",
+      "avatarId": "dots:isolated:group05"
+    },
+    "acquisition": {
+      "place": "退潮后，海边礁石缝旁的一处浅石窝",
+      "connection": "地点直接来自沿海骑车、观察小蟹的事实，壳面线索呼应鱼缸水草；蛋与敲壳是宠物世界虚构，没有新增用户行为。",
+      "storyId": "story-31819f34-82b6-4770-9ddd-3163505bec2c"
+    },
+    "personality": "它喜欢先留一条退路，再尝试新东西；遇到陌生响动会靠近一段、停下来看看，没弄清时不硬撑。陪伴时愿意并排做自己的事，不替对方解释感受。它珍惜不完美的小发现，整理收藏会保留来处而非按漂亮程度丢掉。创作依据是石窝里轻敲后等待的相遇行为，以及用户观察细小生命、整理旧照片的具体线索；这是宠物的性格，不是对用户人格的推断，也不由蟹这一物种固定。",
+    "home": "仍在礁石缝旁的浅石窝，周围是退潮礁石和门前低坎；奶白旧壳遮住入口一侧，门间保留细沙，两颗浅蓝石分列门边，第三颗仍在壳后。石窝深处休息，旧壳后收藏，门前沙路线连接到低坎并保持出口畅通。原有位置全部延续；这次画出的四格试帽漫画留在壳门内侧的干燥石沿作为新收藏，叶帽由宠物继续佩戴，没有替代门或改造房屋。",
+    "special": {
+      "description": "夜潮形态：成年背甲染深蓝潮影，双青绿弧纹更亮，柔软甲缘下垂成小波浪，两钳收拢；保留同一眼柄、左右钳差和四足。",
+      "since": 1792818000000,
+      "storyId": "story-f1818ae7-b6ae-4fde-bb82-ccb9057feb43",
+      "endedAt": 1792990800000
+    }
+  },
+  "pending": null,
+  "storyCount": 10,
+  "stories": [
+    {
+      "id": "story-f1818ae7-b6ae-4fde-bb82-ccb9057feb43",
+      "triggerId": "test:group05:special",
+      "petId": "genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e",
+      "at": 1792818000000,
+      "text": "你这一周常常很晚才关灯，还在整理海边的照片。奶白小蟹没有催你，也没有跟着把夜拖长。它往石窝深处挪了一点，用钳把沙上的路线重新描清；画到出口时，它停住了。背甲渐渐浮起深蓝的潮影，原来的两道青绿弧纹在暗里反而更亮，软软的甲缘垂成了起伏的小波浪。它把两只钳收在身体下，像留给自己的一个安静位置：“你忙你的，我先在这里。”",
+      "basis": "成年后一周兜底已到，必须进入特殊形态；c5-late-pattern是连续多晚而非一次事件，性格使它退回家中守安静，变化发生在同一背甲而非改写基因或新物种。",
+      "stage": "adult",
+      "state": "回应连续晚睡的光线时更愿意守着自己的安静角落。",
+      "special": "夜潮形态：成年背甲染深蓝潮影，双青绿弧纹更亮，柔软甲缘下垂成小波浪，两钳收拢；保留同一眼柄、左右钳差和四足。",
+      "appearanceId": "art-82b95b9b37f73a859497b409",
+      "mediaIds": []
+    },
+    {
+      "id": "story-5e28d8ed-e090-4da1-8010-fd26f8cbc97d",
+      "triggerId": "test:group05:recovery",
+      "petId": "genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e",
+      "at": 1792990800000,
+      "text": "石窝的门一直留着。深蓝的小蟹这两天只在那张沙地图上走短短的一圈，走到出口就停下，像给自己的路线也留一拍。今天，它把门边的两颗圆石扶正，旧壳背后的第三颗仍没动。背甲上的潮影渐渐退去，波浪般的软甲缘收回原来的低圆弧，奶白底色又露了出来。青绿的两道纹仍在。它不需要把所有夜晚都装进自己的壳里，沙上的空圈也还可以空着。",
+      "basis": "特殊形态进入正好两天，growth.required=end-special，必须恢复。没有用户新资料，普通状态沿用，恢复由自身短程活动承载，不补造用户模式改变；成年阶段不逆转，基因性格不变。",
+      "stage": "adult",
+      "state": "回应连续晚睡的光线时更愿意守着自己的安静角落。",
+      "special": null,
+      "appearanceId": "art-5ec13139970d88fb509a0cdd",
+      "mediaIds": []
+    },
+    {
+      "id": "story-62f773ab-a776-427a-bc8f-f3d95b5f7bb1",
+      "triggerId": "story-types-group05-independent",
+      "petId": "genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e",
+      "at": 1792994400000,
+      "text": "今天石窝里多了一声细细的哨音。小蟹把左钳贴在旧壳门上，声音停了；松开，又响。它没拆门，只挪到壳后的第三颗蓝石旁，等下一阵风。\n风钻过壳沿和石头之间的小缝，沙地图上那条路也被吹歪了一点。原来家里藏着一支笛子。\n傍晚，它没有把路重新描直，只把出口清开，趴着听那声不太稳的长音。今天这间窝的声音，得留一道缝才听得见。",
+      "basis": "独立生活没有新用户事实；沿用实际普通状态与成年阶段，growth.required=null，结束过的夜潮形态不重开，长期基因性格不变。",
+      "stage": "adult",
+      "state": "回应连续晚睡的光线时更愿意守着自己的安静角落。",
+      "appearanceId": "art-5ec13139970d88fb509a0cdd",
+      "mediaIds": []
+    },
+    {
+      "id": "story-632be8a7-d3ae-47b6-b8d5-0393746747c8",
+      "triggerId": "story-types-group05-linked",
+      "petId": "genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e",
+      "at": 1792998000000,
+      "text": "过去三天，你晚饭后去散步，把三次观察落叶的差异记进笔记；今天那片叶子在河面旋转。小蟹也在自己的潮水洼边盯住一片叶。\n它想看清叶尖走过哪里，把圆左钳放在水口当记号。叶子碰到钳边，卡住了。它等了好一会儿，才发现那个‘记号’挡住了水。\n左钳挪开，叶子重新转起来，尖端从它眼前一晃而过。这次它站远一点，没有追着按住叶子。它留在岸上的，是三格小画：钳伸下去，叶子停住，钳抬起来。最后一格，叶子自己走。",
+      "basis": "leaf-note的连续观察与记差异，引出宠物自己试水口、发现阻碍后退开的故事，普通状态有事实引用；实际成长required=null，三天观察不足以在刚恢复后再次特殊化，成年阶段与长期基因性格保持。",
+      "stage": "adult",
+      "state": "观察时愿意退开一点，让小发现自己发生。",
+      "appearanceId": "art-5ec13139970d88fb509a0cdd",
+      "mediaIds": [
+        "art-1bb248054131afe058c5dd4f"
+      ]
+    },
+    {
+      "id": "story-e4d6ba72-08d4-4676-9adc-ba1c9de8f40b",
+      "triggerId": "test-092-continued-group05",
+      "petId": "genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e",
+      "at": 1793001600000,
+      "text": "小蟹先把一片落在石窝外的阔叶翻了过来。你想看它戴上能避雨的小帽子，也想收到漫画；它打算把“试帽子”画给你看。\n第一滴雨落下时，叶子还平趴在它头上，水沿叶尖滴到眼柄。它退回旧壳门边，剪短翘起的叶尖，把宽叶沿折成朝外的小檐；一根柔软草纤绕过背甲两侧，绕开两只钳和四只足。\n它只走到门前那两颗蓝石之间，让帽檐先接住细雨。水滴从两边滚下，短眼柄下面仍能看清回家的路。最后一格，它戴着改好的叶帽横着走过门口，圆左钳举向帽檐，尖右钳还留在身体旁。\n“第一回太滴眼睛了。这个可以。”那张四格漫画留在石窝的干燥石沿，它自己把帽子继续戴着，等下一阵细雨。",
+      "basis": "hat-wish明确要求戴避雨帽，故事完成试戴、折檐和继续佩戴，属于有来源的可见普通状态。growth.required=null，近期已恢复成年，不将单次请求或细雨升级为特殊身体；基因性格保持。",
+      "stage": "adult",
+      "state": "戴着阔叶折成的小雨帽，宽帽檐向两侧排水，软草纤固定并绕开眼柄、钳和四侧足。",
+      "home": "仍在礁石缝旁的浅石窝，周围是退潮礁石和门前低坎；奶白旧壳遮住入口一侧，门间保留细沙，两颗浅蓝石分列门边，第三颗仍在壳后。石窝深处休息，旧壳后收藏，门前沙路线连接到低坎并保持出口畅通。原有位置全部延续；这次画出的四格试帽漫画留在壳门内侧的干燥石沿作为新收藏，叶帽由宠物继续佩戴，没有替代门或改造房屋。",
+      "appearanceId": "art-c3e3bf89b897c12687a03747",
+      "mediaIds": [
+        "art-8cc5104824869df9e5e37fb6"
+      ]
+    }
+  ],
+  "artCount": 9,
+  "art": [
+    {
+      "id": "art-0df240f57fb68fab47cc15d3",
+      "stage": "egg",
+      "kind": "avatar",
+      "description": "完整常规卵形奶白蛋壳，上窄下圆，无外露肢体、无裂缝；壳面两道不闭合的青绿弧纹，底侧少许浅蓝斑点，整体仍一眼是蛋。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group05/data/dots/pets/genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e/assets/art-0df240f57fb68fab47cc15d3.png"
+    },
+    {
+      "id": "art-0f9ada5fd8df1bd8369ffe53",
+      "stage": "hatchling",
+      "kind": "avatar",
+      "description": "奶白柔软低圆背甲，浅青绿双弧纹，两根短眼柄、圆左钳与稍尖右钳，四只贴身短足，钳足尚未长开。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group05/data/dots/pets/genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e/assets/art-0f9ada5fd8df1bd8369ffe53.png"
+    },
+    {
+      "id": "art-46e778794b1adcb70b05a0a3",
+      "stage": "hatchling",
+      "kind": "story",
+      "description": "第一次离开壳后谨慎探索，有了可退回的落脚处。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group05/data/dots/pets/genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e/assets/art-46e778794b1adcb70b05a0a3.png"
+    },
+    {
+      "id": "art-24c266a6579af8832a8bcf8c",
+      "stage": "juvenile",
+      "kind": "avatar",
+      "description": "少年低圆拱形奶白背甲，双青绿弧纹更清楚，短眼柄、左右钳差延续；钳与四侧足部分展开，仍未完全成熟。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group05/data/dots/pets/genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e/assets/art-24c266a6579af8832a8bcf8c.png"
+    },
+    {
+      "id": "art-5ec13139970d88fb509a0cdd",
+      "stage": "adult",
+      "kind": "avatar",
+      "description": "成年低圆拱奶白背甲、双青绿弧纹与短眼柄；钳更明确，四侧足完整展开，圆左钳与稍尖右钳保持身份。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group05/data/dots/pets/genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e/assets/art-5ec13139970d88fb509a0cdd.png"
+    },
+    {
+      "id": "art-82b95b9b37f73a859497b409",
+      "stage": "adult",
+      "kind": "avatar",
+      "description": "夜潮形态：成年背甲染深蓝潮影，双青绿弧纹更亮，柔软甲缘下垂成小波浪，两钳收拢；保留同一眼柄、左右钳差和四足。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group05/data/dots/pets/genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e/assets/art-82b95b9b37f73a859497b409.png"
+    },
+    {
+      "id": "art-1bb248054131afe058c5dd4f",
+      "stage": "adult",
+      "kind": "story",
+      "description": "观察时愿意退开一点，让小发现自己发生。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group05/data/dots/pets/genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e/assets/art-1bb248054131afe058c5dd4f.png"
+    },
+    {
+      "id": "art-c3e3bf89b897c12687a03747",
+      "stage": "adult",
+      "kind": "avatar",
+      "description": "同一奶白双青绿弧纹成年小蟹，戴低矮浅绿阔叶雨帽；帽檐外翻向两侧排水，短眼柄露在檐下，细草纤沿甲侧固定，圆左钳、尖右钳和四侧足保留。",
+      "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\data\\dots\\pets\\genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e\\assets\\art-c3e3bf89b897c12687a03747.png"
+    },
+    {
+      "id": "art-8cc5104824869df9e5e37fb6",
+      "stage": "adult",
+      "kind": "story",
+      "description": "同一奶白双青绿弧纹成年小蟹，戴低矮浅绿阔叶雨帽；帽檐外翻向两侧排水，短眼柄露在檐下，细草纤沿甲侧固定，圆左钳、尖右钳和四侧足保留。",
+      "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\data\\dots\\pets\\genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e\\assets\\art-8cc5104824869df9e5e37fb6.png"
+    }
+  ],
+  "chatCount": 0,
+  "chats": [],
+  "namingDue": false,
+  "growth": {
+    "stage": "adult",
+    "next": null,
+    "since": "2026-10-17T05:00:00.000Z",
+    "advanceBy": null,
+    "special": {
+      "active": false,
+      "since": "2026-10-26T05:00:00.000Z",
+      "enterBy": "2026-11-02T05:00:00.000Z"
+    },
+    "required": null
+  },
+  "dataDirectory": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\data\\dots"
+}

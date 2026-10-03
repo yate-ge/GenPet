@@ -1,0 +1,96 @@
+{
+  "commit": "a90f998d44948dacfbde2512abfae064ed51f571",
+  "version": "0.9.2",
+  "seedReports": [
+    "../2026-10-03-run2/REPORT.md",
+    "../2026-10-03-story-types/REPORT.md"
+  ],
+  "images": [
+    {
+      "name": "01-postcard-zh",
+      "label": "中文明信片",
+      "source": "group01/main/carrier.png",
+      "verdict": "accept",
+      "archived": "media/01-postcard-zh.png"
+    },
+    {
+      "name": "02-self-photo",
+      "label": "宠物自拍照片",
+      "source": "group02/main/carrier.png",
+      "verdict": "accept",
+      "archived": "media/02-self-photo.png"
+    },
+    {
+      "name": "03-stone-v2",
+      "label": "带回物件 v2",
+      "source": "group03/main/carrier-v2.png",
+      "verdict": "accept",
+      "archived": "media/03-stone-v2.png"
+    },
+    {
+      "name": "04-moved-home-v2",
+      "label": "搬家全景 v2",
+      "source": "group04/home/generated-v2.png",
+      "verdict": "accept",
+      "archived": "media/04-moved-home-v2.png"
+    },
+    {
+      "name": "05-hat-avatar",
+      "label": "叶帽状态 Avatar",
+      "source": "group05/appearance/generated.png",
+      "verdict": "accept",
+      "archived": "media/05-hat-avatar.png"
+    },
+    {
+      "name": "06-comic",
+      "label": "四格漫画",
+      "source": "group05/carrier/generated.png",
+      "verdict": "accept",
+      "archived": "media/06-comic.png"
+    },
+    {
+      "name": "07-postcard-en",
+      "label": "英文明信片",
+      "source": "group01/en/carrier.png",
+      "verdict": "accept",
+      "archived": "media/07-postcard-en.png"
+    },
+    {
+      "name": "08-postcard-ja",
+      "label": "日文明信片",
+      "source": "group01/ja/carrier.png",
+      "verdict": "accept",
+      "archived": "media/08-postcard-ja.png"
+    },
+    {
+      "name": "09-first-home-v2",
+      "label": "首次建家探针 v2",
+      "source": "home-first/home/generated-v2.png",
+      "verdict": "accept",
+      "archived": "media/09-first-home-v2.png"
+    },
+    {
+      "name": "negative-stone-v1",
+      "label": "负例：画幅方形",
+      "source": "group03/main/carrier.png",
+      "verdict": "repair",
+      "archived": "media/negative-stone-v1.png"
+    },
+    {
+      "name": "negative-moved-home-v1",
+      "label": "负例：空位添标记",
+      "source": "group04/home/generated.png",
+      "verdict": "repair",
+      "archived": "media/negative-moved-home-v1.png"
+    },
+    {
+      "name": "negative-first-home-v1",
+      "label": "负例：多出洞穴",
+      "source": "home-first/home/generated.png",
+      "verdict": "repair",
+      "archived": "media/negative-first-home-v1.png"
+    }
+  ],
+  "isolation": "All fictional fixtures; no live Pet, Avatar or scheduled task changed",
+  "rawLocalRun": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2"
+}

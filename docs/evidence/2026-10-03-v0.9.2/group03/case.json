@@ -1,0 +1,14 @@
+{
+  "availableContext": {
+    "facts": [
+      {
+        "id": "new-river-note",
+        "text": "过去四天晚饭后散步；今天在小溪旁观察小树枝转弯，把两次观察的差异记入本子。",
+        "source": "fictional:0.9.2:river-note"
+      }
+    ],
+    "userRequest": "这篇故事想收到宠物带回的一件物件。",
+    "language": "中文"
+  },
+  "source": "Prior actual 0.8.1 adult record; isolated continuation under 0.9.2, not a new adoption"
+}

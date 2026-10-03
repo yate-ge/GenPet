@@ -1,0 +1,20 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group01\\en\\case.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group01\\status.json"
+  ],
+  "result": {
+    "facts": [
+      {
+        "id": "new-river-note",
+        "text": "For the past four days I have taken walks after dinner. Today I watched a small twig turn beside a creek and wrote down the differences between two observations.",
+        "source": "fictional:0.9.2:river-note:en"
+      }
+    ],
+    "unknowns": [
+      "The exact differences and any interaction with the pet are unknown."
+    ],
+    "language": "English",
+    "userRequest": "I would like this story as a postcard."
+  }
+}

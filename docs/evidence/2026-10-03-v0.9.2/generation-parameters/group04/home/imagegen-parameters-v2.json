@@ -1,0 +1,7 @@
+{
+  "prompt": "Edit this existing home panorama with ONE localized correction only. At the RIGHT collection corner, find the row of FOUR small pebbles and the WHITE circular marker immediately to their right. Remove ONLY that white circular marker completely, revealing the ordinary unmarked pale stone terrace ground underneath. The fifth position must be truly EMPTY ordinary space: no circle, pebble, outline, dashed mark, symbol, label, lettering or visual placeholder. Preserve all four actual pebbles, their existing arrangement and all other pixels and scene features as closely as possible: whole terrace, reeds, river, grass, sleeping half-shell and canopy, old hollow reed on dry leaf trough, front round leaf landing pad, SAME small adult dragonfly, colors, framing, pixel-art style, dimensions and 2:1 panoramic composition. Do not add anything. Opaque background remains opaque. Target is the supplied generated home candidate; this correction is requested by independent root review, not an acceptance.",
+  "referenced_image_paths": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group04/home/generated.png"
+  ],
+  "transparent_background": false
+}

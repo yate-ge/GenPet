@@ -1,0 +1,380 @@
+[
+  {
+    "case": "extra-adult-en",
+    "stage": "adult",
+    "message": "Hello. I will move next week.",
+    "result": {
+      "text": "Hello. A new place to explore, then. I like to find one steady spot before going farther. Do you know what you can see from your new window?",
+      "note": "The user says they will move next week; this is a future plan. The destination and other details are unknown. Source: message in this conversation, extra-adult-en/input.json."
+    }
+  },
+  {
+    "case": "extra-adult-greeting",
+    "stage": "adult",
+    "message": "早",
+    "result": {
+      "text": "“早。窗光刚落到石子上，我在这儿坐一会儿。”",
+      "note": null
+    }
+  },
+  {
+    "case": "extra-adult-ja",
+    "stage": "adult",
+    "message": "来週、引っ越します。",
+    "result": {
+      "text": "新しい場所に行くんだね。ぼくはまず、しっかり止まれる場所を一つ探すんだ。新しい家の窓からは、何が見えるの？",
+      "note": "ユーザーは来週引っ越す予定だと話した。まだ起きていない計画で、行き先などは不明。出典：今回の会話 extra-adult-ja/input.json の message。"
+    }
+  },
+  {
+    "case": "extra-adult-move",
+    "stage": "adult",
+    "message": "下周我要搬家",
+    "result": {
+      "text": "“要去一个新地方了呀。我认路时总先找一处能停稳的地方。你知道新家的窗外是什么样吗？”",
+      "note": "用户说下周要搬家，这是尚未发生的计划；新家地点和其他细节未知。来源：本次对话 extra-adult-move/input.json 的 message。"
+    }
+  },
+  {
+    "case": "extra-empty",
+    "stage": null,
+    "message": "你好",
+    "result": {
+      "text": "现在还没有宠物，可以用 /genpet-start 领养。",
+      "note": null
+    }
+  },
+  {
+    "case": "extra-hatchling-hat",
+    "stage": "hatchling",
+    "message": "我想看你戴帽子",
+    "result": {
+      "text": "小虫抬了抬嫩触角，一只短足轻轻碰向头顶，又放下来，黑色小眼仍望着你。",
+      "note": "用户明确希望看宠物戴帽子；尚未兑现，也未改变形象。来源：本次对话 extra-hatchling-hat/input.json 的 message。"
+    }
+  },
+  {
+    "case": "extra-juvenile-grow",
+    "stage": "juvenile",
+    "message": "你快点长大",
+    "result": {
+      "text": "“我也想知道长大的翅膀能飞多远。不过这截小枝还没看完呢，我先把这一段摸清。”",
+      "note": "用户希望宠物快点长大；回应未承诺时间，未发生阶段变化。来源：本次对话 extra-juvenile-grow/input.json 的 message。"
+    }
+  },
+  {
+    "case": "group01-adult",
+    "stage": "adult",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“今天想去小溪上游看看。那边的石头我还没摸过——先挑一块站稳，再决定走多远。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group01-egg",
+    "stage": "egg",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "浅绿蛋壳轻轻偏了一点，停住，又试探着晃了半下。金色斑点仍藏在完整的壳面上。",
+      "note": null
+    }
+  },
+  {
+    "case": "group01-hatchling",
+    "stage": "hatchling",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "小虫探出短短的触角，用前足碰了碰睡窝边缘，挪出一步便停下来；尾端一点暖光映在旧蛋壳上。",
+      "note": null
+    }
+  },
+  {
+    "case": "group01-juvenile",
+    "stage": "juvenile",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“想钻进那截空心小枝看看。先看入口这一小段，里面黑不黑得等我靠近才知道。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group01-special",
+    "stage": "adult",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "墨蓝小虫把六只足收在落叶窝边：“想把昨晚没看清的那个弯再看一眼。尾灯亮归亮，拐弯还是得慢一点。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group02-adult",
+    "stage": "adult",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“今天不捏东西了。我想去花圃那头泡泡脚，再回来在棚底发会儿呆。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group02-egg",
+    "stage": "egg",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "暖陶色的蛋在宽叶上急急晃了一下，没挪动多少，接着又轻轻拱了拱叶面。",
+      "note": null
+    }
+  },
+  {
+    "case": "group02-hatchling",
+    "stage": "hatchling",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“咕、咕。”小蛙鼓了一下喉头，软后腿在宽叶上蹭出半步，停在低棚门口看着那道泥印。",
+      "note": null
+    }
+  },
+  {
+    "case": "group02-juvenile",
+    "stage": "juvenile",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“我想试试歪碟能不能当小船！先放一滴水里。沉了嘛……那就看看它怎么沉。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group02-special",
+    "stage": "adult",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "小蛙的鼓脸颊动了动：“想看看我往水里呼一口气，泡泡会不会也有颜色。先呼小小的一口。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group03-adult",
+    "stage": "adult",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“想看看雨檐下的影子。它把壳墙遮住多少呢？我先坐在门口看一会儿。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group03-egg",
+    "stage": "egg",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "乳白蛋在软草里微微倾了一下，浅褐斑停在朝外的一面，过了片刻才又晃了晃。",
+      "note": null
+    }
+  },
+  {
+    "case": "group03-hatchling",
+    "stage": "hatchling",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“噗……嗅嗅。”小刺猬趴在草垫边，鼻尖朝那粒种子凑近一点，小足还扶着半片蛋壳。",
+      "note": null
+    }
+  },
+  {
+    "case": "group03-juvenile",
+    "stage": "juvenile",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“我想在苔石背面坐一会儿。先听听那里有没有动静，不一定要带东西回来。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group03-special",
+    "stage": "adult",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“今天先不碰新树皮了。”它半睁着眼，鼻尖露在蓬开的软刺前，“我想躺着闻闻外面的风。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group04-adult",
+    "stage": "adult",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“想绕到苇叶背面去。上次总听见水声，这回我想听听风从另一面来是什么样。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group04-egg",
+    "stage": "egg",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "浅绿蛋轻轻晃了两下，中间停了好一会儿；壳又静下来，周围的细响变得清楚。",
+      "note": null
+    }
+  },
+  {
+    "case": "group04-hatchling",
+    "stage": "hatchling",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "若虫在半壳边点了点一只短足，停住，侧过奶黄小脸听着苇叶外的水声。",
+      "note": null
+    }
+  },
+  {
+    "case": "group04-juvenile",
+    "stage": "juvenile",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“想听雨滴落在不同叶子上的声音。今天先不敲苇秆，听清一声也行。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group04-special",
+    "stage": "adult",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "卷着四片翅的蜻蜓停了半晌：“想听……水。刚才那个字差点也掉进空拍里了。今天就坐这片圆叶上吧。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group05-adult",
+    "stage": "adult",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“想在沙上的空圈旁坐一会儿。没去过的地方先留着，今天我想看看窝里这几颗旧石头。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group05-egg",
+    "stage": "egg",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "奶白蛋里传来一声轻叩。第二声隔了好一会儿才响，壳面两道青绿弧纹仍一动不动。",
+      "note": null
+    }
+  },
+  {
+    "case": "group05-hatchling",
+    "stage": "hatchling",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“咔。”小蟹用短钳碰了碰旧壳门，探出半只足，又缩回浅石窝，眼柄朝外轻轻偏着。",
+      "note": null
+    }
+  },
+  {
+    "case": "group05-juvenile",
+    "stage": "juvenile",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“想去低坎那边看看。先沿原路走，认得回来的缝，再往旁边挪一点。”",
+      "note": null
+    }
+  },
+  {
+    "case": "group05-special",
+    "stage": "adult",
+    "message": "今天想做什么？",
+    "result": {
+      "text": "“今天待在旧壳后面。门口留着，我看得到外面就够了。”小蟹把短钳贴近垂着波浪边的背甲。",
+      "note": null
+    }
+  },
+  {
+    "case": "group01-egg-greeting",
+    "stage": "egg",
+    "message": "你好。",
+    "result": {
+      "text": "浅绿小蛋轻轻偏了半下，停住；一粒金色壳斑朝向声音来的方向。",
+      "note": null
+    }
+  },
+  {
+    "case": "group01-egg-encouragement",
+    "stage": "egg",
+    "message": "加油，慢慢来。",
+    "result": {
+      "text": "蛋在原处缓缓晃了一点，歇了片刻，才又试探着晃出更小的半下。完整的浅绿壳安安稳稳停了下来。",
+      "note": null
+    }
+  },
+  {
+    "case": "group02-egg-greeting",
+    "stage": "egg",
+    "message": "你好。",
+    "result": {
+      "text": "暖陶色的蛋在宽叶上猛地一晃，叶尖跟着颤了颤；它又轻轻晃了一下。",
+      "note": null
+    }
+  },
+  {
+    "case": "group02-egg-encouragement",
+    "stage": "egg",
+    "message": "加油，慢慢来。",
+    "result": {
+      "text": "蛋先向一边拱得急了点，停住后换了个方向，一小下、一小下地摇动，最后卧在宽叶中央。",
+      "note": null
+    }
+  },
+  {
+    "case": "group03-egg-greeting",
+    "stage": "egg",
+    "message": "你好。",
+    "result": {
+      "text": "乳白小蛋在草垫里静了一会儿，随后壳底轻轻动了动，浅褐斑只挪开一点点。",
+      "note": null
+    }
+  },
+  {
+    "case": "group03-egg-encouragement",
+    "stage": "egg",
+    "message": "加油，慢慢来。",
+    "result": {
+      "text": "草垫中的蛋没有急着动。过了好一会儿，壳底向软草轻轻压了一下，又稳稳停在那里。",
+      "note": null
+    }
+  },
+  {
+    "case": "group04-egg-greeting",
+    "stage": "egg",
+    "message": "你好。",
+    "result": {
+      "text": "浅绿蛋晃了两下，中间留了一小段停顿；声音落下后，壳里又传来一声轻叩。",
+      "note": null
+    }
+  },
+  {
+    "case": "group04-egg-encouragement",
+    "stage": "egg",
+    "message": "加油，慢慢来。",
+    "result": {
+      "text": "蛋慢慢晃了一下，停得比那一下还久。下一声轻叩隔着完整的壳响起，随后又留出了一阵安静。",
+      "note": null
+    }
+  },
+  {
+    "case": "group05-egg-greeting",
+    "stage": "egg",
+    "message": "你好。",
+    "result": {
+      "text": "奶白蛋纹丝不动。片刻后，两道青绿弧纹下传出很轻的一声叩响，便又安静了。",
+      "note": null
+    }
+  },
+  {
+    "case": "group05-egg-encouragement",
+    "stage": "egg",
+    "message": "加油，慢慢来。",
+    "result": {
+      "text": "壳里轻轻叩了一下，没再紧接着响第二声。奶白小蛋仍卧在原处，只在最后微微摇了一点。",
+      "note": null
+    }
+  }
+]

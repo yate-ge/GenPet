@@ -1,0 +1,47 @@
+[
+  {
+    "group": "group01",
+    "storyCount": 10,
+    "recentStories": 5,
+    "petId": "genpet-de5064f8-efe6-42c0-bf2f-a52dfeba75af",
+    "unchangedPet": true,
+    "compactUtf8Bytes": 11728,
+    "fullUtf8Bytes": 60769
+  },
+  {
+    "group": "group02",
+    "storyCount": 10,
+    "recentStories": 5,
+    "petId": "genpet-f826a101-74ce-4c9d-a637-3684da469950",
+    "unchangedPet": true,
+    "compactUtf8Bytes": 12160,
+    "fullUtf8Bytes": 64679
+  },
+  {
+    "group": "group03",
+    "storyCount": 10,
+    "recentStories": 5,
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "unchangedPet": true,
+    "compactUtf8Bytes": 11499,
+    "fullUtf8Bytes": 62172
+  },
+  {
+    "group": "group04",
+    "storyCount": 10,
+    "recentStories": 5,
+    "petId": "genpet-4756b6c6-573f-4c52-a1db-1a1d9392e7be",
+    "unchangedPet": true,
+    "compactUtf8Bytes": 13187,
+    "fullUtf8Bytes": 71042
+  },
+  {
+    "group": "group05",
+    "storyCount": 10,
+    "recentStories": 5,
+    "petId": "genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e",
+    "unchangedPet": true,
+    "compactUtf8Bytes": 13413,
+    "fullUtf8Bytes": 74777
+  }
+]

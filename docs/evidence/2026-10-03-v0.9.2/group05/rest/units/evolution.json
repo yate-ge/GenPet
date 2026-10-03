@@ -1,0 +1,14 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/current.snapshot.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rest/context/result.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2/group05/rest/story/result.json"
+  ],
+  "result": {
+    "stage": "adult",
+    "state": "摘下叶帽，留在家中休息；身体保持普通奶白成年形态。",
+    "basis": "hat-rest明确要求摘帽休息，故事中的松开草纤、将帽放回石沿构成可见普通状态改变；尊重已保存身体和珍惜收藏的性格。实际growth.required=null，无积累要求再次特殊化，special继续为空；不改基因性格。",
+    "special": null,
+    "visibleState": "叶帽与固定草纤已从身上摘下，不手持帽子；露出完整奶白背甲、两道青绿弧纹和短眼柄，身体与两钳四足保留原成年关系。"
+  }
+}

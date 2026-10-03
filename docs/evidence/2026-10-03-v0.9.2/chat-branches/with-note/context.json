@@ -1,0 +1,25 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\chat-cases\\note-clone\\chat-note-output.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\chat-cases\\note-clone\\data\\dots\\state.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\chat-cases\\extra-adult-move\\input.json"
+  ],
+  "result": {
+    "facts": [
+      {
+        "id": "chat-804ec6df-42b5-4804-80a2-eb0011e545bd",
+        "text": "用户表示下周要搬家；这是未来计划，尚未发生。",
+        "source": {
+          "kind": "chat",
+          "chatId": "chat-804ec6df-42b5-4804-80a2-eb0011e545bd",
+          "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\chat-cases\\note-clone\\chat-note-output.json",
+          "originalMessageFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\chat-cases\\extra-adult-move\\input.json"
+        }
+      }
+    ],
+    "unknowns": [
+      "搬家的地点、具体日期和新家环境未知。",
+      "用户没有说明与搬家有关的感受。"
+    ]
+  }
+}

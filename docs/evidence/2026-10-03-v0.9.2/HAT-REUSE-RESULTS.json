@@ -1,0 +1,21 @@
+{
+  "reviewer": "root",
+  "verdict": "通过",
+  "petId": "genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e",
+  "appearanceSequence": [
+    "art-c3e3bf89b897c12687a03747",
+    "art-5ec13139970d88fb509a0cdd",
+    "art-c3e3bf89b897c12687a03747"
+  ],
+  "storyCountSequence": [
+    10,
+    11,
+    12
+  ],
+  "artCountSequence": [
+    9,
+    9,
+    9
+  ],
+  "host": "Simulated inactive target only, no live refresh verified"
+}

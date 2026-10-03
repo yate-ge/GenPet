@@ -1,0 +1,127 @@
+{
+  "id": "story-3d4abe94-2f75-463b-b8f6-260a9c78cd4e",
+  "triggerId": "test-092-continued-group03",
+  "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+  "at": 1793001600000,
+  "text": "刺猬取出上回点过泥点的弯木片，正好碰见一颗夹在木片凹弯里的小石子。它先没把石子扔开，拨到苔石上试了试：石子压着哪一头，那一头就不容易翘。你连续四天晚饭后散步，今天在小溪旁记下小树枝转弯的两次观察差异；刺猬于是带着这个小发现去了自己的浅滩。它找到一颗同样扁、却有天然半月凹口的浅灰石，用鼻尖把它推到一根漂停的小枝旁，凹口恰好留出一道水缝。它把石子洗净带回来给你看：不是木片上的新记号，是能压住小枝的一颗小石。收好时，它在半壳内侧让石子靠着弯木片，凹叶里的种子仍在原位。",
+  "basis": "new-river-note延续自然观察；恢复后三小时，growth.required=null，无足够积累再进入特殊形态。沿用当前成年、状态和身份。",
+  "stage": "adult",
+  "state": "想把观察到的差别留个记号",
+  "home": "家仍在苔石边，草垫小窝供休息，壳墙的大叶雨檐挡雨，苔石外沿可走动。半片乳白浅褐斑蛋壳挡风，床边干草保留。凹叶收藏原种子，半壳内侧干草旁放着两端一颗与两颗浅泥点的弯木片，本次新增的浅灰扁石有天然半月凹口，靠弯木片放置；原物件延续，不搬家。",
+  "appearanceId": "art-688ff9d8a4b753b8906f1e8f",
+  "mediaIds": [
+    "art-57f7a274608adcab94d4b235"
+  ],
+  "steps": [
+    {
+      "id": "step-34dae5e55ae1cb82954b18cd",
+      "unit": "context",
+      "at": 1793001600000,
+      "inputRefs": [
+        "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group03\\main\\case.json",
+        "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group03\\status.json"
+      ],
+      "result": {
+        "facts": [
+          {
+            "id": "new-river-note",
+            "text": "过去四天晚饭后散步；今天在小溪旁观察小树枝转弯，把两次观察的差异记入本子。",
+            "source": "fictional:0.9.2:river-note"
+          }
+        ],
+        "unknowns": [
+          "两次观察的具体差异、用户感受及与宠物的互动未知。"
+        ],
+        "language": "中文",
+        "userRequest": "这篇故事想收到宠物带回的一件物件。"
+      }
+    },
+    {
+      "id": "step-0436cb24f25dd82b26da2cab",
+      "unit": "story",
+      "at": 1793001600000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group03/main/context.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group03/status.json"
+      ],
+      "result": {
+        "text": "刺猬取出上回点过泥点的弯木片，正好碰见一颗夹在木片凹弯里的小石子。它先没把石子扔开，拨到苔石上试了试：石子压着哪一头，那一头就不容易翘。你连续四天晚饭后散步，今天在小溪旁记下小树枝转弯的两次观察差异；刺猬于是带着这个小发现去了自己的浅滩。它找到一颗同样扁、却有天然半月凹口的浅灰石，用鼻尖把它推到一根漂停的小枝旁，凹口恰好留出一道水缝。它把石子洗净带回来给你看：不是木片上的新记号，是能压住小枝的一颗小石。收好时，它在半壳内侧让石子靠着弯木片，凹叶里的种子仍在原位。",
+        "connection": "正文使用四天散步及今天小枝转弯的两次观察；石子试验与浅滩取物是宠物独立虚构生活，不编造用户所见差异。",
+        "evidenceIds": [
+          "new-river-note"
+        ],
+        "stateIntent": "想把观察到的差别留个记号",
+        "visualIntent": "给用户看宠物带回的单颗浅灰扁石，具有天然半月凹口，只画物件本身，不画宠物或场景。",
+        "homeIntent": "半壳内侧干草旁的弯木片旁新增一颗有天然半月凹口的浅灰扁石，原种子、蛋壳、干草与叶檐延续。"
+      }
+    },
+    {
+      "id": "step-f36d2b5577b06331c66ebe4d",
+      "unit": "evolution",
+      "at": 1793001600000,
+      "inputRefs": [
+        "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group03\\main\\context.result.json",
+        "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group03\\main\\story.result.json",
+        "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group03\\status.json"
+      ],
+      "result": {
+        "stage": "adult",
+        "state": "想把观察到的差别留个记号",
+        "basis": "new-river-note延续自然观察；恢复后三小时，growth.required=null，无足够积累再进入特殊形态。沿用当前成年、状态和身份。",
+        "special": null,
+        "visibleState": null
+      }
+    },
+    {
+      "id": "step-09d884a5e00c6a4f105899a7",
+      "unit": "home",
+      "at": 1793001600000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group03/main/story.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group03/status.json"
+      ],
+      "result": {
+        "home": "家仍在苔石边，草垫小窝供休息，壳墙的大叶雨檐挡雨，苔石外沿可走动。半片乳白浅褐斑蛋壳挡风，床边干草保留。凹叶收藏原种子，半壳内侧干草旁放着两端一颗与两颗浅泥点的弯木片，本次新增的浅灰扁石有天然半月凹口，靠弯木片放置；原物件延续，不搬家。",
+        "visual": null,
+        "basis": "小幅添置收藏，未建立新家或搬家，不需要另出全景图。"
+      }
+    },
+    {
+      "id": "step-f57727ed32e6610172a567c9",
+      "unit": "carrier",
+      "at": 1793001600000,
+      "inputRefs": [
+        "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group03\\main\\context.result.json",
+        "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group03\\main\\story.result.json",
+        "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group03\\status.json",
+        "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group03\\main\\home.result.json"
+      ],
+      "result": {
+        "reason": "实际旧故事正文已有点泥点的弯木片物件；本次用户明确想收到带回的一件物件，新的小枝观察引出另一颗可试验的石子。载体是有天然半月凹口的浅灰扁石本身，只画唯一物件，不把旧木片、Pet或浅滩画成场景。home收纳此石，visual=null，不另出全景。",
+        "carrier": {
+          "medium": "带回的小石",
+          "purpose": "将试验过的小石作为新发现交给用户看，之后收进家。",
+          "viewpoint": "用户直接看物件本身。",
+          "form": "3:2横向，浅奶油不透明底，无边框，只有单一物件。",
+          "mustShow": [
+            "唯一一颗浅灰扁石",
+            "边缘天然半月凹口",
+            "清楚简化像素轮廓",
+            "无宠物、场景或其他物件"
+          ],
+          "visuals": [
+            {
+              "purpose": "story",
+              "description": "带回的小石",
+              "request": {
+                "prompt": "Use case: illustration-story. Asset type: a single brought-back object from a fantasy pixel hedgehog's creek. Create exactly ONE small flat light-gray stone with a natural crescent-shaped notch opening from one edge. A rounded squat pebble with subtly asymmetrical worn outline, notch visibly a clean natural concavity, simple two-gray cartoon pixel blocks, a few pale gray facets, compact clear silhouette. Show the object alone, centered and large against a plain opaque warm cream background; no other objects, no pet, no person, no scenery, no grass, no twig, no wooden token, no mud dots, no text, no border, no labels. Three-quarter shallow angle just enough to show it is a flattened stone. This is the specific small stone the pet brought home after trying it beside a twig, not a general scenic illustration. Crisp stepped pixel edges, approachable simplified game-item appearance, no photoreal texture.",
+                "transparent_background": false
+              },
+              "references": []
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

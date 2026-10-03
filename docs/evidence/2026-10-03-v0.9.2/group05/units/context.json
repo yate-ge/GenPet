@@ -1,0 +1,17 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\case.json"
+  ],
+  "result": {
+    "facts": [
+      {
+        "id": "hat-wish",
+        "text": "下一篇故事想看看宠物戴上能避雨的小帽子，也想收到漫画。",
+        "source": "fictional:0.9.2:user-request"
+      }
+    ],
+    "unknowns": [
+      "只知道想看宠物戴避雨帽并收到漫画；未提供用户淋雨、天气或近期活动。"
+    ]
+  }
+}

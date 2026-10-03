@@ -1,0 +1,32 @@
+{
+  "inputRefs": [
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\status.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\context\\result.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\story\\result.json",
+    "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-v0.9.2\\group05\\evolution\\result.json"
+  ],
+  "result": {
+    "appearance": {
+      "description": "同一奶白双青绿弧纹成年小蟹，戴低矮浅绿阔叶雨帽；帽檐外翻向两侧排水，短眼柄露在檐下，细草纤沿甲侧固定，圆左钳、尖右钳和四侧足保留。"
+    },
+    "visuals": [
+      {
+        "purpose": "avatar",
+        "description": "成年小蟹的避雨叶帽状态变体",
+        "request": "Use case: identity-preserve. Edit the SAME accepted adult fantasy crab reference by adding ONLY its story rain hat. Preserve exact compact low cream carapace with TWO curved teal bands, two short black eye stalks, round biological left claw and slightly pointed right claw, and FOUR short side walking feet, two on each side. Preserve existing body shape, palette and coarse crisp pixel-art block size. Add a SMALL low pale-green folded broad-leaf rain hat with a clear outward-folded brim that drains rain to BOTH sides, sitting above front of shell. Hat brim leaves BOTH dark eyes and their short stalks plainly visible underneath, and most of both teal bands visible on body. A thin muted green grass-fiber fastening runs along shell sides without crossing eyes, claws or feet. Hat is clothing placed on this same living crab, not a replacement shell or new organ. Full centered standing body isolated on true transparent background, generous margin, no scenery, rain, water, props, shadow, text, sprite sheet or other animals. Few clear pixel color blocks, friendly and readable when contained at 192 by 208 pixels. One static base PNG only.",
+        "referenceFiles": [
+          "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-v0.9.2/group05/data/dots/pets/genpet-3dfa7b41-0714-4095-9f16-2fa21ba3fe3e/assets/art-5ec13139970d88fb509a0cdd.png"
+        ],
+        "requirements": {
+          "format": "PNG",
+          "transparent": true,
+          "displaySize": [
+            192,
+            208
+          ],
+          "scope": "仅静态透明基础Avatar，不声称动作一致性已通过"
+        }
+      }
+    ]
+  }
+}
