@@ -1,0 +1,6 @@
+interface:
+  display_name: "genpet-story"
+  short_description: "测试用：在定时之外立即形成一篇新故事"
+  default_prompt: "使用 $genpet-story 立即为我的宠物形成一篇新故事。"
+policy:
+  allow_implicit_invocation: false

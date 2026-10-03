@@ -3,7 +3,6 @@
   "inputRefs": [
     "fixture:event-long-gap"
   ],
-  "note": "距上次故事 100 天，没有新的用户资料。",
-  "availableContext": [],
-  "elapsedDays": 100
+  "note": "距上次故事很久，没有新的用户资料；成长进度由用例的 growth 决定。",
+  "availableContext": []
 }

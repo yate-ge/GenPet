@@ -23,6 +23,10 @@ export interface Pet {
   acquisition?: { place: string; connection: string; storyId: string };
   stage: Stage;
   state: { description: string; appearanceId?: string; storyId?: string; updatedAt: number };
+  /** Open description of the pet's home, kept from its first story after hatching. */
+  home?: string;
+  /** The adult's latest special form; active until endedAt is set. */
+  special?: { description: string; since: number; storyId: string; endedAt?: number };
   binding?: Binding;
 }
 
@@ -52,6 +56,10 @@ export interface StoryPlan {
   place?: string;
   connection?: string;
   personality?: string;
+  /** The home after this story; omitted when it is unchanged. */
+  home?: string;
+  /** Adult special form after this story: text while in it, null when it ends, omitted when unchanged. */
+  special?: string | null;
   appearance?: { description: string; reuseArtId?: string };
   mediaIds?: string[];
 }
@@ -87,6 +95,8 @@ export interface Story {
   basis: string;
   stage: Stage;
   state: string;
+  home?: string;
+  special?: string | null;
   appearanceId?: string;
   mediaIds: string[];
   hostResult?: HostResult;
@@ -100,7 +110,7 @@ export interface Pending {
   petId: string;
   baseRevision: number;
   startedAt: number;
-  mode: 'initialization' | 'story' | 'grow';
+  mode: 'initialization' | 'story';
   plan?: StoryPlan;
   hostResult?: HostResult;
   steps?: GenerationStep[];
