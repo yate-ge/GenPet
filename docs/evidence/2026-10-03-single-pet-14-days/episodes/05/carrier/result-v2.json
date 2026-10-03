@@ -1,0 +1,45 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/home.result.json"
+  ],
+  "result": {
+    "reason": "用户明确想看宠物带回自己的小发现；本篇交付的空蝉蜕与短枝是视觉物件，保留支撑与空腔才解释为什么不拔下脆壳。近期虽有照片，本次形式改变为物件本身。",
+    "carrier": {
+      "medium": "带短枝支撑的空蝉蜕收藏",
+      "purpose": "将刺猬带回的完整脆壳交给用户看，呈现空蜕仍牢牢抱住短枝的小发现。",
+      "viewpoint": "略俯视接近顶视，六足分左右三对可见，物件居中。",
+      "form": {
+        "aspectRatio": "1:1",
+        "background": "透明",
+        "border": "无"
+      },
+      "mustShow": [
+        "一副淡琥珀色中空蝉蜕，头壳与分节腹部可辨",
+        "背部裂口明确打开，空腔与薄壳透光边缘可见",
+        "六只细足分三对扣住同一段粗糙树皮",
+        "完整短枯枝仍支撑空蜕",
+        "仅空蜕和短枝，无活蝉、宠物、场景、文字或卡片边框"
+      ],
+      "visuals": [
+        {
+          "purpose": "carrier",
+          "description": "淡琥珀色空蝉蜕抱住短枯枝，背部裂口打开，六足仍扣树皮。",
+          "request": "Use case: precise-object-edit\nAsset type: isolated found-object gift, transparent PNG.\nEdit the supplied EMPTY amber cicada shed casing and its short twig. Preserve the hollow empty shell, visibly open dorsal split, amber thin translucent shell edges, intact head casing and segmented abdomen, same general coloring and charming pixel-illustration treatment, and genuine transparent background. Change ONLY the pose and view of the object to make ALL SIX LEGS individually identifiable.\nRepose the shell to an elevated nearly top-down symmetrical view with the head toward the top of the square and abdomen toward the bottom. The same one complete short rough twig runs vertically under its center, projecting beyond head and tail. Show exactly THREE distinctly separated legs on the left and exactly THREE distinctly separated legs on the right: a front pair, middle pair, and hind pair. Each leg begins at the thorax side, arcs visibly outward around an open transparent gap, then curls back inward to hook the same twig bark. Separate adjacent legs vertically and by silhouette gaps so a viewer can count 1, 2, 3 on each side, even at 192 pixel display. No leg may disappear behind shell or twig, overlap another leg or blend into body plates. Six legs total, no extras. All six grips belong to the one twig.\nKeep the empty opening on the upper back clearly visible between shell edges, not filled by a living insect. No active eyes or living body inside, no wings. Full twig stays intact and visible. Center only these two objects with transparent margins, no scenery, pet, hands, furniture, labels, paper border, text or watermark. Retain transparency.",
+          "referenceFiles": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/carrier/generated.png"
+          ],
+          "requirements": {
+            "format": "PNG",
+            "transparent": true
+          },
+          "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/carrier/generated-v2.png",
+          "previewFile": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/carrier/preview-v2-192x208.png",
+          "sourceRecord": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/carrier/image-source-v2.json"
+        }
+      ]
+    }
+  }
+}

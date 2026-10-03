@@ -1,0 +1,13 @@
+{
+  "result": {
+    "mediaRefs": [
+      "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-9ff4809751d62286284059fa.png"
+    ],
+    "text": "刺猬在大树拱根下转了三圈，鼻尖还没撞上东西。你想看它搬到活动空间更开阔的新家，它便挑中了这块高台：背后挡风，前面还能望见旧苔石。它先试过地面的潮气，再请甲虫帮忙，用宽叶把半片蛋壳拖上坡。旧草窝和叶檐安在左边，种子、泥点木片、凹口石与三件纸藏品放到右侧干台；抱枝的空蝉蜕轻轻架好，浅黄小圆叶帽仍帽顶朝上收在床边。中间空出一整片地方。它快走几步，又回头看看：小发现们都有位置，它也能一路走到门外了。"
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/actual-completed.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/actual-output.json"
+  ]
+}

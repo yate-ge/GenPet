@@ -1,0 +1,37 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/07/appearance/result.json"
+  ],
+  "inputs": {
+    "visual": {
+      "appearance": {
+        "description": "同一成年戴浅黄低圆叶帽刺猬；暖棕拱背原钝圆软刺卷成三团独立的大圆螺旋软簇，奶白短吻腹、四足、圆耳和亮眼延续。"
+      },
+      "visuals": [
+        {
+          "purpose": "avatar",
+          "description": "延续真实已保存戴帽成年Avatar，仅将背刺器官聚拢为三团大圆螺旋，保留身体与帽子。",
+          "request": "Use case: identity-preserve\nAsset type: one transparent static cartoon pixel Pet Avatar for 192 by 208 display.\nPrimary request: Edit the supplied SAME adult hedgehog wearing its pale yellow low round leaf hat into its temporary echo-curled-quill form. Change ONLY the dorsal quills: the previous blunt little quill clusters gather into EXACTLY THREE BIG SOFT ROUND SPIRAL CURL CLUSTERS growing out of the same arched back. Show three separate rounded spiral silhouettes arranged sequentially along the back, from rump at left to upper back behind the head at right. Each is a thick softly curled biological quill tuft with a clearly readable spiral groove, warm brown and tan with cream edge tips. These replace the old upright quill spikes, not stickers laid over unchanged spikes. Make the rounded rolls obvious at small size, like three soft coils that could gently tremble while walking, not snail shells, mechanical springs or separate objects.\nIdentity invariants: retain the supplied low compact warm tan-brown arched body, cream-white face, short projecting snout and belly, two dark glossy eyes, brown nose, pink inner ears, all four short pink fleshy feet, same mature proportions, same three-quarter stance facing right and friendly expression. Keep the exact existing pale yellow shallow round leaf hat, narrow brim and single simple grass-fiber securing circle. Both ears remain visible at the sides; face, belly and limbs are unobscured. Do not add garments, items or extra limbs. Color remains warm brown and cream; the change is quill ORGAN SHAPE, not recoloring.\nStyle: match the coarse crisp cartoon pixel grid of the reference, compact approachable living creature silhouette, broad simple color blocks, stepped outline. No fine strands, realistic textures, smooth painting, furry rendering or decorative effects.\nComposition: one full-body character centered with ample transparent margins; all three coils and whole hat visible, no wind lines or text. Genuine transparent PNG, no scenery, floor, background, border, props or shadow blob. One base Avatar, not an animation atlas.",
+          "referenceFiles": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-c6d178ff4e0890241944c0ee.png"
+          ],
+          "requirements": {
+            "host": "dots",
+            "format": "PNG",
+            "transparent": true,
+            "displaySize": [
+              192,
+              208
+            ],
+            "scope": "single static base Avatar"
+          },
+          "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/07/appearance/generated.png",
+          "previewFile": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/07/appearance/preview-192x208.png",
+          "sourceRecord": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/07/appearance/image-source.json"
+        }
+      ],
+      "basis": "本故事回声洞旋风引出特殊形态；以已保存戴帽成年形象延续身份，特殊变化是软刺形状，不换基因或阶段。"
+    },
+    "actualFile": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/07/appearance/generated.png"
+  }
+}

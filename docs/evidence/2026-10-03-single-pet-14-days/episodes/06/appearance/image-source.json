@@ -1,0 +1,16 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "sourcePath": "C:/Users/geyat/.codex/generated_images/01a10261-88fb-7fe1-a093-836076e91df7/exec-c6cb03ea-08fa-4d5f-a493-10bbf8f416c3.png",
+  "originalFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-single-pet-14-days\\episodes\\06\\appearance\\generated.png",
+  "originalSize": [
+    1254,
+    1254
+  ],
+  "mode": "RGBA",
+  "hasAlpha": true,
+  "alphaExtrema": [
+    0,
+    255
+  ],
+  "reviewStatus": "pending independent root review"
+}

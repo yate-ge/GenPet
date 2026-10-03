@@ -1,0 +1,24 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/upstream.json"
+  ],
+  "result": {
+    "facts": [
+      {
+        "source": "test-user-message:episode-12 / message-12 / 2026-11-09T08:00:00Z",
+        "text": "用户11月9日明确想再看宠物戴之前那顶小帽子。",
+        "id": "fact-12-hat"
+      },
+      {
+        "source": "test-user-message:episode-12 / message-12 / 2026-11-09T08:00:00Z",
+        "text": "同一消息希望看看先前的小发现后来怎么样了，未指定其中哪一件。",
+        "id": "fact-12-followup"
+      }
+    ],
+    "unknowns": [
+      "小发现的指代未限定，可根据宠物收藏记录选择后续；没有新的真实用户经历。",
+      "博物馆实际到访仍无确认，不把旧计划写成结果。"
+    ]
+  }
+}

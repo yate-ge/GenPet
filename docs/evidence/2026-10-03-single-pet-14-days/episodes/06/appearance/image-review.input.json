@@ -1,0 +1,37 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/appearance/result.json"
+  ],
+  "inputs": {
+    "visual": {
+      "appearance": {
+        "description": "同一成年暖棕刺猬，持续戴浅黄低圆叶帽，窄檐与草纤维固定圈，两只耳露出；奶白短吻腹部、亮眼、四短肉足及软刺簇延续。"
+      },
+      "visuals": [
+        {
+          "purpose": "avatar",
+          "description": "以本个体成年Avatar为身份参考，仅增加浅黄小圆叶帽，不改变身体、器官与姿态。",
+          "request": "Use case: identity-preserve\nAsset type: one static transparent pixel Pet Avatar, for 192 by 208 display.\nPrimary request: Edit the supplied adult hedgehog Avatar by adding ONLY one small pale yellow round LEAF HAT for going outside. Keep this exact same hedgehog, same warm tan and brown low compact arched body, same cream-white face, short slightly projecting snout and belly, same two dark shiny eyes, brown nose, pink inner ears and four short pink fleshy feet, same cream-tipped blunt quill clusters, exact same three-quarter pose and proportions and coarse pixel grid. Preserve the entire body artwork beneath the added hat.\nHat: a clearly shallow LOW ROUNDED DOME made from pale yellow folded leaf, with a NARROW gently rounded brim. A single thin simple straw grass-fiber circle wraps the base of the crown to secure it. The hat sits between the two ears and BOTH ears remain fully visible outside the sides, as in the reference. Hat is small and low, not tall, not broad brimmed. It must not cover the face, eyes, cream short snout, ears, or the mature brown quill clusters behind the head. Tiny leaf folds can read as two or three broad pixel patches; no detailed woven texture.\nStyle: retain reference's charming cartoon pixel sprite, blocky stepped outline and a few clear color blocks. Every edge and detail follows the existing visible pixel scale. Do not redraw anatomy, soften pixels, add realistic textures or change body color.\nComposition: keep one full-body hedgehog centered, comfortable transparent margins; no objects, landscape or floor, no shadow blob, no other clothing, hands-held items or text. Genuine transparent PNG with intact alpha. A single base Avatar, not an animation atlas.",
+          "referenceFiles": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png"
+          ],
+          "requirements": {
+            "host": "dots",
+            "format": "PNG",
+            "transparent": true,
+            "displaySize": [
+              192,
+              208
+            ],
+            "scope": "single static base Avatar"
+          },
+          "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/appearance/generated.png",
+          "previewFile": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/appearance/preview-192x208.png",
+          "sourceRecord": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/appearance/image-source.json"
+        }
+      ],
+      "basis": "fact-06-hat 经本故事形成持续穿戴状态；savedArt 无戴帽变体，生成同一成年身体的附件变体。"
+    },
+    "actualFile": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/appearance/generated.png"
+  }
+}

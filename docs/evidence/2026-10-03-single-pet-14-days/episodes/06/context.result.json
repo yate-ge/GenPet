@@ -1,0 +1,19 @@
+{
+  "result": {
+    "unknowns": [
+      "用户未指定帽子的款式、材料、颜色或出门地点。",
+      "先前博物馆计划尚无实际到访信息。"
+    ],
+    "facts": [
+      {
+        "source": "test-user-message:episode-06 / message-06 / 2026-11-01T08:00:00Z",
+        "text": "用户11月1日明确希望看到宠物戴一顶出门用的小帽子。",
+        "id": "fact-06-hat"
+      }
+    ]
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/upstream.json"
+  ]
+}

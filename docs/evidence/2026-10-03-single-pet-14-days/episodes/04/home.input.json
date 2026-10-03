@@ -1,0 +1,194 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/story.result.json"
+  ],
+  "inputs": {
+    "savedArt": [
+      {
+        "id": "art-b19202088b6e37fa3f1e590d",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "a0afc7c17e38fbf75cd9db30",
+        "stage": "egg",
+        "description": "完整乳白卵形蛋，浅褐种子小斑，无附件。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-b19202088b6e37fa3f1e590d.png",
+        "kind": "avatar",
+        "createdAt": 1790985600000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      },
+      {
+        "id": "art-d8564ffc9914072cdf4771ac",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "7760e6a7a55aeed778118046",
+        "stage": "hatchling",
+        "description": "刚孵化暖棕软刺幼体，奶白短吻与腹，四只短软肉足，几颗绒芽，耳未立稳。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-d8564ffc9914072cdf4771ac.png",
+        "kind": "avatar",
+        "createdAt": 1791003600000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      },
+      {
+        "id": "art-9585d48ea0d21f0c07529324",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "ba2a54f1e85c4d9ff3a9045b",
+        "stage": "hatchling",
+        "description": "安静等待",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-9585d48ea0d21f0c07529324.png",
+        "kind": "story",
+        "createdAt": 1791090000000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      },
+      {
+        "id": "art-bb3a29e98d80cb37f47446e8",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "1dac2760d0605eb83702f830",
+        "stage": "juvenile",
+        "description": "少年刺猬，耳稍立起，肉足撑稳身体，暖棕拱背软刺开始成簇，奶白面腹与短吻持续。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-bb3a29e98d80cb37f47446e8.png",
+        "kind": "avatar",
+        "createdAt": 1791608400000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      },
+      {
+        "id": "art-688ff9d8a4b753b8906f1e8f",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "c48edd36e9682e8ae53210c7",
+        "stage": "adult",
+        "description": "成年暖棕刺猬，完整围背钝圆软刺簇，清楚稍长奶白短吻，圆耳立稳，四足稳固。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png",
+        "kind": "avatar",
+        "createdAt": 1792213200000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      },
+      {
+        "id": "art-4b29ef2dfc0c9d62aaf8dce4",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "0b0a4ff94fc98454eb52b655",
+        "stage": "adult",
+        "description": "蓝灰蓬软刺成年变体，背刺膨宽成扇，耳垂眼半睁，奶白短吻腹和四只肉足持续。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-4b29ef2dfc0c9d62aaf8dce4.png",
+        "kind": "avatar",
+        "createdAt": 1792818000000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      },
+      {
+        "id": "art-d537ebfa229a2118252ac154",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "27219a619e874be681a543b3",
+        "stage": "adult",
+        "description": "想把观察到的差别留个记号",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-d537ebfa229a2118252ac154.png",
+        "kind": "story",
+        "createdAt": 1792998000000,
+        "provenance": "Built-in imagegen; independent root review accepted; isolated story asset only"
+      },
+      {
+        "id": "art-57f7a274608adcab94d4b235",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "697eb28486a61cccaa9c4a3d",
+        "stage": "adult",
+        "description": "想把观察到的差别留个记号",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-57f7a274608adcab94d4b235.png",
+        "kind": "story",
+        "createdAt": 1793001600000,
+        "provenance": "Actual built-in imagegen; root original and 192x208 review accepted; isolated test"
+      }
+    ],
+    "story": {
+      "stateIntent": "想把自己的发现拍给你看；拍照时看向镜头与指壳是当次照片姿势，回家后不持续拿相机或指向标本。",
+      "visualIntent": "用户收到宠物主动拍给用户的照片，横向3:2带窄白相纸边，无文字无邮票：相机镜头在低木墩高度，成年暖棕刺猬在标本屋空蜗牛壳旁主动面对镜头摆姿势，奶白短吻转向观看者，亮眼与镜头相视，一只前足指向空壳背面的缺角。可见树根室内窗与低展台，主体是这只同一刺猬与它想给你看的缺角，不画它正在操作相机的第三方场景。",
+      "text": "旧树根的标本屋里，最先吸引刺猬的是一枚空蜗牛壳。壳口朝向窗户，里面没有住客；它忍住没碰，绕了一圈才发现背面缺了一小角。你打算周末去博物馆，还没选好哪家，想先看看它自己拍给你的照片。于是它从标本屋借来一台小相机，架在低木墩上，试好定时，跑回空壳旁站住。快门响前，它转过奶白的短吻，朝镜头看去，一只前足指向壳背的小缺口：这次总算赶上了不会走开的展品。相机还给标本屋，照片带回家，平码在明信片下方，只露出一道白边。",
+      "homeIntent": "新增给用户看的窄白边照片，平放在半壳内侧已有明信片下方，错开一条白边便于抽取；收藏区其余物件与休息、活动空间不变。",
+      "connection": "正文明确使用用户尚未确定的周末博物馆计划与自行拍照请求。标本屋、借相机和空壳都是宠物世界的虚构经历，不为用户指定或补写博物馆行程。",
+      "evidenceIds": [
+        "fact-04-plan",
+        "fact-04-photo"
+      ]
+    },
+    "context": {
+      "unknowns": [
+        "未提供用户实际到访、博物馆名称、展览内容或感受，不能将计划写为既成事实。"
+      ],
+      "facts": [
+        {
+          "source": "test-user-message:episode-04 / message-04 / 2026-10-30T08:00:00Z",
+          "id": "fact-04-plan",
+          "text": "用户在10月30日表示周末打算去一次博物馆，尚未决定哪家；是未来计划。"
+        },
+        {
+          "source": "test-user-message:episode-04 / message-04 / 2026-10-30T08:00:00Z",
+          "id": "fact-04-photo",
+          "text": "用户本篇希望看到宠物自己拍给用户的照片。"
+        }
+      ]
+    },
+    "pet": {
+      "id": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "name": "GenPet",
+      "adoptedAt": 1790985600000,
+      "revision": 13,
+      "naming": {
+        "status": "asked",
+        "askedAt": 1791003600000
+      },
+      "genes": "依据：育幼棚草垫与种子般壳斑引出刺猬灵感，不推断用户偏好。身体是低矮紧凑的暖棕圆拱躯干，奶白短吻与腹部，四只短肉足，深色亮眼、两只圆小耳；背上是几簇钝圆的浅褐软刺。幼年背刺仅几个绒芽，身体柔软、足短、耳还没立稳；少年背刺逐渐成簇、步态稳；成年形成围背的清楚软刺簇和更长而仍卡通的短吻。始终是可亲近的生物同伴，少量清晰像素色块，奶白面腹与棕色拱背是身份线索。",
+      "stage": "adult",
+      "state": "想把后续慢慢讲给你",
+      "binding": {
+        "host": "dots",
+        "avatarId": "dots:isolated:group03"
+      },
+      "acquisition": {
+        "place": "宠物世界的苔石育幼棚",
+        "connection": "唯一已知联系是用户主动提出领养；育幼棚与送蛋属于虚构宠物世界，不推断用户的兴趣或经历。",
+        "storyId": "story-c2d37e9d-0c9b-4ec2-a024-65da2e6e4203"
+      },
+      "personality": "喜欢先把陌生东西放在面前观察，再试着摸一下；遇到难处愿意停下来换一种做法，得意时会留下小小的证据给同伴看。它也珍惜独处，会在自己的家里慢慢整理发现。创作依据是这场有限资料的领养：让它有可以自己推进的生活，不把缺失用户资料变成用户人格，也不从刺猬物种推出胆怯。",
+      "home": "家延续在苔石边，外沿通向草根与蜗牛小路，苔石外沿保留走动与观察的空地。半片乳白浅褐斑蛋壳挡风，壳墙的大叶雨檐遮雨，内部草垫小窝供休息，床边干草不变。凹叶里收藏原种子；半壳内侧干草旁仍放着两端一颗、两颗浅泥点的弯木片，天然半月凹口的浅灰扁石仍靠着木片。本次新增给用户看的苔石坡明信片，平放在弯木片后方的干处，与木片错开避免蹭到泥点。不搬家，不替换原物件。",
+      "special": null,
+      "visibleState": null,
+      "stories": [
+        {
+          "id": "story-02e8cf22-dd9d-4fcf-a4c7-4e749bdfc107",
+          "at": "2026-10-26T07:00:00Z",
+          "text": "这件小木片来自刺猬世界的河弯。你连续三天饭后散步，把水面落叶旋转的差异记进笔记；刺猬也想知道，同一个东西换个位置会怎样。它先在河弯看那片弯木被水推着转，等木片搁到浅滩，才伸足摸了摸。它把湿木晾在苔石上，试着用鼻尖推两端：一端转得利落，另一端总卡住。现在给你看它带回的小发现——木片两端被它分别点了一颗、两颗浅泥点，记得哪端好转。看完，它把弯木收在半壳内侧，挨着干草；凹叶里的种子仍留在老位置。",
+          "state": "想把观察到的差别留个记号",
+          "illustrated": true
+        },
+        {
+          "id": "story-3d4abe94-2f75-463b-b8f6-260a9c78cd4e",
+          "at": "2026-10-26T08:00:00Z",
+          "text": "刺猬取出上回点过泥点的弯木片，正好碰见一颗夹在木片凹弯里的小石子。它先没把石子扔开，拨到苔石上试了试：石子压着哪一头，那一头就不容易翘。你连续四天晚饭后散步，今天在小溪旁记下小树枝转弯的两次观察差异；刺猬于是带着这个小发现去了自己的浅滩。它找到一颗同样扁、却有天然半月凹口的浅灰石，用鼻尖把它推到一根漂停的小枝旁，凹口恰好留出一道水缝。它把石子洗净带回来给你看：不是木片上的新记号，是能压住小枝的一颗小石。收好时，它在半壳内侧让石子靠着弯木片，凹叶里的种子仍在原位。",
+          "state": "想把观察到的差别留个记号",
+          "illustrated": true
+        },
+        {
+          "id": "design-episode-01",
+          "at": "2026-10-27T08:00:00Z",
+          "text": "叶檐外传来一声短促的吱鸣，停了很久，又来一声。刺猬循着声音绕到苔石背后，一只小蟋蟀正伏在草茎上。它等在草茎下，想听清下一声到底从哪里起；蟋蟀却跳到另一根草上，把它留在原地。刺猬没有追，只隔一会儿轻敲地面一下。对方偶尔回一声，偶尔不回。天色暗下来，它先结束了这场没什么规矩的合奏，钻回自己的草窝。睡前，叶檐外又响了一声。它没有起来找，只用前足在床沿敲了一下。",
+          "state": "想把观察到的差别留个记号",
+          "status": "uncommitted-design",
+          "visualIntent": "只有文字：这次经历的趣味是声音间隔和没有固定回应的合奏，没有交给用户视觉物件。近期已有连续两篇图像礼物。"
+        },
+        {
+          "id": "design-episode-02",
+          "at": "2026-10-28T08:00:00Z",
+          "text": "给你一张从苔石坡寄来的明信片。你今天第一次在公园观察雨后蜗牛，记下了这一次的爬行方向；我就去看了自己家附近的那条蜗牛小路。泥上留着一道亮亮的弯线，绕过水洼，钻进草根。我顺着它走，到了草根才发现，留下这道线的家伙已经不在那里了。于是我没画蜗牛的脸，只在卡片上画那道线：它走过，我晚来了一点。苔石坡的小邮亭给卡片贴上蜗牛邮票，盖了寄出地的圆戳。这张给你看的卡片，最后收在我家半壳内侧、弯木片后方，泥点不会蹭到它。",
+          "state": "想把自己晚到一步的观察写给你",
+          "status": "uncommitted-design",
+          "visualIntent": "交给用户一张真正的横向明信片，寄出地为虚构的苔石坡：左边是宠物手绘的蜗牛弯曲亮痕与水洼，右边是写给用户的话、蜗牛邮票与盖着苔石坡的邮戳。卡片文字原样为“给你：我沿着亮线走到草根，蜗牛已经走远了。它走过，我晚来了一点。”；寄出地文字原样“苔石坡”。不要替用户画观察路线或实际公园。"
+        },
+        {
+          "id": "design-episode-03",
+          "at": "2026-10-29T08:00:00Z",
+          "text": "你想听昨天那件事的后续，这次我只用文字讲。今天我又去了草根边，昨天的亮线干了，得把鼻尖压低才找得到。草叶背面倒有一只蜗牛，正在啃一个小缺口。我不知道它是不是昨天留下痕迹的那只，就在旁边等着。它吃一会儿，停一会儿，最后把触角缩进壳里。我一路带来的问题还没问，它已经睡了。回家时，我从半壳里翻出那张明信片，看看画上的弯线，又把它放回弯木片后面。今天没追出一个新方向，只赶上了蜗牛的午觉。",
+          "state": "想把后续慢慢讲给你",
+          "status": "uncommitted-design",
+          "visualIntent": "只有文字，按用户明确请求不制作新明信片或画面；旧明信片只是故事中的已有收藏。"
+        }
+      ],
+      "designInputPhase": "uncommitted-design"
+    }
+  }
+}

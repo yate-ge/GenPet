@@ -1,0 +1,37 @@
+{
+  "source": "root actual engine calls",
+  "episode": 12,
+  "time": "2026-11-09T08:00:00Z",
+  "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+  "stories": 22,
+  "art": 15,
+  "appearanceId": "art-c6d178ff4e0890241944c0ee",
+  "growthBefore": {
+    "stage": "adult",
+    "next": null,
+    "since": "2026-10-17T05:00:00.000Z",
+    "advanceBy": null,
+    "special": {
+      "active": false,
+      "since": "2026-11-04T08:00:00.000Z",
+      "enterBy": "2026-11-11T08:00:00.000Z"
+    },
+    "required": null
+  },
+  "growthAfter": {
+    "stage": "adult",
+    "next": null,
+    "since": "2026-10-17T05:00:00.000Z",
+    "advanceBy": null,
+    "special": {
+      "active": false,
+      "since": "2026-11-04T08:00:00.000Z",
+      "enterBy": "2026-11-11T08:00:00.000Z"
+    },
+    "required": null
+  },
+  "identityRetained": true,
+  "duplicateTriggerCreatesStory": false,
+  "slotDueAfter": false,
+  "hostAcknowledgement": "simulated inactive target only"
+}

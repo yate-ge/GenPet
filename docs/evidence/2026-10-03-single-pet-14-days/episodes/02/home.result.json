@@ -1,0 +1,12 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/story.result.json"
+  ],
+  "result": {
+    "home": "家延续在苔石边，外沿通向草根与蜗牛小路，苔石外沿保留走动与观察的空地。半片乳白浅褐斑蛋壳挡风，壳墙的大叶雨檐遮雨，内部草垫小窝供休息，床边干草不变。凹叶里收藏原种子；半壳内侧干草旁仍放着两端一颗、两颗浅泥点的弯木片，天然半月凹口的浅灰扁石仍靠着木片。本次新增给用户看的苔石坡明信片，平放在弯木片后方的干处，与木片错开避免蹭到泥点。不搬家，不替换原物件。",
+    "basis": "只添一张卡片并明确放置，整体空间没有明显值得另画全景的变化；卡片本身的视觉礼物由 carrier 设计。",
+    "visual": null
+  }
+}

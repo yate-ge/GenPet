@@ -1,0 +1,14 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/01/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/01/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/01/story.result.json"
+  ],
+  "result": {
+    "special": null,
+    "basis": "context 没有新事实或调试请求；本篇是独立听声经历，没有持续的用户事件支持状态改写。growth.required 为 null，特殊形态已在 10 月 26 日结束且尚未到 11 月 2 日兜底期限，本篇也无明显身体变化的故事依据；成年阶段、原状态与基因延续。",
+    "state": "想把观察到的差别留个记号",
+    "stage": "adult",
+    "visibleState": null
+  }
+}

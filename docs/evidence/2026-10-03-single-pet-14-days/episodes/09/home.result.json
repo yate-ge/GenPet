@@ -1,0 +1,12 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/story.result.json"
+  ],
+  "result": {
+    "visual": null,
+    "home": "家继续在苔石边，草根蜗牛小路接着外沿的走动与观察空地。半片乳白浅褐斑蛋壳挡风，大叶雨檐遮雨；内侧草垫小窝和床边干草供休息。本次把床边一小处干草铺平，浅黄小圆叶帽帽顶朝上放在草窝入口旁，窄檐保持展开，留出绕行的空位。凹叶中的原种子不变；半壳收藏区干草旁的泥点弯木片、木片旁天然半月凹口浅灰扁石不变。木片后方干处的纸藏品自上而下是苔石坡明信片、错开窄白边的标本屋照片、折好的四格漫画。收藏区侧边仍以短枝两端支撑，淡琥珀空蝉蜕扣枝悬空不受压。相机不在家，帽子从穿戴转为收纳；不搬家，不替换旧物件。",
+    "basis": "仅收好既有帽子并局部铺平干草，家的整体分区与环境延续，不需要全景图。"
+  }
+}

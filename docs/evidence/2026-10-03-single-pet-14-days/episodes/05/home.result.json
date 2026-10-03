@@ -1,0 +1,12 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/story.result.json"
+  ],
+  "result": {
+    "basis": "收藏区只添一件小型空蜕，明确支撑位置即可；没有整体空间改变，物件视觉由carrier呈现。",
+    "visual": null,
+    "home": "家仍在苔石边，周围草根的蜗牛小路通向苔石外沿走动与观察空地。半片乳白浅褐斑蛋壳挡风、大叶雨檐遮雨；内侧草垫小窝及床边干草供休息。收藏区保留凹叶里的原种子、半壳内侧干草旁两端一颗与两颗浅泥点的弯木片、靠木片放置的天然半月凹口浅灰扁石。苔石坡明信片在木片后方干处，标本屋窄白边照片在明信片下面、向旁错开一道白边。本次新增淡琥珀空蝉蜕与其抱住的一小段枯枝；短枝两端架在半壳收藏区侧边，蝉蜕悬空不受压，也不压住纸卡、床边干草。相机未留在家。不搬家，原分区与物件延续。"
+  }
+}

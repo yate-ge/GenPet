@@ -1,0 +1,13 @@
+[
+  {
+    "id": "art-5a28a6ca55c3c26789e4ce0b",
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "requestId": "1da34fcc9eabd5398481804d",
+    "stage": "adult",
+    "description": "想把自己的发现拍给你看",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-single-pet-14-days\\pet\\data\\dots\\pets\\genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53\\assets\\art-5a28a6ca55c3c26789e4ce0b.png",
+    "kind": "story",
+    "createdAt": 1793347200000,
+    "provenance": "Built-in imagegen; independent root carrier review accepted; isolated longitudinal test"
+  }
+]

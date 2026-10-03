@@ -1,0 +1,156 @@
+{
+  "id": "story-2b55ab01-9734-42a8-9b29-509939033c2f",
+  "triggerId": "daily:2026-11-09:16:00:Asia.Shanghai",
+  "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+  "at": 1794211200000,
+  "text": "收藏台上像是多了一只小东西，伏在短枝下面。刺猬停在远处，鼻尖往前探了探，才看清那是空蝉蜕的影子：新家前沿的光穿过它裂开的背，把六只扣枝的细足投在干台上。你想再看它戴之前的小帽子，也想知道先前的小发现后来怎样了。它回到草窝边，拿起昨天一起搬来的浅黄小圆叶帽，按原来的草纤维圈戴稳，两只圆耳仍从两边露着；再回来时，帽檐的影子盖住了那六只小足。它退一步，让光重新照进去。空蜕没有醒来，也没有长出别的东西，还是抱着原先那段枝，只是搬家后，里面能落进一线亮光。刺猬没碰脆壳，在旁边等影子一点点移开，最后戴着旧帽走到高台前沿。床边那块铺平的干草空着，给帽子留着位置。",
+  "basis": "fact-12-hat给出重新穿戴旧帽的明确请求，fact-12-followup带出已有收藏的后续；故事中的观察影子与避碰脆壳延续性格，不转为新性格。growth.required为空，11月9日距上次特殊结束五天，这次光影发现和重戴旧帽没有新的器官变化，保持普通成年而不提前进入特殊形态。帽子持续戴着，需反映在Avatar，可复用适合的原戴帽艺术。",
+  "stage": "adult",
+  "state": "重新戴着原浅黄小圆叶帽，看看迁入新家的小发现",
+  "home": "家延续昨日迁入的草坡较高处大树拱根干高台，拱根在后上方，宽平高台前沿敞开，草坡路向下通往旧苔石及草根蜗牛小路。左后休息角仍为带浅褐斑的旧乳白半蛋壳风墙、大叶雨檐与下方旧草垫小窝、床边干草。床边铺平的收帽干草本次空出，留作以后收帽位置；原浅黄小圆叶帽已由宠物重新戴着，家里没有另一顶帽子。右侧较高干台保留整套收藏：前左凹叶盛原种子，前中泥点弯木片及旁边天然半月凹口浅灰扁石；后左干草垫上三件纸藏品自上而下为苔石坡明信片、错开露窄白边的标本屋照片、略露折边的折好四格漫画，左侧便于取纸。后右短枝两端支撑，淡琥珀空蝉蜕六足扣枝悬空、裂背不受压，与纸物保持间隔；前沿光线可到此处，影子移动只是当天观察，不改物件位置。中央和前沿大块活动平地及通往两侧的宽路线继续留空。旧址仍只留苔石地标，不出现重复物件，相机不在家。",
+  "appearanceId": "art-c6d178ff4e0890241944c0ee",
+  "mediaIds": [],
+  "steps": [
+    {
+      "id": "step-a04d4ca2c2de35b20dd5e4c4",
+      "unit": "context",
+      "at": 1794211200000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/upstream.json"
+      ],
+      "result": {
+        "facts": [
+          {
+            "source": "test-user-message:episode-12 / message-12 / 2026-11-09T08:00:00Z",
+            "text": "用户11月9日明确想再看宠物戴之前那顶小帽子。",
+            "id": "fact-12-hat"
+          },
+          {
+            "source": "test-user-message:episode-12 / message-12 / 2026-11-09T08:00:00Z",
+            "text": "同一消息希望看看先前的小发现后来怎么样了，未指定其中哪一件。",
+            "id": "fact-12-followup"
+          }
+        ],
+        "unknowns": [
+          "小发现的指代未限定，可根据宠物收藏记录选择后续；没有新的真实用户经历。",
+          "博物馆实际到访仍无确认，不把旧计划写成结果。"
+        ]
+      }
+    },
+    {
+      "id": "step-a8db8a60c0f30a2809e85c5d",
+      "unit": "story",
+      "at": 1794211200000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/context.result.json"
+      ],
+      "result": {
+        "text": "收藏台上像是多了一只小东西，伏在短枝下面。刺猬停在远处，鼻尖往前探了探，才看清那是空蝉蜕的影子：新家前沿的光穿过它裂开的背，把六只扣枝的细足投在干台上。你想再看它戴之前的小帽子，也想知道先前的小发现后来怎样了。它回到草窝边，拿起昨天一起搬来的浅黄小圆叶帽，按原来的草纤维圈戴稳，两只圆耳仍从两边露着；再回来时，帽檐的影子盖住了那六只小足。它退一步，让光重新照进去。空蜕没有醒来，也没有长出别的东西，还是抱着原先那段枝，只是搬家后，里面能落进一线亮光。刺猬没碰脆壳，在旁边等影子一点点移开，最后戴着旧帽走到高台前沿。床边那块铺平的干草空着，给帽子留着位置。",
+        "connection": "fact-12-hat与fact-12-followup均直接进入正文；由上游已有空蝉蜕选择小发现后续，观察的是新址光线和影子，未补造活蝉、用户博物馆经历或新的用户观察。",
+        "stateIntent": "重新戴着原浅黄小圆叶帽，看看迁入新家的小发现",
+        "homeIntent": "帽子从新家床边铺平干草上重新戴到宠物头上，原收帽位置空出但保留；空蝉蜕、原短枝及其支撑和其他收藏原位延续。",
+        "visualIntent": "文字讲明空蝉蜕后续，Avatar体现重新戴同一顶浅黄低圆叶帽的普通成年形态。优先复用此个体此前普通成年戴帽艺术；保持原帽色、低圆帽顶、窄檐与草纤维圈，不把卷刺戴帽变体当作普通身体。没有新物件礼物或第二张家全景。",
+        "evidenceIds": [
+          "fact-12-hat",
+          "fact-12-followup"
+        ]
+      }
+    },
+    {
+      "id": "step-f15e69d1cdec88a67144dd82",
+      "unit": "evolution",
+      "at": 1794211200000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/context.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/story.result.json"
+      ],
+      "result": {
+        "basis": "fact-12-hat给出重新穿戴旧帽的明确请求，fact-12-followup带出已有收藏的后续；故事中的观察影子与避碰脆壳延续性格，不转为新性格。growth.required为空，11月9日距上次特殊结束五天，这次光影发现和重戴旧帽没有新的器官变化，保持普通成年而不提前进入特殊形态。帽子持续戴着，需反映在Avatar，可复用适合的原戴帽艺术。",
+        "stage": "adult",
+        "state": "重新戴着原浅黄小圆叶帽，看看迁入新家的小发现",
+        "special": null,
+        "visibleState": "普通成年暖棕刺猬重新戴原浅黄小圆叶帽：低圆帽顶、窄帽檐、简单草纤维固定圈，两只圆小耳从两侧露出；奶白短吻与腹、亮眼、四短肉足和原钝圆围背软刺簇保持，无三团卷刺、无新附件或手持。"
+      }
+    },
+    {
+      "id": "step-0fe8645c3c1fe0d9cc580cd8",
+      "unit": "home",
+      "at": 1794211200000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/context.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/story.result.json"
+      ],
+      "result": {
+        "home": "家延续昨日迁入的草坡较高处大树拱根干高台，拱根在后上方，宽平高台前沿敞开，草坡路向下通往旧苔石及草根蜗牛小路。左后休息角仍为带浅褐斑的旧乳白半蛋壳风墙、大叶雨檐与下方旧草垫小窝、床边干草。床边铺平的收帽干草本次空出，留作以后收帽位置；原浅黄小圆叶帽已由宠物重新戴着，家里没有另一顶帽子。右侧较高干台保留整套收藏：前左凹叶盛原种子，前中泥点弯木片及旁边天然半月凹口浅灰扁石；后左干草垫上三件纸藏品自上而下为苔石坡明信片、错开露窄白边的标本屋照片、略露折边的折好四格漫画，左侧便于取纸。后右短枝两端支撑，淡琥珀空蝉蜕六足扣枝悬空、裂背不受压，与纸物保持间隔；前沿光线可到此处，影子移动只是当天观察，不改物件位置。中央和前沿大块活动平地及通往两侧的宽路线继续留空。旧址仍只留苔石地标，不出现重复物件，相机不在家。",
+        "basis": "只有旧帽从原收纳处变为穿戴，床边空位保留；收藏台原物和新家布局延续，光影属于临时观察，没有需要另画全景的结构变化。",
+        "visual": null
+      }
+    },
+    {
+      "id": "step-f6d9e9b1011997f64163ec6b",
+      "unit": "carrier",
+      "at": 1794211200000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/story.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/evolution.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/home.result.json"
+      ],
+      "result": {
+        "reason": "本篇的明确愿望是重戴原帽并了解先前小发现的后续。原空蝉蜕仍抱着原短枝，变化在新家光线与影子，文字已经讲清；没有新物件、卡片或照片要交付。旧帽通过appearance复用状态Avatar呈现，家布局延续且home.visual为空，故不另增故事载体图。",
+        "carrier": null
+      }
+    },
+    {
+      "id": "step-12c29d6b850743c9146bcbe0",
+      "unit": "appearance",
+      "at": 1794211200000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/story.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/evolution.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/home.result.json"
+      ],
+      "result": {
+        "basis": "change仍为adult、special为空，仅再次穿戴先前同一顶帽子；savedArt中此资源是同一个体已接受的普通成年戴帽Avatar，包含本次visibleState所需身体和帽子关系，可直接复用。临时看影子与走动无需新姿态，不用无帽图或卷刺特殊变体。",
+        "visuals": [
+          {
+            "description": "同一成年暖棕刺猬，持续戴浅黄低圆叶帽，窄檐与草纤维固定圈，两只耳露出；奶白短吻腹部、亮眼、四短肉足及软刺簇延续。",
+            "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-c6d178ff4e0890241944c0ee.png",
+            "reuseArtId": "art-c6d178ff4e0890241944c0ee",
+            "requirements": {
+              "host": "dots",
+              "format": "PNG",
+              "transparent": true,
+              "displaySize": [
+                192,
+                208
+              ],
+              "scope": "Only one static transparent base Avatar; full animation is not requested"
+            },
+            "purpose": "复用已保存的普通成年戴原帽Avatar"
+          }
+        ],
+        "appearance": {
+          "reuseArtId": "art-c6d178ff4e0890241944c0ee",
+          "description": "同一普通成年暖棕刺猬，重新戴原浅黄低圆叶帽，窄帽檐与草纤维圈，两只圆耳露出；奶白短吻腹、亮眼、四短肉足和钝圆围背软刺簇延续。"
+        }
+      }
+    }
+  ],
+  "hostResult": {
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "operationId": "story-2b55ab01-9734-42a8-9b29-509939033c2f",
+    "appearanceId": "art-c6d178ff4e0890241944c0ee",
+    "avatarId": "dots:isolated:group03",
+    "updated": true,
+    "active": false,
+    "refreshRequested": false,
+    "displayStatus": "unconfirmed",
+    "evidence": "Simulated inactive host acknowledgement; no live display verified"
+  }
+}

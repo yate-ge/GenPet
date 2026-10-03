@@ -1,0 +1,12 @@
+{
+  "result": {
+    "home": "家仍在苔石边，草根蜗牛小路接着苔石外沿的走动与观察空地。半片乳白浅褐斑蛋壳挡风，大叶雨檐遮雨；内侧草垫小窝和床边干草供休息。凹叶里原种子不变；半壳内侧干草旁两端一颗与两颗浅泥点的弯木片及其旁的天然半月凹口浅灰扁石不变。木片后方干处平放苔石坡明信片，标本屋照片在明信片下方并错开窄白边；本次新增四格漫画折页，折好放在照片下面，成为纸藏品底层。收藏区侧边仍架着短枝，淡琥珀空蝉蜕仍扣着枝、悬空不受压。相机已归还，浅黄帽仍随宠物穿戴。没有搬家或改变原分区。",
+    "visual": null,
+    "basis": "只增加一张漫画折页，没有值得另画全景的整体布局变化；漫画视觉由carrier负责。"
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/07/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/07/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/07/story.result.json"
+  ]
+}

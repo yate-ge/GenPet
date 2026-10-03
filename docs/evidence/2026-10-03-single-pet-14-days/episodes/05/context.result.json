@@ -1,0 +1,19 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/upstream.json"
+  ],
+  "result": {
+    "unknowns": [
+      "没有指定发现的种类或地点。",
+      "10月30日博物馆意向仍未有实际到访信息；不将周末计划补为完成。"
+    ],
+    "facts": [
+      {
+        "text": "用户10月31日明确想看宠物带回一件属于宠物自己的小发现。",
+        "source": "test-user-message:episode-05 / message-05 / 2026-10-31T08:00:00Z",
+        "id": "fact-05-find"
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/home.result.json"
+  ],
+  "result": {
+    "reason": "本篇交付文字与戴帽后的 Avatar；帽子是持续穿戴状态，由 appearance 呈现，没有独立视觉物件、照片或空间变化，不另配载体图。",
+    "carrier": null
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "result": {
+    "basis": "fact-06-hat 的明确穿戴请求经折帽、压低帽顶、试走与出门故事形成可见状态；是同一身体的附件变化，未改写基因。growth.required 为 null，尚未到特殊形态兜底期限；出门试帽没有特殊身体变化依据，成年与长期性格延续。",
+    "special": null,
+    "stage": "adult",
+    "visibleState": "持续戴一顶浅黄小圆叶帽：低圆帽顶、窄帽檐、简洁草纤维固定圈，两只圆耳从两侧露出。奶白短吻、亮眼、腹部、四短肉足和成年暖棕钝圆软刺簇延续，无其他穿戴或手持物。",
+    "state": "戴着浅黄小圆叶帽出门"
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/story.result.json"
+  ]
+}

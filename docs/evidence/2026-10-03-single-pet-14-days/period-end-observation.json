@@ -1,0 +1,35 @@
+{
+  "simulated": true,
+  "readOnly": true,
+  "at": "2026-11-10T08:00:00.000Z",
+  "elapsedHours": 336,
+  "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+  "stories": 22,
+  "art": 15,
+  "growth": {
+    "stage": "adult",
+    "next": null,
+    "since": "2026-10-17T05:00:00.000Z",
+    "advanceBy": null,
+    "special": {
+      "active": false,
+      "since": "2026-11-04T08:00:00.000Z",
+      "enterBy": "2026-11-11T08:00:00.000Z"
+    },
+    "required": null
+  },
+  "due": {
+    "timezone": "Asia/Shanghai",
+    "times": [
+      "07:00",
+      "12:00",
+      "16:00",
+      "21:00"
+    ],
+    "triggerId": "daily:2026-11-10:16:00:Asia.Shanghai",
+    "due": true,
+    "pending": null
+  },
+  "appearanceId": "art-c6d178ff4e0890241944c0ee",
+  "scope": "Read-only observation one day after episode12; no additional story/host operation"
+}

@@ -1,0 +1,13 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/01/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/01/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/01/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/01/context.result.json"
+  ],
+  "result": {
+    "visual": null,
+    "basis": "本篇在家周围听蟋蟀，回草窝休息；没有改建、添置、带回物件或搬家，既有家与收藏位置沿用。",
+    "home": null
+  }
+}

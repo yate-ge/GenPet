@@ -1,0 +1,16 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/context.result.json"
+  ],
+  "result": {
+    "visualIntent": "文字故事与恢复普通成年、脱帽后的Avatar；特殊形态结束必须在形象上体现，优先复用同一个体已有普通成年无附件艺术。没有额外视觉礼物，帽子小幅收纳不另作家全景。",
+    "evidenceIds": [
+      "fact-09-rest"
+    ],
+    "connection": "采用 fact-09-rest 的当日明确休息与收帽请求；特殊形态满两天的松卷经历发生在宠物世界，不补造用户模式改变。",
+    "text": "帽子先安了家。你想看刺猬回家歇一歇、把帽子收好，它就在草窝入口旁铺平一点床边干草，将浅黄小圆叶帽帽顶朝上放稳，窄檐不压折。回声洞带来的卷刺跟着它颤了两天；现在它伸长前足，又慢慢放下身子，做了一个长得连自己都意外的哈欠。背上的三团螺旋一圈一圈松开，重新分成沿暖棕拱背围着的钝圆软刺簇。奶白短吻旁，两只圆耳自在地露着。它走到叶檐边，接住一滴落下的水，背后再没有抢先响起的沙沙声。回草窝时，它从帽檐边绕过去，空出一只前足的位置给那顶帽子。今天的路，到床边就够了。",
+    "homeIntent": "把原先穿戴的浅黄小圆叶帽帽顶朝上放在草窝入口旁的床边干草上，窄檐不压折，不挡走路；其他收藏与原分区延续。",
+    "stateIntent": "在家歇着，浅黄小圆叶帽已经脱下收好；恢复普通成年软刺身体，未穿戴、手持或使用新附件。"
+  }
+}

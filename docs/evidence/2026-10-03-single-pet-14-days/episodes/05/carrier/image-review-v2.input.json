@@ -1,0 +1,43 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/carrier/result.json"
+  ],
+  "inputs": {
+    "visual": {
+      "reason": "用户明确想看宠物带回自己的小发现；本篇交付的空蝉蜕与短枝是视觉物件，保留支撑与空腔才解释为什么不拔下脆壳。近期虽有照片，本次形式改变为物件本身。",
+      "carrier": {
+        "medium": "带短枝支撑的空蝉蜕收藏",
+        "purpose": "将刺猬带回的完整脆壳交给用户看，呈现空蜕仍牢牢抱住短枝的小发现。",
+        "viewpoint": "用户近看收藏物，略俯视的三分之四角度；画面仅展示物件。",
+        "form": {
+          "aspectRatio": "1:1",
+          "background": "透明",
+          "border": "无"
+        },
+        "mustShow": [
+          "一副淡琥珀色中空蝉蜕，头壳与分节腹部可辨",
+          "背部裂口明确打开，空腔与薄壳透光边缘可见",
+          "六只细足分三对扣住同一段粗糙树皮",
+          "完整短枯枝仍支撑空蜕",
+          "仅空蜕和短枝，无活蝉、宠物、场景、文字或卡片边框"
+        ],
+        "visuals": [
+          {
+            "purpose": "carrier",
+            "description": "淡琥珀色空蝉蜕抱住短枯枝，背部裂口打开，六足仍扣树皮。",
+            "request": "Use case: illustration-story\nAsset type: a discovered object presented to the user, not a scene illustration or photo card.\nPrimary request: Draw ONLY one pale amber EMPTY CICADA EXUVIA still gripping one short piece of dry fallen twig. It is a delicate shed insect shell, visibly hollow and uninhabited, with a head casing, short antenna remnants, a broad empty thorax and segmented tapering abdomen. Exactly six slender curled legs, three on each side, wrap around and hook into the rough twig bark; choose a slightly elevated three-quarter view that separates the six leg silhouettes and clearly exposes the long open split on the dorsal back. The split opens into the hollow body; daylight passes through thin amber shell edges and the empty opening. No living insect inside, no wings. The whole short twig and intact shed casing are visible with room around them.\nStyle/medium: charming carefully simplified pixel illustration of a found natural object, crisp stepped pixel contours, clear amber and warm brown color blocks with a few lighter translucent shell highlights. This is a small fragile specimen, not a monster or a pet.\nComposition/framing: centered object-only composition, square image, twig runs diagonally from lower left to upper right, shell clings atop the center of the twig; clean readable silhouette and all shell organs unobscured.\nScene/backdrop: genuine transparent background, no surface or scenery.\nConstraints: only the exuvia and short supporting twig. No live cicada, hedgehog, person, hands, room, landscape, display stand, labels, text, frame, paper border or watermark. Do not detach the legs from the twig or replace the hollow casing with a solid insect body.",
+            "referenceFiles": [],
+            "requirements": {
+              "format": "PNG",
+              "transparent": true
+            },
+            "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/carrier/generated.png",
+            "previewFile": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/carrier/preview-192x208.png",
+            "sourceRecord": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/carrier/image-source.json"
+          }
+        ]
+      }
+    },
+    "actualFile": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/carrier/generated-v2.png"
+  }
+}

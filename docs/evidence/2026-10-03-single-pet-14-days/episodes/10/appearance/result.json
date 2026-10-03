@@ -1,0 +1,13 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/home.result.json"
+  ],
+  "result": {
+    "appearance": null,
+    "visuals": [],
+    "basis": "宠物继续为普通成年无附件形象，帽子仍在床边收纳；取卡、伸足和走通道是短暂动作，家内纸藏品重排不改变 Avatar，没有特殊形态进出或阶段变化。"
+  }
+}

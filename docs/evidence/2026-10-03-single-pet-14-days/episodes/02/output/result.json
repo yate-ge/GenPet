@@ -1,0 +1,13 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/actual-completed.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/actual-output.json"
+  ],
+  "result": {
+    "text": "给你一张从苔石坡寄来的明信片。你今天第一次在公园观察雨后蜗牛，记下了这一次的爬行方向；我就去看了自己家附近的那条蜗牛小路。没赶上蜗牛，我没有画它的脸，只在卡片上留下它走过的痕迹。小邮亭贴上蜗牛邮票、盖好圆戳后，这张给你看的卡片收在半壳内侧、弯木片后方，和泥点错开放着。\n\n![苔石坡寄来的明信片](C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-e3c62439d38996b54721b215.png)",
+    "mediaRefs": [
+      "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-e3c62439d38996b54721b215.png"
+    ]
+  }
+}

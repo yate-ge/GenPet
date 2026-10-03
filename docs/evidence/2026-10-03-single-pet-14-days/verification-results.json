@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "contracts": 84,
+  "imageReviewContracts": 14,
+  "stories": 12,
+  "totalStories": 22,
+  "art": 15,
+  "identity": true,
+  "oldHistoryUnchanged": true,
+  "specialTimerRetained": true,
+  "ordinaryAndHatReused": true,
+  "archivedFiles": 587,
+  "scope": "Stored evidence and contracts; visual semantics require the recorded independent reviews",
+  "execution": {
+    "command": "node node_modules/tsx/dist/cli.mjs docs/evidence/2026-10-03-single-pet-14-days/verify-results.ts",
+    "exitCode": 0,
+    "source": "Observed actual CLI stdout"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/home.result.json"
+  ],
+  "result": {
+    "appearance": null,
+    "visuals": [],
+    "basis": "本篇仅用文字讲昨日经历的后续，旧明信片翻看后回到原收藏处；没有新增穿戴、持续手持、阶段进化或特殊形态，讲述意愿不需重画当前成年 Avatar。"
+  }
+}

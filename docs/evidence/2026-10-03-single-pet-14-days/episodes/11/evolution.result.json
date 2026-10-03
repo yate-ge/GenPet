@@ -1,0 +1,14 @@
+{
+  "result": {
+    "visibleState": null,
+    "stage": "adult",
+    "special": null,
+    "basis": "fact-11-move明确要求开阔的新家，故事中先观察、试潮气再搬运收藏的做法延续个体性格，因搬家形成安顿状态。成年阶段保持；growth.required为空，距11月4日特殊结束四天，整理和迁居尚未引出生物器官变化，不提前凭单次请求进入特殊形态。搬运及快走是临时动作，帽子没有重新穿戴。",
+    "state": "在拱根高台新家安顿下来，浅黄小圆叶帽继续收在床边"
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/story.result.json"
+  ]
+}

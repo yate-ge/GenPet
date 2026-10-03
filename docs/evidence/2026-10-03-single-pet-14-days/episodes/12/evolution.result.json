@@ -1,0 +1,14 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/story.result.json"
+  ],
+  "result": {
+    "basis": "fact-12-hat给出重新穿戴旧帽的明确请求，fact-12-followup带出已有收藏的后续；故事中的观察影子与避碰脆壳延续性格，不转为新性格。growth.required为空，11月9日距上次特殊结束五天，这次光影发现和重戴旧帽没有新的器官变化，保持普通成年而不提前进入特殊形态。帽子持续戴着，需反映在Avatar，可复用适合的原戴帽艺术。",
+    "stage": "adult",
+    "state": "重新戴着原浅黄小圆叶帽，看看迁入新家的小发现",
+    "special": null,
+    "visibleState": "普通成年暖棕刺猬重新戴原浅黄小圆叶帽：低圆帽顶、窄帽檐、简单草纤维固定圈，两只圆小耳从两侧露出；奶白短吻与腹、亮眼、四短肉足和原钝圆围背软刺簇保持，无三团卷刺、无新附件或手持。"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "result": {
+    "unknowns": [
+      "没有具体公园名称、记录的实际方向或用户观察时的感受。",
+      "这次观察为首次单次行为，不能推断持续习惯。"
+    ],
+    "facts": [
+      {
+        "id": "fact-02-snail",
+        "source": "test-user-message:episode-02 / message-02 / 2026-10-28T08:00:00Z",
+        "text": "用户今天第一次在公园观察雨后蜗牛，并记录这一次的爬行方向。"
+      },
+      {
+        "id": "fact-02-postcard",
+        "source": "test-user-message:episode-02 / message-02 / 2026-10-28T08:00:00Z",
+        "text": "用户明确希望本篇收到宠物的明信片。"
+      }
+    ]
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/upstream.json"
+  ]
+}

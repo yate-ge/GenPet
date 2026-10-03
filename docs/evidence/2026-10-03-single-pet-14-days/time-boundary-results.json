@@ -1,0 +1,119 @@
+{
+  "ok": true,
+  "samples": [
+    {
+      "label": "enter",
+      "offsetMs": -1,
+      "at": "2026-11-02T04:59:59.999Z",
+      "required": null,
+      "due": {
+        "timezone": "Asia/Shanghai",
+        "times": [
+          "07:00",
+          "12:00",
+          "16:00",
+          "21:00"
+        ],
+        "triggerId": "daily:2026-11-02:12:00:Asia.Shanghai",
+        "due": true,
+        "pending": null
+      }
+    },
+    {
+      "label": "enter",
+      "offsetMs": 0,
+      "at": "2026-11-02T05:00:00.000Z",
+      "required": "enter-special",
+      "due": {
+        "timezone": "Asia/Shanghai",
+        "times": [
+          "07:00",
+          "12:00",
+          "16:00",
+          "21:00"
+        ],
+        "triggerId": "daily:2026-11-02:12:00:Asia.Shanghai",
+        "due": true,
+        "pending": null
+      }
+    },
+    {
+      "label": "enter",
+      "offsetMs": 1,
+      "at": "2026-11-02T05:00:00.001Z",
+      "required": "enter-special",
+      "due": {
+        "timezone": "Asia/Shanghai",
+        "times": [
+          "07:00",
+          "12:00",
+          "16:00",
+          "21:00"
+        ],
+        "triggerId": "daily:2026-11-02:12:00:Asia.Shanghai",
+        "due": true,
+        "pending": null
+      }
+    },
+    {
+      "label": "end",
+      "offsetMs": -1,
+      "at": "2026-11-04T07:59:59.999Z",
+      "required": null,
+      "due": {
+        "timezone": "Asia/Shanghai",
+        "times": [
+          "07:00",
+          "12:00",
+          "16:00",
+          "21:00"
+        ],
+        "triggerId": "daily:2026-11-04:12:00:Asia.Shanghai",
+        "due": true,
+        "pending": null
+      }
+    },
+    {
+      "label": "end",
+      "offsetMs": 0,
+      "at": "2026-11-04T08:00:00.000Z",
+      "required": "end-special",
+      "due": {
+        "timezone": "Asia/Shanghai",
+        "times": [
+          "07:00",
+          "12:00",
+          "16:00",
+          "21:00"
+        ],
+        "triggerId": "daily:2026-11-04:16:00:Asia.Shanghai",
+        "due": true,
+        "pending": null
+      }
+    },
+    {
+      "label": "end",
+      "offsetMs": 1,
+      "at": "2026-11-04T08:00:00.001Z",
+      "required": "end-special",
+      "due": {
+        "timezone": "Asia/Shanghai",
+        "times": [
+          "07:00",
+          "12:00",
+          "16:00",
+          "21:00"
+        ],
+        "triggerId": "daily:2026-11-04:16:00:Asia.Shanghai",
+        "due": true,
+        "pending": null
+      }
+    }
+  ],
+  "scheduledEpisode07At": "2026-11-02T08:00:00Z",
+  "enterBy": "2026-11-02T05:00:00.000Z",
+  "actualEnterDelayMs": 10800000,
+  "actualEndDelayMs": 0,
+  "scope": "Pure growth/due boundary calls on actual stored snapshots; no Pet or host writes",
+  "strictEnterDeadlineSatisfied": false
+}

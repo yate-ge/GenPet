@@ -1,0 +1,149 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/actual-completed.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/actual-output.json"
+  ],
+  "inputs": {
+    "story": {
+      "evidenceIds": [
+        "fact-10-note",
+        "fact-10-sort"
+      ],
+      "stateIntent": "在家慢慢整理好小发现，浅黄小圆叶帽仍收在床边",
+      "homeIntent": "调整原收藏区的取物路径：木片与凹口石保留在半壳内侧可触及处；原三件纸藏品按原叠放顺序移向后方左侧干处，与右侧悬空抱枝的空蝉蜕拉开间距，中间留通道。原种子、床边帽子与休息区域延续。",
+      "connection": "用户11月6日说昨日整理的是上周公园那一次蜗牛观察，不扩写为新的观察或习惯；本篇把这件事及明确整理请求写进正文，推动宠物整理已有收藏。",
+      "visualIntent": "只有文字；整理是家内的小幅布局变化，身体仍为普通成年、无穿戴附件。没有另增视觉礼物或必需的家全景。",
+      "text": "半片蛋壳里，最容易拿起的东西反而挡住了最怕碰的东西。刺猬伸足去取木片后的明信片，腕边差一点擦到抱枝的空蝉蜕。它缩回足，先坐着看了一会儿。你昨天把上周那次公园蜗牛观察整理成了一页笔记，也想看它在自己家里整理小发现；它便把自己的这一小堆慢慢摊开。泥点弯木片和半月凹口石留在半壳内侧，能摸得到；纸藏品移到它们后方更靠左的干处，明信片在上，照片露一条白边，漫画折在最下面。它试着从左侧抽出明信片，右侧短枝上的空蝉蜕纹丝不动，这才把明信片送回去。凹叶里的原种子没挪，草窝口的小圆叶帽也仍在床边干草上。最后它从两边藏品中间走了一趟：这回鼻尖不必替脚找路了。"
+    },
+    "completed": {
+      "id": "story-5a555c66-c8b5-485d-bf6d-75640f782b84",
+      "triggerId": "daily:2026-11-06:16:00:Asia.Shanghai",
+      "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "at": 1793952000000,
+      "text": "半片蛋壳里，最容易拿起的东西反而挡住了最怕碰的东西。刺猬伸足去取木片后的明信片，腕边差一点擦到抱枝的空蝉蜕。它缩回足，先坐着看了一会儿。你昨天把上周那次公园蜗牛观察整理成了一页笔记，也想看它在自己家里整理小发现；它便把自己的这一小堆慢慢摊开。泥点弯木片和半月凹口石留在半壳内侧，能摸得到；纸藏品移到它们后方更靠左的干处，明信片在上，照片露一条白边，漫画折在最下面。它试着从左侧抽出明信片，右侧短枝上的空蝉蜕纹丝不动，这才把明信片送回去。凹叶里的原种子没挪，草窝口的小圆叶帽也仍在床边干草上。最后它从两边藏品中间走了一趟：这回鼻尖不必替脚找路了。",
+      "basis": "fact-10-note与fact-10-sort提供这次整理的联系及明确请求，故事中的尝试、停下来观察和腾出取物路线延续性格；仅形成居家整理状态。上次特殊形态11月4日结束，本篇11月6日，growth.required为空，这次整理尚不足以引出新的生理特殊变化，维持成年普通形态。",
+      "stage": "adult",
+      "state": "在家慢慢整理好小发现，浅黄小圆叶帽仍收在床边",
+      "home": "家仍在苔石边，外沿走动观察的空地连着草根蜗牛小路。半片乳白浅褐斑蛋壳挡风，大叶雨檐遮雨，内侧草垫小窝及床边干草用于休息。草窝入口旁原先铺平的干草上，浅黄小圆叶帽帽顶朝上，窄檐展开，绕行空位保留。凹叶中的原种子保持原位。半壳收藏区内侧仍放泥点弯木片及紧邻的天然半月凹口浅灰扁石，方便伸足触及。本次纸藏品从木片后方移到其后更靠左的干处：自上而下是苔石坡明信片、错开一条窄白边的标本屋照片、折好四格漫画，可从左侧抽取。右侧短枝仍以两端支撑，淡琥珀空蝉蜕六足扣枝悬空，背部裂口保持不受挤压。左右收藏之间留出取物和行走的小通道。所有原藏品延续，相机早已归还，不在家。",
+      "appearanceId": "art-688ff9d8a4b753b8906f1e8f",
+      "mediaIds": [],
+      "steps": [
+        {
+          "id": "step-f105055f3736d170e67b4b0b",
+          "unit": "context",
+          "at": 1793952000000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/upstream.json"
+          ],
+          "result": {
+            "unknowns": [
+              "没有笔记具体内容、用户新一次观察或持续观察习惯资料。",
+              "先前未定博物馆计划没有到访确认。"
+            ],
+            "facts": [
+              {
+                "id": "fact-10-note",
+                "source": "test-user-message:episode-10 / message-10 / 2026-11-06T08:00:00Z",
+                "text": "用户11月6日说，昨天（11月5日）把上周公园里的那次蜗牛观察整理成一页笔记；仍是整理同一次观察。"
+              },
+              {
+                "id": "fact-10-sort",
+                "source": "test-user-message:episode-10 / message-10 / 2026-11-06T08:00:00Z",
+                "text": "用户11月6日明确想看宠物在自己家里整理小发现。"
+              }
+            ]
+          }
+        },
+        {
+          "id": "step-f9e14d8285098d648294f67d",
+          "unit": "story",
+          "at": 1793952000000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/context.result.json"
+          ],
+          "result": {
+            "evidenceIds": [
+              "fact-10-note",
+              "fact-10-sort"
+            ],
+            "stateIntent": "在家慢慢整理好小发现，浅黄小圆叶帽仍收在床边",
+            "homeIntent": "调整原收藏区的取物路径：木片与凹口石保留在半壳内侧可触及处；原三件纸藏品按原叠放顺序移向后方左侧干处，与右侧悬空抱枝的空蝉蜕拉开间距，中间留通道。原种子、床边帽子与休息区域延续。",
+            "connection": "用户11月6日说昨日整理的是上周公园那一次蜗牛观察，不扩写为新的观察或习惯；本篇把这件事及明确整理请求写进正文，推动宠物整理已有收藏。",
+            "visualIntent": "只有文字；整理是家内的小幅布局变化，身体仍为普通成年、无穿戴附件。没有另增视觉礼物或必需的家全景。",
+            "text": "半片蛋壳里，最容易拿起的东西反而挡住了最怕碰的东西。刺猬伸足去取木片后的明信片，腕边差一点擦到抱枝的空蝉蜕。它缩回足，先坐着看了一会儿。你昨天把上周那次公园蜗牛观察整理成了一页笔记，也想看它在自己家里整理小发现；它便把自己的这一小堆慢慢摊开。泥点弯木片和半月凹口石留在半壳内侧，能摸得到；纸藏品移到它们后方更靠左的干处，明信片在上，照片露一条白边，漫画折在最下面。它试着从左侧抽出明信片，右侧短枝上的空蝉蜕纹丝不动，这才把明信片送回去。凹叶里的原种子没挪，草窝口的小圆叶帽也仍在床边干草上。最后它从两边藏品中间走了一趟：这回鼻尖不必替脚找路了。"
+          }
+        },
+        {
+          "id": "step-37cc948ea31ad2d1863fd46d",
+          "unit": "evolution",
+          "at": 1793952000000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/context.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/story.result.json"
+          ],
+          "result": {
+            "special": null,
+            "state": "在家慢慢整理好小发现，浅黄小圆叶帽仍收在床边",
+            "stage": "adult",
+            "visibleState": null,
+            "basis": "fact-10-note与fact-10-sort提供这次整理的联系及明确请求，故事中的尝试、停下来观察和腾出取物路线延续性格；仅形成居家整理状态。上次特殊形态11月4日结束，本篇11月6日，growth.required为空，这次整理尚不足以引出新的生理特殊变化，维持成年普通形态。"
+          }
+        },
+        {
+          "id": "step-47b8778cdfe28768b8ee501a",
+          "unit": "home",
+          "at": 1793952000000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/context.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/story.result.json"
+          ],
+          "result": {
+            "basis": "故事是为避免取纸擦到脆弱空蜕而作小幅重排，不涉及建立新家或搬家；只调整纸藏品位置及通道，文字足够呈现，保留全套原物。",
+            "visual": null,
+            "home": "家仍在苔石边，外沿走动观察的空地连着草根蜗牛小路。半片乳白浅褐斑蛋壳挡风，大叶雨檐遮雨，内侧草垫小窝及床边干草用于休息。草窝入口旁原先铺平的干草上，浅黄小圆叶帽帽顶朝上，窄檐展开，绕行空位保留。凹叶中的原种子保持原位。半壳收藏区内侧仍放泥点弯木片及紧邻的天然半月凹口浅灰扁石，方便伸足触及。本次纸藏品从木片后方移到其后更靠左的干处：自上而下是苔石坡明信片、错开一条窄白边的标本屋照片、折好四格漫画，可从左侧抽取。右侧短枝仍以两端支撑，淡琥珀空蝉蜕六足扣枝悬空，背部裂口保持不受挤压。左右收藏之间留出取物和行走的小通道。所有原藏品延续，相机早已归还，不在家。"
+          }
+        },
+        {
+          "id": "step-86aa0cc6d62bb7723d0eaa45",
+          "unit": "carrier",
+          "at": 1793952000000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/story.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/evolution.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/home.result.json"
+          ],
+          "result": {
+            "reason": "本篇回应用户想看整理的请求，以取卡险些碰到空蜕、停下观察和腾通道的文字呈现；只重排已有收藏，未交付新视觉礼物，未建立或搬迁新家，不补载体图。",
+            "carrier": null
+          }
+        },
+        {
+          "id": "step-cf35b23520b5e11a08124008",
+          "unit": "appearance",
+          "at": 1793952000000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/story.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/evolution.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/home.result.json"
+          ],
+          "result": {
+            "appearance": null,
+            "visuals": [],
+            "basis": "宠物继续为普通成年无附件形象，帽子仍在床边收纳；取卡、伸足和走通道是短暂动作，家内纸藏品重排不改变 Avatar，没有特殊形态进出或阶段变化。"
+          }
+        }
+      ],
+      "namingDue": false,
+      "appearanceUpdated": false,
+      "hostAcknowledgement": "unchanged"
+    },
+    "availableMedia": []
+  }
+}

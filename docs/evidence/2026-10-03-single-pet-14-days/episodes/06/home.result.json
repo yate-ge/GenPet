@@ -1,0 +1,12 @@
+{
+  "result": {
+    "visual": null,
+    "basis": "折帽与试走没有改变叶檐和住处分区；帽子随宠物穿戴出门，未安置为家中新增物件。空蜕及其他收藏仍在原位置。",
+    "home": null
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/story.result.json"
+  ]
+}

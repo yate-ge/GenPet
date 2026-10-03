@@ -1,0 +1,13 @@
+[
+  {
+    "id": "art-9ff4809751d62286284059fa",
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "requestId": "3d7409a62e2ae22e9a06454b",
+    "stage": "adult",
+    "description": "在拱根高台新家安顿下来，浅黄小圆叶帽继续收在床边",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-single-pet-14-days\\pet\\data\\dots\\pets\\genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53\\assets\\art-9ff4809751d62286284059fa.png",
+    "kind": "story",
+    "createdAt": 1794124800000,
+    "provenance": "Built-in imagegen; independent root home panorama review accepted; isolated longitudinal test"
+  }
+]

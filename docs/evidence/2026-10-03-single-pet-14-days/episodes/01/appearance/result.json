@@ -1,0 +1,13 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/01/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/01/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/01/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/01/home.result.json"
+  ],
+  "result": {
+    "appearance": null,
+    "visuals": [],
+    "basis": "本篇成年阶段与特殊形态不变，没有新的持续可见状态；听声、敲地和睡前动作属于短暂剧情，不需重画 Avatar。"
+  }
+}

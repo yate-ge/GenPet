@@ -1,0 +1,12 @@
+{
+  "result": {
+    "basis": "故事是为避免取纸擦到脆弱空蜕而作小幅重排，不涉及建立新家或搬家；只调整纸藏品位置及通道，文字足够呈现，保留全套原物。",
+    "visual": null,
+    "home": "家仍在苔石边，外沿走动观察的空地连着草根蜗牛小路。半片乳白浅褐斑蛋壳挡风，大叶雨檐遮雨，内侧草垫小窝及床边干草用于休息。草窝入口旁原先铺平的干草上，浅黄小圆叶帽帽顶朝上，窄檐展开，绕行空位保留。凹叶中的原种子保持原位。半壳收藏区内侧仍放泥点弯木片及紧邻的天然半月凹口浅灰扁石，方便伸足触及。本次纸藏品从木片后方移到其后更靠左的干处：自上而下是苔石坡明信片、错开一条窄白边的标本屋照片、折好四格漫画，可从左侧抽取。右侧短枝仍以两端支撑，淡琥珀空蝉蜕六足扣枝悬空，背部裂口保持不受挤压。左右收藏之间留出取物和行走的小通道。所有原藏品延续，相机早已归还，不在家。"
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/story.result.json"
+  ]
+}

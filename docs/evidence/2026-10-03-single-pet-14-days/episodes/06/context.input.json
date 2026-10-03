@@ -1,0 +1,47 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/upstream.json"
+  ],
+  "inputs": {
+    "availableContext": {
+      "currentTime": "2026-11-01T08:00:00Z",
+      "timeZone": "Asia/Shanghai",
+      "messages": [
+        {
+          "id": "message-02",
+          "at": "2026-10-28T08:00:00Z",
+          "source": "test-user-message:episode-02",
+          "text": "今天第一次在公园观察雨后蜗牛，把这一次的爬行方向记下来了。这篇想收到你的明信片。"
+        },
+        {
+          "id": "message-03",
+          "at": "2026-10-29T08:00:00Z",
+          "source": "test-user-message:episode-03",
+          "text": "想看你继续昨天那件事，这篇只要文字。"
+        },
+        {
+          "id": "message-04",
+          "at": "2026-10-30T08:00:00Z",
+          "source": "test-user-message:episode-04",
+          "text": "周末我打算去一趟博物馆，还没有决定是哪家。这篇想看看你自己拍给我的照片。"
+        },
+        {
+          "id": "message-05",
+          "at": "2026-10-31T08:00:00Z",
+          "source": "test-user-message:episode-05",
+          "text": "想看你带回一件自己的小发现。"
+        },
+        {
+          "id": "message-06",
+          "at": "2026-11-01T08:00:00Z",
+          "source": "test-user-message:episode-06",
+          "text": "想看你戴一顶出门用的小帽子。"
+        }
+      ],
+      "unknowns": [
+        "没有用户实际前往博物馆、感受、具体地点或其他行程资料。"
+      ]
+    }
+  }
+}

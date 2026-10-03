@@ -1,0 +1,11 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/actual-completed.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/actual-output.json"
+  ],
+  "result": {
+    "text": "半片蛋壳里，最容易拿起的东西反而挡住了最怕碰的东西。刺猬伸足去取木片后的明信片，腕边差一点擦到抱枝的空蝉蜕。它缩回足，先坐着看了一会儿。\n\n你昨天把上周那次公园蜗牛观察整理成了一页笔记，也想看它在自己家里整理小发现；它便把自己的这一小堆慢慢摊开。泥点弯木片和半月凹口石留在半壳内侧，能摸得到；纸藏品移到它们后方更靠左的干处，明信片在上，照片露一条白边，漫画折在最下面。\n\n它试着从左侧抽出明信片，右侧短枝上的空蝉蜕纹丝不动，这才把明信片送回去。凹叶里的原种子没挪，草窝口的小圆叶帽也仍在床边干草上。最后它从两边藏品中间走了一趟：这回鼻尖不必替脚找路了。",
+    "mediaRefs": []
+  }
+}

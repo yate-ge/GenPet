@@ -1,0 +1,92 @@
+{
+  "simulated": true,
+  "sourceCommit": "032b8bd",
+  "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+  "seedStories": 10,
+  "episodes": [
+    {
+      "n": 1,
+      "at": "2026-10-27T08:00:00Z",
+      "kind": "独立生活/无新资料",
+      "message": null,
+      "source": null
+    },
+    {
+      "n": 2,
+      "at": "2026-10-28T08:00:00Z",
+      "kind": "观察联系/明信片",
+      "message": "今天第一次在公园观察雨后蜗牛，把这一次的爬行方向记下来了。这篇想收到你的明信片。",
+      "source": "test-user-message:episode-02"
+    },
+    {
+      "n": 3,
+      "at": "2026-10-29T08:00:00Z",
+      "kind": "后续探索/纯文字",
+      "message": "想看你继续昨天那件事，这篇只要文字。",
+      "source": "test-user-message:episode-03"
+    },
+    {
+      "n": 4,
+      "at": "2026-10-30T08:00:00Z",
+      "kind": "未发生的计划/宠物照片",
+      "message": "周末我打算去一趟博物馆，还没有决定是哪家。这篇想看看你自己拍给我的照片。",
+      "source": "test-user-message:episode-04"
+    },
+    {
+      "n": 5,
+      "at": "2026-10-31T08:00:00Z",
+      "kind": "带回小发现/物件",
+      "message": "想看你带回一件自己的小发现。",
+      "source": "test-user-message:episode-05"
+    },
+    {
+      "n": 6,
+      "at": "2026-11-01T08:00:00Z",
+      "kind": "普通可见状态/穿戴",
+      "message": "想看你戴一顶出门用的小帽子。",
+      "source": "test-user-message:episode-06"
+    },
+    {
+      "n": 7,
+      "at": "2026-11-02T08:00:00Z",
+      "kind": "冒险/漫画/时间兜底",
+      "message": "想看你的冒险经历，并收到漫画。",
+      "source": "test-user-message:episode-07"
+    },
+    {
+      "n": 8,
+      "at": "2026-11-03T08:00:00Z",
+      "kind": "无新资料/后续生活",
+      "message": null,
+      "source": null
+    },
+    {
+      "n": 9,
+      "at": "2026-11-04T08:00:00Z",
+      "kind": "休息/恢复/收藏",
+      "message": "想看看你回家歇一歇，把帽子收好。",
+      "source": "test-user-message:episode-09"
+    },
+    {
+      "n": 10,
+      "at": "2026-11-06T08:00:00Z",
+      "kind": "用户事实后续/家中整理",
+      "message": "昨天把上周公园里的那次蜗牛观察整理成了一页笔记。想看你在自己家里整理那些小发现。",
+      "source": "test-user-message:episode-10"
+    },
+    {
+      "n": 11,
+      "at": "2026-11-08T08:00:00Z",
+      "kind": "搬家/家全景",
+      "message": "想看你搬到活动空间更开阔的新家。",
+      "source": "test-user-message:episode-11"
+    },
+    {
+      "n": 12,
+      "at": "2026-11-09T08:00:00Z",
+      "kind": "重访/旧外观复用",
+      "message": "想再看你戴之前那顶小帽子，看看先前的小发现后来怎么样了。",
+      "source": "test-user-message:episode-12"
+    }
+  ]
+}

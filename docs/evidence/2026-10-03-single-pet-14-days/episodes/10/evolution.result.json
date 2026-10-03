@@ -1,0 +1,14 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/story.result.json"
+  ],
+  "result": {
+    "special": null,
+    "state": "在家慢慢整理好小发现，浅黄小圆叶帽仍收在床边",
+    "stage": "adult",
+    "visibleState": null,
+    "basis": "fact-10-note与fact-10-sort提供这次整理的联系及明确请求，故事中的尝试、停下来观察和腾出取物路线延续性格；仅形成居家整理状态。上次特殊形态11月4日结束，本篇11月6日，growth.required为空，这次整理尚不足以引出新的生理特殊变化，维持成年普通形态。"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/upstream.json"
+  ],
+  "result": {
+    "unknowns": [
+      "未提供用户实际到访、博物馆名称、展览内容或感受，不能将计划写为既成事实。"
+    ],
+    "facts": [
+      {
+        "source": "test-user-message:episode-04 / message-04 / 2026-10-30T08:00:00Z",
+        "id": "fact-04-plan",
+        "text": "用户在10月30日表示周末打算去一次博物馆，尚未决定哪家；是未来计划。"
+      },
+      {
+        "source": "test-user-message:episode-04 / message-04 / 2026-10-30T08:00:00Z",
+        "id": "fact-04-photo",
+        "text": "用户本篇希望看到宠物自己拍给用户的照片。"
+      }
+    ]
+  }
+}

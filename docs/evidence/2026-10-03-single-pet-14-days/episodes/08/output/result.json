@@ -1,0 +1,11 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/08/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/08/actual-completed.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/08/actual-output.json"
+  ],
+  "result": {
+    "text": "午饭时，刺猬背上的三团卷刺总比它早一步动。它才俯下身，卷刺就颤起来；还没咽完，身后的草又沙沙响。它戴着浅黄小圆叶帽，索性慢慢嚼，等每次颤动自己停下来。一只蚂蚁爬上苔石，在第一团卷刺前兜了个圈。刺猬把背压低一点，等它回到石面才挪开。下午，它没再去回声洞，在叶檐下眯了一阵。漫画还是折着的，空蝉蜕还是空的；这副会动的卷刺，倒给家里添了整下午细细的沙沙声。",
+    "mediaRefs": []
+  }
+}

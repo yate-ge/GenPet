@@ -1,0 +1,15 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/carrier/image-review.input.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/carrier/image-review.request.json"
+  ],
+  "result": {
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/carrier/generated.png",
+    "verdict": "repair",
+    "observations": [
+      "背部纵裂和空腔可见，完整短枝仍作为支撑，没有活蝉、宠物、文字或背景。",
+      "三对共六足无法逐一辨认，远侧足与壳体、枝条重叠；原图和小图都不能验证 mustShow 的六足。"
+    ],
+    "repair": "只调整姿态/视角，使六足（三对）各自有明确轮廓并抓住同一短枝；保留空腔、背裂、完整短枝和透明背景。"
+  }
+}

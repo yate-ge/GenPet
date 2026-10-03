@@ -1,0 +1,22 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home.result.json"
+  ],
+  "inputs": {
+    "visual": {
+      "references": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png"
+      ],
+      "request": "画一张可亲近的卡通像素家园全景，横向16:9，有背景、非透明；镜头略高从前方看进大树拱根下，完整家和周围草坡均入画。宽阔干燥高台居中，根拱在后上方，不做室内角落特写。左后为休息角：乳白浅褐斑半蛋壳作低风墙，旧大叶雨檐斜搭其上接拱根，下方草垫小窝；床边平干草上放浅黄低圆叶帽，帽顶朝上、窄檐展开。右侧根边的收藏干台留足画面辨认物件：前左凹叶盛一颗原种子，前中一根两端带一与二泥点的弯木片，紧邻天然半月凹口浅灰扁石；后左叠放三个不同纸物，最上为左图右文字区和小邮票的蜗牛亮线明信片，下面是窄白边标本屋照片，再下面是折好的四格漫画，各自露出边缘，以清楚区分三件；后右短枯枝两端支撑，淡琥珀空蝉蜕六细足扣住枝，背裂、中空，悬起不挤纸。中央到前沿空出明显大块平地，通往两侧和门外，不堆物；一只暖棕拱背、奶白短吻腹、亮眼双圆耳四短肉足、钝圆成年软刺簇的可爱小刺猬，在空地上只占画面一小部分，无帽无附件。前沿草路向下接旧苔石，旧址为空地，没有第二套家或收藏。少量清楚像素色块，丰富但有秩序；没有相机、活蝉、卷刺特殊形态、标题、标签或UI。",
+      "mustShow": [
+        "大树拱根下完整高台、周围草坡与通向下方旧苔石的路径",
+        "左后半蛋壳风墙与大叶檐下草窝，床边收好的浅黄低圆叶帽",
+        "右侧干台上的原种子凹叶、泥点弯木片、半月凹口灰石、三件错开露边的纸藏品、抱枝悬空的琥珀空蝉蜕",
+        "占整体明显大块面积的中央前沿活动空地，普通成年无帽刺猬仅占其中一小部分"
+      ],
+      "purpose": "展示搬家后的整体新家及更开阔活动空间，核对旧物迁入与分区关系。",
+      "form": "横向16:9全景"
+    },
+    "actualFile": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home-generated.png"
+  }
+}

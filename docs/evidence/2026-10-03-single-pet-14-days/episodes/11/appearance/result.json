@@ -1,0 +1,13 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home.result.json"
+  ],
+  "result": {
+    "appearance": null,
+    "visuals": [],
+    "basis": "搬家后的安顿是居家状态，帽子继续放在床边，无持续穿戴、手持或身体变化；搬运和快走为短暂剧情，普通成年 Avatar 保持。"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "source": "root actual engine calls",
+  "episode": 7,
+  "time": "2026-11-02T08:00:00Z",
+  "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+  "stories": 17,
+  "art": 14,
+  "appearanceId": "art-5243027577d9f7ed01f8d2ed",
+  "growthBefore": {
+    "stage": "adult",
+    "next": null,
+    "since": "2026-10-17T05:00:00.000Z",
+    "advanceBy": null,
+    "special": {
+      "active": false,
+      "since": "2026-10-26T05:00:00.000Z",
+      "enterBy": "2026-11-02T05:00:00.000Z"
+    },
+    "required": "enter-special"
+  },
+  "growthAfter": {
+    "stage": "adult",
+    "next": null,
+    "since": "2026-10-17T05:00:00.000Z",
+    "advanceBy": null,
+    "special": {
+      "active": true,
+      "description": "回声卷刺形态：成年刺猬背部原有钝圆软刺聚拢卷成三团大圆螺旋，轮廓像沿拱背排列的三簇柔软卷环，迈步时轻颤。暖棕低矮躯干、奶白短吻腹、四短肉足、双圆耳和亮眼延续，浅黄小圆叶帽继续戴着。变化在器官形状而非换色，仍是同一只可爱活刺猬。",
+      "since": "2026-11-02T08:00:00.000Z",
+      "endBy": "2026-11-04T08:00:00.000Z"
+    },
+    "required": null
+  },
+  "identityRetained": true,
+  "duplicateTriggerCreatesStory": false,
+  "slotDueAfter": false,
+  "hostAcknowledgement": "simulated inactive target only"
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "art-5243027577d9f7ed01f8d2ed",
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "requestId": "b653e859464753b55583d266",
+    "stage": "adult",
+    "description": "同一成年戴浅黄低圆叶帽刺猬；暖棕拱背原钝圆软刺卷成三团独立的大圆螺旋软簇，奶白短吻腹、四足、圆耳和亮眼延续。",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-single-pet-14-days\\pet\\data\\dots\\pets\\genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53\\assets\\art-5243027577d9f7ed01f8d2ed.png",
+    "kind": "avatar",
+    "createdAt": 1793606400000,
+    "provenance": "Built-in imagegen; independent root visual review accepted; isolated longitudinal test"
+  },
+  {
+    "id": "art-12b92a2b933bc2332d110cfa",
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "requestId": "b653e859464753b55583d266",
+    "stage": "adult",
+    "description": "同一成年戴浅黄低圆叶帽刺猬；暖棕拱背原钝圆软刺卷成三团独立的大圆螺旋软簇，奶白短吻腹、四足、圆耳和亮眼延续。",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-single-pet-14-days\\pet\\data\\dots\\pets\\genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53\\assets\\art-12b92a2b933bc2332d110cfa.png",
+    "kind": "story",
+    "createdAt": 1793606400000,
+    "provenance": "Built-in imagegen; independent root carrier review accepted; isolated longitudinal test"
+  }
+]

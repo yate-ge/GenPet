@@ -1,0 +1,24 @@
+{
+  "result": {
+    "facts": [
+      {
+        "text": "用户11月2日明确想看宠物的冒险经历并收到漫画。",
+        "source": "test-user-message:episode-07 / message-07 / 2026-11-02T08:00:00Z",
+        "id": "fact-07-adventure"
+      },
+      {
+        "text": "用户11月1日希望宠物戴出门用的小帽子。",
+        "source": "test-user-message:episode-06 / message-06 / 2026-11-01T08:00:00Z",
+        "id": "fact-07-prior-hat"
+      }
+    ],
+    "unknowns": [
+      "没有用户持续生活模式、实际探险或博物馆到访资料。",
+      "没有指定冒险地点或漫画格数。"
+    ]
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/07/upstream.json"
+  ]
+}

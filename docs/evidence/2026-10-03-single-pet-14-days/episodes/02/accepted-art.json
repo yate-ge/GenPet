@@ -1,0 +1,13 @@
+[
+  {
+    "id": "art-e3c62439d38996b54721b215",
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "requestId": "4b0a92ed32e5f48b699a6d47",
+    "stage": "adult",
+    "description": "想把自己晚到一步的观察写给你",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-single-pet-14-days\\pet\\data\\dots\\pets\\genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53\\assets\\art-e3c62439d38996b54721b215.png",
+    "kind": "story",
+    "createdAt": 1793174400000,
+    "provenance": "Built-in imagegen; independent root carrier review accepted; isolated longitudinal test"
+  }
+]

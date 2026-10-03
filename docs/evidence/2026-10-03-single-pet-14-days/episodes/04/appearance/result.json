@@ -1,0 +1,13 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/home.result.json"
+  ],
+  "result": {
+    "appearance": null,
+    "visuals": [],
+    "basis": "相机已归还，指向空壳和看向镜头仅属于照片中的当次姿势；照片作为载体收藏，没有持续穿戴或携带，也未进化或进入特殊形态，保持当前成年 Avatar。"
+  }
+}

@@ -1,0 +1,153 @@
+{
+  "id": "story-6d60dbb1-e5de-4e89-8752-b1acff0e9039",
+  "triggerId": "daily:2026-11-01:16:00:Asia.Shanghai",
+  "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+  "at": 1793520000000,
+  "text": "出门前，刺猬在半壳口试了一下高度。新做的帽子先碰到叶檐，差点连自己的脑袋一起卡住。你想看它戴一顶出门用的小帽子，它挑了浅黄的落叶，折成圆圆的低帽顶，留下窄帽檐，草纤维绕成一圈固定。它把帽顶压低一些，让两只圆耳从帽子两侧露出来，再走过一回：这下连软刺也没蹭到雨檐。半壳侧边的空蝉蜕安稳抱着短枝，它绕开收藏区，戴好这顶小圆叶帽往草坡走。帽檐上落了一滴水；它低头一甩，水滚下去，帽子还在。",
+  "basis": "fact-06-hat 的明确穿戴请求经折帽、压低帽顶、试走与出门故事形成可见状态；是同一身体的附件变化，未改写基因。growth.required 为 null，尚未到特殊形态兜底期限；出门试帽没有特殊身体变化依据，成年与长期性格延续。",
+  "stage": "adult",
+  "state": "戴着浅黄小圆叶帽出门",
+  "appearanceId": "art-c6d178ff4e0890241944c0ee",
+  "mediaIds": [],
+  "steps": [
+    {
+      "id": "step-a3a14126afa2c7f03085533f",
+      "unit": "context",
+      "at": 1793520000000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/upstream.json"
+      ],
+      "result": {
+        "unknowns": [
+          "用户未指定帽子的款式、材料、颜色或出门地点。",
+          "先前博物馆计划尚无实际到访信息。"
+        ],
+        "facts": [
+          {
+            "source": "test-user-message:episode-06 / message-06 / 2026-11-01T08:00:00Z",
+            "text": "用户11月1日明确希望看到宠物戴一顶出门用的小帽子。",
+            "id": "fact-06-hat"
+          }
+        ]
+      }
+    },
+    {
+      "id": "step-671c1e43d365eccbeaccc6a0",
+      "unit": "story",
+      "at": 1793520000000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/context.result.json"
+      ],
+      "result": {
+        "connection": "用户当日明确希望宠物戴出门帽；折帽、试走和草坡出门属于虚构宠物生活，以停下来改做法的同一性格回应。没有推断用户审美或实际出门行程。",
+        "homeIntent": null,
+        "visualIntent": "给用户文字故事与戴帽后的同一个体Avatar。帽子是持续的穿戴变化，需要appearance体现；本篇没有独立明信片、照片或物件礼物。",
+        "evidenceIds": [
+          "fact-06-hat"
+        ],
+        "stateIntent": "戴着浅黄小圆叶帽出门；低圆帽顶、窄帽檐、草纤维固定圈，两耳从两侧露出，脸、奶白短吻和成年棕色软刺簇不遮挡。无其他附件。",
+        "text": "出门前，刺猬在半壳口试了一下高度。新做的帽子先碰到叶檐，差点连自己的脑袋一起卡住。你想看它戴一顶出门用的小帽子，它挑了浅黄的落叶，折成圆圆的低帽顶，留下窄帽檐，草纤维绕成一圈固定。它把帽顶压低一些，让两只圆耳从帽子两侧露出来，再走过一回：这下连软刺也没蹭到雨檐。半壳侧边的空蝉蜕安稳抱着短枝，它绕开收藏区，戴好这顶小圆叶帽往草坡走。帽檐上落了一滴水；它低头一甩，水滚下去，帽子还在。"
+      }
+    },
+    {
+      "id": "step-37e6c4ea8aab1cccfb367ffb",
+      "unit": "evolution",
+      "at": 1793520000000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/context.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/story.result.json"
+      ],
+      "result": {
+        "basis": "fact-06-hat 的明确穿戴请求经折帽、压低帽顶、试走与出门故事形成可见状态；是同一身体的附件变化，未改写基因。growth.required 为 null，尚未到特殊形态兜底期限；出门试帽没有特殊身体变化依据，成年与长期性格延续。",
+        "special": null,
+        "stage": "adult",
+        "visibleState": "持续戴一顶浅黄小圆叶帽：低圆帽顶、窄帽檐、简洁草纤维固定圈，两只圆耳从两侧露出。奶白短吻、亮眼、腹部、四短肉足和成年暖棕钝圆软刺簇延续，无其他穿戴或手持物。",
+        "state": "戴着浅黄小圆叶帽出门"
+      }
+    },
+    {
+      "id": "step-3055b586d36875d68aa844cf",
+      "unit": "home",
+      "at": 1793520000000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/context.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/story.result.json"
+      ],
+      "result": {
+        "visual": null,
+        "basis": "折帽与试走没有改变叶檐和住处分区；帽子随宠物穿戴出门，未安置为家中新增物件。空蜕及其他收藏仍在原位置。",
+        "home": null
+      }
+    },
+    {
+      "id": "step-eff23cf2d34775759f4ceefe",
+      "unit": "carrier",
+      "at": 1793520000000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/story.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/evolution.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/home.result.json"
+      ],
+      "result": {
+        "reason": "本篇交付文字与戴帽后的 Avatar；帽子是持续穿戴状态，由 appearance 呈现，没有独立视觉物件、照片或空间变化，不另配载体图。",
+        "carrier": null
+      }
+    },
+    {
+      "id": "step-c10621a48ca0f024bdf57416",
+      "unit": "appearance",
+      "at": 1793520000000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/story.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/evolution.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/home.result.json"
+      ],
+      "result": {
+        "appearance": {
+          "description": "同一成年暖棕刺猬，持续戴浅黄低圆叶帽，窄檐与草纤维固定圈，两只耳露出；奶白短吻腹部、亮眼、四短肉足及软刺簇延续。"
+        },
+        "visuals": [
+          {
+            "purpose": "avatar",
+            "description": "以本个体成年Avatar为身份参考，仅增加浅黄小圆叶帽，不改变身体、器官与姿态。",
+            "request": "Use case: identity-preserve\nAsset type: one static transparent pixel Pet Avatar, for 192 by 208 display.\nPrimary request: Edit the supplied adult hedgehog Avatar by adding ONLY one small pale yellow round LEAF HAT for going outside. Keep this exact same hedgehog, same warm tan and brown low compact arched body, same cream-white face, short slightly projecting snout and belly, same two dark shiny eyes, brown nose, pink inner ears and four short pink fleshy feet, same cream-tipped blunt quill clusters, exact same three-quarter pose and proportions and coarse pixel grid. Preserve the entire body artwork beneath the added hat.\nHat: a clearly shallow LOW ROUNDED DOME made from pale yellow folded leaf, with a NARROW gently rounded brim. A single thin simple straw grass-fiber circle wraps the base of the crown to secure it. The hat sits between the two ears and BOTH ears remain fully visible outside the sides, as in the reference. Hat is small and low, not tall, not broad brimmed. It must not cover the face, eyes, cream short snout, ears, or the mature brown quill clusters behind the head. Tiny leaf folds can read as two or three broad pixel patches; no detailed woven texture.\nStyle: retain reference's charming cartoon pixel sprite, blocky stepped outline and a few clear color blocks. Every edge and detail follows the existing visible pixel scale. Do not redraw anatomy, soften pixels, add realistic textures or change body color.\nComposition: keep one full-body hedgehog centered, comfortable transparent margins; no objects, landscape or floor, no shadow blob, no other clothing, hands-held items or text. Genuine transparent PNG with intact alpha. A single base Avatar, not an animation atlas.",
+            "referenceFiles": [
+              "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png"
+            ],
+            "requirements": {
+              "host": "dots",
+              "format": "PNG",
+              "transparent": true,
+              "displaySize": [
+                192,
+                208
+              ],
+              "scope": "single static base Avatar"
+            },
+            "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/appearance/generated.png",
+            "previewFile": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/appearance/preview-192x208.png",
+            "sourceRecord": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/06/appearance/image-source.json"
+          }
+        ],
+        "basis": "fact-06-hat 经本故事形成持续穿戴状态；savedArt 无戴帽变体，生成同一成年身体的附件变体。"
+      }
+    }
+  ],
+  "hostResult": {
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "operationId": "story-6d60dbb1-e5de-4e89-8752-b1acff0e9039",
+    "appearanceId": "art-c6d178ff4e0890241944c0ee",
+    "avatarId": "dots:isolated:group03",
+    "updated": true,
+    "active": false,
+    "refreshRequested": false,
+    "displayStatus": "unconfirmed",
+    "evidence": "Simulated inactive host acknowledgement; no live display verified"
+  }
+}

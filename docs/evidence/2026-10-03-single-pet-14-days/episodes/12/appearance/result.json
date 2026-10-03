@@ -1,0 +1,33 @@
+{
+  "result": {
+    "basis": "change仍为adult、special为空，仅再次穿戴先前同一顶帽子；savedArt中此资源是同一个体已接受的普通成年戴帽Avatar，包含本次visibleState所需身体和帽子关系，可直接复用。临时看影子与走动无需新姿态，不用无帽图或卷刺特殊变体。",
+    "visuals": [
+      {
+        "description": "同一成年暖棕刺猬，持续戴浅黄低圆叶帽，窄檐与草纤维固定圈，两只耳露出；奶白短吻腹部、亮眼、四短肉足及软刺簇延续。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-c6d178ff4e0890241944c0ee.png",
+        "reuseArtId": "art-c6d178ff4e0890241944c0ee",
+        "requirements": {
+          "host": "dots",
+          "format": "PNG",
+          "transparent": true,
+          "displaySize": [
+            192,
+            208
+          ],
+          "scope": "Only one static transparent base Avatar; full animation is not requested"
+        },
+        "purpose": "复用已保存的普通成年戴原帽Avatar"
+      }
+    ],
+    "appearance": {
+      "reuseArtId": "art-c6d178ff4e0890241944c0ee",
+      "description": "同一普通成年暖棕刺猬，重新戴原浅黄低圆叶帽，窄帽檐与草纤维圈，两只圆耳露出；奶白短吻腹、亮眼、四短肉足和钝圆围背软刺簇延续。"
+    }
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/home.result.json"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/actual-completed.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/actual-output.json"
+  ],
+  "result": {
+    "text": "你想听昨天那件事的后续，这次我只用文字讲。今天我又去了草根边，昨天的亮线干了，得把鼻尖压低才找得到。草叶背面倒有一只蜗牛，正在啃一个小缺口。我不知道它是不是昨天留下痕迹的那只，就在旁边等着。它吃一会儿，停一会儿，最后把触角缩进壳里。我一路带来的问题还没问，它已经睡了。回家时，我从半壳里翻出那张明信片，看看画上的弯线，又把它放回弯木片后面。今天没追出一个新方向，只赶上了蜗牛的午觉。",
+    "mediaRefs": []
+  }
+}

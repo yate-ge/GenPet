@@ -1,0 +1,46 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home.result.json"
+  ],
+  "result": {
+    "reason": "本篇搬到更开阔新家，必须给用户看完整分区、活动空间与旧物迁入；采用 home 已设计的全景，避免重复生成独立载体。",
+    "carrier": {
+      "medium": "新家全景",
+      "purpose": "展示搬家后的整体新家及更开阔活动空间，核对旧物迁入与分区关系。",
+      "viewpoint": "从前方略高角度看进拱根，用户看完整新家和周围草坡。",
+      "form": {
+        "aspectRatio": "16:9",
+        "background": "大树拱根、草坡与旧苔石路径，非透明",
+        "border": "无"
+      },
+      "mustShow": [
+        "大树拱根下完整高台、周围草坡与通向下方旧苔石的路径",
+        "左后半蛋壳风墙与大叶檐下草窝，床边收好的浅黄低圆叶帽",
+        "右侧干台上的原种子凹叶、泥点弯木片、半月凹口灰石、三件错开露边的纸藏品、抱枝悬空的琥珀空蝉蜕",
+        "占整体明显大块面积的中央前沿活动空地，普通成年无帽刺猬仅占其中一小部分"
+      ],
+      "visuals": [
+        {
+          "purpose": "home",
+          "description": "新家从苔石边搬到同一草坡较高处的大树拱根下：拱根遮在后上方，根间有宽阔平整的干燥高台，前沿敞开，草坡小路向下通往旧苔石和草根蜗牛小路。左后休息角安置带浅褐斑的旧乳白半蛋壳作风墙，旧大叶雨檐斜搭在它与拱根之间，下面是旧草垫小窝及床边干草；浅黄小圆叶帽帽顶朝上放在床边铺平干草上，窄檐不压折、入口留绕行空位。右侧根边较高的干台是收藏区：前左的原凹叶盛原种子，前中是泥点弯木片、旁边天然半月凹口浅灰扁石；后左干草垫上叠放三件纸藏品，苔石坡明信片在上，标本屋照片错开露窄白边，最下的四格漫画折好并略露折边，能从左侧取纸；后右短枝两端被支撑，淡琥珀空蝉蜕六足扣枝悬空，裂背不受压，与纸藏品隔开。中央及前沿的大块平地专供走动、转身和观察，不放收藏，与休息角和收藏台各有宽敞路线相通。所有旧物整套搬入，不留重复收藏或帽子在旧址；旧苔石只作草坡下的空地标，相机已归还。",
+          "request": "Use case: precise-object-edit\nImage 1 is the complete 1672x941 pixel home panorama. Edit ONLY the objects on the RIGHT COLLECTION PLATFORM. Preserve exact 16:9 framing, whole house architecture, tree root arch, center large empty play area and small unadorned normal adult hedgehog, left egg-shell shelter and stored pale yellow hat. Background fully opaque. References: image 2 = accepted EMPTY amber cicada exuvia grasping bark; image 3 = accepted gently BENT wooden piece with ONE pale mud dot on one end and TWO separate pale mud dots on the opposite end (use only this collectible, no second hedgehog or table); image 4 = accepted shallow gray oval stone with natural SMALL half-moon notch.\nRight-front center: REPLACE the current straight dumbbell with a short asymmetrical gently curved wooden piece faithful to image 3. Visibly curved wood, one modest light mud dot left end, two individually separated light mud dots right end. No giant dark brown balls. Beside it REPLACE the crescent-shaped stone with image 4's compact shallow gray oval stone bearing a small semicircular edge notch; avoid oversized crescent shape.\nRight-rear: REPLACE all string/loop suspension. ONE whole dry twig laid nearly horizontally, with EACH of its TWO ENDS resting on its own low simple support. Accepted image 2's empty amber exuvia firmly GRIPS the twig directly with six hooked legs around bark. Its body is close to twig, dorsal shell split exposes empty cavity; no strings, hanging loops, hook, cage, or living cicada. Supports sit on collection platform. The shell is not pendant jewelry and must not float below on a thread.\nRight-rear left papers: preserve the existing correct card content, photo showing the hedgehog beside the chipped empty snail shell and folded comic content, but lay the THREE artifacts as ONE LOW FLAT stack on platform. TOP postcard, MIDDLE white-bordered hedgehog+shell photo slightly offset, BOTTOM FOLDED comic booklet slightly offset. No upright display or steep angled board. Three exposed edges identify the order. Maintain separation from twig.\nPreserve front-left green leaf holding single seed. No added or duplicated collectibles, no labels/signs/UI. Change nothing elsewhere in panorama.",
+          "referenceFiles": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home-generated.png",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-e3c62439d38996b54721b215.png",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-5a28a6ca55c3c26789e4ce0b.png",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-5107b1187a398ccbb54a47a5.png",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-d537ebfa229a2118252ac154.png",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-57f7a274608adcab94d4b235.png",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/07/carrier/generated-v3.png"
+          ],
+          "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home-generated-v2.png",
+          "previewFile": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home-preview-v2-192x208.png",
+          "sourceRecord": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home-image-source-v2.json"
+        }
+      ]
+    }
+  }
+}

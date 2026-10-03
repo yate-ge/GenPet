@@ -1,0 +1,16 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/01/upstream.json"
+  ],
+  "inputs": {
+    "availableContext": {
+      "currentTime": "2026-10-27T08:00:00Z",
+      "timeZone": "Asia/Shanghai",
+      "messages": [],
+      "unknowns": [
+        "没有用户实际前往博物馆、感受、具体地点或其他行程资料。"
+      ]
+    }
+  }
+}

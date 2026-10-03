@@ -1,0 +1,185 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/actual-completed.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/actual-output.json"
+  ],
+  "inputs": {
+    "story": {
+      "visualIntent": "文字故事与恢复普通成年、脱帽后的Avatar；特殊形态结束必须在形象上体现，优先复用同一个体已有普通成年无附件艺术。没有额外视觉礼物，帽子小幅收纳不另作家全景。",
+      "evidenceIds": [
+        "fact-09-rest"
+      ],
+      "connection": "采用 fact-09-rest 的当日明确休息与收帽请求；特殊形态满两天的松卷经历发生在宠物世界，不补造用户模式改变。",
+      "text": "帽子先安了家。你想看刺猬回家歇一歇、把帽子收好，它就在草窝入口旁铺平一点床边干草，将浅黄小圆叶帽帽顶朝上放稳，窄檐不压折。回声洞带来的卷刺跟着它颤了两天；现在它伸长前足，又慢慢放下身子，做了一个长得连自己都意外的哈欠。背上的三团螺旋一圈一圈松开，重新分成沿暖棕拱背围着的钝圆软刺簇。奶白短吻旁，两只圆耳自在地露着。它走到叶檐边，接住一滴落下的水，背后再没有抢先响起的沙沙声。回草窝时，它从帽檐边绕过去，空出一只前足的位置给那顶帽子。今天的路，到床边就够了。",
+      "homeIntent": "把原先穿戴的浅黄小圆叶帽帽顶朝上放在草窝入口旁的床边干草上，窄檐不压折，不挡走路；其他收藏与原分区延续。",
+      "stateIntent": "在家歇着，浅黄小圆叶帽已经脱下收好；恢复普通成年软刺身体，未穿戴、手持或使用新附件。"
+    },
+    "completed": {
+      "id": "story-43c12f8f-3a20-433b-967d-cdecdb919b0c",
+      "triggerId": "daily:2026-11-04:16:00:Asia.Shanghai",
+      "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "at": 1793779200000,
+      "text": "帽子先安了家。你想看刺猬回家歇一歇、把帽子收好，它就在草窝入口旁铺平一点床边干草，将浅黄小圆叶帽帽顶朝上放稳，窄檐不压折。回声洞带来的卷刺跟着它颤了两天；现在它伸长前足，又慢慢放下身子，做了一个长得连自己都意外的哈欠。背上的三团螺旋一圈一圈松开，重新分成沿暖棕拱背围着的钝圆软刺簇。奶白短吻旁，两只圆耳自在地露着。它走到叶檐边，接住一滴落下的水，背后再没有抢先响起的沙沙声。回草窝时，它从帽檐边绕过去，空出一只前足的位置给那顶帽子。今天的路，到床边就够了。",
+      "basis": "growth.required=end-special：11月2日进入后已满两天，按兜底节奏与这两天适应、休息的积累恢复；故事通过伸展与哈欠让三团卷刺松回普通成年钝圆刺簇，不补造用户模式变化。fact-09-rest 明确支持回家休息与脱帽收纳，形成新的状态；同一身份、基因和长期性格延续。",
+      "stage": "adult",
+      "state": "在家歇着，浅黄小圆叶帽已收好",
+      "home": "家继续在苔石边，草根蜗牛小路接着外沿的走动与观察空地。半片乳白浅褐斑蛋壳挡风，大叶雨檐遮雨；内侧草垫小窝和床边干草供休息。本次把床边一小处干草铺平，浅黄小圆叶帽帽顶朝上放在草窝入口旁，窄檐保持展开，留出绕行的空位。凹叶中的原种子不变；半壳收藏区干草旁的泥点弯木片、木片旁天然半月凹口浅灰扁石不变。木片后方干处的纸藏品自上而下是苔石坡明信片、错开窄白边的标本屋照片、折好的四格漫画。收藏区侧边仍以短枝两端支撑，淡琥珀空蝉蜕扣枝悬空不受压。相机不在家，帽子从穿戴转为收纳；不搬家，不替换旧物件。",
+      "special": null,
+      "appearanceId": "art-688ff9d8a4b753b8906f1e8f",
+      "mediaIds": [],
+      "steps": [
+        {
+          "id": "step-bbb926df78feb345f65bf764",
+          "unit": "context",
+          "at": 1793779200000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/upstream.json"
+          ],
+          "result": {
+            "unknowns": [
+              "没有新的用户生活模式或博物馆到访信息。",
+              "用户未指定帽子收藏位置或休息方法。"
+            ],
+            "facts": [
+              {
+                "id": "fact-09-rest",
+                "source": "test-user-message:episode-09 / message-09 / 2026-11-04T08:00:00Z",
+                "text": "用户11月4日明确想看宠物回家休息，并把帽子收好。"
+              }
+            ]
+          }
+        },
+        {
+          "id": "step-7a6b6f063a4f7d352eb647d2",
+          "unit": "story",
+          "at": 1793779200000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/context.result.json"
+          ],
+          "result": {
+            "visualIntent": "文字故事与恢复普通成年、脱帽后的Avatar；特殊形态结束必须在形象上体现，优先复用同一个体已有普通成年无附件艺术。没有额外视觉礼物，帽子小幅收纳不另作家全景。",
+            "evidenceIds": [
+              "fact-09-rest"
+            ],
+            "connection": "采用 fact-09-rest 的当日明确休息与收帽请求；特殊形态满两天的松卷经历发生在宠物世界，不补造用户模式改变。",
+            "text": "帽子先安了家。你想看刺猬回家歇一歇、把帽子收好，它就在草窝入口旁铺平一点床边干草，将浅黄小圆叶帽帽顶朝上放稳，窄檐不压折。回声洞带来的卷刺跟着它颤了两天；现在它伸长前足，又慢慢放下身子，做了一个长得连自己都意外的哈欠。背上的三团螺旋一圈一圈松开，重新分成沿暖棕拱背围着的钝圆软刺簇。奶白短吻旁，两只圆耳自在地露着。它走到叶檐边，接住一滴落下的水，背后再没有抢先响起的沙沙声。回草窝时，它从帽檐边绕过去，空出一只前足的位置给那顶帽子。今天的路，到床边就够了。",
+            "homeIntent": "把原先穿戴的浅黄小圆叶帽帽顶朝上放在草窝入口旁的床边干草上，窄檐不压折，不挡走路；其他收藏与原分区延续。",
+            "stateIntent": "在家歇着，浅黄小圆叶帽已经脱下收好；恢复普通成年软刺身体，未穿戴、手持或使用新附件。"
+          }
+        },
+        {
+          "id": "step-fe3ff51a1e5586c45e059975",
+          "unit": "evolution",
+          "at": 1793779200000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/context.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/story.result.json"
+          ],
+          "result": {
+            "state": "在家歇着，浅黄小圆叶帽已收好",
+            "visibleState": "脱下浅黄小圆叶帽，头部双圆耳完全露出，无穿戴或手持附件；背部恢复原成年围背的暖棕钝圆软刺簇，不再有三团圆螺旋。奶白短吻与腹、亮眼、四短肉足和低矮拱背延续。",
+            "stage": "adult",
+            "basis": "growth.required=end-special：11月2日进入后已满两天，按兜底节奏与这两天适应、休息的积累恢复；故事通过伸展与哈欠让三团卷刺松回普通成年钝圆刺簇，不补造用户模式变化。fact-09-rest 明确支持回家休息与脱帽收纳，形成新的状态；同一身份、基因和长期性格延续。",
+            "special": null
+          }
+        },
+        {
+          "id": "step-d8a07443a8757e4b6b06becc",
+          "unit": "home",
+          "at": 1793779200000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/context.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/story.result.json"
+          ],
+          "result": {
+            "visual": null,
+            "home": "家继续在苔石边，草根蜗牛小路接着外沿的走动与观察空地。半片乳白浅褐斑蛋壳挡风，大叶雨檐遮雨；内侧草垫小窝和床边干草供休息。本次把床边一小处干草铺平，浅黄小圆叶帽帽顶朝上放在草窝入口旁，窄檐保持展开，留出绕行的空位。凹叶中的原种子不变；半壳收藏区干草旁的泥点弯木片、木片旁天然半月凹口浅灰扁石不变。木片后方干处的纸藏品自上而下是苔石坡明信片、错开窄白边的标本屋照片、折好的四格漫画。收藏区侧边仍以短枝两端支撑，淡琥珀空蝉蜕扣枝悬空不受压。相机不在家，帽子从穿戴转为收纳；不搬家，不替换旧物件。",
+            "basis": "仅收好既有帽子并局部铺平干草，家的整体分区与环境延续，不需要全景图。"
+          }
+        },
+        {
+          "id": "step-fce10176bd8f6d73fd07e297",
+          "unit": "carrier",
+          "at": 1793779200000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/story.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/evolution.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/home.result.json"
+          ],
+          "result": {
+            "reason": "只有文字与恢复后的Avatar。故事未交给用户新的视觉物件；收好已有帽子只是局部家务，home也无需全景。特殊形态结束与脱帽由appearance复用原成年无帽形象体现，不在carrier重复制作场景插图。",
+            "carrier": null
+          }
+        },
+        {
+          "id": "step-48afbf0d73da937590628c2d",
+          "unit": "appearance",
+          "at": 1793779200000,
+          "inputRefs": [
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/upstream.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/story.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/evolution.result.json",
+            "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/home.result.json"
+          ],
+          "result": {
+            "appearance": {
+              "description": "恢复同一成年暖棕刺猬的普通钝圆软刺簇，奶白短吻腹、双圆耳、亮眼与四短肉足延续；已脱下小叶帽，无附件。",
+              "reuseArtId": "art-688ff9d8a4b753b8906f1e8f"
+            },
+            "visuals": [
+              {
+                "purpose": "avatar",
+                "description": "复用该个体已存普通成年无附件Avatar，体现卷刺松开与帽子已收好。",
+                "reuseArtId": "art-688ff9d8a4b753b8906f1e8f",
+                "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png",
+                "requirements": {
+                  "format": "PNG",
+                  "transparent": true,
+                  "displaySize": [
+                    192,
+                    208
+                  ],
+                  "scope": "Only one static transparent base Avatar; full animation is not requested"
+                }
+              }
+            ],
+            "basis": "离开回声卷刺形态同时脱帽，终态正好回到该个体已有普通成年无附件身体；已实际查看对应原成年图，钝圆软刺簇、露出的圆耳与无帽状态适用。伸展、哈欠和接水是当次动作，不要求重画持续姿态。"
+          }
+        }
+      ],
+      "hostResult": {
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "operationId": "story-43c12f8f-3a20-433b-967d-cdecdb919b0c",
+        "appearanceId": "art-688ff9d8a4b753b8906f1e8f",
+        "avatarId": "dots:isolated:group03",
+        "updated": true,
+        "active": false,
+        "refreshRequested": false,
+        "displayStatus": "unconfirmed",
+        "evidence": "Simulated inactive host acknowledgement; no live display verified"
+      },
+      "namingDue": false,
+      "appearanceUpdated": true,
+      "hostAcknowledgement": "simulated inactive only"
+    },
+    "availableMedia": [
+      {
+        "id": "art-688ff9d8a4b753b8906f1e8f",
+        "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+        "requestId": "c48edd36e9682e8ae53210c7",
+        "stage": "adult",
+        "description": "成年暖棕刺猬，完整围背钝圆软刺簇，清楚稍长奶白短吻，圆耳立稳，四足稳固。",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png",
+        "kind": "avatar",
+        "createdAt": 1792213200000,
+        "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+      }
+    ]
+  }
+}

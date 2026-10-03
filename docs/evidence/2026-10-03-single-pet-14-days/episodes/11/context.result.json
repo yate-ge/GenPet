@@ -1,0 +1,19 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/upstream.json"
+  ],
+  "result": {
+    "unknowns": [
+      "用户未指定新家地点或建筑样式；此处由宠物世界设计，不推断用户搬家或住房情况。",
+      "没有用户实际前往博物馆的确认。"
+    ],
+    "facts": [
+      {
+        "text": "用户11月8日明确想看宠物搬到活动空间更开阔的新家。",
+        "id": "fact-11-move",
+        "source": "test-user-message:episode-11 / message-11 / 2026-11-08T08:00:00Z"
+      }
+    ]
+  }
+}

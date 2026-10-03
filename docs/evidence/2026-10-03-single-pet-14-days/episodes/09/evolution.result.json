@@ -1,0 +1,14 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/story.result.json"
+  ],
+  "result": {
+    "state": "在家歇着，浅黄小圆叶帽已收好",
+    "visibleState": "脱下浅黄小圆叶帽，头部双圆耳完全露出，无穿戴或手持附件；背部恢复原成年围背的暖棕钝圆软刺簇，不再有三团圆螺旋。奶白短吻与腹、亮眼、四短肉足和低矮拱背延续。",
+    "stage": "adult",
+    "basis": "growth.required=end-special：11月2日进入后已满两天，按兜底节奏与这两天适应、休息的积累恢复；故事通过伸展与哈欠让三团卷刺松回普通成年钝圆刺簇，不补造用户模式变化。fact-09-rest 明确支持回家休息与脱帽收纳，形成新的状态；同一身份、基因和长期性格延续。",
+    "special": null
+  }
+}

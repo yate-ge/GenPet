@@ -1,0 +1,14 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/story.result.json"
+  ],
+  "result": {
+    "stage": "adult",
+    "visibleState": null,
+    "basis": "fact-04-photo 的明确照片请求与 fact-04-plan 的未定未来计划引出宠物参观自家世界标本屋并主动拍照，状态转为分享照片。相机借还、指壳姿势均在故事中结束，没有持续附件。growth.required 为 null，无用户持续模式或特殊身体经历支持特殊形态；阶段、基因与性格延续。",
+    "state": "想把自己的发现拍给你看",
+    "special": null
+  }
+}

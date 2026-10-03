@@ -1,0 +1,123 @@
+{
+  "id": "story-8b02a7c3-c8a4-4e56-a3a2-4db866c52e54",
+  "triggerId": "daily:2026-10-29:16:00:Asia.Shanghai",
+  "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+  "at": 1793260800000,
+  "text": "你想听昨天那件事的后续，这次我只用文字讲。今天我又去了草根边，昨天的亮线干了，得把鼻尖压低才找得到。草叶背面倒有一只蜗牛，正在啃一个小缺口。我不知道它是不是昨天留下痕迹的那只，就在旁边等着。它吃一会儿，停一会儿，最后把触角缩进壳里。我一路带来的问题还没问，它已经睡了。回家时，我从半壳里翻出那张明信片，看看画上的弯线，又把它放回弯木片后面。今天没追出一个新方向，只赶上了蜗牛的午觉。",
+  "basis": "fact-03-continue 的当日明确请求让宠物继续追痕经历并用文字讲述，状态由写卡转为讲后续。旧用户观察仍只在10月28日发生；本篇没有新增穿戴或身体变化。growth.required 为 null，特殊形态期限未到，无提前进入依据；成年、同一基因和长期性格延续。",
+  "stage": "adult",
+  "state": "想把后续慢慢讲给你",
+  "appearanceId": "art-688ff9d8a4b753b8906f1e8f",
+  "mediaIds": [],
+  "steps": [
+    {
+      "id": "step-edeac1a14e9c70e0cf10cfc1",
+      "unit": "context",
+      "at": 1793260800000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/upstream.json"
+      ],
+      "result": {
+        "unknowns": [
+          "今天没有新的蜗牛观察或路线记录事实，不能延长为用户连续观察。",
+          "“昨天那件事”需对应pet昨日故事，不能认定是用户又去公园。"
+        ],
+        "facts": [
+          {
+            "text": "用户在10月29日希望宠物继续昨天那件事，并明确本篇只要文字。",
+            "id": "fact-03-continue",
+            "source": "test-user-message:episode-03 / message-03 / 2026-10-29T08:00:00Z"
+          },
+          {
+            "text": "用户10月28日第一次在公园观察雨后蜗牛，记录那一次的爬行方向，彼时希望收到明信片。",
+            "id": "fact-03-prior-snail",
+            "source": "test-user-message:episode-02 / message-02 / 2026-10-28T08:00:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "step-7b67d98f3e87f01f2b71bd2b",
+      "unit": "story",
+      "at": 1793260800000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/context.result.json"
+      ],
+      "result": {
+        "text": "你想听昨天那件事的后续，这次我只用文字讲。今天我又去了草根边，昨天的亮线干了，得把鼻尖压低才找得到。草叶背面倒有一只蜗牛，正在啃一个小缺口。我不知道它是不是昨天留下痕迹的那只，就在旁边等着。它吃一会儿，停一会儿，最后把触角缩进壳里。我一路带来的问题还没问，它已经睡了。回家时，我从半壳里翻出那张明信片，看看画上的弯线，又把它放回弯木片后面。今天没追出一个新方向，只赶上了蜗牛的午觉。",
+        "connection": "用户10月29日明确要延续昨日故事且只要文字；续的是10月28日宠物追痕寄卡片的经历，不将10月28日用户观察事实改为今天，也不确认两日所见是同一只蜗牛。",
+        "stateIntent": "想把后续慢慢讲给你；没有新增穿戴、手持或持续姿态。",
+        "homeIntent": null,
+        "evidenceIds": [
+          "fact-03-continue"
+        ],
+        "visualIntent": "只有文字，按用户明确请求不制作新明信片或画面；旧明信片只是故事中的已有收藏。"
+      }
+    },
+    {
+      "id": "step-2b316e398fd86911b1243102",
+      "unit": "evolution",
+      "at": 1793260800000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/context.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/story.result.json"
+      ],
+      "result": {
+        "basis": "fact-03-continue 的当日明确请求让宠物继续追痕经历并用文字讲述，状态由写卡转为讲后续。旧用户观察仍只在10月28日发生；本篇没有新增穿戴或身体变化。growth.required 为 null，特殊形态期限未到，无提前进入依据；成年、同一基因和长期性格延续。",
+        "state": "想把后续慢慢讲给你",
+        "special": null,
+        "visibleState": null,
+        "stage": "adult"
+      }
+    },
+    {
+      "id": "step-629c6e246ea4e4f891c29e04",
+      "unit": "home",
+      "at": 1793260800000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/context.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/story.result.json"
+      ],
+      "result": {
+        "basis": "只是取出旧明信片查看后归回原处，没有新增物件或空间改动。",
+        "visual": null,
+        "home": null
+      }
+    },
+    {
+      "id": "step-9a49ea945cae6cd679404567",
+      "unit": "carrier",
+      "at": 1793260800000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/story.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/evolution.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/home.result.json"
+      ],
+      "result": {
+        "reason": "用户明确要求本篇只有文字。故事延续昨日追寻亮痕的经历；旧明信片只是取出查看后放回原处，没有新的视觉礼物或家的变化，因此不制作、复用或附送载体图。",
+        "carrier": null
+      }
+    },
+    {
+      "id": "step-a79d460d63dfcdfc1ca4799d",
+      "unit": "appearance",
+      "at": 1793260800000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/story.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/evolution.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/home.result.json"
+      ],
+      "result": {
+        "appearance": null,
+        "visuals": [],
+        "basis": "本篇仅用文字讲昨日经历的后续，旧明信片翻看后回到原收藏处；没有新增穿戴、持续手持、阶段进化或特殊形态，讲述意愿不需重画当前成年 Avatar。"
+      }
+    }
+  ]
+}

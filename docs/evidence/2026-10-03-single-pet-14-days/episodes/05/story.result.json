@@ -1,0 +1,16 @@
+{
+  "result": {
+    "evidenceIds": [
+      "fact-05-find"
+    ],
+    "connection": "采用 fact-05-find 的当日明确请求；发现与带回均发生在宠物世界，用户没有被写成到访博物馆或亲眼发现蝉蜕。延续昨日宠物标本屋空壳经历，但没有再次复制照片载体。",
+    "stateIntent": "想把脆弱的小发现完整交给你看；蝉蜕短枝安置在家，不作为持续手持或穿戴。",
+    "text": "有只小东西抱着枯枝，一动不动。刺猬隔着草看了半天，伸鼻尖碰一下，才发现它背上裂开了：这是一副空蝉蜕，六只细足还紧紧扣住树皮。昨天标本屋的空壳卧在台上，今天这副空壳却把自己挂得牢牢的。你想看它带回一件自己的小发现，它便把已经落地的这小段枯枝一起托起来，轻轻送回苔石边。给你看的，是淡琥珀色的空蝉蜕和它抱住的短枝，背上的裂口透着光。它没把脆壳拔下来，而是将短枝的两端架在半壳收藏区侧边，让蝉蜕继续抱着自己的东西。",
+    "homeIntent": "新增抱住短枝的空蝉蜕，短枝两端架在半壳收藏区侧边，避免压到纸卡及床边干草；原种子、木片、凹口石、明信片、照片全部延续。",
+    "visualIntent": "只画带回来的物件本身：一副淡琥珀色空蝉蜕仍抱着一小段落地枯枝，头壳、六只扣住树皮的细足、背部明显裂口与中空透光关系可辨；没有活蝉、宠物、房间、风景、文字或卡片边框。这是一件带短枝支撑的空蜕收藏。"
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/05/context.result.json"
+  ]
+}

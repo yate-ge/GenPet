@@ -1,0 +1,24 @@
+{
+  "result": {
+    "unknowns": [
+      "今天没有新的蜗牛观察或路线记录事实，不能延长为用户连续观察。",
+      "“昨天那件事”需对应pet昨日故事，不能认定是用户又去公园。"
+    ],
+    "facts": [
+      {
+        "text": "用户在10月29日希望宠物继续昨天那件事，并明确本篇只要文字。",
+        "id": "fact-03-continue",
+        "source": "test-user-message:episode-03 / message-03 / 2026-10-29T08:00:00Z"
+      },
+      {
+        "text": "用户10月28日第一次在公园观察雨后蜗牛，记录那一次的爬行方向，彼时希望收到明信片。",
+        "id": "fact-03-prior-snail",
+        "source": "test-user-message:episode-02 / message-02 / 2026-10-28T08:00:00Z"
+      }
+    ]
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/03/upstream.json"
+  ]
+}

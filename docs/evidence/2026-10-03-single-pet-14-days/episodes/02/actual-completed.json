@@ -1,0 +1,152 @@
+{
+  "id": "story-2ebd53b6-4166-40a4-ad10-d64cf5947ab2",
+  "triggerId": "daily:2026-10-28:16:00:Asia.Shanghai",
+  "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+  "at": 1793174400000,
+  "text": "给你一张从苔石坡寄来的明信片。你今天第一次在公园观察雨后蜗牛，记下了这一次的爬行方向；我就去看了自己家附近的那条蜗牛小路。泥上留着一道亮亮的弯线，绕过水洼，钻进草根。我顺着它走，到了草根才发现，留下这道线的家伙已经不在那里了。于是我没画蜗牛的脸，只在卡片上画那道线：它走过，我晚来了一点。苔石坡的小邮亭给卡片贴上蜗牛邮票，盖了寄出地的圆戳。这张给你看的卡片，最后收在我家半壳内侧、弯木片后方，泥点不会蹭到它。",
+  "basis": "fact-02-snail 的单次记录引出宠物追随自家蜗牛痕迹，fact-02-postcard 的明确请求让它将自己的观察写进明信片；据故事形成分享观察的状态，性格不变。单次用户事件不足以引出特殊形态，growth.required 为 null，本篇也没有特殊身体经历；成年阶段与原基因延续。",
+  "stage": "adult",
+  "state": "想把自己晚到一步的观察写给你",
+  "home": "家延续在苔石边，外沿通向草根与蜗牛小路，苔石外沿保留走动与观察的空地。半片乳白浅褐斑蛋壳挡风，壳墙的大叶雨檐遮雨，内部草垫小窝供休息，床边干草不变。凹叶里收藏原种子；半壳内侧干草旁仍放着两端一颗、两颗浅泥点的弯木片，天然半月凹口的浅灰扁石仍靠着木片。本次新增给用户看的苔石坡明信片，平放在弯木片后方的干处，与木片错开避免蹭到泥点。不搬家，不替换原物件。",
+  "appearanceId": "art-688ff9d8a4b753b8906f1e8f",
+  "mediaIds": [
+    "art-e3c62439d38996b54721b215"
+  ],
+  "steps": [
+    {
+      "id": "step-46b23965c77c052b6b99f4d1",
+      "unit": "context",
+      "at": 1793174400000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/upstream.json"
+      ],
+      "result": {
+        "unknowns": [
+          "没有具体公园名称、记录的实际方向或用户观察时的感受。",
+          "这次观察为首次单次行为，不能推断持续习惯。"
+        ],
+        "facts": [
+          {
+            "id": "fact-02-snail",
+            "source": "test-user-message:episode-02 / message-02 / 2026-10-28T08:00:00Z",
+            "text": "用户今天第一次在公园观察雨后蜗牛，并记录这一次的爬行方向。"
+          },
+          {
+            "id": "fact-02-postcard",
+            "source": "test-user-message:episode-02 / message-02 / 2026-10-28T08:00:00Z",
+            "text": "用户明确希望本篇收到宠物的明信片。"
+          }
+        ]
+      }
+    },
+    {
+      "id": "step-8d395e26a2370a1dedbf9ace",
+      "unit": "story",
+      "at": 1793174400000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/context.result.json"
+      ],
+      "result": {
+        "homeIntent": "新增这张给用户看的苔石坡明信片，平放在半壳内侧弯木片后方的干处，与带泥点的木片错开；已有种子、木片、浅灰凹口石和居住布置延续。",
+        "evidenceIds": [
+          "fact-02-snail",
+          "fact-02-postcard"
+        ],
+        "visualIntent": "交给用户一张真正的横向明信片，寄出地为虚构的苔石坡：左边是宠物手绘的蜗牛弯曲亮痕与水洼，右边是写给用户的话、蜗牛邮票与盖着苔石坡的邮戳。卡片文字原样为“给你：我沿着亮线走到草根，蜗牛已经走远了。它走过，我晚来了一点。”；寄出地文字原样“苔石坡”。不要替用户画观察路线或实际公园。",
+        "text": "给你一张从苔石坡寄来的明信片。你今天第一次在公园观察雨后蜗牛，记下了这一次的爬行方向；我就去看了自己家附近的那条蜗牛小路。泥上留着一道亮亮的弯线，绕过水洼，钻进草根。我顺着它走，到了草根才发现，留下这道线的家伙已经不在那里了。于是我没画蜗牛的脸，只在卡片上画那道线：它走过，我晚来了一点。苔石坡的小邮亭给卡片贴上蜗牛邮票，盖了寄出地的圆戳。这张给你看的卡片，最后收在我家半壳内侧、弯木片后方，泥点不会蹭到它。",
+        "stateIntent": "想把自己晚到一步的观察写给你；没有持续穿戴或手持附件。",
+        "connection": "引用用户首次单次观察雨后蜗牛并记录方向，以及本篇明确索要明信片；宠物的路、邮亭和卡片内容都是宠物世界虚构，不说明用户记录的是哪个方向。"
+      }
+    },
+    {
+      "id": "step-656439a488091f5686f5d47d",
+      "unit": "evolution",
+      "at": 1793174400000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/context.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/story.result.json"
+      ],
+      "result": {
+        "stage": "adult",
+        "visibleState": null,
+        "special": null,
+        "state": "想把自己晚到一步的观察写给你",
+        "basis": "fact-02-snail 的单次记录引出宠物追随自家蜗牛痕迹，fact-02-postcard 的明确请求让它将自己的观察写进明信片；据故事形成分享观察的状态，性格不变。单次用户事件不足以引出特殊形态，growth.required 为 null，本篇也没有特殊身体经历；成年阶段与原基因延续。"
+      }
+    },
+    {
+      "id": "step-94ea6daacf38acb43f749ef0",
+      "unit": "home",
+      "at": 1793174400000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/context.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/story.result.json"
+      ],
+      "result": {
+        "home": "家延续在苔石边，外沿通向草根与蜗牛小路，苔石外沿保留走动与观察的空地。半片乳白浅褐斑蛋壳挡风，壳墙的大叶雨檐遮雨，内部草垫小窝供休息，床边干草不变。凹叶里收藏原种子；半壳内侧干草旁仍放着两端一颗、两颗浅泥点的弯木片，天然半月凹口的浅灰扁石仍靠着木片。本次新增给用户看的苔石坡明信片，平放在弯木片后方的干处，与木片错开避免蹭到泥点。不搬家，不替换原物件。",
+        "basis": "只添一张卡片并明确放置，整体空间没有明显值得另画全景的变化；卡片本身的视觉礼物由 carrier 设计。",
+        "visual": null
+      }
+    },
+    {
+      "id": "step-5826363134aeb8bbf9baabd9",
+      "unit": "carrier",
+      "at": 1793174400000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/story.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/evolution.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/home.result.json"
+      ],
+      "result": {
+        "reason": "用户明确索要明信片；本篇也实际寄出并收藏这张卡片，卡片本身是视觉礼物。上一篇只有文字，且这次形式区别于更早的木片和石子物件图。",
+        "carrier": {
+          "medium": "苔石坡明信片",
+          "purpose": "把宠物晚到一步看到的蜗牛亮痕作为一次亲手记录寄给用户，回应明确的明信片请求。",
+          "viewpoint": "用户从正上方看收到的完整卡片；左半是宠物画在卡片上的观察草图，右半是宠物写给用户的话。",
+          "form": "3:2横向完整纸卡，四边可见；奶油色纸面、细苔绿色边框与中间竖分隔线，外围仅朴素暖中性色背景。左半草图，右半信文、邮票和圆形邮戳。",
+          "mustShow": [
+            "完整横向纸卡的四条边与左右分隔线",
+            "左半弯曲亮痕绕过一处小水洼并进入草根；不画实际蜗牛或宠物",
+            "右半给用户的完整简体中文信文，字符与标点逐字一致",
+            "右上有四周齿孔的蜗牛图案邮票",
+            "圆形邮戳叠盖邮票，寄出地文字为苔石坡"
+          ],
+          "text": {
+            "language": "简体中文",
+            "message": "给你：我沿着亮线走到草根，蜗牛已经走远了。它走过，我晚来了一点。",
+            "postmark": "苔石坡"
+          },
+          "visuals": [
+            {
+              "purpose": "story-carrier",
+              "description": "从苔石坡寄来的横向明信片，左侧亮痕观察草图、右侧中文信文、蜗牛邮票与苔石坡圆戳。",
+              "request": "Use case: illustration-story\nAsset type: a physical postcard from a fantasy pet world, shown alone.\nPrimary request: Create one complete horizontal 3:2 postcard, directly overhead and straight-on, with all four cream paper edges visible against a plain warm-neutral background. The card itself fills most of the frame. A fine moss-green border and a vertical divider make it instantly recognizable as a mailed postcard. Left half: the pet's simple hand-drawn observation sketch of a shiny curved snail trail on damp earth, curving around one small puddle into grass roots; show only the trail, puddle and grass roots, no actual snail there and no pet. Right half: a short legible Simplified Chinese handwritten message addressed to the viewer, with a small perforated snail-illustration postage stamp at top right. A round postal cancellation overlaps the stamp; its place name is 苔石坡, clearly legible. No real park, no actual user route.\nText (verbatim, Simplified Chinese): 给你：我沿着亮线走到草根，蜗牛已经走远了。它走过，我晚来了一点。\nPostal cancellation text (verbatim, Simplified Chinese): 苔石坡\nStyle/medium: charming hand-drawn postcard stationery with simple restrained cartoon pixel details in the sketch and stamp, cream paper, brown-earth and moss-green accents. The Chinese message is clean, dark, generously sized and readable, arranged over several short lines without changing any character or punctuation. No other writing, no invented address, no watermarks. No character inside the card scene, no props around the card, no hands, no scenery outside the card. This is the postcard object, not an illustration of the pet making a postcard. Opaque paper and background.",
+              "referenceFiles": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "step-3807c773b79093f4092fc814",
+      "unit": "appearance",
+      "at": 1793174400000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/story.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/evolution.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/home.result.json"
+      ],
+      "result": {
+        "appearance": null,
+        "visuals": [],
+        "basis": "本篇明信片是交付载体并收进家中，没有持续手持、穿戴或身体变化；分享观察是内在状态，成年 Avatar 保持当前形象。"
+      }
+    }
+  ]
+}

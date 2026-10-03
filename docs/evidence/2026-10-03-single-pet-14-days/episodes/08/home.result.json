@@ -1,0 +1,12 @@
+{
+  "result": {
+    "visual": null,
+    "basis": "午饭与叶檐下小憩没有改动家或添置物件；蚂蚁离开，未成为收藏。所有分区与漫画、空蜕、旧藏品延续。",
+    "home": null
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/08/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/08/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/08/story.result.json"
+  ]
+}

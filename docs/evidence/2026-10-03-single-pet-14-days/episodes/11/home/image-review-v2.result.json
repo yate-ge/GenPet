@@ -1,0 +1,17 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home/image-review-v2.input.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home/image-review-v2.request.json"
+  ],
+  "result": {
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home-generated-v2.png",
+    "verdict": "accept",
+    "observations": [
+      "1672×941全景保持完整根拱、左休息右干台、中央大块活动空间及小比例普通无帽刺猬，床边同色帽子收好。",
+      "右台纸物恢复同源内容：亮痕明信片上层、Pet与空壳照片露白边中层、漫画底层只露部分；未再用房屋照片。",
+      "弯木片恢复弯曲轮廓和一/二点，凹口灰石与凹叶种子保留；空蜕附在两端支撑的短枝上。",
+      "全景和192×208仅证明布局与类别；照片缺角、明信片逐字内容和空蜕六足的精确细节需回看已接受的单件原图，不能把这张缩图当细节证据。"
+    ],
+    "repair": null
+  }
+}

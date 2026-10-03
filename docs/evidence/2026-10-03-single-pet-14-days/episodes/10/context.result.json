@@ -1,0 +1,24 @@
+{
+  "result": {
+    "unknowns": [
+      "没有笔记具体内容、用户新一次观察或持续观察习惯资料。",
+      "先前未定博物馆计划没有到访确认。"
+    ],
+    "facts": [
+      {
+        "id": "fact-10-note",
+        "source": "test-user-message:episode-10 / message-10 / 2026-11-06T08:00:00Z",
+        "text": "用户11月6日说，昨天（11月5日）把上周公园里的那次蜗牛观察整理成一页笔记；仍是整理同一次观察。"
+      },
+      {
+        "id": "fact-10-sort",
+        "source": "test-user-message:episode-10 / message-10 / 2026-11-06T08:00:00Z",
+        "text": "用户11月6日明确想看宠物在自己家里整理小发现。"
+      }
+    ]
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/10/upstream.json"
+  ]
+}

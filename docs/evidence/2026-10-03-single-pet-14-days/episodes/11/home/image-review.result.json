@@ -1,0 +1,16 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home/image-review.input.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home/image-review.request.json"
+  ],
+  "result": {
+    "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/11/home-generated.png",
+    "verdict": "repair",
+    "observations": [
+      "1672×941接近16:9；完整根拱家、左休息右收藏、中央开阔活动地与小比例普通无帽宠物可辨。",
+      "照片被画成房屋风景，原本同宠物与缺角空壳的自拍内容丢失；明信片也变成通用蜗牛正面图，漫画展开并分离摆放，未兑现原三张纸叠放。",
+      "泥点弯木片被画成直杆两头团块，无法核验两端一与二泥点；蝉蜕从枝条悬吊，未清楚扣住原枝。"
+    ],
+    "repair": "使用真实旧木片/灰石与已接受明信片、照片、蝉蜕参考，只修右侧收藏台为原物迁入且纸叠放漫画折底，不改变主布局。"
+  }
+}

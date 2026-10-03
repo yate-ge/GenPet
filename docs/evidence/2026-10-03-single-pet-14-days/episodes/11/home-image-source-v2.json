@@ -1,0 +1,22 @@
+{
+  "sourceFile": "C:\\Users\\geyat\\.codex\\generated_images\\01a10261-88fb-7fe1-a093-836076e91df7\\exec-60a2a433-cae1-4e5b-bbd1-be86b4537305.png",
+  "savedFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-single-pet-14-days\\episodes\\11\\home-generated-v2.png",
+  "width": 1672,
+  "height": 941,
+  "mode": "RGB",
+  "hasAlpha": false,
+  "alphaExtrema": null,
+  "reviewStatus": "pending-independent-root-review",
+  "generationSteps": [
+    {
+      "parametersFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-single-pet-14-days\\episodes\\11\\home-imagegen-parameters-v2-paper.json",
+      "sourceFile": "C:/Users/geyat/.codex/generated_images/01a10261-88fb-7fe1-a093-836076e91df7/exec-cdb80046-e0d0-46ac-8d26-0f1e87797856.png"
+    },
+    {
+      "parametersFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-single-pet-14-days\\episodes\\11\\home-imagegen-parameters-v2-objects.json",
+      "sourceFile": "C:\\Users\\geyat\\.codex\\generated_images\\01a10261-88fb-7fe1-a093-836076e91df7\\exec-60a2a433-cae1-4e5b-bbd1-be86b4537305.png"
+    }
+  ],
+  "unexecutedParametersFile": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-single-pet-14-days\\episodes\\11\\home-imagegen-parameters-v2.json",
+  "unexecutedReason": "tool rejected 7 references; actual limit is 5"
+}

@@ -1,0 +1,13 @@
+[
+  {
+    "id": "art-5107b1187a398ccbb54a47a5",
+    "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "requestId": "f9adbf9110d795b3973b957b",
+    "stage": "adult",
+    "description": "想把脆弱的小发现完整交给你看",
+    "file": "C:\\Users\\geyat\\Documents\\workingProjects\\GenPet\\output\\agent-tests\\2026-10-03-single-pet-14-days\\pet\\data\\dots\\pets\\genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53\\assets\\art-5107b1187a398ccbb54a47a5.png",
+    "kind": "story",
+    "createdAt": 1793433600000,
+    "provenance": "Built-in imagegen; independent root carrier review accepted; isolated longitudinal test"
+  }
+]

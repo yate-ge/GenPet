@@ -1,0 +1,176 @@
+{
+  "pet": {
+    "id": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+    "name": "GenPet",
+    "adoptedAt": 1790985600000,
+    "revision": 17,
+    "naming": {
+      "status": "asked",
+      "askedAt": 1791003600000
+    },
+    "genes": "依据：育幼棚草垫与种子般壳斑引出刺猬灵感，不推断用户偏好。身体是低矮紧凑的暖棕圆拱躯干，奶白短吻与腹部，四只短肉足，深色亮眼、两只圆小耳；背上是几簇钝圆的浅褐软刺。幼年背刺仅几个绒芽，身体柔软、足短、耳还没立稳；少年背刺逐渐成簇、步态稳；成年形成围背的清楚软刺簇和更长而仍卡通的短吻。始终是可亲近的生物同伴，少量清晰像素色块，奶白面腹与棕色拱背是身份线索。",
+    "stage": "adult",
+    "state": "戴着浅黄小圆叶帽，适应会轻颤的卷刺身体",
+    "binding": {
+      "host": "dots",
+      "avatarId": "dots:isolated:group03"
+    },
+    "acquisition": {
+      "place": "宠物世界的苔石育幼棚",
+      "connection": "唯一已知联系是用户主动提出领养；育幼棚与送蛋属于虚构宠物世界，不推断用户的兴趣或经历。",
+      "storyId": "story-c2d37e9d-0c9b-4ec2-a024-65da2e6e4203"
+    },
+    "personality": "喜欢先把陌生东西放在面前观察，再试着摸一下；遇到难处愿意停下来换一种做法，得意时会留下小小的证据给同伴看。它也珍惜独处，会在自己的家里慢慢整理发现。创作依据是这场有限资料的领养：让它有可以自己推进的生活，不把缺失用户资料变成用户人格，也不从刺猬物种推出胆怯。",
+    "home": "家仍在苔石边，草根蜗牛小路接着苔石外沿的走动与观察空地。半片乳白浅褐斑蛋壳挡风，大叶雨檐遮雨；内侧草垫小窝和床边干草供休息。凹叶里原种子不变；半壳内侧干草旁两端一颗与两颗浅泥点的弯木片及其旁的天然半月凹口浅灰扁石不变。木片后方干处平放苔石坡明信片，标本屋照片在明信片下方并错开窄白边；本次新增四格漫画折页，折好放在照片下面，成为纸藏品底层。收藏区侧边仍架着短枝，淡琥珀空蝉蜕仍扣着枝、悬空不受压。相机已归还，浅黄帽仍随宠物穿戴。没有搬家或改变原分区。",
+    "special": "回声卷刺形态：成年刺猬背部原有钝圆软刺聚拢卷成三团大圆螺旋，轮廓像沿拱背排列的三簇柔软卷环，迈步时轻颤。暖棕低矮躯干、奶白短吻腹、四短肉足、双圆耳和亮眼延续，浅黄小圆叶帽继续戴着。变化在器官形状而非换色，仍是同一只可爱活刺猬。",
+    "visibleState": "继续戴浅黄低圆叶帽、窄檐与草纤维固定圈，双耳外露；背部三团圆螺旋是special的身体变化。无新手持、坐具或其他附件。",
+    "stories": [
+      {
+        "id": "design-episode-03",
+        "at": "2026-10-29T08:00:00.000Z",
+        "text": "你想听昨天那件事的后续，这次我只用文字讲。今天我又去了草根边，昨天的亮线干了，得把鼻尖压低才找得到。草叶背面倒有一只蜗牛，正在啃一个小缺口。我不知道它是不是昨天留下痕迹的那只，就在旁边等着。它吃一会儿，停一会儿，最后把触角缩进壳里。我一路带来的问题还没问，它已经睡了。回家时，我从半壳里翻出那张明信片，看看画上的弯线，又把它放回弯木片后面。今天没追出一个新方向，只赶上了蜗牛的午觉。",
+        "state": "想把后续慢慢讲给你",
+        "status": "uncommitted-design",
+        "visualIntent": "只有文字，按用户明确请求不制作新明信片或画面；旧明信片只是故事中的已有收藏。"
+      },
+      {
+        "id": "design-episode-04",
+        "at": "2026-10-30T08:00:00.000Z",
+        "text": "旧树根的标本屋里，最先吸引刺猬的是一枚空蜗牛壳。壳口朝向窗户，里面没有住客；它忍住没碰，绕了一圈才发现背面缺了一小角。你打算周末去博物馆，还没选好哪家，想先看看它自己拍给你的照片。于是它从标本屋借来一台小相机，架在低木墩上，试好定时，跑回空壳旁站住。快门响前，它转过奶白的短吻，朝镜头看去，一只前足指向壳背的小缺口：这次总算赶上了不会走开的展品。相机还给标本屋，照片带回家，平码在明信片下方，只露出一道白边。",
+        "state": "想把自己的发现拍给你看",
+        "status": "uncommitted-design",
+        "visualIntent": "用户收到宠物主动拍给用户的照片，横向3:2带窄白相纸边，无文字无邮票：相机镜头在低木墩高度，成年暖棕刺猬在标本屋空蜗牛壳旁主动面对镜头摆姿势，奶白短吻转向观看者，亮眼与镜头相视，一只前足指向空壳背面的缺角。可见树根室内窗与低展台，主体是这只同一刺猬与它想给你看的缺角，不画它正在操作相机的第三方场景。"
+      },
+      {
+        "id": "design-episode-05",
+        "at": "2026-10-31T08:00:00.000Z",
+        "text": "有只小东西抱着枯枝，一动不动。刺猬隔着草看了半天，伸鼻尖碰一下，才发现它背上裂开了：这是一副空蝉蜕，六只细足还紧紧扣住树皮。昨天标本屋的空壳卧在台上，今天这副空壳却把自己挂得牢牢的。你想看它带回一件自己的小发现，它便把已经落地的这小段枯枝一起托起来，轻轻送回苔石边。给你看的，是淡琥珀色的空蝉蜕和它抱住的短枝，背上的裂口透着光。它没把脆壳拔下来，而是将短枝的两端架在半壳收藏区侧边，让蝉蜕继续抱着自己的东西。",
+        "state": "想把脆弱的小发现完整交给你看",
+        "status": "uncommitted-design",
+        "visualIntent": "只画带回来的物件本身：一副淡琥珀色空蝉蜕仍抱着一小段落地枯枝，头壳、六只扣住树皮的细足、背部明显裂口与中空透光关系可辨；没有活蝉、宠物、房间、风景、文字或卡片边框。这是一件带短枝支撑的空蜕收藏。"
+      },
+      {
+        "id": "design-episode-06",
+        "at": "2026-11-01T08:00:00.000Z",
+        "text": "出门前，刺猬在半壳口试了一下高度。新做的帽子先碰到叶檐，差点连自己的脑袋一起卡住。你想看它戴一顶出门用的小帽子，它挑了浅黄的落叶，折成圆圆的低帽顶，留下窄帽檐，草纤维绕成一圈固定。它把帽顶压低一些，让两只圆耳从帽子两侧露出来，再走过一回：这下连软刺也没蹭到雨檐。半壳侧边的空蝉蜕安稳抱着短枝，它绕开收藏区，戴好这顶小圆叶帽往草坡走。帽檐上落了一滴水；它低头一甩，水滚下去，帽子还在。",
+        "state": "戴着浅黄小圆叶帽出门",
+        "status": "uncommitted-design",
+        "visualIntent": "给用户文字故事与戴帽后的同一个体Avatar。帽子是持续的穿戴变化，需要appearance体现；本篇没有独立明信片、照片或物件礼物。"
+      },
+      {
+        "id": "design-episode-07",
+        "at": "2026-11-02T08:00:00.000Z",
+        "text": "这周它追过蜗牛的亮线，看过空壳，也带回过抱枝的蝉蜕。今天，草坡后那个会回声的小洞成了新去处。你想看冒险并收到漫画，刺猬就戴着昨天的浅黄小圆叶帽，在洞口喊了一声。里面回了两声。它先探看，再往里挪一小步；一阵旋风从洞底绕上来，把背上的软刺卷成了三团大大的圆螺旋。暖棕身体、奶白短吻和四只肉足都还在，只是每落一步，卷刺就轻轻颤一下。它倒着退到洞口，帽子仍稳稳戴着，回声还在里面追它。回家后，它把喊声、回声、卷刺、倒退这四步画成四格漫画给你，折好放在照片下面。画最后一格时，它背上的三团卷刺又抖了一下，纸上多出一条弯线。",
+        "state": "戴着浅黄小圆叶帽，适应会轻颤的卷刺身体",
+        "status": "uncommitted-design",
+        "visualIntent": "交给用户四格漫画折页，2×2按左上→右上→左下→右下：1戴浅黄叶帽的普通成年刺猬在小洞口喊，气泡原样“喂？”；2探进一小步、洞深处卷风出现，两个回声气泡原样“喂？”、“喂？”；3背刺变为三团圆螺旋、奶白短吻和四足不变，帽子延续，气泡原样“咦！”；4同一卷刺刺猬倒退到洞外、身向洞而回头看路，气泡原样“先退一步。”。漫画给用户看完整因果；特殊形态另由appearance体现，不能仅用漫画代替。"
+      }
+    ],
+    "designInputPhase": "uncommitted-design"
+  },
+  "growth": {
+    "stage": "adult",
+    "next": null,
+    "since": "2026-10-17T05:00:00.000Z",
+    "advanceBy": null,
+    "special": {
+      "active": true,
+      "description": "回声卷刺形态：成年刺猬背部原有钝圆软刺聚拢卷成三团大圆螺旋，轮廓像沿拱背排列的三簇柔软卷环，迈步时轻颤。暖棕低矮躯干、奶白短吻腹、四短肉足、双圆耳和亮眼延续，浅黄小圆叶帽继续戴着。变化在器官形状而非换色，仍是同一只可爱活刺猬。",
+      "since": "2026-11-02T08:00:00.000Z",
+      "endBy": "2026-11-04T08:00:00.000Z"
+    },
+    "required": null
+  },
+  "savedArt": [
+    {
+      "id": "art-b19202088b6e37fa3f1e590d",
+      "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "requestId": "a0afc7c17e38fbf75cd9db30",
+      "stage": "egg",
+      "description": "完整乳白卵形蛋，浅褐种子小斑，无附件。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-b19202088b6e37fa3f1e590d.png",
+      "kind": "avatar",
+      "createdAt": 1790985600000,
+      "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+    },
+    {
+      "id": "art-d8564ffc9914072cdf4771ac",
+      "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "requestId": "7760e6a7a55aeed778118046",
+      "stage": "hatchling",
+      "description": "刚孵化暖棕软刺幼体，奶白短吻与腹，四只短软肉足，几颗绒芽，耳未立稳。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-d8564ffc9914072cdf4771ac.png",
+      "kind": "avatar",
+      "createdAt": 1791003600000,
+      "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+    },
+    {
+      "id": "art-9585d48ea0d21f0c07529324",
+      "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "requestId": "ba2a54f1e85c4d9ff3a9045b",
+      "stage": "hatchling",
+      "description": "安静等待",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-9585d48ea0d21f0c07529324.png",
+      "kind": "story",
+      "createdAt": 1791090000000,
+      "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+    },
+    {
+      "id": "art-bb3a29e98d80cb37f47446e8",
+      "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "requestId": "1dac2760d0605eb83702f830",
+      "stage": "juvenile",
+      "description": "少年刺猬，耳稍立起，肉足撑稳身体，暖棕拱背软刺开始成簇，奶白面腹与短吻持续。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-bb3a29e98d80cb37f47446e8.png",
+      "kind": "avatar",
+      "createdAt": 1791608400000,
+      "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+    },
+    {
+      "id": "art-688ff9d8a4b753b8906f1e8f",
+      "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "requestId": "c48edd36e9682e8ae53210c7",
+      "stage": "adult",
+      "description": "成年暖棕刺猬，完整围背钝圆软刺簇，清楚稍长奶白短吻，圆耳立稳，四足稳固。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png",
+      "kind": "avatar",
+      "createdAt": 1792213200000,
+      "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+    },
+    {
+      "id": "art-4b29ef2dfc0c9d62aaf8dce4",
+      "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "requestId": "0b0a4ff94fc98454eb52b655",
+      "stage": "adult",
+      "description": "蓝灰蓬软刺成年变体，背刺膨宽成扇，耳垂眼半睁，奶白短吻腹和四只肉足持续。",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-4b29ef2dfc0c9d62aaf8dce4.png",
+      "kind": "avatar",
+      "createdAt": 1792818000000,
+      "provenance": "Built-in imagegen; independent review pending; isolated test asset only"
+    },
+    {
+      "id": "art-d537ebfa229a2118252ac154",
+      "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "requestId": "27219a619e874be681a543b3",
+      "stage": "adult",
+      "description": "想把观察到的差别留个记号",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-d537ebfa229a2118252ac154.png",
+      "kind": "story",
+      "createdAt": 1792998000000,
+      "provenance": "Built-in imagegen; independent root review accepted; isolated story asset only"
+    },
+    {
+      "id": "art-57f7a274608adcab94d4b235",
+      "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+      "requestId": "697eb28486a61cccaa9c4a3d",
+      "stage": "adult",
+      "description": "想把观察到的差别留个记号",
+      "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-57f7a274608adcab94d4b235.png",
+      "kind": "story",
+      "createdAt": 1793001600000,
+      "provenance": "Actual built-in imagegen; root original and 192x208 review accepted; isolated test"
+    }
+  ],
+  "sourceProjection": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/projection.json",
+  "episodeTime": "2026-11-03T08:00:00Z"
+}

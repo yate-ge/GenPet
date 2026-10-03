@@ -1,0 +1,17 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/12/context.result.json"
+  ],
+  "result": {
+    "text": "收藏台上像是多了一只小东西，伏在短枝下面。刺猬停在远处，鼻尖往前探了探，才看清那是空蝉蜕的影子：新家前沿的光穿过它裂开的背，把六只扣枝的细足投在干台上。你想再看它戴之前的小帽子，也想知道先前的小发现后来怎样了。它回到草窝边，拿起昨天一起搬来的浅黄小圆叶帽，按原来的草纤维圈戴稳，两只圆耳仍从两边露着；再回来时，帽檐的影子盖住了那六只小足。它退一步，让光重新照进去。空蜕没有醒来，也没有长出别的东西，还是抱着原先那段枝，只是搬家后，里面能落进一线亮光。刺猬没碰脆壳，在旁边等影子一点点移开，最后戴着旧帽走到高台前沿。床边那块铺平的干草空着，给帽子留着位置。",
+    "connection": "fact-12-hat与fact-12-followup均直接进入正文；由上游已有空蝉蜕选择小发现后续，观察的是新址光线和影子，未补造活蝉、用户博物馆经历或新的用户观察。",
+    "stateIntent": "重新戴着原浅黄小圆叶帽，看看迁入新家的小发现",
+    "homeIntent": "帽子从新家床边铺平干草上重新戴到宠物头上，原收帽位置空出但保留；空蝉蜕、原短枝及其支撑和其他收藏原位延续。",
+    "visualIntent": "文字讲明空蝉蜕后续，Avatar体现重新戴同一顶浅黄低圆叶帽的普通成年形态。优先复用此个体此前普通成年戴帽艺术；保持原帽色、低圆帽顶、窄檐与草纤维圈，不把卷刺戴帽变体当作普通身体。没有新物件礼物或第二张家全景。",
+    "evidenceIds": [
+      "fact-12-hat",
+      "fact-12-followup"
+    ]
+  }
+}

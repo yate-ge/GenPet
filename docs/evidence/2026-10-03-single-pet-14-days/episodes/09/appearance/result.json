@@ -1,0 +1,32 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/home.result.json"
+  ],
+  "result": {
+    "appearance": {
+      "description": "恢复同一成年暖棕刺猬的普通钝圆软刺簇，奶白短吻腹、双圆耳、亮眼与四短肉足延续；已脱下小叶帽，无附件。",
+      "reuseArtId": "art-688ff9d8a4b753b8906f1e8f"
+    },
+    "visuals": [
+      {
+        "purpose": "avatar",
+        "description": "复用该个体已存普通成年无附件Avatar，体现卷刺松开与帽子已收好。",
+        "reuseArtId": "art-688ff9d8a4b753b8906f1e8f",
+        "file": "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png",
+        "requirements": {
+          "format": "PNG",
+          "transparent": true,
+          "displaySize": [
+            192,
+            208
+          ],
+          "scope": "Only one static transparent base Avatar; full animation is not requested"
+        }
+      }
+    ],
+    "basis": "离开回声卷刺形态同时脱帽，终态正好回到该个体已有普通成年无附件身体；已实际查看对应原成年图，钝圆软刺簇、露出的圆耳与无帽状态适用。伸展、哈欠和接水是当次动作，不要求重画持续姿态。"
+  }
+}

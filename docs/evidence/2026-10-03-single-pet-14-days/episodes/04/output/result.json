@@ -1,0 +1,13 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/actual-completed.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/actual-output.json"
+  ],
+  "result": {
+    "text": "旧树根的标本屋里，一枚空蜗牛壳把我留住了。里面没有住客，我忍住没碰，绕了一圈，才发现壳背缺了一小角。\n\n你打算周末去博物馆，还没选好哪家，想先看看我自己拍给你的照片。我就借来一台小相机，架在低木墩上，试好定时，跑回空壳旁。快门响前，我朝镜头看去，伸出一只前足指给你看：这次总算赶上了不会走开的展品。\n\n相机还给标本屋，照片带回了家。现在给你看；看过以后，它就平码在明信片下面，只露出一道白边。",
+    "mediaRefs": [
+      "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-5a28a6ca55c3c26789e4ce0b.png"
+    ]
+  }
+}

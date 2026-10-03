@@ -1,0 +1,12 @@
+{
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/story.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/evolution.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/home.result.json"
+  ],
+  "result": {
+    "reason": "只有文字与恢复后的Avatar。故事未交给用户新的视觉物件；收好已有帽子只是局部家务，home也无需全景。特殊形态结束与脱帽由appearance复用原成年无帽形象体现，不在carrier重复制作场景插图。",
+    "carrier": null
+  }
+}

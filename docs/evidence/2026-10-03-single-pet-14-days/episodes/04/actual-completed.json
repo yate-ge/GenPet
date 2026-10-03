@@ -1,0 +1,149 @@
+{
+  "id": "story-105b7cb6-0669-447b-8815-e76b3f1ee329",
+  "triggerId": "daily:2026-10-30:16:00:Asia.Shanghai",
+  "petId": "genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53",
+  "at": 1793347200000,
+  "text": "旧树根的标本屋里，最先吸引刺猬的是一枚空蜗牛壳。壳口朝向窗户，里面没有住客；它忍住没碰，绕了一圈才发现背面缺了一小角。你打算周末去博物馆，还没选好哪家，想先看看它自己拍给你的照片。于是它从标本屋借来一台小相机，架在低木墩上，试好定时，跑回空壳旁站住。快门响前，它转过奶白的短吻，朝镜头看去，一只前足指向壳背的小缺口：这次总算赶上了不会走开的展品。相机还给标本屋，照片带回家，平码在明信片下方，只露出一道白边。",
+  "basis": "fact-04-photo 的明确照片请求与 fact-04-plan 的未定未来计划引出宠物参观自家世界标本屋并主动拍照，状态转为分享照片。相机借还、指壳姿势均在故事中结束，没有持续附件。growth.required 为 null，无用户持续模式或特殊身体经历支持特殊形态；阶段、基因与性格延续。",
+  "stage": "adult",
+  "state": "想把自己的发现拍给你看",
+  "home": "家仍在苔石边，周围草根有蜗牛小路，苔石外沿是走动、观察的活动空地。半片乳白浅褐斑蛋壳作挡风壳墙，大叶雨檐遮雨；内侧草垫小窝和床边干草供休息。收藏区保留凹叶里的原种子、半壳内侧干草旁两端一颗与两颗浅泥点的弯木片，以及靠木片放置的天然半月凹口浅灰扁石。苔石坡明信片仍平放在弯木片后方的干处；本次给用户看的标本屋照片平码在明信片下面，向旁错开一道窄白边方便取出。相机已经归还，没有成为家中物件。不搬家，原布置和收藏延续。",
+  "appearanceId": "art-688ff9d8a4b753b8906f1e8f",
+  "mediaIds": [
+    "art-5a28a6ca55c3c26789e4ce0b"
+  ],
+  "steps": [
+    {
+      "id": "step-9c1b2006ff2b1593f39f99f5",
+      "unit": "context",
+      "at": 1793347200000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/upstream.json"
+      ],
+      "result": {
+        "unknowns": [
+          "未提供用户实际到访、博物馆名称、展览内容或感受，不能将计划写为既成事实。"
+        ],
+        "facts": [
+          {
+            "source": "test-user-message:episode-04 / message-04 / 2026-10-30T08:00:00Z",
+            "id": "fact-04-plan",
+            "text": "用户在10月30日表示周末打算去一次博物馆，尚未决定哪家；是未来计划。"
+          },
+          {
+            "source": "test-user-message:episode-04 / message-04 / 2026-10-30T08:00:00Z",
+            "id": "fact-04-photo",
+            "text": "用户本篇希望看到宠物自己拍给用户的照片。"
+          }
+        ]
+      }
+    },
+    {
+      "id": "step-7f09448a8b407ad2fd8daacd",
+      "unit": "story",
+      "at": 1793347200000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/context.result.json"
+      ],
+      "result": {
+        "stateIntent": "想把自己的发现拍给你看；拍照时看向镜头与指壳是当次照片姿势，回家后不持续拿相机或指向标本。",
+        "visualIntent": "用户收到宠物主动拍给用户的照片，横向3:2带窄白相纸边，无文字无邮票：相机镜头在低木墩高度，成年暖棕刺猬在标本屋空蜗牛壳旁主动面对镜头摆姿势，奶白短吻转向观看者，亮眼与镜头相视，一只前足指向空壳背面的缺角。可见树根室内窗与低展台，主体是这只同一刺猬与它想给你看的缺角，不画它正在操作相机的第三方场景。",
+        "text": "旧树根的标本屋里，最先吸引刺猬的是一枚空蜗牛壳。壳口朝向窗户，里面没有住客；它忍住没碰，绕了一圈才发现背面缺了一小角。你打算周末去博物馆，还没选好哪家，想先看看它自己拍给你的照片。于是它从标本屋借来一台小相机，架在低木墩上，试好定时，跑回空壳旁站住。快门响前，它转过奶白的短吻，朝镜头看去，一只前足指向壳背的小缺口：这次总算赶上了不会走开的展品。相机还给标本屋，照片带回家，平码在明信片下方，只露出一道白边。",
+        "homeIntent": "新增给用户看的窄白边照片，平放在半壳内侧已有明信片下方，错开一条白边便于抽取；收藏区其余物件与休息、活动空间不变。",
+        "connection": "正文明确使用用户尚未确定的周末博物馆计划与自行拍照请求。标本屋、借相机和空壳都是宠物世界的虚构经历，不为用户指定或补写博物馆行程。",
+        "evidenceIds": [
+          "fact-04-plan",
+          "fact-04-photo"
+        ]
+      }
+    },
+    {
+      "id": "step-a19ad343a6a0816681a5c01a",
+      "unit": "evolution",
+      "at": 1793347200000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/context.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/story.result.json"
+      ],
+      "result": {
+        "stage": "adult",
+        "visibleState": null,
+        "basis": "fact-04-photo 的明确照片请求与 fact-04-plan 的未定未来计划引出宠物参观自家世界标本屋并主动拍照，状态转为分享照片。相机借还、指壳姿势均在故事中结束，没有持续附件。growth.required 为 null，无用户持续模式或特殊身体经历支持特殊形态；阶段、基因与性格延续。",
+        "state": "想把自己的发现拍给你看",
+        "special": null
+      }
+    },
+    {
+      "id": "step-c879898f14b7ed40e989b2dc",
+      "unit": "home",
+      "at": 1793347200000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/context.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/story.result.json"
+      ],
+      "result": {
+        "home": "家仍在苔石边，周围草根有蜗牛小路，苔石外沿是走动、观察的活动空地。半片乳白浅褐斑蛋壳作挡风壳墙，大叶雨檐遮雨；内侧草垫小窝和床边干草供休息。收藏区保留凹叶里的原种子、半壳内侧干草旁两端一颗与两颗浅泥点的弯木片，以及靠木片放置的天然半月凹口浅灰扁石。苔石坡明信片仍平放在弯木片后方的干处；本次给用户看的标本屋照片平码在明信片下面，向旁错开一道窄白边方便取出。相机已经归还，没有成为家中物件。不搬家，原布置和收藏延续。",
+        "basis": "新增一张照片，收藏区局部叠放变化无需全景图；本篇照片礼物由carrier呈现。",
+        "visual": null
+      }
+    },
+    {
+      "id": "step-0aef92e54cdec870e9db3c92",
+      "unit": "carrier",
+      "at": 1793347200000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/story.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/evolution.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/home.result.json"
+      ],
+      "result": {
+        "reason": "用户明确希望收到宠物自己拍的照片；故事用定时相机形成一张主动向用户展示空壳缺角的照片。上一篇仅文字，本次照片与此前明信片载体不同。",
+        "carrier": {
+          "medium": "标本屋定时照片",
+          "purpose": "宠物把自己在虚构标本屋发现的空壳缺角拍给用户看，回应自行拍照请求。",
+          "viewpoint": "用户透过低木墩上定时相机的镜头看宠物；宠物主动看向镜头并用前足指给观看者看，不是第三方拍摄操作相机的过程。",
+          "form": "3:2横向完整相纸，四边窄白边可见；照片内为低机位树根标本屋，背景仅窗户、树根墙与低展台，纸外朴素中性色。没有文字或邮政元素。",
+          "mustShow": [
+            "窄白相纸边与完整横向照片",
+            "同一成年暖棕卡通像素刺猬、奶白面腹、圆耳、亮眼与软刺簇",
+            "宠物短吻正对观看者、眼睛望向镜头，主动摆姿势",
+            "一只前足明确指向旁边空蜗牛壳背面的缺角",
+            "空蜗牛壳、可见空壳口与实际缺损的外沿小角",
+            "树根室内小窗与低展台；没有相机操作场景、文字或邮票"
+          ],
+          "visuals": [
+            {
+              "purpose": "story-carrier",
+              "description": "宠物定时拍给用户的窄白边照片，低机位面对镜头，用前足指向标本屋空蜗牛壳缺角。",
+              "request": "Use case: illustration-story\nAsset type: a printed photograph deliberately made by this fantasy pet and sent to the viewer.\nInput image 1: identity reference only for the same adult pet. Keep its warm tan-brown low rounded hedgehog body, cream muzzle and belly, round pink-inner ears, glossy dark eyes, short fleshy pink feet, and clearly grouped blunt soft cream-tipped back spines. Keep its cute compact cartoon pixel-art character, not realistic anatomy.\nPrimary request: one horizontal 3:2 photograph print with a narrow plain white photographic-paper border on all four sides, completely visible, straight-on against a plain warm-neutral backing. No text anywhere, no postal elements. Within the photograph, the camera was placed at low wooden-stump height on a timer: the adult hedgehog deliberately faces the lens and looks directly at the viewer, with its cream muzzle turned toward the camera and one forepaw extended to point clearly at a small triangular missing chip on the back outer edge of an EMPTY snail shell beside it. It poses like a companion showing you a discovery, aware of the camera. Preserve its four biological limbs; only one forepaw is raised to point. The shell sits on a low wooden specimen display stand, opening slightly angled toward a small window so the empty interior can be seen; rotate the shell enough that the missing rear edge chip is also exposed to the camera. The chip is a visible missing piece of shell rim, not a dark decorative marking. The shell is large enough that the chip reads easily, roughly half the hedgehog body's height.\nScene: cozy fictional specimen room built into old tree roots, a small bright window, simple root walls and the one low display stand. Compose the familiar pet and damaged shell as the main subjects; background is sparse. Pixel-art fantasy snapshot with blocky edges, a small clear palette and soft warm window light. The photo is viewed through the low camera's lens by the recipient, not a third-person illustration of the hedgehog photographing itself. No camera visible, no other people or animals, no accessories, no labels, no invented museum name. Opaque image and paper.",
+              "referenceFiles": [
+                "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/pet/data/dots/pets/genpet-48e128bd-d5b8-4cc4-95e1-aa2b5892bc53/assets/art-688ff9d8a4b753b8906f1e8f.png"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "step-3f0f9b81414d6e43d2f1770f",
+      "unit": "appearance",
+      "at": 1793347200000,
+      "inputRefs": [
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/upstream.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/story.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/evolution.result.json",
+        "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/04/home.result.json"
+      ],
+      "result": {
+        "appearance": null,
+        "visuals": [],
+        "basis": "相机已归还，指向空壳和看向镜头仅属于照片中的当次姿势；照片作为载体收藏，没有持续穿戴或携带，也未进化或进入特殊形态，保持当前成年 Avatar。"
+      }
+    }
+  ]
+}

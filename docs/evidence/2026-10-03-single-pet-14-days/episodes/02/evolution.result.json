@@ -1,0 +1,14 @@
+{
+  "result": {
+    "stage": "adult",
+    "visibleState": null,
+    "special": null,
+    "state": "想把自己晚到一步的观察写给你",
+    "basis": "fact-02-snail 的单次记录引出宠物追随自家蜗牛痕迹，fact-02-postcard 的明确请求让它将自己的观察写进明信片；据故事形成分享观察的状态，性格不变。单次用户事件不足以引出特殊形态，growth.required 为 null，本篇也没有特殊身体经历；成年阶段与原基因延续。"
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/upstream.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/context.result.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/02/story.result.json"
+  ]
+}

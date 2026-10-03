@@ -1,0 +1,19 @@
+{
+  "result": {
+    "unknowns": [
+      "没有新的用户生活模式或博物馆到访信息。",
+      "用户未指定帽子收藏位置或休息方法。"
+    ],
+    "facts": [
+      {
+        "id": "fact-09-rest",
+        "source": "test-user-message:episode-09 / message-09 / 2026-11-04T08:00:00Z",
+        "text": "用户11月4日明确想看宠物回家休息，并把帽子收好。"
+      }
+    ]
+  },
+  "inputRefs": [
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/timeline.json",
+    "C:/Users/geyat/Documents/workingProjects/GenPet/output/agent-tests/2026-10-03-single-pet-14-days/episodes/09/upstream.json"
+  ]
+}
