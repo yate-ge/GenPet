@@ -8,6 +8,8 @@ GenPet has three layers. Most changes touch only one of them.
 | Generation | `framework/prompts/*.md`, `units.json` | One prompt per independently testable unit. Content stays open; the Agent decides it at runtime. |
 | Engineering | `src/` | Identity, persistence, retries, artwork files and host updates. No creative judgment. |
 
+Generation units are grouped under four designer roles (details in `framework/references/generation-units.md`): **GeneDesigner** (who the pet is; adoption only), **PetDesigner** (the Avatar at each stage), **StoryDesigner** (stories, evolution, the carrier a story hands the user) and **HomeDesigner** (the pet's home and its view). Roles are prompt-level ownership; the engine does not know them.
+
 Skills (`framework/skills/`) tell the Agent which CLI commands to call and which prompts to read. References (`framework/references/`) document the workflow and host contracts for the Agent.
 
 ## One story, end to end
