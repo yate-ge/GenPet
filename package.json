@@ -1,6 +1,6 @@
 {
   "name": "genpet",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "private": true,
   "type": "module",
   "description": "A lightweight story-driven Pet framework for Codex Dots and native Codex Pets.",
@@ -18,7 +18,6 @@
     "package:plugin": "npm run build:plugin && npm run verify:version && tsx scripts/package.ts",
     "verify:fast": "npm run check && npm run format:check && npm test",
     "verify:release": "node scripts/verify-release.mjs",
-    "verify:native": "tsx scripts/verify-native-contract.ts",
     "verify:version": "node scripts/verify-release-version.mjs",
     "format": "prettier --write src tests scripts framework/debugger-web",
     "format:check": "prettier --check src tests scripts framework/debugger-web"

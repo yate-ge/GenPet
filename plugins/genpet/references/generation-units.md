@@ -12,7 +12,7 @@ Units are grouped by who owns the decision. A designer is a role with its own pr
 | --- | --- | --- | --- |
 | GeneDesigner | Who the pet is: the adoption encounter, genes with their design basis, personality | encounter, genes, personality | Adoption, reset, legacy migration only; the result is immutable |
 | PetDesigner | What the pet looks like: egg, each stage and special form as an Avatar | appearance | Every Avatar change |
-| StoryDesigner | What happens: the story, state, evolution and special-form decisions, and the carrier the story hands the user (or none) | context, story, evolution, carrier, output | Every story |
+| StoryDesigner | What happens: the story, state, evolution and special-form decisions, the carrier the story hands the user (or none), and the pet's replies in conversation | context, story, evolution, carrier, chat, output | Every story |
 | HomeDesigner | The pet's home: layout, zones, rearranging, moving, the home view | home | When the story changes the home |
 
 `image-review` is shared: it checks each visual against its designer's declared `mustShow` features.
@@ -28,6 +28,7 @@ Units are grouped by who owns the decision. A designer is a role with its own pr
 | appearance | Genes, story, change, saved art, host requirements | Reuse/new/unchanged appearance and actual visual requests | Source copied as realistic mature anatomy instead of a cartoon hatchling Avatar |
 | home | Context, pet including home, story with its home intent, saved art | Complete home description (or null) and a home-view plan (or null) | A corner close-up instead of a livable home; no zones; moving treated as a rename |
 | carrier | Context, pet with recent stories, story, saved art | Reason for an image or text only; a designed carrier with purpose, viewpoint, form, must-show features and exact text | A postcard without text or postmark; a photo that is only a scene; images on every story |
+| chat | Pet record, the user's message, recent chat notes | The pet's reply by stage; a brief note or null | An egg or hatchling speaking sentences; a generic cute voice; granting the user's wish on the spot; fiction saved as user fact |
 | image-review | One visual request and an actual image | Boundary, design, cartoon Avatar and phase observations; accept/repair | Source recognizable but young phase or small-size character design missing |
 | output | Story, actual completion, available media (a story without a carrier has no image) | Story text and actual media references | Unfinished evolution claimed complete |
 

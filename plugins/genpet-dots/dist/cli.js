@@ -2127,7 +2127,7 @@ var require_png = __commonJS({
 // src/cli.ts
 import { readFile as readFile8 } from "node:fs/promises";
 import path10 from "node:path";
-import { randomUUID as randomUUID9 } from "node:crypto";
+import { randomUUID as randomUUID10 } from "node:crypto";
 
 // src/art.ts
 import { mkdir as mkdir4, readFile as readFile7, rename as rename3, rm as rm2, stat as stat2, writeFile as writeFile3 } from "node:fs/promises";
@@ -4816,6 +4816,20 @@ async function acceptArt(store2, input) {
   });
 }
 
+// src/chat.ts
+import { randomUUID as randomUUID9 } from "node:crypto";
+async function noteChat(store2, petId, note) {
+  identifier(petId, "petId");
+  const brief = text(note, "chat note");
+  if (brief.length > 1e3) throw new Error("A chat note is a brief record of at most 1000 characters");
+  return store2.transaction((state) => {
+    if (!state.pet || state.pet.id !== petId) throw new Error("Chat note belongs to another or missing pet");
+    const chat = { id: `chat-${randomUUID9()}`, petId, at: Date.now(), text: brief };
+    (state.chats ??= []).push(chat);
+    return chat;
+  });
+}
+
 // src/debugger.ts
 import { spawn } from "node:child_process";
 import path9 from "node:path";
@@ -4971,7 +4985,7 @@ var shared = {
   // Story lifecycle
   "begin-story": {
     usage: "begin-story [TRIGGER_ID]",
-    run: ([trigger], store2) => beginStory(store2, trigger || `manual:${randomUUID9()}`)
+    run: ([trigger], store2) => beginStory(store2, trigger || `manual:${randomUUID10()}`)
   },
   "plan-story": {
     usage: "plan-story OPERATION_ID PLAN_JSON",
@@ -4980,7 +4994,7 @@ var shared = {
   "finish-story": { usage: "finish-story OPERATION_ID", run: ([id], store2) => finishStory(store2, id) },
   "cancel-story": { usage: "cancel-story OPERATION_ID", run: ([id], store2) => cancelStory(store2, id) },
   "story-output": { usage: "story-output [STORY_ID]", run: async ([id], store2) => storyOutput(await store2.peek(), id) },
-  reset: { usage: "reset [OPERATION_ID]", run: ([id], store2) => resetPet(store2, id || randomUUID9()) },
+  reset: { usage: "reset [OPERATION_ID]", run: ([id], store2) => resetPet(store2, id || randomUUID10()) },
   // Artwork and host updates
   "art-request": { usage: "art-request", run: async (_, store2) => artRequest(await store2.peek()) },
   "accept-art": {
@@ -4994,6 +5008,8 @@ var shared = {
   // Naming
   "name-pet": { usage: "name-pet PET_ID USER_NAME", run: ([id, name2], store2) => namePet(store2, id, name2) },
   "name-asked": { usage: "name-asked PET_ID", run: ([id], store2) => markNameAsked(store2, id) },
+  // Conversation
+  "note-chat": { usage: "note-chat PET_ID NOTE", run: ([id, note], store2) => noteChat(store2, id, note) },
   // Generation units
   prompt: { usage: "prompt MODULE", run: ([name2]) => ({ prompt: readPrompt(name2) }) },
   "unit-request": {

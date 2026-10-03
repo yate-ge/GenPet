@@ -325,3 +325,46 @@ test('an unfinished initialization that cannot be completed can be abandoned by 
     await rm(root, { recursive: true, force: true });
   }
 });
+test('a visible state change gives the Avatar a variant without changing the stage, and a later story reuses a saved look', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'genpet-variant-')),
+    store = new Store(root, 'dots');
+  const story = { text: 'It found a rain hat.', basis: 'Test', state: 'Wearing a rain hat' };
+  const file = path.join(root, 'avatar.png');
+  try {
+    await image(file);
+    const draw = async (operationId: string) => {
+      await acceptArt(store, {
+        requestId: artRequest(await store.peek())!.id,
+        file,
+        kind: 'avatar',
+        provenance: 'Fixture',
+      });
+      await hostDone(store, operationId);
+      return finishStory(store, operationId);
+    };
+    await draw(await initialization(store));
+    let op = (await beginStory(store, 'manual:hatch')).pending!.id;
+    await planStory(store, op, { ...story, stage: 'hatchling', appearance: { description: 'Plain hatchling' } });
+    const plain = (await draw(op)).appearanceId!;
+    op = (await beginStory(store, 'manual:hat')).pending!.id;
+    await planStory(store, op, { ...story, appearance: { description: 'The same hatchling wearing a rain hat' } });
+    const hat = (await draw(op)).appearanceId!;
+    let state = await store.peek();
+    assert.equal(state.pet!.stage, 'hatchling');
+    assert.equal(state.pet!.state.appearanceId, hat);
+    assert.notEqual(hat, plain);
+    op = (await beginStory(store, 'manual:plain-again')).pending!.id;
+    await planStory(store, op, {
+      ...story,
+      state: 'Back to plain',
+      appearance: { description: 'Hat off again', reuseArtId: plain },
+    });
+    await hostDone(store, op);
+    await finishStory(store, op);
+    state = await store.peek();
+    assert.equal(state.pet!.state.appearanceId, plain);
+    assert.equal(state.art.filter(art => art.kind === 'avatar').length, 3); // egg, plain, hat: nothing was redrawn
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
