@@ -1,0 +1,6 @@
+interface:
+  display_name: "genpet-stop"
+  short_description: "明确请求时关闭宠物的定时故事检查，保留宠物与记录，可用 /genpet-start 恢复"
+  default_prompt: "使用 $genpet-stop 让我的宠物先停下自己的定时外出。"
+policy:
+  allow_implicit_invocation: false

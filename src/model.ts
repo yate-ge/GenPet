@@ -132,7 +132,8 @@ export interface State {
   art: ArtRecord[];
   pending: Pending | null;
   chats?: Chat[];
-  schedule?: { timezone: string; reference: string };
+  /** The host's story check. `stoppedAt` (the user turned it off) and `resumedAt` are kept as time facts for the next story. */
+  schedule?: { timezone: string; reference?: string; stoppedAt?: number; resumedAt?: number };
   legacy?: { backup: string; importedAt: number };
   replacesPetId?: string;
 }

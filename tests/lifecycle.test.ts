@@ -8,7 +8,7 @@ import { Store } from '../src/store.js';
 import { beginStory, cancelStory, planStory, finishStory, resetPet } from '../src/lifecycle.js';
 import { growth } from '../src/growth.js';
 import { recordHostResult } from '../src/hosts/result.js';
-import { dueStory } from '../src/schedule.js';
+import { dueStory, setSchedule, stopSchedule, timeSense } from '../src/schedule.js';
 import { artRequest, acceptArt } from '../src/art.js';
 import { bindAvatar } from '../src/hosts/dots.js';
 import { createPet } from '../src/model.js';
@@ -172,6 +172,51 @@ test('story checks run every five hours from adoption, coalesce missed checks an
     ],
   };
   assert.equal(dueStory(done, adopted + 5 * HOUR + 60000).due, false);
+});
+test('a stopped check is remembered, no longer due, and resumes with the gap known to the next story', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'genpet-stop-')),
+    store = new Store(root, 'dots');
+  try {
+    const first = await beginStory(store, 'manual:adopt');
+    assert.equal(first.status === 'pending' && first.time!.hoursSinceLastStory < 1, true);
+    await setSchedule(store, 'Asia/Shanghai', 'automation:pet');
+    const adopted = (await store.peek()).pet!.adoptedAt;
+    const stopped = await stopSchedule(store);
+    assert.equal(stopped.previousReference, 'automation:pet');
+    assert.equal((await stopSchedule(store)).stoppedAt, stopped.stoppedAt); // idempotent
+    let state = await store.peek();
+    assert.equal(state.schedule!.reference, undefined);
+    const later = adopted + 30 * 3600000;
+    assert.equal(dueStory(state, later).due, false);
+    assert.equal(dueStory(state, later).stopped, true);
+    // The gap and the stop are facts for the next story, with no cause guessed.
+    const sense = timeSense(state, later)!; // the egg itself is the last event: adoption
+    assert.equal(sense.hoursSinceLastStory, Math.round(((later - adopted) / 3600000) * 10) / 10);
+    assert.equal(sense.userStoppedCheckAt, new Date(stopped.stoppedAt!).toISOString());
+    // Resuming sets the check again and keeps the stop and resume times.
+    await setSchedule(store, 'Asia/Shanghai', 'automation:pet-2');
+    state = await store.peek();
+    assert.equal(state.schedule!.reference, 'automation:pet-2');
+    assert.ok(state.schedule!.resumedAt! >= state.schedule!.stoppedAt!);
+    assert.equal(dueStory(state, later).stopped, false);
+    assert.equal(dueStory(state, later).due, true);
+    assert.ok(timeSense(state, later)!.checkResumedAt);
+    // A story after the resume no longer carries the old stop.
+    state.stories.push({
+      id: 's',
+      triggerId: 't',
+      petId: 'p',
+      at: later,
+      text: 'x',
+      basis: 'x',
+      stage: 'egg',
+      state: 'x',
+      mediaIds: [],
+    });
+    assert.equal('userStoppedCheckAt' in timeSense(state, later + 1)!, false);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
 test('replacement artwork invalidates an earlier host confirmation for the same story', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-stale-display-')),
