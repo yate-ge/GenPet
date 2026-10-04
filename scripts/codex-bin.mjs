@@ -16,9 +16,9 @@ export const BUNDLED = [
   '/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex',
 ];
 
-function probe(bin) {
+function probe(bin, env) {
   const run = args =>
-    execFileSync(bin, args, { encoding: 'utf8', timeout: 20_000, stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+    execFileSync(bin, args, { encoding: 'utf8', env, timeout: 20_000, stdio: ['ignore', 'pipe', 'pipe'] }).trim();
   let version;
   try {
     version = run(['--version']);
@@ -42,7 +42,7 @@ function probe(bin) {
 export function findCodex(env = process.env, bundled = BUNDLED) {
   const tried = [];
   const attempt = (source, bin) => {
-    const result = probe(bin);
+    const result = probe(bin, env);
     if (result.ok) return { bin, version: result.version, source };
     tried.push(`  - ${source} (${bin}): ${result.reason}${result.version ? ` [${result.version}]` : ''}`);
     return null;
