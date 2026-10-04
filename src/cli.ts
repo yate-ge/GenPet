@@ -18,7 +18,7 @@ import { beginStory, cancelStory, finishStory, planStory, resetPet, storyOutput 
 import { findLegacyRecord, migrateLegacy } from './migration.js';
 import type { ArtKind } from './model.js';
 import { markNameAsked, namePet, namingDue } from './naming.js';
-import { dueStory, setSchedule } from './schedule.js';
+import { dueStory, setSchedule, stopSchedule, timeSense } from './schedule.js';
 import { statusView } from './status.js';
 import { Store } from './store.js';
 
@@ -38,6 +38,7 @@ const shared: Record<string, Command> = {
         ...(flag === '--full' ? state : statusView(state)),
         namingDue: namingDue(state),
         growth: growth(state),
+        time: timeSense(state),
         dataDirectory: store.root,
         ...(legacyFile ? { legacyFile } : {}),
       };
@@ -92,6 +93,7 @@ const shared: Record<string, Command> = {
     usage: 'schedule TIMEZONE REFERENCE',
     run: ([zone, reference], store) => setSchedule(store, zone, reference),
   },
+  'schedule-stop': { usage: 'schedule-stop', run: (_, store) => stopSchedule(store) },
   // Maintenance
   'migrate-legacy': {
     usage: 'migrate-legacy V1_FILE DESIGN_JSON',

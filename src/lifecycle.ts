@@ -12,6 +12,7 @@ import { findLegacyRecord } from './migration.js';
 import { createPet, fresh, identifier, stages, text, validateStage } from './model.js';
 import type { HostResult, Pending, Pet, State, Story, StoryPlan } from './model.js';
 import { namingDue } from './naming.js';
+import { timeSense } from './schedule.js';
 import { atomicJson, type Store } from './store.js';
 
 /** The pending story, if it is still current for this pet; otherwise the caller works from stale data. */
@@ -48,13 +49,19 @@ export async function beginStory(store: Store, triggerId: string) {
     if (state.pending) {
       if (state.pending.triggerId !== triggerId)
         throw new Error(`Unfinished story ${state.pending.id}; resume it first`);
-      return { status: 'pending', pending: state.pending, pet: state.pet, growth: growth(state) };
+      return {
+        status: 'pending',
+        pending: state.pending,
+        pet: state.pet,
+        growth: growth(state),
+        time: timeSense(state),
+      };
     }
     if (!state.pet && (await findLegacyRecord(store)))
       throw new Error('Existing legacy pet found; migrate it before creating a new identity');
     state.pet ??= createPet();
     state.pending = startPending(state.pet, triggerId, state.pet.genes ? 'story' : 'initialization');
-    return { status: 'pending', pending: state.pending, pet: state.pet, growth: growth(state) };
+    return { status: 'pending', pending: state.pending, pet: state.pet, growth: growth(state), time: timeSense(state) };
   });
 }
 

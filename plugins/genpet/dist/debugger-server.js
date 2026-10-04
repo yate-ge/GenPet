@@ -2312,6 +2312,9 @@ var STAGE_CEILING = { egg: 5 * HOUR, hatchling: 7 * DAY, juvenile: 7 * DAY };
 var SPECIAL_INTERVAL = 7 * DAY;
 var SPECIAL_DURATION = 2 * DAY;
 
+// src/schedule.ts
+var CHECK_INTERVAL = 5 * 36e5;
+
 // src/lifecycle.ts
 function pendingFor(state, id) {
   const pending = state.pending;
