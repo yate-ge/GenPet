@@ -255,7 +255,7 @@ class ArtworkPipelineTests(unittest.TestCase):
         manifest = self.manifest()
         manifest.update(workflow_profile="genpet-egg-three", jobs=make_egg_jobs(self.run, []), source_review_required=True)
         write_json(self.run / "imagegen-jobs.json", manifest)
-        with Image.open(ROOT / "assets/pets/mystery-egg/spritesheet.webp") as atlas:
+        with Image.open(ROOT / "tests/fixtures/mystery-egg.webp") as atlas:
             atlas.crop((0, 0, 192, 208)).save(self.run / "decoded/base.png")
             for state in ("egg-calm", "egg-stir", "egg-settle"):
                 atlas.crop((0, 208, 1536, 416)).save(self.run / "decoded" / f"{state}.png")
@@ -275,7 +275,7 @@ class ArtworkPipelineTests(unittest.TestCase):
     def test_complete_atlas_resume_and_structural_failure(self):
         self.manifest()
         # Existing checked-in artwork is only a processing fixture, never installed.
-        with Image.open(ROOT / "assets/pets/mystery-egg/spritesheet.webp") as opened:
+        with Image.open(ROOT / "tests/fixtures/mystery-egg.webp") as opened:
             atlas = opened.convert("RGBA")
         atlas.crop((0, 0, 192, 208)).save(self.run / "decoded/base.png")
         for state, row, count in [*ROW_SPECS, ("look-row-9", 9, 8), ("look-row-10", 10, 8)]:
