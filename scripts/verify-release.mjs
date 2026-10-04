@@ -5,10 +5,10 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
+import { findCodex } from './codex-bin.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const plugin = path.join(root, 'plugins', 'genpet');
-const codex = process.env.CODEX_BIN || 'codex';
 function run(label, command, args, cwd = root, env = process.env) {
   const started = Date.now();
   try {
@@ -62,6 +62,10 @@ for (const relative of [
   assert.equal(await exists(path.join(plugin, relative)), false, `Developer-only path leaked into plugin: ${relative}`);
 }
 
+const found = findCodex();
+const codex = found.bin;
+console.log(`Codex CLI: ${found.version} (${found.source}: ${codex})`);
+if (found.note) console.warn(`Note: ${found.note}`);
 const temporary = await mkdtemp(path.join(tmpdir(), 'genpet-release-check-'));
 try {
   // The repository root is the marketplace; a local path exercises the same layout as `owner/repo`.

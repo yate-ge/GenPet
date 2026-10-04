@@ -73,6 +73,10 @@ export interface HostResult {
   active: boolean | null;
   refreshRequested: boolean;
   displayStatus: 'confirmed' | 'unconfirmed';
+  /** The host could not deliver the refresh (app not running, channel missing or changed). The files are updated and show when the host next loads them. */
+  refreshUnavailable?: boolean;
+  /** Why, in plain words; required with refreshUnavailable. */
+  notice?: string;
   evidence?: string;
   error?: string;
 }

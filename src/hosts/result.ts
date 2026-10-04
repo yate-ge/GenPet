@@ -22,6 +22,9 @@ export function validateHostResult(state: State, operationId: string, input: Hos
     !['confirmed', 'unconfirmed'].includes(input.displayStatus)
   )
     throw new Error('Invalid host result');
+  if (input.refreshUnavailable !== undefined && typeof input.refreshUnavailable !== 'boolean')
+    throw new Error('Invalid host result');
+  if (input.refreshUnavailable && !input.notice?.trim()) throw new Error('refreshUnavailable requires a notice');
   if (input.displayStatus === 'confirmed' && !input.evidence?.trim())
     throw new Error('Confirmed display requires evidence');
   return {
@@ -33,6 +36,7 @@ export function validateHostResult(state: State, operationId: string, input: Hos
     active: input.active,
     refreshRequested: input.refreshRequested,
     displayStatus: input.displayStatus,
+    ...(input.refreshUnavailable ? { refreshUnavailable: true, notice: text(input.notice, 'notice') } : {}),
     ...(input.evidence ? { evidence: text(input.evidence, 'evidence') } : {}),
     ...(input.error ? { error: text(input.error, 'error') } : {}),
   };

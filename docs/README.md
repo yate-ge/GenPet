@@ -15,6 +15,7 @@
 | [本轮完整故事与效果](evidence/2026-10-03-run1/README.zh-CN.md) | 89 页图文故事册、82 篇故事全文、350 个单元的结果与缺项 |
 | [Agent 安装](AGENT_INSTALL.md) | 从已发布的 marketplace 安装或更新 |
 | [原生 Pet 兼容合同](NATIVE-CONTRACT.md) | 桌面原生 Pet 的 V2 图集格式与核对方式 |
+| [桌面端自动刷新模块](DESKTOP-REFRESH.zh-CN.md) | 刷新通道、结果字段、降级策略与待测清单（待在真实 Codex 上测试） |
 | [研究基础](RESEARCH.md) | GenFaceUI 理论背景 |
 
 开发与发布规则见 [CONTRIBUTING](../CONTRIBUTING.md) 和 [AGENTS.md](../AGENTS.md)。

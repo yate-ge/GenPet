@@ -70,3 +70,31 @@ test('release gate rejects same-version payload changes and permits a consistent
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test('findCodex reports why a Codex is unusable and never replaces an explicit CODEX_BIN', async () => {
+  if (process.platform === 'win32') return;
+  const { findCodex } = await import('../scripts/codex-bin.mjs');
+  const dir = await mkdtemp(path.join(tmpdir(), 'genpet-codex-bin-'));
+  try {
+    const script = async (name: string, body: string) => {
+      const file = path.join(dir, name);
+      await writeFile(file, `#!/bin/sh\n${body}\n`, { mode: 0o755 });
+      return file;
+    };
+    const good = await script('good', 'echo codex-cli 9.9.9');
+    const old = await script('old', 'case "$1 $2" in "--version "*) echo codex-cli 0.1.0;; *) exit 2;; esac');
+    const broken = path.join(dir, 'missing');
+    assert.equal(findCodex({ CODEX_BIN: good }, []).version, 'codex-cli 9.9.9');
+    // A Codex without the plugin subcommands is rejected with the reason, not a spawn error.
+    assert.throws(() => findCodex({ CODEX_BIN: old }, [good]), /no `codex plugin marketplace add`/);
+    // An explicit CODEX_BIN is not silently replaced by a bundled one.
+    assert.throws(() => findCodex({ CODEX_BIN: broken }, [good]), /CODEX_BIN is not usable[\s\S]*not found/);
+    // Without CODEX_BIN, an unusable PATH codex falls back to a working bundled CLI and says so.
+    const found = findCodex({ PATH: dir + path.delimiter + '/nonexistent' }, [broken, good]);
+    assert.equal(found.bin, good);
+    assert.ok(found.note);
+    assert.throws(() => findCodex({ PATH: '/nonexistent' }, [broken]), /No usable Codex CLI found/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
