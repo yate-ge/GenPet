@@ -43,6 +43,12 @@ export function timeSense(state: State, now = Date.now()) {
     lastStoryAt: iso(last),
     hoursSinceLastStory: Math.round(((now - last) / 3_600_000) * 10) / 10,
     checkIntervalHours: CHECK_INTERVAL / 3_600_000,
+    ...(state.pending
+      ? {
+          pendingStartedAt: iso(state.pending.startedAt),
+          pendingHours: Math.round(((now - state.pending.startedAt) / 3_600_000) * 10) / 10,
+        }
+      : {}),
     ...(pause ? { userStoppedCheckAt: iso(schedule.stoppedAt!) } : {}),
     ...(pause && schedule.resumedAt !== undefined ? { checkResumedAt: iso(schedule.resumedAt) } : {}),
   };
