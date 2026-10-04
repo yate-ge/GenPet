@@ -71,7 +71,7 @@ test('request freshness and durable media prevent stale or temporary-file instal
     await rm(root, { recursive: true, force: true });
   }
 });
-test('active and inactive updates retain target ID and never change selection; failed refresh can resume', async () => {
+test('active and inactive updates retain target ID and never change selection; an undeliverable refresh completes with a notice', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-publish-')),
     store = new Store(root),
     old = process.env.CODEX_HOME;
@@ -108,9 +108,11 @@ test('active and inactive updates retain target ID and never change selection; f
       selection,
       refresh: async () => ({ ...(await refresh()), automaticRefresh: false, refreshRequested: false }),
     });
-    assert.ok(failed.error);
-    await assert.rejects(() => finishStory(store, op), /unfinished/);
-    await installNative(store, { refresh, selection });
+    // An undeliverable refresh is recorded honestly and no longer blocks the story forever.
+    assert.equal(failed.refreshRequested, false);
+    assert.equal(failed.refreshUnavailable, true);
+    assert.match(failed.notice!, /next loads Pets/);
+    assert.equal(failed.error, undefined);
     await finishStory(store, op);
     const next = (await beginStory(store, 'story:reuse')).pending!.id,
       art = (await store.peek()).art[0];

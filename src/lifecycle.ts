@@ -151,7 +151,12 @@ export async function planStory(store: Store, id: string, input: StoryPlan) {
 /** The story may complete once the target shows, or will show, the planned appearance. */
 function hostUpdateComplete(result: HostResult | undefined, appearanceId: string) {
   if (!result?.updated || result.appearanceId !== appearanceId || result.error) return false;
-  return result.active === false || result.refreshRequested || result.displayStatus === 'confirmed';
+  return (
+    result.active === false ||
+    result.refreshRequested ||
+    result.refreshUnavailable === true ||
+    result.displayStatus === 'confirmed'
+  );
 }
 
 /** `finish-story`: commit stage, state, history and the trigger together. Until then nothing changes. */
