@@ -3,13 +3,16 @@ import { readFile, realpath } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { findCodex } from './codex-bin.mjs';
 
 const name = process.argv[2] || 'genpet';
 if (!['genpet', 'genpet-dots'].includes(name)) throw new Error('Choose genpet or genpet-dots');
 const root = await realpath(path.resolve(import.meta.dirname, '..'));
 const catalog = JSON.parse(await readFile(path.join(root, '.agents/plugins/marketplace.json'), 'utf8'));
 const marketplace = catalog.name;
-const codex = process.env.CODEX_BIN || 'codex';
+const found = findCodex();
+const codex = found.bin;
+console.error(`Codex CLI: ${found.version} (${found.source}: ${codex})${found.note ? ` — ${found.note}` : ''}`);
 const run = (args: string[]) => execFileSync(codex, args, { encoding: 'utf8' });
 const list = () => JSON.parse(run(['plugin', 'marketplace', 'list', '--json'])).marketplaces;
 const previous = list().find((entry: { name: string }) => entry.name === marketplace);
