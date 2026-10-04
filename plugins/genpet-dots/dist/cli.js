@@ -2475,6 +2475,62 @@ async function namePet(store2, petId, userName) {
   });
 }
 
+// src/schedule.ts
+var CHECK_INTERVAL = 5 * 36e5;
+function dueStory(state, now = Date.now(), timezone = state.schedule?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone) {
+  const period = state.pet ? Math.floor((now - state.pet.adoptedAt) / CHECK_INTERVAL) : 0;
+  const triggerId = period >= 1 ? `period:${period}` : null;
+  const stopped = isStopped(state);
+  return {
+    timezone,
+    intervalHours: CHECK_INTERVAL / 36e5,
+    triggerId,
+    stopped,
+    due: !stopped && !!triggerId && !state.stories.some((story) => story.triggerId === triggerId),
+    pending: state.pending?.id ?? null
+  };
+}
+var isStopped = (state) => state.schedule?.stoppedAt !== void 0 && state.schedule.resumedAt === void 0;
+var iso2 = (time) => new Date(time).toISOString();
+function timeSense(state, now = Date.now()) {
+  const last = state.stories.at(-1)?.at ?? state.pet?.adoptedAt;
+  if (last === void 0) return null;
+  const schedule = state.schedule;
+  const pause = schedule?.stoppedAt !== void 0 && schedule.stoppedAt >= last;
+  return {
+    lastStoryAt: iso2(last),
+    hoursSinceLastStory: Math.round((now - last) / 36e5 * 10) / 10,
+    checkIntervalHours: CHECK_INTERVAL / 36e5,
+    ...pause ? { userStoppedCheckAt: iso2(schedule.stoppedAt) } : {},
+    ...pause && schedule.resumedAt !== void 0 ? { checkResumedAt: iso2(schedule.resumedAt) } : {}
+  };
+}
+async function setSchedule(store2, timezone, reference) {
+  const zone = text(timezone, "timezone");
+  new Intl.DateTimeFormat("en", { timeZone: zone });
+  const ref = text(reference, "schedule reference");
+  return store2.transaction((state) => {
+    const previous = state.schedule;
+    const resumedAt = previous?.stoppedAt !== void 0 ? previous.resumedAt ?? Date.now() : void 0;
+    return state.schedule = {
+      timezone: zone,
+      reference: ref,
+      ...previous?.stoppedAt !== void 0 ? { stoppedAt: previous.stoppedAt, resumedAt } : {}
+    };
+  });
+}
+async function stopSchedule(store2) {
+  return store2.transaction((state) => {
+    const previous = state.schedule;
+    if (isStopped(state)) return { stopped: true, stoppedAt: previous.stoppedAt, previousReference: null };
+    state.schedule = {
+      timezone: previous?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+      stoppedAt: Date.now()
+    };
+    return { stopped: true, stoppedAt: state.schedule.stoppedAt, previousReference: previous?.reference ?? null };
+  });
+}
+
 // src/lifecycle.ts
 function pendingFor(state, id) {
   const pending = state.pending;
@@ -2500,13 +2556,19 @@ async function beginStory(store2, triggerId) {
     if (state.pending) {
       if (state.pending.triggerId !== triggerId)
         throw new Error(`Unfinished story ${state.pending.id}; resume it first`);
-      return { status: "pending", pending: state.pending, pet: state.pet, growth: growth(state) };
+      return {
+        status: "pending",
+        pending: state.pending,
+        pet: state.pet,
+        growth: growth(state),
+        time: timeSense(state)
+      };
     }
     if (!state.pet && await findLegacyRecord(store2))
       throw new Error("Existing legacy pet found; migrate it before creating a new identity");
     state.pet ??= createPet();
     state.pending = startPending(state.pet, triggerId, state.pet.genes ? "story" : "initialization");
-    return { status: "pending", pending: state.pending, pet: state.pet, growth: growth(state) };
+    return { status: "pending", pending: state.pending, pet: state.pet, growth: growth(state), time: timeSense(state) };
   });
 }
 function validatePlan(state, input) {
@@ -4930,26 +4992,6 @@ async function recordStep(store2, operationId, unit, input) {
   });
 }
 
-// src/schedule.ts
-var CHECK_INTERVAL = 5 * 36e5;
-function dueStory(state, now = Date.now(), timezone = state.schedule?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone) {
-  const period = state.pet ? Math.floor((now - state.pet.adoptedAt) / CHECK_INTERVAL) : 0;
-  const triggerId = period >= 1 ? `period:${period}` : null;
-  return {
-    timezone,
-    intervalHours: CHECK_INTERVAL / 36e5,
-    triggerId,
-    due: !!triggerId && !state.stories.some((story) => story.triggerId === triggerId),
-    pending: state.pending?.id ?? null
-  };
-}
-async function setSchedule(store2, timezone, reference) {
-  const zone = text(timezone, "timezone");
-  new Intl.DateTimeFormat("en", { timeZone: zone });
-  const schedule = { timezone: zone, reference: text(reference, "schedule reference") };
-  return store2.transaction((state) => state.schedule = schedule);
-}
-
 // src/status.ts
 var RECENT = { stories: 5, art: 30, chats: 10 };
 function statusView(state) {
@@ -4985,6 +5027,7 @@ var shared = {
         ...flag === "--full" ? state : statusView(state),
         namingDue: namingDue(state),
         growth: growth(state),
+        time: timeSense(state),
         dataDirectory: store2.root,
         ...legacyFile ? { legacyFile } : {}
       };
@@ -5038,6 +5081,7 @@ var shared = {
     usage: "schedule TIMEZONE REFERENCE",
     run: ([zone, reference], store2) => setSchedule(store2, zone, reference)
   },
+  "schedule-stop": { usage: "schedule-stop", run: (_, store2) => stopSchedule(store2) },
   // Maintenance
   "migrate-legacy": {
     usage: "migrate-legacy V1_FILE DESIGN_JSON",
