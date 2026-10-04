@@ -4931,25 +4931,13 @@ async function recordStep(store2, operationId, unit, input) {
 }
 
 // src/schedule.ts
-var DAILY_TIMES = ["07:00", "12:00", "16:00", "21:00"];
+var CHECK_INTERVAL = 5 * 36e5;
 function dueStory(state, now = Date.now(), timezone = state.schedule?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23"
-  }).formatToParts(now);
-  const get = (key) => parts.find((part) => part.type === key).value;
-  const date = `${get("year")}-${get("month")}-${get("day")}`;
-  const time = `${get("hour")}:${get("minute")}`;
-  const slot = DAILY_TIMES.filter((slot2) => slot2 <= time).at(-1);
-  const triggerId = slot ? `daily:${date}:${slot}:${timezone.replace(/\//g, ".")}` : null;
+  const period = state.pet ? Math.floor((now - state.pet.adoptedAt) / CHECK_INTERVAL) : 0;
+  const triggerId = period >= 1 ? `period:${period}` : null;
   return {
     timezone,
-    times: DAILY_TIMES,
+    intervalHours: CHECK_INTERVAL / 36e5,
     triggerId,
     due: !!triggerId && !state.stories.some((story) => story.triggerId === triggerId),
     pending: state.pending?.id ?? null
