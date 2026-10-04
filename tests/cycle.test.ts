@@ -202,16 +202,15 @@ test('failed initialization reset preserves exact backup and ordinary pending st
   }
 });
 
-test('daily retry retains pending operation and coalesces missed local slots after completion', async t => {
-  const root = await mkdtemp(path.join(tmpdir(), 'genpet-daily-cycle-')),
+test('periodic retry retains pending operation and coalesces missed periods after completion', async t => {
+  const root = await mkdtemp(path.join(tmpdir(), 'genpet-periodic-cycle-')),
     store = new Store(root, 'dots');
   let now = Date.parse('2026-10-02T23:00:00Z');
   t.mock.method(Date, 'now', () => now);
   try {
-    const trigger = dueStory(await store.peek(), now, 'Asia/Shanghai').triggerId!;
-    const first = await beginStory(store, trigger);
-    assert.equal((await beginStory(store, trigger)).pending!.id, first.pending!.id);
-    assert.equal(dueStory(await store.peek(), now, 'Asia/Shanghai').pending, first.pending!.id);
+    const first = await beginStory(store, 'manual:adopt');
+    assert.equal((await beginStory(store, 'manual:adopt')).pending!.id, first.pending!.id);
+    assert.equal(dueStory(await store.peek(), now).pending, first.pending!.id);
     await planStory(store, first.pending!.id, initialPlan);
     const file = path.join(root, 'egg.png');
     await image(file);
@@ -219,18 +218,18 @@ test('daily retry retains pending operation and coalesces missed local slots aft
       requestId: artRequest(await store.peek())!.id,
       file,
       kind: 'avatar',
-      provenance: 'Synthetic daily fixture',
+      provenance: 'Synthetic periodic fixture',
     });
     await hostDone(store, first.pending!.id);
     await finishStory(store, first.pending!.id);
-    assert.equal(dueStory(await store.peek(), now, 'Asia/Shanghai').due, false);
-    now = Date.parse('2026-10-03T13:05:00Z');
-    const next = dueStory(await store.peek(), now, 'Asia/Shanghai');
-    assert.equal(next.triggerId, 'daily:2026-10-03:21:00:Asia.Shanghai');
+    assert.equal(dueStory(await store.peek(), now).due, false); // the initialization period
+    now += 5 * HOUR;
+    assert.equal(dueStory(await store.peek(), now).triggerId, 'period:1');
+    now += 13 * HOUR + 5 * 60000; // missed checks coalesce into the current period
+    const next = dueStory(await store.peek(), now);
+    assert.equal(next.triggerId, 'period:3');
     assert.equal(next.due, true);
     assert.equal((await store.peek()).stories.length, 1);
-    now = Date.parse('2026-10-03T16:00:00Z');
-    assert.equal(dueStory(await store.peek(), now, 'Asia/Shanghai').triggerId, null);
   } finally {
     t.mock.restoreAll();
     await rm(root, { recursive: true, force: true });
