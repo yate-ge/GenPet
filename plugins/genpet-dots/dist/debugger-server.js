@@ -2336,6 +2336,9 @@ function validateHostResult(state, operationId, input) {
   if (binding.avatarId !== avatarId) throw new Error("Host updated a different Avatar from the persisted target");
   if (typeof input.updated !== "boolean" || ![true, false, null].includes(input.active) || typeof input.refreshRequested !== "boolean" || !["confirmed", "unconfirmed"].includes(input.displayStatus))
     throw new Error("Invalid host result");
+  if (input.refreshUnavailable !== void 0 && typeof input.refreshUnavailable !== "boolean")
+    throw new Error("Invalid host result");
+  if (input.refreshUnavailable && !input.notice?.trim()) throw new Error("refreshUnavailable requires a notice");
   if (input.displayStatus === "confirmed" && !input.evidence?.trim())
     throw new Error("Confirmed display requires evidence");
   return {
@@ -2347,6 +2350,7 @@ function validateHostResult(state, operationId, input) {
     active: input.active,
     refreshRequested: input.refreshRequested,
     displayStatus: input.displayStatus,
+    ...input.refreshUnavailable ? { refreshUnavailable: true, notice: text(input.notice, "notice") } : {},
     ...input.evidence ? { evidence: text(input.evidence, "evidence") } : {},
     ...input.error ? { error: text(input.error, "error") } : {}
   };
@@ -2797,7 +2801,12 @@ async function installNative(store, options = {}) {
       active,
       refreshRequested: refresh.refreshRequested,
       displayStatus: refresh.displayStatus,
-      ...mustRefresh && !refresh.automaticRefresh ? { error: "Active Avatar refresh did not complete" } : {}
+      // No delivery channel (app closed, or a Codex version whose channel is missing or changed) must not leave the
+      // story unfinished forever: the files are committed and appear when Codex next loads Pets.
+      ...mustRefresh && !refresh.automaticRefresh ? {
+        refreshUnavailable: true,
+        notice: `Files committed; the desktop refresh was not delivered (${refresh.errors?.join("; ") || "no live app channel"}). The new look appears when Codex next loads Pets.`
+      } : {}
     });
     state.pending.hostResult = hostResult;
     return { ...result, ...hostResult, refresh };

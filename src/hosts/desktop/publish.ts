@@ -99,7 +99,14 @@ export async function installNative(
       active,
       refreshRequested: refresh.refreshRequested,
       displayStatus: refresh.displayStatus,
-      ...(mustRefresh && !refresh.automaticRefresh ? { error: 'Active Avatar refresh did not complete' } : {}),
+      // No delivery channel (app closed, or a Codex version whose channel is missing or changed) must not leave the
+      // story unfinished forever: the files are committed and appear when Codex next loads Pets.
+      ...(mustRefresh && !refresh.automaticRefresh
+        ? {
+            refreshUnavailable: true,
+            notice: `Files committed; the desktop refresh was not delivered (${refresh.errors?.join('; ') || 'no live app channel'}). The new look appears when Codex next loads Pets.`,
+          }
+        : {}),
     });
     state.pending.hostResult = hostResult;
     return { ...result, ...hostResult, refresh };
