@@ -179,6 +179,7 @@ test('a stopped check is remembered, no longer due, and resumes with the gap kno
   try {
     const first = await beginStory(store, 'manual:adopt');
     assert.equal(first.status === 'pending' && first.time!.hoursSinceLastStory < 1, true);
+    assert.equal(first.status === 'pending' && first.time!.pendingHours! < 1, true); // an unfinished story's age is visible
     await setSchedule(store, 'Asia/Shanghai', 'automation:pet');
     const adopted = (await store.peek()).pet!.adoptedAt;
     const stopped = await stopSchedule(store);
