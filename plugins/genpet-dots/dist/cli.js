@@ -3177,6 +3177,7 @@ function desktopDestination(state) {
     throw new Error("Avatar binding does not match its destination");
   return destination;
 }
+var desktopLabel = (petId) => petId.slice(0, "genpet-".length + 8);
 async function exportNative(state, destination) {
   if (!state.pet || state.host !== "desktop") throw new Error("Native export requires a desktop pet");
   const art = desiredAppearance(state);
@@ -3202,7 +3203,7 @@ async function exportNative(state, destination) {
   const manifest = {
     id: path7.basename(destination),
     genpetId: state.pet.id,
-    displayName: state.pet.name,
+    displayName: desktopLabel(state.pet.id),
     description: "GenPet \xB7 a companion with its own stories",
     spriteVersionNumber: 2,
     spritesheetPath
