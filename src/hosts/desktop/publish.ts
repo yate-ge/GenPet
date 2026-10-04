@@ -24,6 +24,12 @@ export function desktopDestination(state: State) {
   return destination;
 }
 
+/**
+ * What the Codex Pet list shows: the pet's unique ID in short form (genpet-xxxxxxxx), never the user's name.
+ * The name is for talking with the user; this stays stable, so naming needs no republish.
+ */
+export const desktopLabel = (petId: string) => petId.slice(0, 'genpet-'.length + 8);
+
 /** Replace the entry's sprite and manifest; refuses an entry that belongs to another pet. */
 export async function exportNative(state: State, destination: string) {
   if (!state.pet || state.host !== 'desktop') throw new Error('Native export requires a desktop pet');
@@ -52,7 +58,7 @@ export async function exportNative(state: State, destination: string) {
   const manifest = {
     id: path.basename(destination),
     genpetId: state.pet.id,
-    displayName: state.pet.name,
+    displayName: desktopLabel(state.pet.id),
     description: 'GenPet · a companion with its own stories',
     spriteVersionNumber: 2,
     spritesheetPath,
