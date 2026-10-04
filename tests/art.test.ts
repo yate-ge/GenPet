@@ -54,13 +54,13 @@ test('request freshness and durable media prevent stale or temporary-file instal
     assert.equal(await readFile(path.join(destination, 'previous-pet.json'), 'utf8'), first);
     // The host label is the short unique ID, not the user's name, so a rename never changes the entry.
     const petId = (await store.peek()).pet!.id;
-    assert.equal(JSON.parse(first).displayName, petId.slice(0, 15));
-    assert.match(JSON.parse(first).displayName, /^genpet-[0-9a-f]{8}$/);
+    assert.equal(JSON.parse(first).displayName, petId.slice(0, 13));
+    assert.match(JSON.parse(first).displayName, /^genpet-[0-9a-f]{6}$/);
     await store.transaction(state => void (state.pet!.name = 'Mochi')); // as if the user named it
     await exportNative(await store.peek(), destination);
     assert.equal(
       JSON.parse(await readFile(path.join(destination, 'pet.json'), 'utf8')).displayName,
-      petId.slice(0, 15),
+      petId.slice(0, 13),
     );
     const foreign = path.join(root, 'foreign');
     await mkdir(foreign);

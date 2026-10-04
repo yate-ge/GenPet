@@ -3177,7 +3177,7 @@ function desktopDestination(state) {
     throw new Error("Avatar binding does not match its destination");
   return destination;
 }
-var desktopLabel = (petId) => petId.slice(0, "genpet-".length + 8);
+var desktopLabel = (petId) => petId.slice(0, "genpet-".length + 6);
 async function exportNative(state, destination) {
   if (!state.pet || state.host !== "desktop") throw new Error("Native export requires a desktop pet");
   const art = desiredAppearance(state);
