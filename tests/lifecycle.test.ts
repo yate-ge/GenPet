@@ -11,6 +11,7 @@ import { recordHostResult } from '../src/hosts/result.js';
 import { dueStory } from '../src/schedule.js';
 import { artRequest, acceptArt } from '../src/art.js';
 import { bindAvatar } from '../src/hosts/dots.js';
+import { createPet } from '../src/model.js';
 import { initialPlan, initialization, image, hostDone } from './fixtures.js';
 test('identity is persisted once, reads do not age it, and competing triggers cannot create another pet', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-story-'));
@@ -137,11 +138,23 @@ test('host failure leaves current stage intact and active refresh is required be
     await rm(root, { recursive: true, force: true });
   }
 });
-test('daily slots use user timezone, coalesce missed checks and deduplicate completion', () => {
-  const s = { version: 2 as const, host: 'dots' as const, pet: null, stories: [], art: [], pending: null };
-  assert.equal(dueStory(s, Date.parse('2026-10-02T22:00:00Z'), 'Asia/Taipei').due, false);
-  const due = dueStory(s, Date.parse('2026-10-02T08:01:00Z'), 'Asia/Taipei');
-  assert.equal(due.triggerId, 'daily:2026-10-02:16:00:Asia.Taipei');
+test('story checks run every five hours from adoption, coalesce missed checks and deduplicate completion', () => {
+  const adopted = Date.parse('2026-10-02T00:00:00Z'),
+    HOUR = 3600000;
+  const s = {
+    version: 2 as const,
+    host: 'dots' as const,
+    pet: createPet('Test', adopted),
+    stories: [],
+    art: [],
+    pending: null,
+  };
+  assert.equal(dueStory(s, adopted + 5 * HOUR - 1).due, false); // still the initialization period
+  const due = dueStory(s, adopted + 5 * HOUR, 'Asia/Taipei');
+  assert.equal(due.triggerId, 'period:1');
+  assert.equal(due.timezone, 'Asia/Taipei');
+  assert.equal(dueStory(s, adopted + 24 * HOUR).triggerId, 'period:4'); // missed periods coalesce
+  assert.equal(dueStory({ ...s, pet: null }, adopted + 24 * HOUR).due, false);
   const done = {
     ...s,
     stories: [
@@ -158,7 +171,7 @@ test('daily slots use user timezone, coalesce missed checks and deduplicate comp
       },
     ],
   };
-  assert.equal(dueStory(done, Date.parse('2026-10-02T08:02:00Z'), 'Asia/Taipei').due, false);
+  assert.equal(dueStory(done, adopted + 5 * HOUR + 60000).due, false);
 });
 test('replacement artwork invalidates an earlier host confirmation for the same story', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-stale-display-')),
