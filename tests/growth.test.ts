@@ -99,3 +99,20 @@ test('daily slots use local dates across midnight and timezone/DST transitions',
   );
   assert.throws(() => dueStory(state, START, 'Invalid/Timezone'), RangeError);
 });
+test('a ceiling that expires between daily slots is carried by the first slot at or after it', () => {
+  const state = fixture('adult');
+  const zone = 'Asia/Shanghai';
+  // The previous special form ended at 13:00 Shanghai, so the one-week ceiling expires at 13:00 a week later.
+  const ended = Date.parse('2026-10-01T05:00:00Z');
+  state.pet!.special = { description: 'Lantern glow', since: ended - 86400000, storyId: 'form', endedAt: ended };
+  const deadline = ended + SPECIAL_INTERVAL;
+  const noon = Date.parse('2026-10-08T04:00:00Z'); // 12:00 slot: one hour before the ceiling
+  assert.equal(dueStory(state, noon, zone).triggerId, 'daily:2026-10-08:12:00:Asia.Shanghai');
+  assert.equal(growth(state, noon)!.required, null);
+  assert.equal(growth(state, deadline - 1)!.required, null);
+  assert.equal(growth(state, deadline)!.required, 'enter-special');
+  const afternoon = Date.parse('2026-10-08T08:00:00Z'); // 16:00 slot: first story after the ceiling
+  assert.equal(dueStory(state, afternoon, zone).triggerId, 'daily:2026-10-08:16:00:Asia.Shanghai');
+  assert.equal(dueStory(state, afternoon, zone).due, true);
+  assert.equal(growth(state, afternoon)!.required, 'enter-special');
+});
