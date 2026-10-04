@@ -11,8 +11,7 @@
 | [0.6.0 命名、用户联系与性格](COMPANION_0_6.zh-CN.md) | 提示词主导的实现、必要代码与验证边界 |
 | [工程设计与待决问题](ENGINEERING.zh-CN.md) | 待决问题状态表、宿主接入、持久记录与宠物编号 |
 | [新版验证说明](NEW_VERSION_VALIDATION.zh-CN.md) | 用户验证入口、本轮工程检查与当前证据（安装脚本引用此路径） |
-| [生成证据摘要](evidence/README.md) | 各轮生成单元测试的结论与状态、分享报告及证据归档 |
-| [本轮完整故事与效果](evidence/2026-10-03-run1/README.zh-CN.md) | 89 页图文故事册、82 篇故事全文、350 个单元的结果与缺项 |
+| [生成证据摘要](evidence/README.md) | 各轮生成单元测试的结论与状态（原始数据、图片与完整报告只保存在本地，不入库） |
 | [Agent 安装](AGENT_INSTALL.md) | 从已发布的 marketplace 安装或更新 |
 | [原生 Pet 兼容合同](NATIVE-CONTRACT.md) | 桌面原生 Pet 的 V2 图集格式与核对方式 |
 | [桌面端自动刷新模块](DESKTOP-REFRESH.zh-CN.md) | 刷新通道、结果字段、降级策略与待测清单（待在真实 Codex 上测试） |
