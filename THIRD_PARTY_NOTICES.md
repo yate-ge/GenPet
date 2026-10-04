@@ -5,7 +5,7 @@
   - `zod`: MIT license.
   - `pngjs`: MIT license. Reads PNG artwork for validation.
   - `@jsquash/webp`: Apache-2.0. `dist/webp_dec.wasm` is its WebAssembly build of Google's libwebp decoder (BSD-3-Clause).
-- The repository includes `assets/` examples and test fixtures generated specifically for GenPet with Codex imagegen. The installable plugin (`plugins/genpet/`) contains no sample character art or pre-made user Pet. Built-in images used only as local style references and rejected image iterations are excluded from the repository.
+- The repository includes one test fixture, `tests/fixtures/mystery-egg.webp`, generated specifically for GenPet with Codex imagegen. The installable plugin (`plugins/genpet/`) contains no sample character art or pre-made user Pet. Built-in images used only as local style references and rejected image iterations are excluded from the repository.
 
 Open-source alternatives reviewed: [OpenPets](https://github.com/alterhq/openpets) is MIT-licensed but provides its own companion runtime. GenPet uses the native Codex custom-Pet contract instead, so it does not include OpenPets code.
 

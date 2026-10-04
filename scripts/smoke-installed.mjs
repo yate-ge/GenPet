@@ -50,7 +50,7 @@ try {
   };
   call('plan-story', op.pending.id, await file('plan.json', plan));
   const request = call('art-request'),
-    fixture = path.join(source, 'assets/pets/mystery-egg/spritesheet.webp');
+    fixture = path.join(source, 'tests/fixtures/mystery-egg.webp');
   call('accept-art', request.id, fixture, 'portrait', 'Isolated existing fixture; not generated visual evidence');
   const art = call(
     'accept-art',
