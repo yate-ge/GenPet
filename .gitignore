@@ -10,3 +10,7 @@ output/
 __pycache__/
 *.pyc
 .playwright-mcp/
+
+# Test evidence stays local; only the summary index is tracked
+/docs/evidence/*
+!/docs/evidence/README.md
