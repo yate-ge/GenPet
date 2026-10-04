@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { growth, STAGE_CEILING, SPECIAL_INTERVAL, SPECIAL_DURATION } from '../src/growth.js';
 import { createPet, fresh, type Stage, type State } from '../src/model.js';
-import { dueStory } from '../src/schedule.js';
+import { CHECK_INTERVAL, dueStory } from '../src/schedule.js';
 
 const START = Date.parse('2026-10-01T00:00:00Z');
 function fixture(stage: Stage): State {
@@ -81,38 +81,22 @@ test('egg hatches by adoption plus five hours even when initialization completes
   // Product meta.md: egg must hatch within five hours of adoption, not completed artwork.
   assert.equal(growth(state, START + 5 * 3600000)!.required, 'advance');
 });
-test('daily slots use local dates across midnight and timezone/DST transitions', () => {
-  const state = fresh('dots');
-  assert.equal(dueStory(state, Date.parse('2026-10-02T22:59:59Z'), 'Asia/Shanghai').triggerId, null);
-  assert.equal(
-    dueStory(state, Date.parse('2026-10-02T23:00:00Z'), 'Asia/Shanghai').triggerId,
-    'daily:2026-10-03:07:00:Asia.Shanghai',
-  );
-  assert.equal(
-    dueStory(state, Date.parse('2026-10-02T23:00:00Z'), 'America/New_York').triggerId,
-    'daily:2026-10-02:16:00:America.New_York',
-  );
-  assert.equal(dueStory(state, Date.parse('2026-11-01T11:59:59Z'), 'America/New_York').triggerId, null);
-  assert.equal(
-    dueStory(state, Date.parse('2026-11-01T12:00:00Z'), 'America/New_York').triggerId,
-    'daily:2026-11-01:07:00:America.New_York',
-  );
-  assert.throws(() => dueStory(state, START, 'Invalid/Timezone'), RangeError);
-});
-test('a ceiling that expires between daily slots is carried by the first slot at or after it', () => {
-  const state = fixture('adult');
-  const zone = 'Asia/Shanghai';
-  // The previous special form ended at 13:00 Shanghai, so the one-week ceiling expires at 13:00 a week later.
-  const ended = Date.parse('2026-10-01T05:00:00Z');
-  state.pet!.special = { description: 'Lantern glow', since: ended - 86400000, storyId: 'form', endedAt: ended };
-  const deadline = ended + SPECIAL_INTERVAL;
-  const noon = Date.parse('2026-10-08T04:00:00Z'); // 12:00 slot: one hour before the ceiling
-  assert.equal(dueStory(state, noon, zone).triggerId, 'daily:2026-10-08:12:00:Asia.Shanghai');
-  assert.equal(growth(state, noon)!.required, null);
-  assert.equal(growth(state, deadline - 1)!.required, null);
-  assert.equal(growth(state, deadline)!.required, 'enter-special');
-  const afternoon = Date.parse('2026-10-08T08:00:00Z'); // 16:00 slot: first story after the ceiling
-  assert.equal(dueStory(state, afternoon, zone).triggerId, 'daily:2026-10-08:16:00:Asia.Shanghai');
-  assert.equal(dueStory(state, afternoon, zone).due, true);
-  assert.equal(growth(state, afternoon)!.required, 'enter-special');
+test('story checks are five-hourly from adoption, so a growth ceiling is met at most one interval late', () => {
+  const state = fixture('hatchling');
+  const check = (hours: number) => dueStory(state, START + hours * 3600000);
+  assert.equal(check(4.99).triggerId, null);
+  assert.equal(check(5).triggerId, 'period:1');
+  assert.equal(check(9.99).triggerId, 'period:1');
+  assert.equal(check(10).triggerId, 'period:2');
+  // The egg's own ceiling coincides with the first check, so a hatch is due then.
+  const egg = fixture('egg');
+  assert.equal(growth(egg, START + CHECK_INTERVAL)!.required, 'advance');
+  assert.equal(dueStory(egg, START + CHECK_INTERVAL).due, true);
+  // The one-week ceiling (168h) falls inside period 33 (165-170h): the check at 170h carries it, 2h late at most.
+  const deadline = START + STAGE_CEILING.hatchling!;
+  assert.equal(growth(state, START + 165 * 3600000)!.required, null);
+  assert.equal(dueStory(state, deadline - 1).triggerId, 'period:33');
+  assert.equal(growth(state, START + 170 * 3600000)!.required, 'advance');
+  assert.equal(dueStory(state, START + 170 * 3600000).triggerId, 'period:34');
+  assert.ok(START + 170 * 3600000 - deadline <= CHECK_INTERVAL);
 });
