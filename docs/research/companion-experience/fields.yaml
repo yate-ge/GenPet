@@ -1,0 +1,27 @@
+fields:
+  - name: 实际机制
+    description: 一手资料可以核验的行为与条件
+    detail_level: detailed
+  - name: 用户关联
+    description: 用户和宠物如何相互影响，用户是否看得出来
+    detail_level: detailed
+  - name: 变化结构
+    description: 线索、过程、揭晓、持续性、身份稳定与长期变化
+    detail_level: detailed
+  - name: 长期关系
+    description: 熟悉、共同记忆、自主性、重访、离开和归来
+    detail_level: detailed
+  - name: 分享
+    description: 分享对象、来历和旁观者的理解成本
+    detail_level: moderate
+  - name: 迁移边界
+    description: 依赖直接互动、实体接触或重内容运营的部分
+    detail_level: detailed
+  - name: 证据
+    description: 来源URL、文献元数据、方法、样本、时长和局限
+    detail_level: detailed
+uncertain:
+  - 无直接互动条件下长期关系的因果机制
+  - 适合GenPet的变化节奏
+  - 个人关联、可读性、自主性三者的合适平衡
+  - 最小内容规模和长期生成成本
