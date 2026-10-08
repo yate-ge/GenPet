@@ -1,0 +1,21 @@
+topic: GenPet 的动态变化、关系形成、期待、长期陪伴与分享
+research_date: 2026-09-28
+purpose: 机制与体验设计讨论
+time_range: 不限时间，覆盖经典与截至调研日可核验材料
+constraints:
+  - Codex Pet 载体
+  - 不以点击、喂养、聊天等直接互动为玩法中心
+  - 现有原型只是技术验证，时间表和现有映射不是设计前提
+items:
+  - 异步宠物与等待结果
+  - 自主个体与成长可塑性
+  - 非语言陪伴机器人
+  - 桌宠与开源陪伴智能体
+  - 长期人机关系和新奇感衰减
+  - 慢技术、好奇心与解释空间
+  - 共同记忆、身份连续性与分享
+execution:
+  batch_size: 3
+  items_per_agent: 按产品、开源项目、学术证据分组
+  output_dir: docs/research/companion-experience
+deliverable: REPORT.zh-CN.md
