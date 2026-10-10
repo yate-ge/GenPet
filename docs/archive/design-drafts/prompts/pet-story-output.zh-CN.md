@@ -2,7 +2,7 @@
 
 # 宠物故事输出提示词草案
 
-本文保留故事输出的设计依据；0.5.0 实际运行文件为 [output.md](../../../../framework/prompts/output.md)。适用于 Codex Dots 与普通 Pet，落实 [对话框输出要求](../../../PRODUCT_DESIGN.zh-CN.md)。
+本文保留故事输出的设计依据；0.5.0 实际运行文件为 [output.md](../../../../framework/prompts/output.md)。适用于 Codex Dots 与普通 Pet，落实 [对话框输出要求](../../v0.5/PRODUCT_DESIGN.zh-CN.md)。
 
 ## 输入与职责
 
