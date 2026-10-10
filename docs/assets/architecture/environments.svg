@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 624" role="img" aria-labelledby="t d">
+  <title id="t">GenPet architecture: two environments</title>
+  <desc id="d">Codex desktop and Dots each have the same host, skills and runtime. Codex desktop is the main environment by default: its Agent runs GenPet and puts each new appearance on the cloud Pet. Codex syncs the cloud Pet, so the desktop Pet and the Dots look are the same Pet under one cloud ID. A pet brief goes from the main environment to the Dots Agent, which keeps its own functions and replies in the pet's speaking style. The main environment can be switched to Dots: the record moves, and Dots then sets the appearance.</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; fill: #1F2A1C; }
+    .layer { font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; }
+    .where { font-size: 12px; fill: #5B6657; }
+    .name { font-size: 13.5px; font-weight: 600; }
+    .sub { font-size: 11.5px; fill: #5B6657; }
+    .switch { font-size: 12px; font-weight: 600; }
+    .rel { font-size: 11px; fill: #3F4A3B; }
+    .tag { font-size: 10px; font-weight: 700; letter-spacing: 0.4px; }
+    .pill { font-size: 10px; font-weight: 600; fill: #8A5A00; }
+    .num { font-size: 12px; font-weight: 700; fill: #FFFFFF; }
+    .flow { stroke: #4A5646; stroke-width: 1.5; fill: none; }
+    .port { stroke: #6E8A3C; stroke-width: 2; fill: none; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10z" fill="#4A5646"/>
+    </marker>
+    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10z" fill="#6E8A3C"/>
+    </marker>
+  </defs>
+
+  <rect width="1000" height="624" rx="14" fill="#FFFFFF"/>
+  <rect x="0.5" y="0.5" width="999" height="623" rx="14" fill="none" stroke="#E2E6DA"/>
+
+  <!-- legend -->
+  <rect x="24" y="18" width="55" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="pill" x="51.5" y="30.5" text-anchor="middle">planned</text>
+  <text class="sub" x="87" y="31">not built yet</text>
+  <rect x="184.76" y="18" width="68" height="18" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="218.76" y="30.5" text-anchor="middle" fill="#8A5A00">TO TEST</text>
+  <text class="sub" x="260.76" y="31">how it is done is decided by tests on the host</text>
+  <path class="port" d="M542.98 27H576.98" stroke-dasharray="5 4"/>
+  <text class="sub" x="584.98" y="31">after switching to Dots</text>
+
+  <!-- the two environments -->
+  <rect x="20" y="50" width="340" height="376" rx="10" fill="#EEF4E4" stroke="#6E8A3C" stroke-width="1.6"/>
+  <text class="layer" x="36" y="74">CODEX DESKTOP</text>
+  <text class="where" x="344" y="74" text-anchor="end">main environment by default</text>
+  <rect x="640" y="50" width="340" height="376" rx="10" fill="#EEF4E4" stroke="#9DB57A"/>
+  <text class="layer" x="656" y="74">DOTS</text>
+  <text class="where" x="964" y="74" text-anchor="end">can become the main environment</text>
+  <rect x="36" y="88" width="308" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="52" y="113">Pet on the desktop</text>
+  <text class="sub" x="52" y="132">shows the cloud Pet's image</text>
+  <rect x="36" y="180" width="308" height="150" rx="8" fill="#FFFFFF" stroke="#6E8A3C" stroke-width="1.6"/>
+  <text class="name" x="52" y="205">Agent runs GenPet</text>
+  <text class="sub" x="52" y="224">skills and runtime, see the layers diagram</text>
+  <text class="sub" x="52" y="240">every 5 hours while the computer is on:</text>
+  <text class="sub" x="52" y="256">writes the story, draws, sets the appearance</text>
+  <rect x="36" y="350" width="308" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="52" y="375">Record</text>
+  <text class="sub" x="52" y="394">per pet: soul, memory, state, history</text>
+  <rect x="656" y="88" width="308" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="672" y="113">Dots' look</text>
+  <text class="sub" x="672" y="132">select the Pet with the same cloud ID</text>
+  <rect x="656" y="180" width="308" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A" stroke-dasharray="5 4"/>
+  <text class="name" x="672" y="205">GenPet's skills and runtime</text>
+  <text class="sub" x="672" y="224">the same set; runs once Dots is main</text>
+  <rect x="899" y="171" width="55" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="pill" x="926.5" y="183.5" text-anchor="middle">planned</text>
+  <rect x="656" y="258" width="308" height="72" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="672" y="283">Dots' Agent</text>
+  <text class="sub" x="672" y="302">keeps its own functions;</text>
+  <text class="sub" x="672" y="318">replies in this pet's speaking style</text>
+  <rect x="899" y="249" width="55" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="pill" x="926.5" y="261.5" text-anchor="middle">planned</text>
+  <rect x="656" y="350" width="308" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A" stroke-dasharray="5 4"/>
+  <text class="name" x="672" y="375">Record</text>
+  <text class="sub" x="672" y="394">continues the same record after a switch</text>
+
+  <!-- 1: the cloud Pet -->
+  <rect x="400" y="82" width="200" height="72" rx="8" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.6"/>
+  <text class="name" x="500" y="110" text-anchor="middle">Cloud Pet</text>
+  <text class="sub" x="500" y="128" text-anchor="middle">one cloud ID per pet</text>
+  <text class="sub" x="500" y="144" text-anchor="middle">synced by Codex</text>
+  <circle cx="500" cy="82" r="10" fill="#4E6B22"/><text class="num" x="500" y="86.2" text-anchor="middle">1</text>
+  <path class="port" d="M400 118H347" marker-end="url(#p)"/>
+  <path class="port" d="M600 118H653" marker-end="url(#p)"/>
+  <text class="rel" x="373" y="107" text-anchor="middle" fill="#4E6B22">sync</text>
+  <text class="rel" x="627" y="107" text-anchor="middle" fill="#4E6B22">sync</text>
+  <path class="port" d="M344 200H430V157" marker-end="url(#p)"/>
+  <text class="rel" x="438" y="178" fill="#4E6B22">new appearance</text>
+  <path class="port" d="M656 210H570V157" stroke-dasharray="5 4" marker-end="url(#p)"/>
+  <text class="rel" x="562" y="196" text-anchor="end" fill="#4E6B22">after switching</text>
+  <rect x="494" y="203" width="68" height="18" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="528" y="215.5" text-anchor="middle" fill="#8A5A00">TO TEST</text>
+
+  <!-- 2: the pet brief -->
+  <rect x="440" y="274" width="120" height="40" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="500" y="299" text-anchor="middle">Pet brief</text>
+  <circle cx="500" cy="274" r="10" fill="#4E6B22"/><text class="num" x="500" y="278.2" text-anchor="middle">2</text>
+  <path class="flow" d="M344 294H438" marker-end="url(#a)"/>
+  <path class="flow" d="M560 294H654" marker-end="url(#a)"/>
+  <rect x="360.92" y="320" width="68" height="18" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="394.92" y="332.5" text-anchor="middle" fill="#8A5A00">TO TEST</text>
+  <text class="rel" x="434.92" y="333">from the record; how it reaches Dots</text>
+  <text class="rel" x="500" y="351" text-anchor="middle">first try: the Pet entry's description</text>
+
+  <!-- 3: switching the main environment -->
+  <path class="flow" d="M347 380H653" marker-start="url(#a)" marker-end="url(#a)"/>
+  <rect x="403.5" y="368" width="193" height="24" rx="12" fill="#FFFFFF" stroke="#4A5646"/>
+  <circle cx="417.5" cy="380" r="10" fill="#4E6B22"/><text class="num" x="417.5" y="384.2" text-anchor="middle">3</text>
+  <text class="switch" x="510" y="384.2" text-anchor="middle">Switch main environment</text>
+  <text class="rel" x="500" y="410" text-anchor="middle">the record moves; one side writes stories at a time</text>
+
+  <!-- the three links -->
+  <text class="layer" x="24" y="460">THREE LINKS</text>
+  <text class="where" x="130.62" y="460">between the two environments</text>
+  <rect x="24" y="476" width="308" height="124" rx="8" fill="#F3F8EA" stroke="#9DB57A"/>
+  <circle cx="48" cy="502" r="10" fill="#4E6B22"/><text class="num" x="48" y="506.2" text-anchor="middle">1</text>
+  <text class="name" x="68" y="507">One pet through its cloud ID</text>
+  <text class="sub" x="40" y="534">The main environment sets the cloud</text>
+  <text class="sub" x="40" y="550">Pet's image; Codex syncs it to both sides.</text>
+  <text class="sub" x="40" y="584" fill="#8A5A00">Sync is tested. Cloud image: planned.</text>
+  <rect x="346" y="476" width="308" height="124" rx="8" fill="#F3F8EA" stroke="#9DB57A"/>
+  <circle cx="370" cy="502" r="10" fill="#4E6B22"/><text class="num" x="370" y="506.2" text-anchor="middle">2</text>
+  <text class="name" x="390" y="507">Dots becomes this pet</text>
+  <text class="sub" x="362" y="534">Dots takes the pet's look and speaking</text>
+  <text class="sub" x="362" y="550">style; its own functions stay as they are.</text>
+  <text class="sub" x="362" y="584" fill="#8A5A00">Planned. Brief reaching Dots: to test.</text>
+  <rect x="668" y="476" width="308" height="124" rx="8" fill="#F3F8EA" stroke="#9DB57A"/>
+  <circle cx="692" cy="502" r="10" fill="#4E6B22"/><text class="num" x="692" y="506.2" text-anchor="middle">3</text>
+  <text class="name" x="712" y="507">Switch the main environment</text>
+  <text class="sub" x="684" y="534">Codex desktop by default. On a switch the</text>
+  <text class="sub" x="684" y="550">old side stops and the record moves.</text>
+  <text class="sub" x="684" y="584" fill="#8A5A00">Planned. Image set from Dots: to test.</text>
+</svg>

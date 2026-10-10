@@ -1,154 +1,155 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 690" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 906" role="img" aria-labelledby="t d">
   <title id="t">GenPet architecture: the host interface</title>
-  <desc id="d">The shared story code calls one host interface with four functions. The desktop and Dots adapters implement it; each step is done by the runtime or by the Agent. Below, the four appearance checks; finish-story requires the second.</desc>
+  <desc id="d">In the runtime, the story flow calls the host adapters, which implement the four functions of the host interface. The desktop adapter lists its steps, each done by the runtime or left to the Agent; the Dots adapter, used when Dots is the main environment, targets the same cloud Pet and its steps are still to test. Runtime steps reach the Pet Avatar in the host through files, IPC and app-tools; the Agent does the other steps with the host's own tools and reports with host-result. Below, the four appearance checks; finish-story requires the second.</desc>
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; fill: #1F2A1C; }
     .layer { font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; }
     .where { font-size: 12px; fill: #5B6657; }
     .name { font-size: 13.5px; font-weight: 600; }
     .cmd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; font-weight: 600; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
     .sub { font-size: 11.5px; fill: #5B6657; }
+    .rel { font-size: 11px; fill: #3F4A3B; }
     .step { font-size: 12px; }
     .tag { font-size: 10px; font-weight: 700; letter-spacing: 0.4px; }
+    .pill { font-size: 10px; font-weight: 600; fill: #8A5A00; }
     .num { font-size: 12px; font-weight: 700; fill: #FFFFFF; }
     .flow { stroke: #4A5646; stroke-width: 1.5; fill: none; }
+    .port { stroke: #6E8A3C; stroke-width: 2; fill: none; }
   </style>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0 0 10 5 0 10z" fill="#4A5646"/>
     </marker>
+    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10z" fill="#6E8A3C"/>
+    </marker>
   </defs>
 
-  <rect width="1000" height="690" rx="14" fill="#FFFFFF"/>
-  <rect x="0.5" y="0.5" width="999" height="689" rx="14" fill="none" stroke="#E2E6DA"/>
+  <rect width="1000" height="906" rx="14" fill="#FFFFFF"/>
+  <rect x="0.5" y="0.5" width="999" height="905" rx="14" fill="none" stroke="#E2E6DA"/>
 
   <!-- legend -->
-  <text class="sub" x="40" y="31">Who does each step:</text>
-  <rect x="170" y="18" width="62" height="18" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
-  <text class="tag" x="201" y="30.5" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
-  <rect x="244" y="18" width="52" height="18" rx="4" fill="#EAF0FA" stroke="#9CB3DC"/>
-  <text class="tag" x="270" y="30.5" text-anchor="middle" fill="#2F4F8A">AGENT</text>
-  <rect x="308" y="18" width="62" height="18" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="339" y="30.5" text-anchor="middle" fill="#8A5A00">TO TEST</text>
-  <text class="sub" x="380" y="31">runtime if the host lets it, otherwise the Agent; decided by host tests</text>
+  <text class="sub" x="24" y="31">Who does each step:</text>
+  <rect x="148.24" y="18" width="62" height="18" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="179.24" y="31" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
+  <rect x="218.24" y="18" width="62" height="18" rx="4" fill="#EEF4E4" stroke="#6E8A3C"/>
+  <text class="tag" x="249.24" y="31" text-anchor="middle" fill="#3F5A1C">AGENT</text>
+  <rect x="288.24" y="18" width="62" height="18" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="319.24" y="31" text-anchor="middle" fill="#8A5A00">TO TEST</text>
+  <text class="sub" x="360.24" y="31">runtime if the host lets it, otherwise the Agent; decided by host tests</text>
 
-  <!-- shared story code and port -->
-  <rect x="40" y="58" width="250" height="78" rx="8" fill="#FBF3E4" stroke="#D8B978"/>
-  <text class="name" x="165" y="90" text-anchor="middle">Shared story code</text>
-  <text class="sub" x="165" y="110" text-anchor="middle">plan · artwork · finish</text>
-  <path class="flow" d="M290 97H338" marker-end="url(#a)"/>
+  <!-- RUNTIME -->
+  <rect x="20" y="48" width="960" height="514" rx="10" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="layer" x="36" y="72">RUNTIME</text>
+  <text class="where mono" x="111.13" y="72">src/</text>
+  <rect x="36" y="84" width="928" height="44" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
+  <text class="name" x="54" y="111">Story flow</text>
+  <text class="sub" x="948" y="111" text-anchor="end">shared by both environments; its appearance step calls the host interface</text>
+  <path class="flow" d="M500 128V152" marker-end="url(#a)"/>
+  <text class="rel" x="512" y="145">calls</text>
 
-  <rect x="340" y="58" width="620" height="78" rx="8" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.6"/>
-  <text class="layer" x="360" y="82" fill="#4E6B22">HOST INTERFACE</text>
-  <text class="where" x="486" y="82">one adapter per host</text>
-  <rect x="360" y="94" width="126" height="30" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
-  <text class="cmd" x="423" y="113.5" text-anchor="middle">validateArt</text>
-  <rect x="498" y="94" width="150" height="30" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
-  <text class="cmd" x="573" y="113.5" text-anchor="middle">findAvatar</text>
-  <rect x="660" y="94" width="126" height="30" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
-  <text class="cmd" x="723" y="113.5" text-anchor="middle">setAppearance</text>
-  <rect x="798" y="94" width="142" height="30" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
-  <text class="cmd" x="869" y="113.5" text-anchor="middle">diagnose</text>
+  <!-- host adapters: the host interface -->
+  <rect x="36" y="154" width="928" height="394" rx="8" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.6"/>
+  <text class="name" x="54" y="183">Host adapters</text>
+  <text class="sub" x="162.93" y="183">host interface: four functions per adapter</text>
+  <rect x="866" y="166" width="84" height="28" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="cmd" x="908" y="184.5" text-anchor="middle">diagnose</text>
+  <rect x="740" y="166" width="118" height="28" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="cmd" x="799" y="184.5" text-anchor="middle">setAppearance</text>
+  <rect x="634" y="166" width="98" height="28" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="cmd" x="683" y="184.5" text-anchor="middle">findAvatar</text>
+  <rect x="522" y="166" width="104" height="28" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="cmd" x="574" y="184.5" text-anchor="middle">validateArt</text>
+  <rect x="901" y="145" width="55" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="pill" x="928.5" y="157.5" text-anchor="middle">planned</text>
+  <rect x="50" y="208" width="456" height="326" rx="10" fill="#FAFBF8" stroke="#B7BFAE"/>
+  <text class="name" x="68" y="234">Desktop adapter</text>
+  <text class="sub" x="192.05" y="234">Codex desktop Pet</text>
+  <rect x="68" y="248" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="99" y="264" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
+  <text class="step" x="142" y="264.5"><tspan class="cmd">validateArt</tspan>  v2 atlas, 8 × 11 cells</text>
+  <rect x="68" y="288" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="99" y="304" text-anchor="middle" fill="#8A5A00">TO TEST</text>
+  <text class="step" x="142" y="304.5"><tspan class="cmd">findAvatar</tspan>  local custom: ID ↔ cloud pet_ ID</text>
+  <rect x="68" y="328" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="99" y="344" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
+  <text class="step" x="142" y="344.5"><tspan class="cmd">setAppearance</tspan>  write local atlas and manifest</text>
+  <rect x="68" y="368" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="99" y="384" text-anchor="middle" fill="#8A5A00">TO TEST</text>
+  <text class="step" x="142" y="384.5"><tspan class="cmd">setAppearance</tspan>  replace the cloud Pet's image</text>
+  <rect x="68" y="408" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="99" y="424" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
+  <text class="step" x="142" y="424.5"><tspan class="cmd">setAppearance</tspan>  IPC refresh for that Avatar</text>
+  <rect x="68" y="448" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="99" y="464" text-anchor="middle" fill="#8A5A00">TO TEST</text>
+  <text class="step" x="142" y="464.5"><tspan class="cmd">setAppearance</tspan>  read back the saved image</text>
+  <rect x="68" y="488" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="99" y="504" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
+  <text class="step" x="142" y="504.5"><tspan class="cmd">diagnose</tspan>  record, Pet list, mapping, selection, schedule</text>
+  <rect x="520" y="208" width="430" height="326" rx="10" fill="#FAFBF8" stroke="#B7BFAE"/>
+  <text class="name" x="538" y="234">Dots adapter</text>
+  <text class="sub" x="639.37" y="234">when Dots is the main environment</text>
+  <rect x="538" y="248" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="569" y="264" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
+  <text class="step" x="612" y="264.5"><tspan class="cmd">validateArt</tspan>  the same v2 atlas</text>
+  <rect x="538" y="288" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="569" y="304" text-anchor="middle" fill="#8A5A00">TO TEST</text>
+  <text class="step" x="612" y="304.5"><tspan class="cmd">findAvatar</tspan>  the same cloud pet_ ID</text>
+  <rect x="538" y="328" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="569" y="344" text-anchor="middle" fill="#8A5A00">TO TEST</text>
+  <text class="step" x="612" y="344.5"><tspan class="cmd">setAppearance</tspan>  replace the existing cloud Pet's image</text>
+  <rect x="538" y="368" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="569" y="384" text-anchor="middle" fill="#8A5A00">TO TEST</text>
+  <text class="step" x="612" y="384.5"><tspan class="cmd">setAppearance</tspan>  read back the saved image</text>
+  <rect x="538" y="408" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="569" y="424" text-anchor="middle" fill="#8A5A00">TO TEST</text>
+  <text class="step" x="612" y="424.5"><tspan class="cmd">diagnose</tspan>  record, cloud ID, selection</text>
+  <text class="sub" x="538" y="465">same cloud Pet as desktop; steps decided by tests on Dots</text>
 
-  <path class="flow" d="M500 136V160" marker-end="url(#a)"/>
-  <path class="flow" d="M800 136V160" marker-end="url(#a)"/>
+  <!-- HOST -->
+  <rect x="20" y="604" width="960" height="112" rx="10" fill="#EEF4E4" stroke="#9DB57A"/>
+  <text class="layer" x="36" y="628">HOST</text>
+  <text class="where" x="91.12" y="628">main environment: desktop or Dots</text>
 
-  <!-- desktop adapter -->
-  <rect x="40" y="162" width="470" height="330" rx="10" fill="#FAFBF8" stroke="#B7BFAE"/>
-  <text class="name" x="58" y="188">Desktop adapter</text>
-  <text class="sub" x="172" y="188">Codex desktop Pet</text>
-
-  <g>
-    <rect x="58" y="202" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
-    <text class="tag" x="89" y="218" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
-    <text class="step" x="132" y="218.5"><tspan class="cmd">validateArt</tspan>  v2 atlas, 8 × 11 cells</text>
-
-    <rect x="58" y="242" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-    <text class="tag" x="89" y="258" text-anchor="middle" fill="#8A5A00">TO TEST</text>
-    <text class="step" x="132" y="258.5"><tspan class="cmd">findAvatar</tspan>  local custom: ID ↔ cloud pet_ ID</text>
-
-    <rect x="58" y="282" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
-    <text class="tag" x="89" y="298" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
-    <text class="step" x="132" y="298.5"><tspan class="cmd">setAppearance</tspan>  write local atlas and manifest</text>
-
-    <rect x="58" y="322" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-    <text class="tag" x="89" y="338" text-anchor="middle" fill="#8A5A00">TO TEST</text>
-    <text class="step" x="132" y="338.5"><tspan class="cmd">setAppearance</tspan>  replace the cloud Pet's image</text>
-
-    <rect x="58" y="362" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
-    <text class="tag" x="89" y="378" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
-    <text class="step" x="132" y="378.5"><tspan class="cmd">setAppearance</tspan>  IPC refresh for that Avatar</text>
-
-    <rect x="58" y="402" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-    <text class="tag" x="89" y="418" text-anchor="middle" fill="#8A5A00">TO TEST</text>
-    <text class="step" x="132" y="418.5"><tspan class="cmd">setAppearance</tspan>  read back the saved image</text>
-
-    <rect x="58" y="442" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
-    <text class="tag" x="89" y="458" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
-    <text class="step" x="132" y="458.5"><tspan class="cmd">diagnose</tspan>  record, Avatar ID, list, mapping, selection</text>
-  </g>
-
-  <!-- dots adapter -->
-  <rect x="530" y="162" width="430" height="330" rx="10" fill="#FAFBF8" stroke="#B7BFAE"/>
-  <text class="name" x="548" y="188">Dots adapter</text>
-  <text class="sub" x="640" y="188">Dots Avatar</text>
-
-  <g>
-    <rect x="548" y="202" width="62" height="24" rx="4" fill="#EAF0FA" stroke="#9CB3DC"/>
-    <text class="tag" x="579" y="218" text-anchor="middle" fill="#2F4F8A">AGENT</text>
-    <text class="step" x="622" y="218.5"><tspan class="cmd">validateArt</tspan>  format defined by Dots tools</text>
-
-    <rect x="548" y="242" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
-    <text class="tag" x="579" y="258" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
-    <text class="step" x="622" y="258.5"><tspan class="cmd">findAvatar</tspan>  the saved Avatar ID</text>
-
-    <rect x="548" y="282" width="62" height="24" rx="4" fill="#EAF0FA" stroke="#9CB3DC"/>
-    <text class="tag" x="579" y="298" text-anchor="middle" fill="#2F4F8A">AGENT</text>
-    <text class="step" x="622" y="298.5"><tspan class="cmd">setAppearance</tspan>  set that Avatar's image</text>
-
-    <rect x="548" y="322" width="62" height="24" rx="4" fill="#EAF0FA" stroke="#9CB3DC"/>
-    <text class="tag" x="579" y="338" text-anchor="middle" fill="#2F4F8A">AGENT</text>
-    <text class="step" x="622" y="338.5"><tspan class="cmd">setAppearance</tspan>  refresh if active, keep selection</text>
-
-    <rect x="548" y="362" width="62" height="24" rx="4" fill="#EAF0FA" stroke="#9CB3DC"/>
-    <text class="tag" x="579" y="378" text-anchor="middle" fill="#2F4F8A">AGENT</text>
-    <text class="step" x="622" y="378.5"><tspan class="cmd">setAppearance</tspan>  read back the saved image</text>
-
-    <rect x="548" y="402" width="62" height="24" rx="4" fill="#EAF0FA" stroke="#9CB3DC"/>
-    <text class="tag" x="579" y="418" text-anchor="middle" fill="#2F4F8A">AGENT</text>
-    <text class="step" x="622" y="418.5"><tspan class="cmd">diagnose</tspan>  Avatar state through Dots tools</text>
-
-    <text class="sub" x="548" y="454">The Agent reports its steps with</text>
-    <text class="sub" x="548" y="470"><tspan class="cmd" fill="#1F2A1C">host-result</tspan>; the runtime checks the Avatar ID.</text>
-  </g>
+  <!-- between runtime and host -->
+  <path class="port" d="M330 548V638" marker-end="url(#p)"/>
+  <text class="rel" x="318" y="590" text-anchor="end" fill="#4E6B22">steps done by the runtime: files · IPC · app-tools</text>
+  <path class="flow" d="M650 548V638" marker-end="url(#a)"/>
+  <text class="rel" x="640" y="590" text-anchor="end">steps left to the Agent</text>
+  <path class="flow" d="M770 638V550" marker-end="url(#a)"/>
+  <text class="rel" x="782" y="590">reported with host-result</text>
+  <rect x="150" y="640" width="280" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="290" y="665" text-anchor="middle">Pet Avatar</text>
+  <text class="sub" x="290" y="684" text-anchor="middle">local entry · cloud Pet, the same one in Dots</text>
+  <rect x="570" y="640" width="280" height="60" rx="8" fill="#FFFFFF" stroke="#6E8A3C" stroke-width="1.6"/>
+  <text class="name" x="710" y="665" text-anchor="middle">Agent</text>
+  <text class="sub" x="710" y="684" text-anchor="middle">does its steps with the host's own tools</text>
+  <path class="port" d="M570 676H432" marker-end="url(#p)"/>
+  <text class="rel" x="501" y="668" text-anchor="middle" fill="#4E6B22">the host's tools</text>
 
   <!-- appearance checks -->
-  <text class="layer" x="40" y="528">FOUR APPEARANCE CHECKS</text>
-  <text class="where" x="262" y="528">saved separately every time</text>
-
-  <path d="M40 546H250L268 590L250 634H40Z" fill="#F3F3F0" stroke="#B7BFAE"/>
-  <circle cx="64" cy="572" r="11" fill="#5B6657"/><text class="num" x="64" y="576.3" text-anchor="middle">1</text>
-  <text class="name" x="84" y="577">Files written</text>
-  <text class="sub" x="56" y="602">the write or upload</text>
-  <text class="sub" x="56" y="618">itself succeeded</text>
-
-  <path d="M266 546H486L504 590L486 634H266L284 590Z" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.8"/>
-  <circle cx="306" cy="572" r="11" fill="#4E6B22"/><text class="num" x="306" y="576.3" text-anchor="middle">2</text>
-  <text class="name" x="326" y="577">Saved image matches</text>
-  <text class="sub" x="298" y="602">read back from the host, same</text>
-  <text class="sub" x="298" y="618">as the accepted image</text>
-
-  <path d="M502 546H712L730 590L712 634H502L520 590Z" fill="#F3F3F0" stroke="#B7BFAE"/>
-  <circle cx="542" cy="572" r="11" fill="#5B6657"/><text class="num" x="542" y="576.3" text-anchor="middle">3</text>
-  <text class="name" x="562" y="577">Refresh requested</text>
-  <text class="sub" x="534" y="602">the refresh request was delivered</text>
-
-  <path d="M728 546H960V634H728L746 590Z" fill="#F3F3F0" stroke="#B7BFAE"/>
-  <circle cx="768" cy="572" r="11" fill="#5B6657"/><text class="num" x="768" y="576.3" text-anchor="middle">4</text>
-  <text class="name" x="788" y="577">Display confirmed</text>
-  <text class="sub" x="760" y="602">only when the host can show it;</text>
-  <text class="sub" x="760" y="618">otherwise it stays unknown</text>
-
-  <path class="flow" d="M385 664V638" marker-end="url(#a)" stroke="#4E6B22"/>
-  <text class="sub" x="398" y="667" fill="#4E6B22"><tspan class="cmd" fill="#4E6B22">finish-story</tspan>: a story with a new appearance can finish once check 2 passes</text>
+  <text class="layer" x="24" y="750">FOUR APPEARANCE CHECKS</text>
+  <text class="where" x="234.9" y="750">saved separately every time</text>
+  <path d="M24 768H240L258 812L240 856H24Z" fill="#F3F3F0" stroke="#B7BFAE"/>
+  <circle cx="48" cy="794" r="11" fill="#5B6657"/><text class="num" x="48" y="798.3" text-anchor="middle">1</text>
+  <text class="name" x="68" y="799">Files written</text>
+  <text class="sub" x="40" y="824">the write or upload</text>
+  <text class="sub" x="40" y="840">itself succeeded</text>
+  <path d="M256 768H482L500 812L482 856H256L274 812Z" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.8"/>
+  <circle cx="298" cy="794" r="11" fill="#4E6B22"/><text class="num" x="298" y="798.3" text-anchor="middle">2</text>
+  <text class="name" x="318" y="799">Saved image matches</text>
+  <text class="sub" x="290" y="824">read back from the host, same</text>
+  <text class="sub" x="290" y="840">as the accepted image</text>
+  <path d="M498 768H716L734 812L716 856H498L516 812Z" fill="#F3F3F0" stroke="#B7BFAE"/>
+  <circle cx="540" cy="794" r="11" fill="#5B6657"/><text class="num" x="540" y="798.3" text-anchor="middle">3</text>
+  <text class="name" x="560" y="799">Refresh requested</text>
+  <text class="sub" x="532" y="824">the refresh request was delivered</text>
+  <path d="M732 768H976V856H732L750 812Z" fill="#F3F3F0" stroke="#B7BFAE"/>
+  <circle cx="774" cy="794" r="11" fill="#5B6657"/><text class="num" x="774" y="798.3" text-anchor="middle">4</text>
+  <text class="name" x="794" y="799">Display confirmed</text>
+  <text class="sub" x="766" y="824">only when the host can show it;</text>
+  <text class="sub" x="766" y="840">otherwise it stays unknown</text>
+  <path class="flow" d="M378 886V860" marker-end="url(#a)" stroke="#4E6B22"/>
+  <text class="sub" x="391" y="889" fill="#4E6B22"><tspan class="cmd" fill="#4E6B22">finish-story</tspan>: a story with a new appearance can finish once check 2 passes</text>
 </svg>

@@ -1,154 +1,155 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 690" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 906" role="img" aria-labelledby="t d">
   <title id="t">GenPet 架构：宿主接口</title>
-  <desc id="d">共用的故事代码只调用一个宿主接口，接口有四个函数。桌面端和 Dots 两个适配器各自实现它，每一步由运行时或 Agent 完成。下方是换形象的四项检查，finish-story 要求第二项通过。</desc>
+  <desc id="d">运行时里，故事流程调用宿主适配，宿主适配实现宿主接口的四个函数。桌面端适配器列出步骤，每一步由运行时做或交给 Agent；Dots 适配器在 Dots 成为主环境时使用，目标是同一个云端 Pet，各步骤待测。运行时做的步骤通过文件、IPC 和 app-tools 到达宿主里的 Pet Avatar；其余步骤由 Agent 用宿主自带的工具做，再用 host-result 回报。下方是换形象的四项检查，finish-story 要求第二项通过。</desc>
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Segoe UI', Helvetica, Arial, sans-serif; fill: #1F2A1C; }
     .layer { font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; }
     .where { font-size: 12px; fill: #5B6657; }
     .name { font-size: 13.5px; font-weight: 600; }
     .cmd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; font-weight: 600; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
     .sub { font-size: 11.5px; fill: #5B6657; }
+    .rel { font-size: 11px; fill: #3F4A3B; }
     .step { font-size: 12px; }
     .tag { font-size: 10px; font-weight: 700; letter-spacing: 0.4px; }
+    .pill { font-size: 10px; font-weight: 600; fill: #8A5A00; }
     .num { font-size: 12px; font-weight: 700; fill: #FFFFFF; }
     .flow { stroke: #4A5646; stroke-width: 1.5; fill: none; }
+    .port { stroke: #6E8A3C; stroke-width: 2; fill: none; }
   </style>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0 0 10 5 0 10z" fill="#4A5646"/>
     </marker>
+    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10z" fill="#6E8A3C"/>
+    </marker>
   </defs>
 
-  <rect width="1000" height="690" rx="14" fill="#FFFFFF"/>
-  <rect x="0.5" y="0.5" width="999" height="689" rx="14" fill="none" stroke="#E2E6DA"/>
+  <rect width="1000" height="906" rx="14" fill="#FFFFFF"/>
+  <rect x="0.5" y="0.5" width="999" height="905" rx="14" fill="none" stroke="#E2E6DA"/>
 
   <!-- legend -->
-  <text class="sub" x="40" y="31">每一步由谁做：</text>
-  <rect x="170" y="18" width="62" height="18" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
-  <text class="tag" x="201" y="30.5" text-anchor="middle" fill="#7A5A12">运行时</text>
-  <rect x="244" y="18" width="52" height="18" rx="4" fill="#EAF0FA" stroke="#9CB3DC"/>
-  <text class="tag" x="270" y="30.5" text-anchor="middle" fill="#2F4F8A">Agent</text>
-  <rect x="308" y="18" width="62" height="18" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="339" y="30.5" text-anchor="middle" fill="#8A5A00">待测</text>
-  <text class="sub" x="380" y="31">宿主允许就由运行时做，否则由 Agent 做；由宿主测试决定</text>
+  <text class="sub" x="24" y="31">每一步由谁做：</text>
+  <rect x="116.5" y="18" width="62" height="18" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="147.5" y="31" text-anchor="middle" fill="#7A5A12">运行时</text>
+  <rect x="186.5" y="18" width="62" height="18" rx="4" fill="#EEF4E4" stroke="#6E8A3C"/>
+  <text class="tag" x="217.5" y="31" text-anchor="middle" fill="#3F5A1C">Agent</text>
+  <rect x="256.5" y="18" width="62" height="18" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="287.5" y="31" text-anchor="middle" fill="#8A5A00">待测</text>
+  <text class="sub" x="328.5" y="31">宿主允许就由运行时做，否则由 Agent 做；由宿主测试决定</text>
 
-  <!-- shared story code and port -->
-  <rect x="40" y="58" width="250" height="78" rx="8" fill="#FBF3E4" stroke="#D8B978"/>
-  <text class="name" x="165" y="90" text-anchor="middle">共用的故事代码</text>
-  <text class="sub" x="165" y="110" text-anchor="middle">计划 · 素材 · 完成</text>
-  <path class="flow" d="M290 97H338" marker-end="url(#a)"/>
+  <!-- RUNTIME -->
+  <rect x="20" y="48" width="960" height="514" rx="10" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="layer" x="36" y="72">运行时</text>
+  <text class="where mono" x="92.5" y="72">src/</text>
+  <rect x="36" y="84" width="928" height="44" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
+  <text class="name" x="54" y="111">故事流程</text>
+  <text class="sub" x="948" y="111" text-anchor="end">两个环境共用；换形象这一步调用宿主接口</text>
+  <path class="flow" d="M500 128V152" marker-end="url(#a)"/>
+  <text class="rel" x="512" y="145">调用</text>
 
-  <rect x="340" y="58" width="620" height="78" rx="8" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.6"/>
-  <text class="layer" x="360" y="82" fill="#4E6B22">宿主接口</text>
-  <text class="where" x="428" y="82">每个宿主一个适配器</text>
-  <rect x="360" y="94" width="126" height="30" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
-  <text class="cmd" x="423" y="113.5" text-anchor="middle">validateArt</text>
-  <rect x="498" y="94" width="150" height="30" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
-  <text class="cmd" x="573" y="113.5" text-anchor="middle">findAvatar</text>
-  <rect x="660" y="94" width="126" height="30" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
-  <text class="cmd" x="723" y="113.5" text-anchor="middle">setAppearance</text>
-  <rect x="798" y="94" width="142" height="30" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
-  <text class="cmd" x="869" y="113.5" text-anchor="middle">diagnose</text>
+  <!-- host adapters: the host interface -->
+  <rect x="36" y="154" width="928" height="394" rx="8" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.6"/>
+  <text class="name" x="54" y="183">宿主适配</text>
+  <text class="sub" x="120" y="183">宿主接口：每个适配器实现这四个函数</text>
+  <rect x="866" y="166" width="84" height="28" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="cmd" x="908" y="184.5" text-anchor="middle">diagnose</text>
+  <rect x="740" y="166" width="118" height="28" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="cmd" x="799" y="184.5" text-anchor="middle">setAppearance</text>
+  <rect x="634" y="166" width="98" height="28" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="cmd" x="683" y="184.5" text-anchor="middle">findAvatar</text>
+  <rect x="522" y="166" width="104" height="28" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="cmd" x="574" y="184.5" text-anchor="middle">validateArt</text>
+  <rect x="908" y="145" width="48" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="pill" x="932" y="157.5" text-anchor="middle">待开发</text>
+  <rect x="50" y="208" width="456" height="326" rx="10" fill="#FAFBF8" stroke="#B7BFAE"/>
+  <text class="name" x="68" y="234">桌面端适配器</text>
+  <text class="sub" x="161" y="234">Codex 桌面端 Pet</text>
+  <rect x="68" y="248" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="99" y="264" text-anchor="middle" fill="#7A5A12">运行时</text>
+  <text class="step" x="142" y="264.5"><tspan class="cmd">validateArt</tspan>  v2 图集，8 × 11 格</text>
+  <rect x="68" y="288" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="99" y="304" text-anchor="middle" fill="#8A5A00">待测</text>
+  <text class="step" x="142" y="304.5"><tspan class="cmd">findAvatar</tspan>  本地 custom: ID ↔ 云端 pet_ ID</text>
+  <rect x="68" y="328" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="99" y="344" text-anchor="middle" fill="#7A5A12">运行时</text>
+  <text class="step" x="142" y="344.5"><tspan class="cmd">setAppearance</tspan>  写入本地图集和清单</text>
+  <rect x="68" y="368" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="99" y="384" text-anchor="middle" fill="#8A5A00">待测</text>
+  <text class="step" x="142" y="384.5"><tspan class="cmd">setAppearance</tspan>  替换云端 Pet 的图</text>
+  <rect x="68" y="408" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="99" y="424" text-anchor="middle" fill="#7A5A12">运行时</text>
+  <text class="step" x="142" y="424.5"><tspan class="cmd">setAppearance</tspan>  通过 IPC 刷新这个 Avatar</text>
+  <rect x="68" y="448" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="99" y="464" text-anchor="middle" fill="#8A5A00">待测</text>
+  <text class="step" x="142" y="464.5"><tspan class="cmd">setAppearance</tspan>  回读宿主存的图</text>
+  <rect x="68" y="488" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="99" y="504" text-anchor="middle" fill="#7A5A12">运行时</text>
+  <text class="step" x="142" y="504.5"><tspan class="cmd">diagnose</tspan>  记录、Pet 列表、映射、选中项、定时任务</text>
+  <rect x="520" y="208" width="430" height="326" rx="10" fill="#FAFBF8" stroke="#B7BFAE"/>
+  <text class="name" x="538" y="234">Dots 适配器</text>
+  <text class="sub" x="626.95" y="234">Dots 成为主环境时使用</text>
+  <rect x="538" y="248" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="569" y="264" text-anchor="middle" fill="#7A5A12">运行时</text>
+  <text class="step" x="612" y="264.5"><tspan class="cmd">validateArt</tspan>  同一种 v2 图集</text>
+  <rect x="538" y="288" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="569" y="304" text-anchor="middle" fill="#8A5A00">待测</text>
+  <text class="step" x="612" y="304.5"><tspan class="cmd">findAvatar</tspan>  同一个云端 pet_ ID</text>
+  <rect x="538" y="328" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="569" y="344" text-anchor="middle" fill="#8A5A00">待测</text>
+  <text class="step" x="612" y="344.5"><tspan class="cmd">setAppearance</tspan>  给已有的云端 Pet 换图</text>
+  <rect x="538" y="368" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="569" y="384" text-anchor="middle" fill="#8A5A00">待测</text>
+  <text class="step" x="612" y="384.5"><tspan class="cmd">setAppearance</tspan>  回读宿主存的图</text>
+  <rect x="538" y="408" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="569" y="424" text-anchor="middle" fill="#8A5A00">待测</text>
+  <text class="step" x="612" y="424.5"><tspan class="cmd">diagnose</tspan>  记录、云端 ID、选中项</text>
+  <text class="sub" x="538" y="465">和桌面端是同一个云端 Pet；各步骤在 Dots 上实测后确定</text>
 
-  <path class="flow" d="M500 136V160" marker-end="url(#a)"/>
-  <path class="flow" d="M800 136V160" marker-end="url(#a)"/>
+  <!-- HOST -->
+  <rect x="20" y="604" width="960" height="112" rx="10" fill="#EEF4E4" stroke="#9DB57A"/>
+  <text class="layer" x="36" y="628">宿主</text>
+  <text class="where" x="81" y="628">主环境：Codex 桌面端或 Dots</text>
 
-  <!-- desktop adapter -->
-  <rect x="40" y="162" width="470" height="330" rx="10" fill="#FAFBF8" stroke="#B7BFAE"/>
-  <text class="name" x="58" y="188">桌面端适配器</text>
-  <text class="sub" x="154" y="188">Codex 桌面端 Pet</text>
-
-  <g>
-    <rect x="58" y="202" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
-    <text class="tag" x="89" y="218" text-anchor="middle" fill="#7A5A12">运行时</text>
-    <text class="step" x="132" y="218.5"><tspan class="cmd">validateArt</tspan>  v2 图集，8 × 11 格</text>
-
-    <rect x="58" y="242" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-    <text class="tag" x="89" y="258" text-anchor="middle" fill="#8A5A00">待测</text>
-    <text class="step" x="132" y="258.5"><tspan class="cmd">findAvatar</tspan>  本地 custom: ID ↔ 云端 pet_ ID</text>
-
-    <rect x="58" y="282" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
-    <text class="tag" x="89" y="298" text-anchor="middle" fill="#7A5A12">运行时</text>
-    <text class="step" x="132" y="298.5"><tspan class="cmd">setAppearance</tspan>  写入本地图集和清单</text>
-
-    <rect x="58" y="322" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-    <text class="tag" x="89" y="338" text-anchor="middle" fill="#8A5A00">待测</text>
-    <text class="step" x="132" y="338.5"><tspan class="cmd">setAppearance</tspan>  替换云端 Pet 的图</text>
-
-    <rect x="58" y="362" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
-    <text class="tag" x="89" y="378" text-anchor="middle" fill="#7A5A12">运行时</text>
-    <text class="step" x="132" y="378.5"><tspan class="cmd">setAppearance</tspan>  通过 IPC 刷新这个 Avatar</text>
-
-    <rect x="58" y="402" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-    <text class="tag" x="89" y="418" text-anchor="middle" fill="#8A5A00">待测</text>
-    <text class="step" x="132" y="418.5"><tspan class="cmd">setAppearance</tspan>  回读宿主存的图</text>
-
-    <rect x="58" y="442" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
-    <text class="tag" x="89" y="458" text-anchor="middle" fill="#7A5A12">运行时</text>
-    <text class="step" x="132" y="458.5"><tspan class="cmd">diagnose</tspan>  记录、Avatar ID、列表、映射、选中项</text>
-  </g>
-
-  <!-- dots adapter -->
-  <rect x="530" y="162" width="430" height="330" rx="10" fill="#FAFBF8" stroke="#B7BFAE"/>
-  <text class="name" x="548" y="188">Dots 适配器</text>
-  <text class="sub" x="640" y="188">Dots Avatar</text>
-
-  <g>
-    <rect x="548" y="202" width="62" height="24" rx="4" fill="#EAF0FA" stroke="#9CB3DC"/>
-    <text class="tag" x="579" y="218" text-anchor="middle" fill="#2F4F8A">Agent</text>
-    <text class="step" x="622" y="218.5"><tspan class="cmd">validateArt</tspan>  格式由 Dots 工具决定</text>
-
-    <rect x="548" y="242" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
-    <text class="tag" x="579" y="258" text-anchor="middle" fill="#7A5A12">运行时</text>
-    <text class="step" x="622" y="258.5"><tspan class="cmd">findAvatar</tspan>  已保存的 Avatar ID</text>
-
-    <rect x="548" y="282" width="62" height="24" rx="4" fill="#EAF0FA" stroke="#9CB3DC"/>
-    <text class="tag" x="579" y="298" text-anchor="middle" fill="#2F4F8A">Agent</text>
-    <text class="step" x="622" y="298.5"><tspan class="cmd">setAppearance</tspan>  设置这个 Avatar 的图</text>
-
-    <rect x="548" y="322" width="62" height="24" rx="4" fill="#EAF0FA" stroke="#9CB3DC"/>
-    <text class="tag" x="579" y="338" text-anchor="middle" fill="#2F4F8A">Agent</text>
-    <text class="step" x="622" y="338.5"><tspan class="cmd">setAppearance</tspan>  激活时刷新，保留当前选择</text>
-
-    <rect x="548" y="362" width="62" height="24" rx="4" fill="#EAF0FA" stroke="#9CB3DC"/>
-    <text class="tag" x="579" y="378" text-anchor="middle" fill="#2F4F8A">Agent</text>
-    <text class="step" x="622" y="378.5"><tspan class="cmd">setAppearance</tspan>  回读宿主存的图</text>
-
-    <rect x="548" y="402" width="62" height="24" rx="4" fill="#EAF0FA" stroke="#9CB3DC"/>
-    <text class="tag" x="579" y="418" text-anchor="middle" fill="#2F4F8A">Agent</text>
-    <text class="step" x="622" y="418.5"><tspan class="cmd">diagnose</tspan>  用 Dots 工具查看 Avatar 状态</text>
-
-    <text class="sub" x="548" y="454">Agent 做完的步骤用</text>
-    <text class="sub" x="548" y="470"><tspan class="cmd" fill="#1F2A1C">host-result</tspan> 回报；运行时核对 Avatar ID。</text>
-  </g>
+  <!-- between runtime and host -->
+  <path class="port" d="M330 548V638" marker-end="url(#p)"/>
+  <text class="rel" x="318" y="590" text-anchor="end" fill="#4E6B22">运行时做的步骤：文件 · IPC · app-tools</text>
+  <path class="flow" d="M650 548V638" marker-end="url(#a)"/>
+  <text class="rel" x="640" y="590" text-anchor="end">交给 Agent 的步骤</text>
+  <path class="flow" d="M770 638V550" marker-end="url(#a)"/>
+  <text class="rel" x="782" y="590">用 host-result 回报</text>
+  <rect x="150" y="640" width="280" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="290" y="665" text-anchor="middle">Pet Avatar</text>
+  <text class="sub" x="290" y="684" text-anchor="middle">本地条目 · 云端 Pet，Dots 里是同一只</text>
+  <rect x="570" y="640" width="280" height="60" rx="8" fill="#FFFFFF" stroke="#6E8A3C" stroke-width="1.6"/>
+  <text class="name" x="710" y="665" text-anchor="middle">Agent</text>
+  <text class="sub" x="710" y="684" text-anchor="middle">用宿主自带的工具做交给它的步骤</text>
+  <path class="port" d="M570 676H432" marker-end="url(#p)"/>
+  <text class="rel" x="501" y="668" text-anchor="middle" fill="#4E6B22">宿主自带的工具</text>
 
   <!-- appearance checks -->
-  <text class="layer" x="40" y="528">换形象的四项检查</text>
-  <text class="where" x="162" y="528">每次分别保存</text>
-
-  <path d="M40 546H250L268 590L250 634H40Z" fill="#F3F3F0" stroke="#B7BFAE"/>
-  <circle cx="64" cy="572" r="11" fill="#5B6657"/><text class="num" x="64" y="576.3" text-anchor="middle">1</text>
-  <text class="name" x="84" y="577">文件已写入</text>
-  <text class="sub" x="56" y="602">写入或上传</text>
-  <text class="sub" x="56" y="618">本身成功</text>
-
-  <path d="M266 546H486L504 590L486 634H266L284 590Z" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.8"/>
-  <circle cx="306" cy="572" r="11" fill="#4E6B22"/><text class="num" x="306" y="576.3" text-anchor="middle">2</text>
-  <text class="name" x="326" y="577">宿主存的图一致</text>
-  <text class="sub" x="298" y="602">从宿主回读的图</text>
-  <text class="sub" x="298" y="618">与验收图相同</text>
-
-  <path d="M502 546H712L730 590L712 634H502L520 590Z" fill="#F3F3F0" stroke="#B7BFAE"/>
-  <circle cx="542" cy="572" r="11" fill="#5B6657"/><text class="num" x="542" y="576.3" text-anchor="middle">3</text>
-  <text class="name" x="562" y="577">已请求刷新</text>
-  <text class="sub" x="534" y="602">刷新请求已送达</text>
-
-  <path d="M728 546H960V634H728L746 590Z" fill="#F3F3F0" stroke="#B7BFAE"/>
-  <circle cx="768" cy="572" r="11" fill="#5B6657"/><text class="num" x="768" y="576.3" text-anchor="middle">4</text>
-  <text class="name" x="788" y="577">显示已确认</text>
-  <text class="sub" x="760" y="602">宿主能提供画面时才确认，</text>
-  <text class="sub" x="760" y="618">否则保持未知</text>
-
-  <path class="flow" d="M385 664V638" marker-end="url(#a)" stroke="#4E6B22"/>
-  <text class="sub" x="398" y="667" fill="#4E6B22"><tspan class="cmd" fill="#4E6B22">finish-story</tspan>：换了形象的故事，第 2 项通过后才能完成</text>
+  <text class="layer" x="24" y="750">换形象的四项检查</text>
+  <text class="where" x="137.6" y="750">每次分别保存</text>
+  <path d="M24 768H240L258 812L240 856H24Z" fill="#F3F3F0" stroke="#B7BFAE"/>
+  <circle cx="48" cy="794" r="11" fill="#5B6657"/><text class="num" x="48" y="798.3" text-anchor="middle">1</text>
+  <text class="name" x="68" y="799">文件已写入</text>
+  <text class="sub" x="40" y="824">写入或上传</text>
+  <text class="sub" x="40" y="840">本身成功</text>
+  <path d="M256 768H482L500 812L482 856H256L274 812Z" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.8"/>
+  <circle cx="298" cy="794" r="11" fill="#4E6B22"/><text class="num" x="298" y="798.3" text-anchor="middle">2</text>
+  <text class="name" x="318" y="799">宿主存的图一致</text>
+  <text class="sub" x="290" y="824">从宿主回读的图</text>
+  <text class="sub" x="290" y="840">与验收图相同</text>
+  <path d="M498 768H716L734 812L716 856H498L516 812Z" fill="#F3F3F0" stroke="#B7BFAE"/>
+  <circle cx="540" cy="794" r="11" fill="#5B6657"/><text class="num" x="540" y="798.3" text-anchor="middle">3</text>
+  <text class="name" x="560" y="799">已请求刷新</text>
+  <text class="sub" x="532" y="824">刷新请求已送达</text>
+  <path d="M732 768H976V856H732L750 812Z" fill="#F3F3F0" stroke="#B7BFAE"/>
+  <circle cx="774" cy="794" r="11" fill="#5B6657"/><text class="num" x="774" y="798.3" text-anchor="middle">4</text>
+  <text class="name" x="794" y="799">显示已确认</text>
+  <text class="sub" x="766" y="824">宿主能提供画面时才确认，</text>
+  <text class="sub" x="766" y="840">否则保持未知</text>
+  <path class="flow" d="M378 886V860" marker-end="url(#a)" stroke="#4E6B22"/>
+  <text class="sub" x="391" y="889" fill="#4E6B22"><tspan class="cmd" fill="#4E6B22">finish-story</tspan>：换了形象的故事，第 2 项通过后才能完成</text>
 </svg>

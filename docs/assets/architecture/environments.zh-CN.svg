@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 624" role="img" aria-labelledby="t d">
+  <title id="t">GenPet 架构：两个环境</title>
+  <desc id="d">Codex 桌面端和 Dots 各有同一套宿主、skills 和运行时。Codex 桌面端是默认的主环境：它的 Agent 运行 GenPet，把每次的新形象换到云端 Pet 上。Codex 同步云端 Pet，桌面上的 Pet 和 Dots 的形象是同一个 cloud ID 下的同一只。主环境把宠物简介交给 Dots 的 Agent，Dots 原有功能不变，按这只宠物的说话风格回复。主环境可以切换到 Dots：记录跟着走，之后由 Dots 换形象。</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Segoe UI', Helvetica, Arial, sans-serif; fill: #1F2A1C; }
+    .layer { font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; }
+    .where { font-size: 12px; fill: #5B6657; }
+    .name { font-size: 13.5px; font-weight: 600; }
+    .sub { font-size: 11.5px; fill: #5B6657; }
+    .switch { font-size: 12px; font-weight: 600; }
+    .rel { font-size: 11px; fill: #3F4A3B; }
+    .tag { font-size: 10px; font-weight: 700; letter-spacing: 0.4px; }
+    .pill { font-size: 10px; font-weight: 600; fill: #8A5A00; }
+    .num { font-size: 12px; font-weight: 700; fill: #FFFFFF; }
+    .flow { stroke: #4A5646; stroke-width: 1.5; fill: none; }
+    .port { stroke: #6E8A3C; stroke-width: 2; fill: none; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10z" fill="#4A5646"/>
+    </marker>
+    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10z" fill="#6E8A3C"/>
+    </marker>
+  </defs>
+
+  <rect width="1000" height="624" rx="14" fill="#FFFFFF"/>
+  <rect x="0.5" y="0.5" width="999" height="623" rx="14" fill="none" stroke="#E2E6DA"/>
+
+  <!-- legend -->
+  <rect x="24" y="18" width="48" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="pill" x="48" y="30.5" text-anchor="middle">待开发</text>
+  <text class="sub" x="80" y="31">尚未实现</text>
+  <rect x="152" y="18" width="42" height="18" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="173" y="30.5" text-anchor="middle" fill="#8A5A00">待测</text>
+  <text class="sub" x="202" y="31">做法由宿主上的实测决定</text>
+  <path class="port" d="M354.5 27H388.5" stroke-dasharray="5 4"/>
+  <text class="sub" x="396.5" y="31">切换到 Dots 之后</text>
+
+  <!-- the two environments -->
+  <rect x="20" y="50" width="340" height="376" rx="10" fill="#EEF4E4" stroke="#6E8A3C" stroke-width="1.6"/>
+  <text class="layer" x="36" y="74">CODEX 桌面端</text>
+  <text class="where" x="344" y="74" text-anchor="end">默认的主环境</text>
+  <rect x="640" y="50" width="340" height="376" rx="10" fill="#EEF4E4" stroke="#9DB57A"/>
+  <text class="layer" x="656" y="74">DOTS</text>
+  <text class="where" x="964" y="74" text-anchor="end">可切换为主环境</text>
+  <rect x="36" y="88" width="308" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="52" y="113">桌面上的 Pet</text>
+  <text class="sub" x="52" y="132">显示云端 Pet 的图</text>
+  <rect x="36" y="180" width="308" height="150" rx="8" fill="#FFFFFF" stroke="#6E8A3C" stroke-width="1.6"/>
+  <text class="name" x="52" y="205">Agent 运行 GenPet</text>
+  <text class="sub" x="52" y="224">skills 和运行时，见分层图</text>
+  <text class="sub" x="52" y="240">电脑开着时每 5 小时检查：</text>
+  <text class="sub" x="52" y="256">写故事、画图、换形象</text>
+  <rect x="36" y="350" width="308" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="52" y="375">记录</text>
+  <text class="sub" x="52" y="394">每只宠物一个目录：soul、memory、state 和历史</text>
+  <rect x="656" y="88" width="308" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="672" y="113">Dots 的形象</text>
+  <text class="sub" x="672" y="132">选同一个 cloud ID 的 Pet</text>
+  <rect x="656" y="180" width="308" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A" stroke-dasharray="5 4"/>
+  <text class="name" x="672" y="205">GenPet 的 skills 和运行时</text>
+  <text class="sub" x="672" y="224">同一套；Dots 成为主环境后运行</text>
+  <rect x="906" y="171" width="48" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="pill" x="930" y="183.5" text-anchor="middle">待开发</text>
+  <rect x="656" y="258" width="308" height="72" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="672" y="283">Dots 的 Agent</text>
+  <text class="sub" x="672" y="302">原有功能不变；</text>
+  <text class="sub" x="672" y="318">按这只宠物的说话风格回复</text>
+  <rect x="906" y="249" width="48" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="pill" x="930" y="261.5" text-anchor="middle">待开发</text>
+  <rect x="656" y="350" width="308" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A" stroke-dasharray="5 4"/>
+  <text class="name" x="672" y="375">记录</text>
+  <text class="sub" x="672" y="394">切换后接着用同一份记录</text>
+
+  <!-- 1: the cloud Pet -->
+  <rect x="400" y="82" width="200" height="72" rx="8" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.6"/>
+  <text class="name" x="500" y="110" text-anchor="middle">云端 Pet</text>
+  <text class="sub" x="500" y="128" text-anchor="middle">每只宠物一个 cloud ID</text>
+  <text class="sub" x="500" y="144" text-anchor="middle">Codex 自动同步</text>
+  <circle cx="500" cy="82" r="10" fill="#4E6B22"/><text class="num" x="500" y="86.2" text-anchor="middle">1</text>
+  <path class="port" d="M400 118H347" marker-end="url(#p)"/>
+  <path class="port" d="M600 118H653" marker-end="url(#p)"/>
+  <text class="rel" x="373" y="107" text-anchor="middle" fill="#4E6B22">同步</text>
+  <text class="rel" x="627" y="107" text-anchor="middle" fill="#4E6B22">同步</text>
+  <path class="port" d="M344 200H430V157" marker-end="url(#p)"/>
+  <text class="rel" x="438" y="178" fill="#4E6B22">换形象</text>
+  <path class="port" d="M656 210H570V157" stroke-dasharray="5 4" marker-end="url(#p)"/>
+  <text class="rel" x="562" y="196" text-anchor="end" fill="#4E6B22">切换后</text>
+  <rect x="520" y="203" width="42" height="18" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="541" y="215.5" text-anchor="middle" fill="#8A5A00">待测</text>
+
+  <!-- 2: the pet brief -->
+  <rect x="440" y="274" width="120" height="40" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="500" y="299" text-anchor="middle">宠物简介</text>
+  <circle cx="500" cy="274" r="10" fill="#4E6B22"/><text class="num" x="500" y="278.2" text-anchor="middle">2</text>
+  <path class="flow" d="M344 294H438" marker-end="url(#a)"/>
+  <path class="flow" d="M560 294H654" marker-end="url(#a)"/>
+  <rect x="400.65" y="320" width="42" height="18" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="tag" x="421.65" y="332.5" text-anchor="middle" fill="#8A5A00">待测</text>
+  <text class="rel" x="448.65" y="333">从记录里摘出；怎样到达 Dots</text>
+  <text class="rel" x="500" y="351" text-anchor="middle">先试：写进 Pet 条目的 description</text>
+
+  <!-- 3: switching the main environment -->
+  <path class="flow" d="M347 380H653" marker-start="url(#a)" marker-end="url(#a)"/>
+  <rect x="447" y="368" width="106" height="24" rx="12" fill="#FFFFFF" stroke="#4A5646"/>
+  <circle cx="461.0" cy="380" r="10" fill="#4E6B22"/><text class="num" x="461.0" y="384.2" text-anchor="middle">3</text>
+  <text class="switch" x="510" y="384.2" text-anchor="middle">切换主环境</text>
+  <text class="rel" x="500" y="410" text-anchor="middle">记录跟着走；同一时间只有一个环境写故事</text>
+
+  <!-- the three links -->
+  <text class="layer" x="24" y="460">三种联动</text>
+  <text class="where" x="86.8" y="460">两个环境之间</text>
+  <rect x="24" y="476" width="308" height="124" rx="8" fill="#F3F8EA" stroke="#9DB57A"/>
+  <circle cx="48" cy="502" r="10" fill="#4E6B22"/><text class="num" x="48" y="506.2" text-anchor="middle">1</text>
+  <text class="name" x="68" y="507">同一只宠物靠 cloud ID 同步</text>
+  <text class="sub" x="40" y="534">主环境把新形象换到云端 Pet，</text>
+  <text class="sub" x="40" y="550">Codex 同步到两边，显示的是同一只。</text>
+  <text class="sub" x="40" y="584" fill="#8A5A00">同步已由用户实测。换云端 Pet 的图：待开发。</text>
+  <rect x="346" y="476" width="308" height="124" rx="8" fill="#F3F8EA" stroke="#9DB57A"/>
+  <circle cx="370" cy="502" r="10" fill="#4E6B22"/><text class="num" x="370" y="506.2" text-anchor="middle">2</text>
+  <text class="name" x="390" y="507">Dots 变成这只宠物</text>
+  <text class="sub" x="362" y="534">Dots 用这只宠物的形象和说话风格，</text>
+  <text class="sub" x="362" y="550">原有的功能不变。</text>
+  <text class="sub" x="362" y="584" fill="#8A5A00">待开发。宠物简介怎样到达 Dots：待测。</text>
+  <rect x="668" y="476" width="308" height="124" rx="8" fill="#F3F8EA" stroke="#9DB57A"/>
+  <circle cx="692" cy="502" r="10" fill="#4E6B22"/><text class="num" x="692" y="506.2" text-anchor="middle">3</text>
+  <text class="name" x="712" y="507">切换主环境</text>
+  <text class="sub" x="684" y="534">默认是 Codex 桌面端。切换时旧环境停止</text>
+  <text class="sub" x="684" y="550">检查，记录跟着走，新环境接着写故事。</text>
+  <text class="sub" x="684" y="584" fill="#8A5A00">待开发。从 Dots 换形象：待测。</text>
+</svg>

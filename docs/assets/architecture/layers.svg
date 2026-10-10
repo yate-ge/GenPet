@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1046" role="img" aria-labelledby="t d">
   <title id="t">GenPet architecture: layers</title>
-  <desc id="d">Three layers. Inside the host, chat and the scheduler start the Agent; the Agent reads user information, draws with image generation and puts new appearances on the Pet Avatar. In the prompt layer, the main skill handles the entries and the main workflow and calls sub skills when needed: four Designer roles and the ImageReviewer. References sit beside the flow and both the main skill and the sub skills refer to them. In the runtime, commands call the story flow, everyday features and host adapters; all three read and write records through the core, and the story flow sets appearances through the host adapters.</desc>
+  <desc id="d">Three layers. Inside the host, chat and the scheduler start the Agent; the Agent reads user information, draws with image generation and puts new appearances on the Pet Avatar. In the prompt layer, the main skill handles the entries (/genpet takes any request) and the main workflow and calls sub skills when needed: four Designer roles and the ImageReviewer. References sit beside the flow and both the main skill and the sub skills refer to them. In the runtime, commands call the story flow, everyday features and host adapters; all three read and write records through the core, and the story flow sets appearances through the host adapters. Everyday features include recent content and a random tool; records have one folder per pet.</desc>
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; fill: #1F2A1C; }
     .layer { font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; }
@@ -39,7 +39,7 @@
   <!-- HOST -->
   <rect x="30" y="50" width="1020" height="212" rx="10" fill="#EEF4E4" stroke="#9DB57A"/>
   <text class="layer" x="48" y="75">HOST</text>
-  <text class="where" x="100" y="75">Codex desktop · Dots</text>
+  <text class="where" x="100" y="75">Codex desktop (default main environment) · can switch to Dots</text>
   <text class="sub" x="1032" y="75" text-anchor="end">the Agent uses these with the host's own tools and reports what happened</text>
 
   <rect x="48" y="104" width="180" height="56" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
@@ -48,7 +48,7 @@
 
   <rect x="48" y="184" width="180" height="56" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
   <text class="name" x="138" y="208" text-anchor="middle">Scheduler</text>
-  <text class="sub" x="138" y="227" text-anchor="middle">5-hour check · Dots events</text>
+  <text class="sub" x="138" y="227" text-anchor="middle">5-hour check, computer on</text>
 
   <rect x="330" y="104" width="180" height="136" rx="8" fill="#FFFFFF" stroke="#6E8A3C" stroke-width="1.6"/>
   <text class="name" x="420" y="162" text-anchor="middle">Agent</text>
@@ -62,7 +62,7 @@
 
   <rect x="600" y="104" width="170" height="56" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
   <text class="name" x="685" y="128" text-anchor="middle">User information</text>
-  <text class="sub" x="685" y="147" text-anchor="middle">what the host lets it read</text>
+  <text class="sub" x="685" y="147" text-anchor="middle">Codex memory and other data</text>
   <rect x="706" y="95" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
   <text class="pill" x="734" y="107.5" text-anchor="middle">planned</text>
 
@@ -78,8 +78,8 @@
   <rect x="862" y="104" width="170" height="136" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
   <text class="name" x="947" y="150" text-anchor="middle">Pet Avatar</text>
   <text class="sub" x="947" y="171" text-anchor="middle">what the user sees:</text>
-  <text class="sub" x="947" y="187" text-anchor="middle">local entry, cloud Pet,</text>
-  <text class="sub" x="947" y="203" text-anchor="middle">Dots Avatar</text>
+  <text class="sub" x="947" y="187" text-anchor="middle">local entry, cloud Pet;</text>
+  <text class="sub" x="947" y="203" text-anchor="middle">the same Pet in Dots</text>
   <path class="flow" d="M510 172H860" marker-end="url(#a)"/>
   <text class="rel" x="816" y="165" text-anchor="middle">appearance</text>
 
@@ -96,8 +96,8 @@
 
   <rect x="48" y="290" width="542" height="78" rx="8" fill="#FFFFFF" stroke="#9CB3DC" stroke-width="1.4"/>
   <text class="name" x="66" y="313">Main skill</text>
-  <text class="sub" x="66" y="334">entries: /genpet and 6 commands; tells talk, story and diagnosis apart</text>
-  <text class="sub" x="66" y="352">main workflow: status → decide → draw and check → appearance → finish → tell</text>
+  <text class="sub" x="66" y="334">entries: /genpet takes any request; each function also has its own command</text>
+  <text class="sub" x="66" y="352">workflow: status, user info → decide → draw and check → appearance → finish → tell</text>
   <rect x="526" y="281" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
   <text class="pill" x="554" y="293.5" text-anchor="middle">planned</text>
 
@@ -115,17 +115,17 @@
   <text class="grp" x="70" y="451">GeneDesigner</text>
   <text class="rel" x="303" y="451" text-anchor="end" fill="#5B6657">adoption only</text>
   <text class="sub" x="70" y="469" fill="#1F2A1C">who the pet is</text>
-  <text class="sub" x="70" y="485">encounter, genes, personality</text>
+  <text class="sub" x="70" y="485">journey, genes, personality, speech habits</text>
   <rect x="323" y="432" width="257" height="62" rx="6" fill="#F4F7FC" stroke="#C5D3EA"/>
   <text class="grp" x="335" y="451">StoryDesigner</text>
   <text class="rel" x="568" y="451" text-anchor="end" fill="#5B6657">every story and chat</text>
   <text class="sub" x="335" y="469" fill="#1F2A1C">what happens and how it is told</text>
-  <text class="sub" x="335" y="485">story, growth, the story's item, chat</text>
+  <text class="sub" x="335" y="485">story, growth, story item, chat, memory</text>
   <rect x="58" y="502" width="257" height="62" rx="6" fill="#F4F7FC" stroke="#C5D3EA"/>
   <text class="grp" x="70" y="521">PetDesigner</text>
   <text class="rel" x="303" y="521" text-anchor="end" fill="#5B6657">every new appearance</text>
   <text class="sub" x="70" y="539" fill="#1F2A1C">what the pet looks like</text>
-  <text class="sub" x="70" y="555">egg, each stage, special form</text>
+  <text class="sub" x="70" y="555">egg, each stage, new looks, special form</text>
   <rect x="323" y="502" width="257" height="62" rx="6" fill="#F4F7FC" stroke="#C5D3EA"/>
   <text class="grp" x="335" y="521">HomeDesigner</text>
   <text class="rel" x="568" y="521" text-anchor="end" fill="#5B6657">when the home changes</text>
@@ -134,7 +134,7 @@
 
   <rect x="58" y="572" width="522" height="44" rx="6" fill="#F4F7FC" stroke="#C5D3EA"/>
   <text class="grp" x="70" y="590">ImageReviewer</text>
-  <text class="rel" x="568" y="590" text-anchor="end" fill="#5B6657">every image</text>
+  <text class="rel" x="568" y="590" text-anchor="end" fill="#5B6657">before acceptance</text>
   <text class="sub" x="70" y="607" fill="#3F4A3B">whether each image actually drawn passes: checked against the rules; accepted, or repaired</text>
 
   <rect x="632" y="290" width="170" height="336" rx="8" fill="#FFFFFF" stroke="#9CB3DC" stroke-dasharray="6 4"/>
@@ -146,7 +146,7 @@
   <text class="sub" x="717" y="438" text-anchor="middle" fill="#1F2A1C">record format</text>
   <text class="sub" x="717" y="462" text-anchor="middle" fill="#1F2A1C">story check schedule</text>
   <text class="sub" x="717" y="486" text-anchor="middle" fill="#1F2A1C">naming</text>
-  <text class="sub" x="717" y="510" text-anchor="middle" fill="#1F2A1C">desktop and Dots formats</text>
+  <text class="sub" x="717" y="510" text-anchor="middle" fill="#1F2A1C">host capabilities, formats</text>
 
   <path class="flow" d="M632 329H592" stroke-dasharray="5 4" marker-end="url(#a)"/>
   <text class="rel" x="612" y="322" text-anchor="middle">refer</text>
@@ -169,14 +169,16 @@
 
   <rect x="48" y="534" width="150" height="100" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
   <text class="name" x="123" y="556" text-anchor="middle">Everyday features</text>
-  <text class="sub" x="123" y="576" text-anchor="middle">story check periods</text>
-  <text class="sub" x="123" y="591" text-anchor="middle">naming</text>
-  <text class="sub" x="123" y="606" text-anchor="middle">chat notes</text>
-  <text class="sub" x="123" y="621" text-anchor="middle">status summary</text>
+  <text class="sub" x="123" y="576" text-anchor="middle">check periods · naming</text>
+  <text class="sub" x="123" y="591" text-anchor="middle">chat notes · status</text>
+  <text class="sub" x="123" y="606" text-anchor="middle">recent content</text>
+  <text class="sub" x="123" y="621" text-anchor="middle">random tool</text>
+  <rect x="134" y="525" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="pill" x="162.0" y="537.5" text-anchor="middle">planned</text>
 
   <rect x="212" y="534" width="372" height="100" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
   <text class="name" x="226" y="556">Story flow</text>
-  <text class="rel" x="572" y="556" text-anchor="end" fill="#5B6657">one unfinished story at a time</text>
+  <text class="rel" x="572" y="556" text-anchor="end" fill="#5B6657">one unfinished story at a time, safe to retry</text>
   <rect x="230.6" y="564" width="40.0" height="22" rx="11" fill="#FFFFFF" stroke="#D8B978"/>
   <text class="chip" x="250.6" y="578.6" text-anchor="middle">begin</text>
   <path class="flow" d="M271.6 575H278.6" marker-end="url(#s)" stroke-width="1.2"/>
@@ -194,8 +196,10 @@
   <path class="flow" d="M510.8 575H517.8" marker-end="url(#s)" stroke-width="1.2"/>
   <rect x="519.8" y="564" width="45.6" height="22" rx="11" fill="#FFFFFF" stroke="#D8B978"/>
   <text class="chip" x="542.6" y="578.6" text-anchor="middle">finish</text>
-  <text class="sub" x="398" y="606" text-anchor="middle">every step is safe to retry; the code enforces:</text>
-  <text class="sub" x="398" y="621" text-anchor="middle" fill="#3F4A3B">fixed identity · stages only forward · growth deadlines</text>
+  <text class="sub" x="398" y="606" text-anchor="middle">the code enforces: fixed identity · stages only forward ·</text>
+  <text class="sub" x="398" y="621" text-anchor="middle" fill="#3F4A3B">growth deadlines · at most 2 text-only stories in a row</text>
+  <rect x="520" y="525" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
+  <text class="pill" x="548.0" y="537.5" text-anchor="middle">planned</text>
 
   <rect x="652" y="534" width="150" height="100" rx="8" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.6"/>
   <text class="name" x="727" y="556" text-anchor="middle">Host adapters</text>
@@ -232,7 +236,7 @@
   <path d="M850 672c0-9 45-14 100-14s100 5 100 14v52c0 9-45 14-100 14s-100-5-100-14z" fill="#FFFFFF" stroke="#8C8C84"/>
   <path d="M850 672c0 9 45 14 100 14s100-5 100-14" fill="none" stroke="#8C8C84"/>
   <text class="name" x="950" y="704" text-anchor="middle">Records</text>
-  <text class="mono" x="950" y="722" text-anchor="middle" fill="#5B6657">~/.genpet/&lt;host&gt;/</text>
+  <text class="sub" x="950" y="722" text-anchor="middle"><tspan class="mono">~/.genpet/</tspan> · a folder per pet</text>
   </g>
   </g>
   </g>
