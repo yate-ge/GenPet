@@ -173,6 +173,8 @@
 | 待做 | `basis`、`designBasis` | `reason`、`designReason` | `src/model.ts` 的 `StoryPlan`、`Story`；`src/lifecycle.ts`；`units.json` 的 genes、evolution；`storage.md` |
 | 待做 | `provenance` | `source` | `src/model.ts` 的 `ArtRecord`；`accept-art` 的参数；`workflow.md`、`desktop.md` |
 | 待做 | envelope | result file（结果文件） | `generation-units.md`、`workflow.md`，只是文字 |
+| 待做 | `image-review` 单元、「图像检查」 | ImageReviewer，与四个 Designer 的命名对齐 | `units.json` 的单元名、`image-review.md` 文件名、`generation-units.md`、`workflow.md`；旧记录里的 `unit: "image-review"` 读取时要兼容 |
+| 待定 | 提示词层的文件组织：7 个薄 skill 共用流程文档，12 个单元提示词 | 是否照架构文档改成一个主 skill、几个子 skill 和参考文档；只改组织方式，不改内容 | `framework/skills/`、`framework/prompts/`、`framework/references/`、`scripts/build-plugin.ts` |
 | 待做 | `framework/` 里提示词和参考文档的措辞 | 与 `docs/` 统一：用户资料、格式、这只宠物、产品规则 | `framework/prompts/`、`framework/references/`、`framework/skills/` |
 | 待定 | `docs/evidence/` 目录名 | 测试记录对应的目录名 | 目录本身、`AGENTS.md`、`.gitignore`、引用它的文档；需要先决定是否改路径 |
 | 待定 | `README.zh-CN.md` 的「每个个体」 | 「每只宠物」 | 中文 README，以及日文、韩文对应句子 |
@@ -188,3 +190,5 @@
 2026-10-08：汇总本轮测试反馈，确认每次五小时检查都有宠物内容、用户联系来自真实上下文与交互输入；记录领养缺少用户联系及用户资料获取流程的实现缺口。细化 context 的职责、读取与传给下游的流程、六项开发任务和验收样本，并补充自然语言加载、列表缺失与桌面显示异常的诊断修复范围。本轮交付为开发计划和问题记录，相关插件功能尚未实施；没有发布新插件版本。
 
 2026-10-10：梳理系统架构并确定目标架构，写入 [架构文档](ARCHITECTURE.zh-CN.md)（中英文各一份，配分层、故事流程、宿主接口三张 SVG 图）。本轮确认两项设计：两个宿主走同一套换形象步骤；`finish-story` 的完成条件收紧为「宿主存的图与验收图一致」。文档里标明了已完成和待开发的部分，以及决定步骤归属的三项宿主测试，测试由用户进行。同时把文档中不直接的说法换成直白的词（用户资料、格式、这只宠物、产品规则、换形象等），字段名和提示词措辞的改名列入上方待办。本轮只改文档和图，没有修改代码、提示词或插件，没有发布新插件版本。
+
+2026-10-10（续）：对着分层图逐项修改架构图和架构文档。构建与发布从图里移出，只在文档的「插件包」「检查」两节说明。宿主层画出内部关系：对话框和定时任务到 Agent，Agent 到用户资料、图像生成和 Pet Avatar。提示词层按策略设计来画：一个主 skill，需要时调用子 skill（GeneDesigner、StoryDesigner、PetDesigner、HomeDesigner、ImageReviewer），参考文档放在旁边，用虚线指向主 skill 和子 skill。图像检查改称 ImageReviewer，与 Designer 的命名对齐。运行时画出内部结构：命令入口、日常功能、故事流程、宿主适配、核心。层之间的连线改为 Agent 读取提示词层、Agent 执行运行时的命令，运行时的宿主适配通过宿主接口连到 Pet Avatar。图和文档里只说「不是什么」的句子改为直接说明是什么、做什么。`image-review` 的改名和提示词文件是否按主 skill、子 skill 重新组织，列入上方待办。本轮只改文档和图，没有修改代码、提示词或插件，没有发布新插件版本。

@@ -35,7 +35,7 @@
   <!-- shared story code and port -->
   <rect x="40" y="58" width="250" height="78" rx="8" fill="#FBF3E4" stroke="#D8B978"/>
   <text class="name" x="165" y="90" text-anchor="middle">Shared story code</text>
-  <text class="sub" x="165" y="110" text-anchor="middle">plan · artwork · finish; depends on no host</text>
+  <text class="sub" x="165" y="110" text-anchor="middle">plan · artwork · finish</text>
   <path class="flow" d="M290 97H338" marker-end="url(#a)"/>
 
   <rect x="340" y="58" width="620" height="78" rx="8" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.6"/>
@@ -124,7 +124,7 @@
 
   <!-- appearance checks -->
   <text class="layer" x="40" y="528">FOUR APPEARANCE CHECKS</text>
-  <text class="where" x="262" y="528">saved separately every time; passing one does not prove another</text>
+  <text class="where" x="262" y="528">saved separately every time</text>
 
   <path d="M40 546H250L268 590L250 634H40Z" fill="#F3F3F0" stroke="#B7BFAE"/>
   <circle cx="64" cy="572" r="11" fill="#5B6657"/><text class="num" x="64" y="576.3" text-anchor="middle">1</text>
@@ -141,8 +141,7 @@
   <path d="M502 546H712L730 590L712 634H502L520 590Z" fill="#F3F3F0" stroke="#B7BFAE"/>
   <circle cx="542" cy="572" r="11" fill="#5B6657"/><text class="num" x="542" y="576.3" text-anchor="middle">3</text>
   <text class="name" x="562" y="577">Refresh requested</text>
-  <text class="sub" x="534" y="602">delivery of the request only,</text>
-  <text class="sub" x="534" y="618">not what the screen shows</text>
+  <text class="sub" x="534" y="602">the refresh request was delivered</text>
 
   <path d="M728 546H960V634H728L746 590Z" fill="#F3F3F0" stroke="#B7BFAE"/>
   <circle cx="768" cy="572" r="11" fill="#5B6657"/><text class="num" x="768" y="576.3" text-anchor="middle">4</text>
