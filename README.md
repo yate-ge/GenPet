@@ -150,7 +150,7 @@ Start with the [architecture overview](docs/ARCHITECTURE.md), then see [contribu
 
 ## Research background
 
-GenPet takes inspiration from **GenFaceUI**, a meta-design framework for generative, personalized agent interfaces: designers set the rules, and each individual is generated within them. See [research foundation](docs/RESEARCH.md).
+GenPet takes inspiration from **GenFaceUI**, a meta-design framework for generative, personalized agent interfaces: designers set the rules, and each pet is generated within them. See [research foundation](docs/RESEARCH.md).
 
 ## License
 
