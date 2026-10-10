@@ -15,7 +15,7 @@
 | `src/hosts/desktop/switch.ts` | 通道二：app-tools 读取当前选中的宠物（`readSelectedPet`）；`switch-pet` 切换；`listPets` |
 | `src/hosts/desktop/frames.ts` | 两个通道共用的 4 字节小端长度前缀 JSON 帧 |
 | `src/hosts/result.ts` | 校验并保存宿主结果 `HostResult` |
-| `src/lifecycle.ts` | `hostUpdateComplete`：判断宿主更新是否足以让故事完成 |
+| `src/lifecycle.ts` | `hostUpdateComplete`：判断宿主换形象是否足以让故事完成 |
 
 ## 一次 `publish` 的流程
 
@@ -34,7 +34,7 @@
 | `updated` | 文件已写入 |
 | `active` | 该宠物当前是否被选中：true / false / null（未知） |
 | `refreshRequested` | 刷新请求已被路由器转发（只说明送达，不说明界面已变） |
-| `displayStatus` | 只有有证据时才是 `confirmed`；IPC 路径永远是 `unconfirmed`，因为没有测量界面里的精灵图哈希 |
+| `displayStatus` | 只有实际确认了显示时才是 `confirmed`；IPC 路径永远是 `unconfirmed`，因为没有测量界面里的精灵图哈希 |
 | `refreshUnavailable` + `notice` | **本轮新增**：必须刷新但通道不可用（应用没开、通道缺失或协议变化）。文件已写入，下次 Codex 加载宠物时生效 |
 | `error` | 更新失败，故事不能完成 |
 
