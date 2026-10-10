@@ -1,19 +1,19 @@
 # GenPet 文档索引
 
-运行时的产品规则只有一个来源：[framework/prompts/meta.md](../framework/prompts/meta.md)。各单元提示词在 [framework/prompts](../framework/prompts/)，运行合同与宿主接入说明在 [framework/references](../framework/references/)。
+运行时的产品规则只有一个来源：[framework/prompts/meta.md](../framework/prompts/meta.md)。各单元提示词在 [framework/prompts](../framework/prompts/)，运行约定与宿主接入说明在 [framework/references](../framework/references/)。
 
 ## 当前文档
 
 | 文档 | 内容 |
 | --- | --- |
-| [代码架构](ARCHITECTURE.md) | 三层结构、一次故事的流程、源码地图与扩展方式 |
+| [代码架构](ARCHITECTURE.zh-CN.md)（[English](ARCHITECTURE.md)） | 目标架构（2026-10-10 确认）：四层结构、一次故事的流程、宿主接口、源码地图与实现状态 |
 | [产品设计](PRODUCT_DESIGN.zh-CN.md) | 产品目标、基因、进化、新故事与输出范围 |
 | [0.6.0 命名、用户联系与性格](COMPANION_0_6.zh-CN.md) | 提示词主导的实现、必要代码与验证边界 |
 | [工程设计与待决问题](ENGINEERING.zh-CN.md) | 待决问题状态表、宿主接入、持久记录与宠物编号 |
-| [新版验证说明](NEW_VERSION_VALIDATION.zh-CN.md) | 用户验证入口、本轮工程检查与当前证据（安装脚本引用此路径） |
-| [生成证据摘要](evidence/README.md) | 各轮生成单元测试的结论与状态（原始数据、图片与完整报告只保存在本地，不入库） |
+| [新版验证说明](NEW_VERSION_VALIDATION.zh-CN.md) | 用户验证入口、本轮工程检查与当前测试记录（安装脚本引用此路径） |
+| [生成测试记录摘要](evidence/README.md) | 各轮生成单元测试的结论与状态（原始数据、图片与完整报告只保存在本地，不入库） |
 | [Agent 安装](AGENT_INSTALL.md) | 从已发布的 marketplace 安装或更新 |
-| [原生 Pet 兼容合同](NATIVE-CONTRACT.md) | 桌面原生 Pet 的 V2 图集格式与核对方式 |
+| [原生 Pet 兼容格式](NATIVE-CONTRACT.md) | 桌面原生 Pet 的 V2 图集格式与核对方式 |
 | [桌面端自动刷新模块](DESKTOP-REFRESH.zh-CN.md) | 刷新通道、结果字段、降级策略与待测清单（待在真实 Codex 上测试） |
 | [研究基础](RESEARCH.md) | GenFaceUI 理论背景 |
 
