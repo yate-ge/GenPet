@@ -1,6 +1,8 @@
 # 命名、用户联系与性格 · 0.6.0
 
-本轮采用提示词主导的轻量实现。产品规则仍以 [meta.md](../framework/prompts/meta.md) 为唯一来源，不增加性格数值、故事分类器、固定事件菜单或轮换比例。
+> 2026-10-11 归档。这是 0.6.0 那一轮的实现记录。命名、用户联系和性格现在的目标与原则见 [开发计划](../../DEVELOPMENT_PLAN.zh-CN.md)。
+
+本轮采用提示词主导的轻量实现。产品规则仍以 [meta.md](../../../framework/prompts/meta.md) 为唯一来源，不增加性格数值、故事分类器、固定事件菜单或轮换比例。
 
 ## 设计落点
 
@@ -20,11 +22,11 @@
 
 ## 修改入口与验证
 
-- [meta.md](../framework/prompts/meta.md)：用户联系、故事与状态、宠物性格、用户命名。
-- [personality.md](../framework/prompts/personality.md)：新的独立生成单元。
-- [story.md](../framework/prompts/story.md)、[evolution.md](../framework/prompts/evolution.md)：性格如何作用于故事和状态。
-- [naming.md](../framework/references/naming.md)：一次命名邀请与回答的执行方式。
-- [companion.test.ts](../tests/companion.test.ts)：提交与重试、旧记录、命名邀请、暂缓、答案防串与隔离 CLI。
+- [meta.md](../../../framework/prompts/meta.md)：用户联系、故事与状态、宠物性格、用户命名。
+- [personality.md](../../../framework/prompts/personality.md)：新的独立生成单元。
+- [story.md](../../../framework/prompts/story.md)、[evolution.md](../../../framework/prompts/evolution.md)：性格如何作用于故事和状态。
+- [naming.md](../../../framework/references/naming.md)：一次命名邀请与回答的执行方式。
+- [companion.test.ts](../../../tests/companion.test.ts)：提交与重试、旧记录、命名邀请、暂缓、答案防串与隔离 CLI。
 
 源码提示词修改在 framework；build:plugin 将它们复制到两个宿主包。当前共九个生成单元。本轮工程测试 64 项通过、1 项因平台条件跳过，类型检查与两个包的隔离安装、文件哈希、CLI 测试通过。真实用户宠物与已安装插件不在开发测试中修改。内容与实图需单独检查，尤其需要同一用户事件在不同性格下的故事对照。
 

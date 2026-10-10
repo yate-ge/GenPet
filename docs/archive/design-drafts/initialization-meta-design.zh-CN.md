@@ -2,7 +2,7 @@
 
 # 初始化元规则草案
 
-本文保留初始化元规则的设计依据；0.5.0 实际运行文件为 [meta.md](../../../framework/prompts/meta.md)。开发者修改运行文件，具体形象和故事由初始化任务形成。对应 [产品设计](../../PRODUCT_DESIGN.zh-CN.md)。
+本文保留初始化元规则的设计依据；0.5.0 实际运行文件为 [meta.md](../../../framework/prompts/meta.md)。开发者修改运行文件，具体形象和故事由初始化任务形成。对应 [产品设计](../v0.5/PRODUCT_DESIGN.zh-CN.md)。
 
 ## 规则的作用范围
 
