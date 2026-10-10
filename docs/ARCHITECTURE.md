@@ -6,26 +6,68 @@ This is the target architecture, agreed on 2026-10-10. Most of it is how GenPet 
 
 ## Principles
 
-1. **The Agent decides, the runtime records.** Creative content and decisions live in the prompt layer. `src/` handles identity, saved records, retries and putting a new appearance on the Pet Avatar, and makes no creative decision.
+1. **The Agent decides, the runtime records.** Creative content and decisions live in the prompt layer. `src/` handles identity, saved records, retries and putting a new appearance on the Pet Avatar.
 2. **The host is a layer.** User information, image generation, scheduling and the Pet Avatar are things the host provides. Each one is either called by the runtime, or used by the Agent with the host's own tools and reported back. Both paths follow the same steps.
-3. **A new appearance is checked in four separate ways.** Files written, saved image matches, refresh requested, display confirmed. Passing one does not prove another.
+3. **A new appearance is checked in four separate ways.** Files written, saved image matches, refresh requested, display confirmed. Each is saved and judged on its own.
 4. **Each rule is written once.** A rule lives in one file; other files link to it.
-5. **Imports go one way.** The core does not depend on any host.
+5. **Imports go one way.** Upper parts import lower ones: commands → story flow and everyday features → host adapters → core.
 
 ## Layers
 
-![Four layers: host, prompt layer, runtime, build and release. The runtime's host adapters reach the host's Pet Avatar through the host interface.](assets/architecture/layers.svg)
+![Three layers: host, prompt layer, runtime. The Agent in the host reads the prompt layer and runs the runtime's commands; the runtime's host adapters reach the Pet Avatar through the host interface.](assets/architecture/layers.svg)
 
 | Layer | Where | Decides |
 | --- | --- | --- |
-| Host | Codex desktop, Dots | Nothing about the pet. Provides the Agent and what it uses: user information, image generation, scheduling, the Pet Avatar. |
+| Host | Codex desktop, Dots | Provides the Agent and what it uses: user information, image generation, scheduling, the Pet Avatar. |
 | Prompt layer | `framework/` | What a pet, story, egg and Avatar must be, and how one story is made. Content stays open; the Agent decides it at runtime. |
-| Runtime | `src/` | Identity, saved records, retries, artwork files and putting a new appearance on the Pet Avatar. No creative decisions. |
-| Build and release | `scripts/`, `plugins/` | How the sources become the two installable packages. |
+| Runtime | `src/` | Identity, saved records, retries, artwork files and putting a new appearance on the Pet Avatar. |
 
-The **Pet Avatar** is the host's own entry that shows the pet: on the desktop, the Pet in Codex (the local entry under `CODEX_HOME/pets/`, or the cloud Pet it was migrated to); in Dots, the Avatar. The host also owns its list, selection and refresh. It is separate from the pet's own record under `~/.genpet/`, and from the artwork files GenPet saves for it.
+Inside the host, the Agent is the center. The user's commands and talk reach it through chat, and the scheduler triggers it for the 5-hour check. The Agent reads user information, draws with image generation, and puts new appearances on the Pet Avatar, which is what the user sees. The runtime reaches the Pet Avatar too, through the host interface.
 
-Generation units are grouped under four designer roles (details in `framework/references/generation-units.md`): **GeneDesigner** (who the pet is; adoption only), **PetDesigner** (the Avatar at each stage), **StoryDesigner** (stories, evolution, and the item a story gives the user, such as a postcard or photo) and **HomeDesigner** (the pet's home and its view). The roles only organize the prompts; the runtime does not know them.
+The three layers are connected through the Agent. The Agent reads the prompt layer to know what to do, and runs the runtime's commands to save and check each step. The runtime's host adapters reach the Pet Avatar through the host interface.
+
+The **Pet Avatar** is the host's own entry that shows the pet: on the desktop, the Pet in Codex (the local entry under `CODEX_HOME/pets/`, or the cloud Pet it was migrated to); in Dots, the Avatar. The host also owns its list, selection and refresh. GenPet keeps the pet's record and artwork files under `~/.genpet/`.
+
+## Prompt layer
+
+Logically the prompt layer is skills: one main skill, a few sub skills, and a set of references. The Agent in the host reads and runs all of them.
+
+The **main skill** handles the basics:
+
+- Entries: `/genpet` and 6 commands (start, story, grow, name, reset, stop).
+- Telling talk, a story and diagnosis apart; see [Three kinds of request](#three-kinds-of-request).
+- The main workflow: read status → decide → draw and check → appearance → finish → tell the user.
+
+It calls a sub skill only when one kind of thing has to be decided.
+
+| Sub skill | Decides | Called |
+| --- | --- | --- |
+| GeneDesigner | Who the pet is: the encounter, genes and personality. | Adoption only |
+| StoryDesigner | What happens and how it is told: the story, growth, the item the story gives the user (a postcard, a photo), and replies in chat. | Every story and chat |
+| PetDesigner | What the pet looks like: the egg, each stage, a special form. | Every new appearance |
+| HomeDesigner | The pet's home: layout, moving, the home view. | When the home changes |
+| ImageReviewer | Whether an image that was actually drawn passes. | Every image, before it is accepted |
+
+The four Designers decide; ImageReviewer checks the result. It looks at the actual generated file (full size and at the size the host shows it), against the product rules and what the Designer wrote the image must show, and the answer is accept or repair.
+
+Sub skills are roles the same Agent plays in turn. They are called in two orders:
+
+- **Adoption**: GeneDesigner → PetDesigner → ImageReviewer.
+- **A later story**: StoryDesigner → PetDesigner (only for a new appearance) → HomeDesigner (only when the home changes) → ImageReviewer (every image).
+
+**References** are the knowledge the main skill and the sub skills share: product rules, the record format, the story check schedule, naming, and the desktop and Dots formats. Whichever skill needs one refers to it, and each rule is written there once.
+
+**Today.** 0.9.4 already has all three parts, with the files organized this way: the entries are 7 thin skills that share one workflow document, and the sub skills are 12 unit prompts under `framework/prompts/`. Each unit decides one thing and can be tested on its own with `unit-request` and `verify-unit`.
+
+| Sub skill | Units today |
+| --- | --- |
+| GeneDesigner | `encounter`, `genes`, `personality` |
+| StoryDesigner | `context`, `story`, `evolution`, `carrier`, `chat`, `output` |
+| PetDesigner | `appearance` |
+| HomeDesigner | `home` |
+| ImageReviewer | `image-review` |
+
+Whether the files are also reorganized as a main skill and sub skills is left to the development phase. For where each file is, see [Where each rule is written](#where-each-rule-is-written).
 
 ## One story, end to end
 
@@ -33,20 +75,20 @@ Generation units are grouped under four designer roles (details in `framework/re
 
 1. `begin-story` creates the pet once and opens the one unfinished story for a trigger ID. Retrying the same trigger returns the same story.
 2. **Planned.** Before the `context` unit, the Agent reads the user information this host really lets it read, and notes where each piece came from. See [User information](#user-information).
-3. The Agent runs the generation units one by one and saves each result with `record-step`.
+3. Following the main workflow, the Agent calls the sub skills it needs and saves each result with `record-step`.
 4. `plan-story` checks and saves the plan once. Artwork retries keep it.
-5. The Agent draws, reviews the actual file with `image-review`, and `accept-art` copies it into the pet's assets under the plan's request ID.
+5. The Agent draws, ImageReviewer checks the actual file, and `accept-art` copies it into the pet's assets under the plan's request ID.
 6. The new appearance goes through the [host interface](#host-interface) onto the pet's own Pet Avatar, found by ID.
-7. `finish-story` saves stage, state, history and trigger together. The pet's record does not change before this.
+7. `finish-story` saves stage, state, history and trigger together. The pet's record changes at this step.
 8. `story-output` returns the finished story and its saved media for the `output` unit to present.
 
-A story does not need a new appearance. A short story with no artwork skips steps 5 and 6, so "every check has pet content" needs no new runtime path.
+A short story with no artwork skips steps 5 and 6. "Every check has pet content" uses this same flow.
 
 ## Host interface
 
 ![The shared story code calls one host interface with four functions. The desktop and Dots adapters implement it; each step is done by the runtime or by the Agent. Below, the four appearance checks, with finish-story requiring the second.](assets/architecture/host-interface.svg)
 
-Every difference between hosts sits behind one interface. The shared story code never imports a host module.
+Every difference between hosts sits behind one interface. The shared story code calls only this interface.
 
 | Function | Purpose |
 | --- | --- |
@@ -55,7 +97,7 @@ Every difference between hosts sits behind one interface. The shared story code 
 | `setAppearance` | Put the new appearance on the Pet Avatar: do the steps the runtime can do, and return the steps left for the Agent. |
 | `diagnose` | Read-only check of the record, the Avatar ID, the host's Pet list, the local-to-cloud mapping, the selection and the refresh channel. |
 
-**The same steps for both hosts.** `set-appearance` (working name) runs `setAppearance`. Whatever the runtime could not do comes back as a list for the Agent, who does it with the host's own tools and reports with `host-result`. On the desktop the runtime writes the local entry and requests the IPC refresh itself. For Dots every step is left to the Agent. Which of the remaining desktop steps the runtime can do is decided by [host tests](#host-tests), not by this design.
+**The same steps for both hosts.** `set-appearance` (working name) runs `setAppearance`. The remaining steps come back as a list for the Agent, who does it with the host's own tools and reports with `host-result`. On the desktop the runtime writes the local entry and requests the IPC refresh itself. For Dots every step is left to the Agent. Which of the remaining desktop steps the runtime can do is decided by [host tests](#host-tests).
 
 **Which Avatar gets the new appearance.** The record keeps the pet's local Avatar ID and the cloud ID last found for it. The host owns the mapping, so `findAvatar` asks the host again every time. A local `custom:` entry and the `pet_` ID it migrated to are the same Pet: the new image goes to the cloud ID, the refresh covers the cloud Pet resources, and the Pet counts as active when the host's selection matches either ID.
 
@@ -63,20 +105,20 @@ Every difference between hosts sits behind one interface. The shared story code 
 
 1. Files written: the write or upload itself succeeded.
 2. Saved image matches: the image read back from the host is the same as the accepted image.
-3. Refresh requested: the request was delivered. This says nothing about the screen.
+3. Refresh requested: the request was delivered.
 4. Display confirmed: only when the host can show what is on screen; otherwise it stays unknown.
 
-A story with a new appearance can finish once check 2 passes. If the host cannot be reached at all, the story may finish with a clear note, and the files show when the host next loads them. If the host is reachable but its saved image is different, the story stays unfinished and the next check retries. A delivered refresh request or a selection read-back never counts as seeing the new look. GenPet does not use Computer Use for any of this.
+A story with a new appearance can finish once check 2 passes. If the host cannot be reached at all, the story may finish with a clear note, and the files show when the host next loads them. If the host is reachable but its saved image is different, the story stays unfinished and the next check retries. All four checks go through the host's own interfaces: host APIs, app-tools, IPC and the plugin runtime.
 
 ## User information
 
-Reading user information is something the Agent does before writing. It is not a runtime service and not a new unit.
+Reading user information is something the Agent does before writing.
 
 - A host reference lists what each host has been tested to let the Agent read, and the limits.
 - The workflow puts the reading step before the `context` unit, for adoption and for every later story.
 - The `context` unit's existing `inputRefs` record where each piece came from. "Could not read" and "nothing new" are saved as different results.
 
-The Agent still chooses which information matters and how far back to look. There is no fixed user profile, list of sources or time window.
+The Agent chooses which information matters and how far back to look.
 
 ## Three kinds of request
 
@@ -84,11 +126,21 @@ The Agent still chooses which information matters and how far back to look. Ther
 
 | Request | When | How the reply reads |
 | --- | --- | --- |
-| Conversation | The user talks to the pet. Runs the `chat` unit; changes nothing except an optional chat note. | In the pet's voice |
+| Conversation | The user talks to the pet. Runs the `chat` unit and may save a chat note. | In the pet's voice |
 | Story | A scheduled, proactive or explicit trigger. Runs the full flow above. | In the pet's voice |
-| Diagnosis | "Load my pet", "it isn't showing", "I can't find it". Runs `diagnose`, fixes what it actually found, then checks again. Never adopts, resets, grows or redraws. | Plain and direct |
+| Diagnosis | "Load my pet", "it isn't showing", "I can't find it". Runs `diagnose`, fixes what it actually found, then checks again. It works on the host side only; the pet itself stays as it is. | Plain and direct |
 
 ## Runtime modules
+
+The runtime has five parts, matching the runtime layer in the diagram:
+
+- **Commands**: every command the Agent runs enters here and returns one JSON result.
+- **Everyday features**: story check periods, naming, chat notes and the status summary.
+- **Story flow**: begin → unit results → plan → images → appearance → finish. There is one unfinished story at a time and every step is safe to retry. The code enforces three rules: a fixed identity, stages only move forward, and growth deadlines.
+- **Host adapters**: one for the desktop and one for Dots. They check the image format, find the Avatar, set the appearance and diagnose. This is the only part of the runtime that touches a host.
+- **Core**: the saved data format, locking and atomic writes. The other parts read and write records through it.
+
+The files behind each part:
 
 | Group | Files | What it does |
 | --- | --- | --- |
@@ -108,10 +160,10 @@ The Agent still chooses which information matters and how far back to look. Ther
 | Core | `model.ts` | Saved data types and small validators. |
 | | `store.ts` | Read without side effects (`peek`), locked `transaction`, atomic writes. |
 | | `appearance.ts` | The current plan's request ID and the artwork a plan refers to. Becomes the `pending` module, see below. |
-| Support | `config.ts`, `image.ts`, `migration.ts` | Paths and prompt files; PNG/WebP reading without native modules; explicit import of v1 desktop records. |
+| Support | `config.ts`, `image.ts`, `migration.ts` | Paths and prompt files; pure-JS PNG/WebP reading; explicit import of v1 desktop records. |
 | Debugger | `debugger.ts`, `debugger-server.ts` | Optional local read-only record viewer. |
 
-**Import rule.** `cli` → Story and Everyday features → Host adapters → Core. Nothing imports upward, and Core imports no host. Files stay in the flat layout; the groups are a rule about imports, not a directory move.
+**Import rule.** `cli` → Story and Everyday features → Host adapters → Core; imports follow this direction only. Files stay in the flat layout; the groups describe the import rule.
 
 **Planned.** Today two import cycles break this rule: `lifecycle → appearance → hosts → dots → lifecycle`, and `hosts → desktop/publish → art → hosts`. `art.ts` also imports the desktop atlas check directly, and `debugger-server.ts` imports the desktop switch. The fix is small: the functions that only read the unfinished story (`pendingFor`, the request ID, the planned appearance) move into one Core module that takes the host's image format as an argument, and the format check and the Pet list go behind `validateArt` and `diagnose`.
 
@@ -125,7 +177,7 @@ The Agent still chooses which information matters and how far back to look. Ther
   backups/              full record before a reset or a legacy import
 ```
 
-One record per host; `GENPET_DATA_DIR` moves the base directory, not the per-host folder. Every change runs inside one locked transaction and is written atomically. Unit results move out of `state.json` because they are the part that keeps growing, and the whole file is rewritten on every command. Existing records stay readable. The fields are described in `framework/references/storage.md`.
+One record per host; `GENPET_DATA_DIR` moves the base directory; the per-host folders stay the same. Every change runs inside one locked transaction and is written atomically. Unit results move out of `state.json` because they are the part that keeps growing, and the whole file is rewritten on every command. Existing records stay readable. The fields are described in `framework/references/storage.md`.
 
 ## Where each rule is written
 
@@ -147,6 +199,7 @@ One record per host; `GENPET_DATA_DIR` moves the base directory, not the per-hos
 | --- | --- | --- |
 | Story lifecycle, one unfinished story, safe retries, growth deadlines | Built | None |
 | Generation units, `record-step`, single-unit tests | Built | None |
+| Prompt layer organized as main skill, sub skills and references | The content exists: 7 thin skills share one workflow document, 12 units are grouped by role, the image check is named `image-review` | Decide in the development phase whether to reorganize the files this way; rename `image-review` to ImageReviewer |
 | Desktop: local entry, IPC refresh, selection read and switch | Built | Becomes the runtime's part of `setAppearance` |
 | Dots: save the Avatar ID, leave the appearance change to the Agent | Built, not tested on a real Dots host | Test on Dots |
 | Host interface | Adapter has `appearanceKind`, `artContract`, `commands` | Add `validateArt`, `findAvatar`, `setAppearance`, `diagnose` |
@@ -155,13 +208,13 @@ One record per host; `GENPET_DATA_DIR` moves the base directory, not the per-hos
 | Saved-image check before finishing | Not recorded; a story finishes on `active: false` or a requested refresh | Save the read-back result; `finish-story` requires it |
 | Reading user information | The `context` unit receives whatever it is given; no reading step | Host reference of readable sources, workflow step, sources saved in `inputRefs` |
 | Three kinds of request | `/genpet` leads to conversation only | Add diagnosis, built on `diagnose` |
-| One-way imports, Core without hosts | Two import cycles, two direct host imports | Move the unfinished-story functions into Core |
+| One-way imports | Two import cycles, two direct host imports | Move the unfinished-story functions into Core |
 | Unit results saved per story | Inside `state.json` | One file per story |
 | Each rule written once | Some rules repeated across files | Move each to its one file |
 
 ### Host tests
 
-These three facts decide whether a step is done by the runtime or by the Agent. The structure is the same either way.
+These three facts decide whether a step is done by the runtime or by the Agent.
 
 1. Can the plugin runtime, a Node process, replace a cloud Pet's artwork itself, or can only the Agent call the Pets API?
 2. Can the local-to-cloud mapping be read through a host interface, or only from the client's own storage?
@@ -169,12 +222,12 @@ These three facts decide whether a step is done by the runtime or by the Agent. 
 
 ### Open decision
 
-How the release is delivered. The marketplace clones this repository in full under a 30-second limit, and the history is far larger than the current files. The options are rewriting the history or publishing from a branch that holds only `plugins/` and the marketplace file. Neither changes the structure above.
+How the release is delivered. The marketplace clones this repository in full under a 30-second limit, and the history is far larger than the current files. The options are rewriting the history or publishing from a branch that holds only `plugins/` and the marketplace file.
 
 ## Extending
 
 - **Change a product rule**: edit `meta.md`. Only touch a unit prompt if its review points depend on that rule.
-- **Add or change a generation unit**: edit its prompt and its entry in `units.json` together. `unit-request` and `verify-unit` pick it up; nothing in `src/` changes.
+- **Add or change a generation unit**: edit its prompt and its entry in `units.json` together. `unit-request` and `verify-unit` pick it up.
 - **Add a host**: write an adapter that implements the host interface and adds its own commands. Register it in `hosts/index.ts`, add `config/host.json` and a plugin directory, add the package name to `scripts/build-plugin.ts`, and write its reference with what you tested the host can do.
 - **Add a command**: add an entry to the command table in `cli.ts`, or to the host adapter's `commands` if only one host needs it. Keep the logic in the feature module.
 - **Change a skill**: edit `framework/skills/` for shared skills. Host-only skills live in `plugins/<package>/skills/`.
@@ -185,4 +238,4 @@ How the release is delivered. The marketplace clones this repository in full und
 
 ## Checks
 
-`npm run verify:fast` runs type-checking, formatting and unit tests. `npm run verify:release` additionally builds, installs both packages into a temporary Codex home and runs the installed CLI and debugger. These checks only prove the code works. Whether a story or image is right is judged separately with the Codex-run suite in `tests/agent/README.zh-CN.md`.
+`npm run verify:fast` runs type-checking, formatting and unit tests. `npm run verify:release` additionally builds, installs both packages into a temporary Codex home and runs the installed CLI and debugger. These checks cover the code. Whether a story or image is right is judged with the Codex-run suite in `tests/agent/README.zh-CN.md`.

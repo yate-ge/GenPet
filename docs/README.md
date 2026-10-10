@@ -6,7 +6,7 @@
 
 | 文档 | 内容 |
 | --- | --- |
-| [代码架构](ARCHITECTURE.zh-CN.md)（[English](ARCHITECTURE.md)） | 目标架构（2026-10-10 确认）：四层结构、一次故事的流程、宿主接口、源码地图与实现状态 |
+| [代码架构](ARCHITECTURE.zh-CN.md)（[English](ARCHITECTURE.md)） | 目标架构（2026-10-10 确认）：三层结构、一次故事的流程、宿主接口、源码地图与实现状态 |
 | [产品设计](PRODUCT_DESIGN.zh-CN.md) | 产品目标、基因、进化、新故事与输出范围 |
 | [0.6.0 命名、用户联系与性格](COMPANION_0_6.zh-CN.md) | 提示词主导的实现、必要代码与验证边界 |
 | [工程设计与待决问题](ENGINEERING.zh-CN.md) | 待决问题状态表、宿主接入、持久记录与宠物编号 |

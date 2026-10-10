@@ -70,12 +70,12 @@
 
   <!-- 3 -->
   <rect x="370" y="264" width="260" height="60" rx="8" fill="#FFFFFF" stroke="#6E8A3C"/>
-  <text class="name" x="500" y="284" text-anchor="middle">Generation units</text>
-  <text class="sub" x="500" y="301" text-anchor="middle">context → story → evolution →</text>
-  <text class="sub" x="500" y="316" text-anchor="middle">appearance · home · carrier</text>
+  <text class="name" x="500" y="284" text-anchor="middle">Sub skills decide</text>
+  <text class="sub" x="500" y="301" text-anchor="middle">GeneDesigner · StoryDesigner</text>
+  <text class="sub" x="500" y="316" text-anchor="middle">PetDesigner · HomeDesigner</text>
   <rect x="690" y="264" width="260" height="60" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
   <text class="cmd" x="820" y="289" text-anchor="middle">record-step</text>
-  <text class="sub" x="820" y="308" text-anchor="middle">saves each unit result</text>
+  <text class="sub" x="820" y="308" text-anchor="middle">saves each result</text>
   <path class="flow" d="M630 294H688" marker-end="url(#a)"/>
   <circle cx="370" cy="264" r="11" fill="#4E6B22"/><text class="num" x="370" y="268.3" text-anchor="middle">3</text>
 
@@ -95,7 +95,7 @@
   <text class="sub" x="180" y="476" text-anchor="middle">built-in imagegen, sprite helpers</text>
   <rect x="370" y="432" width="260" height="60" rx="8" fill="#FFFFFF" stroke="#6E8A3C"/>
   <text class="name" x="500" y="457" text-anchor="middle">Draw and review</text>
-  <text class="sub" x="500" y="476" text-anchor="middle">image-review on the actual file</text>
+  <text class="sub" x="500" y="476" text-anchor="middle">ImageReviewer checks the actual file</text>
   <rect x="690" y="432" width="260" height="60" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
   <text class="cmd" x="820" y="457" text-anchor="middle">accept-art</text>
   <text class="sub" x="820" y="476" text-anchor="middle">format checks, copy into assets</text>
