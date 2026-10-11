@@ -110,9 +110,12 @@ export async function chooseCandidate(
       throw new Error('Include a candidate with a visible output');
     const weights = candidates.map(candidate => {
       if (input.purpose !== 'story') return 1;
-      if (!candidate.outputs?.length) return recent.visualRequired || !candidate.contextRefs.length ? 0 : 1;
+      const textOnly = !candidate.outputs?.length;
+      if (textOnly && (recent.visualRequired || !candidate.contextRefs.length)) return 0;
       const last = recent.items.findLastIndex(item =>
-        item.outputs.some(output => candidate.outputs!.includes(output as 'appearance' | 'home' | 'item')),
+        textOnly
+          ? !item.outputs.length
+          : item.outputs.some(output => candidate.outputs!.includes(output as 'appearance' | 'home' | 'item')),
       );
       return recent.items.length - last;
     });

@@ -5105,7 +5105,7 @@ function growth(state, now = Date.now()) {
     since: iso(since),
     advanceBy: deadline === null ? null : iso(deadline),
     experiences,
-    canAdvance: pet.state.stage !== "adult" && (required === "advance" || pet.state.stage !== "egg" && experiences >= EXPERIENCES_TO_GROW),
+    canAdvance: pet.state.stage !== "adult" && (required === "advance" || experiences >= EXPERIENCES_TO_GROW),
     paused: clock.pausedAt !== void 0,
     special,
     required
@@ -6258,9 +6258,10 @@ async function chooseCandidate(store2, operationId, input, seed) {
       throw new Error("Include a candidate with a visible output");
     const weights = candidates.map((candidate) => {
       if (input.purpose !== "story") return 1;
-      if (!candidate.outputs?.length) return recent.visualRequired || !candidate.contextRefs.length ? 0 : 1;
+      const textOnly = !candidate.outputs?.length;
+      if (textOnly && (recent.visualRequired || !candidate.contextRefs.length)) return 0;
       const last = recent.items.findLastIndex(
-        (item) => item.outputs.some((output) => candidate.outputs.includes(output))
+        (item) => textOnly ? !item.outputs.length : item.outputs.some((output) => candidate.outputs.includes(output))
       );
       return recent.items.length - last;
     });
@@ -6446,10 +6447,6 @@ async function finishStory(store2, id) {
     if (pending.mode === "story" && !appearanceChanged && !hasVisibleMedia) {
       if (!plan.contextRefs?.length) throw new Error("A text-only story needs a user-related context reference");
       const sources = /* @__PURE__ */ new Set();
-      for (const story2 of state.stories) {
-        sources.add(story2.id);
-        for (const ref of story2.contextRefs ?? []) sources.add(ref);
-      }
       for (const owner of [...state.stories, pending])
         for (const step of owner.steps ?? []) {
           if (step.unit !== "context") continue;
@@ -6463,7 +6460,7 @@ async function finishStory(store2, id) {
       for (const round of pet.soul.acquisition?.journey?.rounds ?? [])
         for (const ref of round.inputRefs) sources.add(ref);
       for (const chat of state.chats ?? []) sources.add(chat.id);
-      if (pet.memory.storyId) sources.add(pet.memory.storyId);
+      for (const story2 of state.stories) if (story2.contextRefs?.some((ref) => sources.has(ref))) sources.add(story2.id);
       if (plan.contextRefs.some((ref) => !sources.has(ref)))
         throw new Error("The context reference is not present in the saved inputs or shared history");
       if (recentContent(state).visualRequired)

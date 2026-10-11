@@ -63,7 +63,7 @@ export function commitExperience(
   }
   return true;
 }
-/** Invoke after changing stage/form, after committing that story's memory, to start the next stage at zero. */
+/** Invoke after changing stage/form; the transition story does not add an experience to the new stage. */
 export function stageAdvance(state: State, at = Date.now()): void {
   const pet = state.pet;
   if (!pet) return;
@@ -115,9 +115,7 @@ export function growth(state: State, now = Date.now()) {
     since: iso(since),
     advanceBy: deadline === null ? null : iso(deadline),
     experiences,
-    canAdvance:
-      pet.state.stage !== 'adult' &&
-      (required === 'advance' || (pet.state.stage !== 'egg' && experiences >= EXPERIENCES_TO_GROW)),
+    canAdvance: pet.state.stage !== 'adult' && (required === 'advance' || experiences >= EXPERIENCES_TO_GROW),
     paused: clock.pausedAt !== undefined,
     special,
     required,

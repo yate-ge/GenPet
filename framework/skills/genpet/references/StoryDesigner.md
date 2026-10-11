@@ -6,6 +6,8 @@ For a story, bind operation to the starting Pet ID and add --pet PET_ID to subse
 
 Run story then evolution as separate results. State, growth and memory follow the story, with required deadline changes and forced grow included accurately. Only rewrite memory when worth remembering; the completed rewrite counts once. soul stays unchanged. Pass appearance to PetDesigner and home to HomeDesigner only when needed, run story-item for the story's particular object. Pure text needs actual user-related contextRefs and remains within runtime streak rule.
 
+Before forming candidates, read growth.canAdvance as well as required. Sufficient accumulated experiences can carry the next stage before its ceiling; prefer a real life change, otherwise use the existing shared experiences. The egg ceiling is not a minimum wait. Do not expose experience counts. A saved Pet-only story ID does not establish a user-related context item for pure text.
+
 Build and save one plan, then continue artwork/host work without rerolling content. Finish-story commits valid state/memory/history together. Output reads actual saved media and completed facts; outfit-only content may be silent, ordinary text says what it thinks instead of narrating an already visible action. Growth has a new-image portrait; hatch includes its home and one naming invitation.
 
 Keep the detailed internal story separate from final output. Read the final text without its earlier episodes: ordinary object names and a necessary short connection should suffice. Give the Pet a clear reason to care and a small discovery; do not publish placement lists, temporary object labels or visual-review explanations. Images carry visible actions and layout, words add the thought they cannot show.

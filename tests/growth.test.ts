@@ -94,10 +94,13 @@ test('actual memory rewrites count once, unchanged content and retrying any comm
   assert.equal(growth(state, START + 8)!.canAdvance, false);
   assert.equal(growth(state, START + 8)!.since, new Date(START + 8).toISOString());
 });
-test('five egg experiences do not bypass the five-hour hatch, and initial plans count no experience', () => {
+test('five egg experiences allow early hatching; the five-hour ceiling is not a minimum and initial plans count zero', () => {
   const state = fixture('egg');
-  for (let i = 1; i <= 5; i++) commitExperience(state, `egg-${i}`, `New egg memory ${i}`, START + i);
-  assert.equal(growth(state, START + 5)!.canAdvance, false);
+  for (let i = 1; i <= 4; i++) commitExperience(state, `egg-${i}`, `New egg memory ${i}`, START + i);
+  assert.equal(growth(state, START + 4)!.canAdvance, false);
+  commitExperience(state, 'egg-5', 'New egg memory 5', START + 5);
+  assert.equal(growth(state, START + 5)!.canAdvance, true);
+  assert.equal(growth(state, START + 5)!.required, null);
   assert.equal(growth(state, START + 5 * 3600000)!.canAdvance, true);
   state.pending = {
     id: 'init',

@@ -197,10 +197,6 @@ export async function finishStory(store: Store, id: string) {
     if (pending.mode === 'story' && !appearanceChanged && !hasVisibleMedia) {
       if (!plan.contextRefs?.length) throw new Error('A text-only story needs a user-related context reference');
       const sources = new Set<string>();
-      for (const story of state.stories) {
-        sources.add(story.id);
-        for (const ref of story.contextRefs ?? []) sources.add(ref);
-      }
       for (const owner of [...state.stories, pending])
         for (const step of owner.steps ?? []) {
           if (step.unit !== 'context') continue;
@@ -214,7 +210,8 @@ export async function finishStory(store: Store, id: string) {
       for (const round of pet.soul.acquisition?.journey?.rounds ?? [])
         for (const ref of round.inputRefs) sources.add(ref);
       for (const chat of state.chats ?? []) sources.add(chat.id);
-      if (pet.memory.storyId) sources.add(pet.memory.storyId);
+      // A Pet-world story ID alone is not a user fact. Only carry forward a grounded reference.
+      for (const story of state.stories) if (story.contextRefs?.some(ref => sources.has(ref))) sources.add(story.id);
       if (plan.contextRefs.some(ref => !sources.has(ref)))
         throw new Error('The context reference is not present in the saved inputs or shared history');
       if (recentContent(state).visualRequired)

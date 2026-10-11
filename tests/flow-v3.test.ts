@@ -217,6 +217,58 @@ test('a made-up context reference cannot complete a text-only story', async () =
   assert.equal((await store.peek()).stories.length, 1);
 });
 
+test('story recency weights also favor a user-grounded text candidate when text has not appeared recently', async () => {
+  const { store, root } = await isolated();
+  await adopted(store, root);
+  await store.transaction(state => {
+    const first = state.stories[0];
+    for (let i = 1; i <= 3; i++)
+      state.stories.push({ ...first, id: `visible-${i}`, triggerId: `visible-${i}`, appearanceChanged: true });
+  });
+  const op = (await beginStory(store, 'recency')).pending!.id;
+  const candidates = {
+    purpose: 'story' as const,
+    candidates: [
+      { id: 'thought', description: 'A thought about the shared choice', contextRefs: ['fixture:shared-event'] },
+      {
+        id: 'outfit',
+        description: 'A visible outfit from that choice',
+        contextRefs: ['fixture:shared-event'],
+        outputs: ['appearance' as const],
+      },
+    ],
+  };
+  const choice = await chooseCandidate(store, op, candidates, 'text-recency');
+  assert.ok('weights' in choice);
+  assert.ok(choice.weights[0] > choice.weights[1]);
+  assert.equal((await chooseCandidate(store, op, candidates)).candidateId, choice.candidateId);
+});
+
+test('a saved Pet-only story or its memory ID cannot substitute for a user-related text context', async () => {
+  const { store, root } = await isolated();
+  await adopted(store, root);
+  await store.transaction(state => {
+    const previous = state.stories[0];
+    state.stories.push({
+      ...previous,
+      id: 'pet-only-world',
+      triggerId: 'pet-only-world',
+      text: 'A fictional cloud passed its window without any user-related input.',
+      contextRefs: [],
+    });
+    state.pet!.memory = { text: 'A cloud passed.', storyId: 'pet-only-world', updatedAt: Date.now() };
+  });
+  const op = (await beginStory(store, 'pet-only-reference')).pending!.id;
+  await planStory(store, op, {
+    text: 'Another thought about that cloud.',
+    reason: 'Pet-only reference is a negative fixture.',
+    state: 'Quiet',
+    contextRefs: ['pet-only-world'],
+  });
+  await assert.rejects(() => finishStory(store, op), /not present in the saved inputs/);
+  assert.equal((await store.peek()).pending!.id, op);
+});
+
 test('a final nonempty story item cannot silently finish without its actual image', async () => {
   const { store, root } = await isolated();
   await adopted(store, root);
