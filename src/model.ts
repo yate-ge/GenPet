@@ -217,6 +217,8 @@ export interface State {
     status: 'exported' | 'imported';
     at: number;
     previousTransferId?: string;
+    /** Connects a newly installed transfer to its registry clock publication. */
+    activityTransferId?: string;
   };
   /** Read-only legacy views are never silently adopted by a mutation. */
   needsImport?: boolean;

@@ -48,8 +48,10 @@ export function validateHostResult(
   if (input.refreshUnavailable !== undefined && typeof input.refreshUnavailable !== 'boolean')
     throw new Error('Invalid host result');
   if (input.refreshUnavailable && !input.notice?.trim()) throw new Error('refreshUnavailable requires a notice');
-  if (input.displayStatus === 'confirmed' && !input.observed?.trim())
-    throw new Error('Confirmed display requires observed host evidence');
+  if (input.displayStatus === 'confirmed')
+    throw new Error(
+      'The available host interfaces provide no evidence of the displayed image; keep displayStatus unconfirmed',
+    );
   return {
     petId: input.petId,
     operationId,

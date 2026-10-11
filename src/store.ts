@@ -42,10 +42,12 @@ export async function atomicJson(file: string, value: unknown) {
 }
 async function readJson(file: string): Promise<any | null> {
   try {
-    return JSON.parse(await readFile(file, 'utf8'));
+    const record = JSON.parse(await readFile(file, 'utf8'));
+    if (record === null) throw new Error('Record is null');
+    return record;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
-    throw error;
+    throw new Error(`Cannot read Pet record ${file}: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 interface Activity {
@@ -54,6 +56,7 @@ interface Activity {
   pausedAt?: number;
   lastActivatedAt?: number;
   lastInactiveAt?: number;
+  transferId?: string;
   archived?: { at: number; replacesPetId: string };
 }
 interface Registry {
@@ -65,12 +68,13 @@ interface Registry {
 export interface StoredPet {
   id: string;
   name: string;
-  stage: Stage;
+  stage?: Stage;
   binding?: Binding;
   active: boolean;
   archived: boolean;
   directory: string;
   file: string;
+  error?: string;
 }
 const jsonEqual = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 const key = (id: string) => encodeURIComponent(identifier(id)).replace(/\./g, '%2E');
@@ -107,13 +111,8 @@ export class Store {
   private async canonicalIds(): Promise<string[]> {
     try {
       const dirs = await readdir(path.join(this.root, 'pets'), { withFileTypes: true });
-      const ids: string[] = [];
-      for (const dir of dirs) {
-        if (!dir.isDirectory()) continue;
-        const record = await readJson(path.join(this.root, 'pets', dir.name, 'state.json'));
-        if (record?.version === 3 && record.pet) ids.push(identifier(record.pet.id, 'petId'));
-      }
-      return ids;
+      // A damaged JSON file still has an identity and must remain visible in the inventory.
+      return dirs.filter(dir => dir.isDirectory()).map(dir => identifier(decodeURIComponent(dir.name), 'petId'));
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') return [];
       throw error;
@@ -131,30 +130,68 @@ export class Store {
       return raw;
     }
     const ids = await this.canonicalIds();
-    const records = await Promise.all(ids.map(id => readJson(path.join(this.petDirectory(id), 'state.json'))));
-    const order = ids.map((id, index) => ({ id, at: records[index]?.pet?.adoptedAt ?? 0 })).sort((a, b) => a.at - b.at);
+    const records = await Promise.all(
+      ids.map(id => readJson(path.join(this.petDirectory(id), 'state.json')).catch(() => ({ recordError: true }))),
+    );
+    const order = ids
+      .map((id, index) => ({ id, at: records[index]?.pet?.adoptedAt ?? 0 }))
+      .filter((_, index) => records[index] !== null)
+      .sort((a, b) => a.at - b.at);
     const activePetId = order.at(-1)?.id;
     return {
       version: 1,
       host: this.host,
       ...(activePetId ? { activePetId } : {}),
-      pets: ids.map((id, index) => ({
-        id,
-        pausedMs: records[index]?.growthClock?.pausedMs ?? 0,
-        ...(records[index]?.growthClock?.pausedAt !== undefined
-          ? { pausedAt: records[index].growthClock.pausedAt }
-          : {}),
-      })),
+      pets: ids.flatMap((id, index) =>
+        records[index] === null
+          ? []
+          : [
+              {
+                id,
+                pausedMs: records[index]?.growthClock?.pausedMs ?? 0,
+                ...(records[index]?.handoff?.activityTransferId
+                  ? { transferId: records[index].handoff.activityTransferId }
+                  : {}),
+                ...(records[index]?.growthClock?.pausedAt !== undefined
+                  ? { pausedAt: records[index].growthClock.pausedAt }
+                  : {}),
+              },
+            ],
+      ),
     };
   }
-  private async readPet(id: string, registry: Registry): Promise<State> {
+  private async readPet(id: string, registry: Registry, allowNew = false, recoverTransfer = false): Promise<State> {
     const file = path.join(this.petDirectory(id), 'state.json');
     const raw = await readJson(file);
-    if (!raw) return fresh(this.host);
-    const state = normalizeRecord(raw, this.host, file);
-    if (state.pet?.id !== id) throw new Error('Pet directory identity mismatch');
     const activity = registry.pets.find(pet => pet.id === id);
-    if (activity && state.pet) {
+    if (raw === null) {
+      if (allowNew && !activity && registry.activePetId !== id) return fresh(this.host);
+      throw Object.assign(new Error(`Pet ${id} record is missing: ${file}`), {
+        code: 'GENPET_RECORD_MISSING',
+        registered: !!activity || registry.activePetId === id,
+      });
+    }
+    let state: State;
+    try {
+      state = normalizeRecord(raw, this.host, file);
+      if (state.pet?.id !== id) throw new Error('Pet directory identity mismatch');
+    } catch (error) {
+      throw new Error(
+        `Pet ${id} record is invalid: ${file}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+    const incompleteTransfer =
+      state.handoff?.status === 'imported' &&
+      state.handoff.activityTransferId !== undefined &&
+      state.handoff.activityTransferId !== activity?.transferId;
+    if (incompleteTransfer && !recoverTransfer)
+      throw Object.assign(
+        new Error(`Pet ${id} transfer activity is not committed: ${file}; resume the same transfer`),
+        {
+          code: 'GENPET_TRANSFER_INCOMPLETE',
+        },
+      );
+    if (activity && state.pet && !incompleteTransfer) {
       const clock = ensureGrowthClock(state)!;
       clock.pausedMs = activity.pausedMs;
       if (activity.pausedAt !== undefined) clock.pausedAt = activity.pausedAt;
@@ -169,8 +206,9 @@ export class Store {
     if (!state.pet) return;
     for (const owner of [...state.stories, ...(state.pending ? [state.pending] : [])]) {
       if (owner.stepsCount === undefined) continue;
-      if (!Number.isSafeInteger(owner.stepsCount) || owner.stepsCount < 0) throw new Error('Invalid story steps count');
       const file = path.join(this.petDirectory(state.pet.id), 'stories', `${key(owner.id)}.json`);
+      if (!Number.isSafeInteger(owner.stepsCount) || owner.stepsCount < 0)
+        throw new Error(`Invalid story steps count: ${file}`);
       const saved = await readJson(file);
       if (
         !saved ||
@@ -179,7 +217,7 @@ export class Store {
         !Array.isArray(saved.steps) ||
         saved.steps.length < owner.stepsCount
       )
-        throw new Error('Story unit snapshot is missing or incomplete');
+        throw new Error(`Story unit snapshot is missing or incomplete: ${file}`);
       owner.steps = saved.steps.slice(0, owner.stepsCount).map(normalizeStep);
     }
   }
@@ -200,29 +238,62 @@ export class Store {
   }
   async listPets(): Promise<StoredPet[]> {
     const registry = await this.registry();
-    const ids = [...new Set([...registry.pets.map(pet => pet.id), ...(await this.canonicalIds())])];
+    const ids = [
+      ...new Set([
+        ...registry.pets.map(pet => pet.id),
+        ...(registry.activePetId ? [registry.activePetId] : []),
+        ...(await this.canonicalIds()),
+      ]),
+    ];
     const result: StoredPet[] = [];
     for (const id of ids) {
-      const state = await this.readPet(id, registry);
-      if (!state.pet) continue;
       const entry = registry.pets.find(pet => pet.id === id);
-      result.push({
+      const row: StoredPet = {
         id,
-        name: state.pet.name,
-        stage: state.pet.state.stage,
-        ...(state.pet.binding ? { binding: state.pet.binding } : {}),
+        name: id,
         active: registry.activePetId === id,
         archived: !!entry?.archived,
         directory: this.petDirectory(id),
         file: path.join(this.petDirectory(id), 'state.json'),
-      });
+      };
+      try {
+        const state = await this.readPet(id, registry);
+        row.name = state.pet!.name;
+        row.stage = state.pet!.state.stage;
+        if (state.pet!.binding) row.binding = state.pet!.binding;
+      } catch (error) {
+        row.error = error instanceof Error ? error.message : String(error);
+        // Readable identity/binding can still route a broken snapshot to an explicit error.
+        const raw = await readJson(row.file).catch(() => null);
+        try {
+          const state = normalizeRecord(raw, this.host, row.file);
+          if (state.pet?.id === id) {
+            row.name = state.pet.name;
+            row.stage = state.pet.state.stage;
+            if (state.pet.binding) row.binding = state.pet.binding;
+          }
+        } catch {
+          // The error and original path remain on the row; no record is repaired or removed.
+        }
+      }
+      result.push(row);
     }
     return result;
   }
   /** An operation stays attached to its original Pet even when the host selection changes. */
   async forOperation(id: string): Promise<Store> {
     identifier(id, 'operationId');
-    for (const pet of await this.listPets()) {
+    const pets = await this.listPets();
+    for (const pet of pets) {
+      if (pet.error) {
+        const raw = await readJson(pet.file).catch(() => null);
+        if (
+          raw?.pending?.id === id ||
+          (Array.isArray(raw?.stories) && raw.stories.some((story: { id: string }) => story.id === id))
+        )
+          throw new Error(pet.error);
+        continue;
+      }
       const candidate = this.forPet(pet.id),
         state = await candidate.peek();
       if (state.pending?.id === id) {
@@ -233,7 +304,10 @@ export class Store {
     }
     const current = await this.peek();
     if (current.pending?.id === id || current.stories.some(story => story.id === id)) return this;
-    throw new Error('Operation belongs to a missing Pet');
+    const errors = pets.filter(pet => pet.error).map(pet => pet.error);
+    throw new Error(
+      `Operation belongs to a missing Pet${errors.length ? `; unreadable records: ${errors.join('; ')}` : ''}`,
+    );
   }
   async readSteps(storyId: string): Promise<GenerationStep[]> {
     const state = await this.peek();
@@ -330,13 +404,16 @@ export class Store {
       : [];
     if (matches.length > 1) throw new Error('Host binding maps to more than one GenPet');
     const registry = await this.registry();
-    const id = matches[0]?.id ?? registry.activePetId ?? pets.find(pet => !pet.archived)?.id;
+    const id = matches[0]?.id ?? registry.activePetId ?? pets.find(pet => !pet.archived && !pet.error)?.id;
     if (id) await this.selectPet(id, now);
     return {
       petId: id ?? null,
       matched: !!matches.length,
       selectionRead: selectedHostId !== undefined,
       selectedHostId: selectedHostId ?? null,
+      ...(pets.some(pet => pet.error)
+        ? { errors: pets.filter(pet => pet.error).map(pet => ({ petId: pet.id, file: pet.file, error: pet.error })) }
+        : {}),
     };
   }
 
@@ -435,7 +512,8 @@ export class Store {
       const replaced = registry.pets.find(pet => pet.id === state.replacesPetId);
       if (replaced) replaced.archived ??= { at: now, replacesPetId: id };
     }
-    await this.validateBindingUniqueness(state, registry);
+    if (!before?.pet || !jsonEqual(before.pet.binding, state.pet?.binding))
+      await this.validateBindingUniqueness(state, registry);
     const record = structuredClone(state);
     delete record.needsImport;
     delete record.legacyFile;
@@ -533,7 +611,7 @@ export class Store {
       if (!source?.pet?.id) throw new Error('No Pet to import');
       const id = identifier(source.pet.id, 'petId'),
         registry = await this.registry();
-      const existing = await this.readPet(id, registry);
+      const existing = await this.readPet(id, registry, true);
       if (existing.pet) {
         this.activate(registry, id, now);
         await atomicJson(this.registryFile, registry);
@@ -556,9 +634,26 @@ export class Store {
     const id = identifier(state.pet.id, 'transferred petId');
     return this.locked(async () => {
       const registry = await this.registry();
-      const existing = await this.readPet(id, registry);
+      const existing = await this.readPet(id, registry, true, true);
       if (existing.pet) {
         if (existing.handoff?.status === 'imported' && existing.handoff.id === state.handoff!.id) {
+          if (
+            existing.handoff.activityTransferId !== undefined &&
+            registry.pets.find(pet => pet.id === id)?.transferId !== existing.handoff.activityTransferId
+          ) {
+            const clock = ensureGrowthClock(existing)!;
+            const recovered: Activity = {
+              id,
+              pausedMs: clock.pausedMs,
+              transferId: existing.handoff.activityTransferId,
+              ...(clock.pausedAt !== undefined ? { pausedAt: clock.pausedAt } : {}),
+              ...(clock.lastActivatedAt !== undefined ? { lastActivatedAt: clock.lastActivatedAt } : {}),
+              ...(clock.lastInactiveAt !== undefined ? { lastInactiveAt: clock.lastInactiveAt } : {}),
+            };
+            const index = registry.pets.findIndex(pet => pet.id === id);
+            if (index < 0) registry.pets.push(recovered);
+            else registry.pets[index] = recovered;
+          }
           this.activate(registry, id, now);
           await atomicJson(this.registryFile, registry);
           this.selectedId = id;
@@ -579,6 +674,7 @@ export class Store {
       const entry: Activity = {
         id,
         pausedMs: clock.pausedMs,
+        transferId: state.handoff!.id,
         ...(clock.pausedAt !== undefined ? { pausedAt: clock.pausedAt } : {}),
         ...(clock.lastActivatedAt !== undefined ? { lastActivatedAt: clock.lastActivatedAt } : {}),
         ...(clock.lastInactiveAt !== undefined ? { lastInactiveAt: clock.lastInactiveAt } : {}),
@@ -596,8 +692,8 @@ export class Store {
         if (replaced) replaced.archived ??= { at: now, replacesPetId: id };
       }
       await this.validateBindingUniqueness(state, registry);
-      // Publish incoming activity first. An interruption cannot project the old host's pause history onto it.
-      await atomicJson(this.registryFile, registry);
+      state.handoff!.activityTransferId = state.handoff!.id;
+      // The record comes first; its transfer receipt prevents applying stale registry clocks after interruption.
       await this.persist(state, registry, undefined, now);
       return this.readPet(id, registry);
     });

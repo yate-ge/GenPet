@@ -1,6 +1,6 @@
 ---
 name: genpet-switch
-description: List, inspect or immediately switch the ordinary Codex desktop Pet when the user explicitly invokes /genpet-switch.
+description: Inspect the current Codex desktop Pet and use supported host selection APIs to switch it when the user explicitly invokes /genpet-switch.
 ---
 
 # genpet-switch

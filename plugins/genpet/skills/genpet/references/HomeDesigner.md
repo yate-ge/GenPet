@@ -6,4 +6,6 @@ Describe a complete livable place: where it is, surroundings, individual activit
 
 Plan a real panorama for the first home or moving, and when another change is worth seeing. Put the home and surroundings in view with the Pet a small part; choose a readable composition and the actual reference from before. Newly adopted eggs have no home.
 
+When the Pet appears, also supply its accepted current-stage portrait as identity and pixel-style reference. The old home reference preserves layout and objects; it must not replace the Pet reference. Keep the Pet's body, organs and clear color blocks, and coordinate the surroundings with that visual language rather than drawing a smooth character with jagged edges.
+
 Record home result separately, hand its visual to the image subagent/ImageReviewer, save accepted art and update the full description through the story plan. The description and image agree on objects and layout. Never use house changes to invent the user's behavior or reason for absence.

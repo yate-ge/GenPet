@@ -13,6 +13,16 @@ async function load() {
   el('error').textContent = '';
   try {
     const selected = el('pet').value;
+    const pets = await get('/api/pets');
+    el('pet').replaceChildren(new Option('当前记录', ''));
+    for (const pet of pets)
+      el('pet').add(
+        new Option(
+          `${pet.name || pet.id} · ${pet.id}${pet.error ? ' · 记录异常' : pet.archived ? ' · 已归档' : ''}`,
+          pet.id,
+        ),
+      );
+    el('pet').value = selected;
     const suffix = selected ? '?pet=' + encodeURIComponent(selected) : '';
     const { state, token: secret } = await get('/api/state' + suffix);
     token = secret;
@@ -39,11 +49,6 @@ async function load() {
       el('art').append(detail);
     }
     show('host', await get('/api/native-pets' + suffix));
-    const pets = await get('/api/pets');
-    el('pet').replaceChildren(new Option('当前记录', ''));
-    for (const pet of pets)
-      el('pet').add(new Option(`${pet.name} · ${pet.id}${pet.archived ? ' · 已归档' : ''}`, pet.id));
-    el('pet').value = selected;
   } catch (error) {
     el('error').textContent = `读取记录失败：${error.message}`;
   }

@@ -54,6 +54,6 @@ The output remains transparent v2: 1536×2288, 8×11 cells of 192×208. Ordinary
 
 Every observed source revision, replaced processing output, report, negative candidate and command log is retained. Metadata histories live in `.history`; source and processing revisions live under `qa/source-history`. Development artifacts go to the user's Google Drive and stay out of git.
 
-`processing_seconds` and step timings measure deterministic work. The fifteen-minute goal requires a real timed run including generation, review and handoff; fixture tests or parallel manifests do not prove it.
+`processing_seconds` and step timings measure deterministic work. The twenty-minute goal requires a real timed run from preparation through generation, review, same-ID update and stored-art readback; fixture tests or parallel manifests do not prove it.
 
 GenPet changed `prepare_pet_run.py`, `process_pet_run.py`, `extract_strip_frames.py` and `validate_atlas.py`, and added `prepare_strip.py`. Run the full `tests/artwork_pipeline_test.py` suite with a Python runtime containing Pillow after changes, then validate a real generated atlas.

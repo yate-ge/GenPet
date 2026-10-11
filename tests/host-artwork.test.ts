@@ -9,7 +9,7 @@ import { artworkFingerprint, verifyStoredArtwork } from '../src/hosts/artwork.js
 import { Store } from '../src/store.js';
 import { acceptArt, artRequest } from '../src/art.js';
 import { bindCloud } from '../src/hosts/cloud.js';
-import { recordHostResult } from '../src/hosts/result.js';
+import { recordHostResult, validateHostResult } from '../src/hosts/result.js';
 import { finishStory } from '../src/lifecycle.js';
 
 test('canonical artwork hashes ignore invisible RGB and preserve every visible pixel', async () => {
@@ -72,6 +72,12 @@ test('host success requires actual readback and a mismatched picture leaves the 
   await assert.rejects(finishStory(store, operationId), /stored|verified|Host/i);
   assert.equal((await store.peek()).pending!.id, operationId);
   await copyFile(file, readbackFile);
+  const selfReported = { ...base, displayStatus: 'confirmed' as const, observed: 'I can see the new Pet.' };
+  assert.throws(() => validateHostResult(state, operationId, selfReported), /displayed image/);
+  await assert.rejects(
+    recordHostResult(store, operationId, { ...selfReported, readbackFile }, { selection: noSelection }),
+    /displayed image/,
+  );
   assert.equal(
     (await recordHostResult(store, operationId, { ...base, readbackFile }, { selection: noSelection }))
       .storedArtworkVerified,
@@ -79,4 +85,10 @@ test('host success requires actual readback and a mismatched picture leaves the 
   );
   await finishStory(store, operationId);
   assert.equal((await store.peek()).pending, null);
+  // Historical receipts remain readable; this compatibility cannot authorize a new confirmation.
+  const saved = JSON.parse(await readFile(store.file, 'utf8'));
+  await writeFile(path.join(root, 'before-historical-receipt.json'), JSON.stringify(saved, null, 2));
+  saved.stories[0].hostResult.displayStatus = 'confirmed';
+  await writeFile(store.file, JSON.stringify(saved));
+  assert.equal((await store.peek()).stories[0].hostResult!.displayStatus, 'confirmed');
 });

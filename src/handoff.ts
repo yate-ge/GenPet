@@ -2,7 +2,7 @@
 import { access, cp, mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { identifier, type Host, type State } from './model.js';
+import { fresh, identifier, type Host, type State } from './model.js';
 import { atomicJson, Store } from './store.js';
 
 export async function exportPet(store: Store, target: Host, destination: string) {
@@ -92,7 +92,20 @@ export async function importPet(store: Store, directory: string) {
     manifest.state.handoff?.status !== 'exported'
   )
     throw new Error('Invalid or mismatched Pet transfer');
-  const existing = await store.forPet(manifest.petId).peek();
+  const existing = await store
+    .forPet(manifest.petId)
+    .peek()
+    .catch(async error => {
+      if (error.code === 'GENPET_RECORD_MISSING' && !error.registered) return fresh(store.host);
+      if (error.code === 'GENPET_TRANSFER_INCOMPLETE') {
+        const incoming = structuredClone(manifest.state);
+        incoming.host = store.host;
+        incoming.handoff!.status = 'imported';
+        if (incoming.pet!.binding) incoming.pet!.binding.host = store.host;
+        return store.installTransfer(incoming);
+      }
+      throw error;
+    });
   if (existing.handoff?.id === manifest.transferId && existing.handoff.status === 'imported')
     return { petId: manifest.petId, transferId: manifest.transferId, imported: true, duplicate: true };
   if (existing.pet && existing.handoff?.status !== 'exported')

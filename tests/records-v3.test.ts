@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, writeFile, stat, utimes } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile, stat, utimes, rename } from 'node:fs/promises';
 import path from 'node:path';
 import { Store } from '../src/store.js';
 import { atomicJson } from '../src/store.js';
@@ -250,6 +250,50 @@ test('a story and its raw units remain bound to A after the host selects B, with
   assert.deepEqual(await original.readSteps('story-in-progress'), [step]);
   assert.deepEqual(await readFile(b.file), beforeB);
   assert.equal((await store.peek()).pet!.id, bId);
+});
+
+test('bad JSON and missing story snapshots stay visible without blocking a healthy Pet or its operation', async () => {
+  const store = new Store(await rootFor('records-damage-isolation'), 'cloud');
+  const a = await hatchling(store, 'pet_healthy', 'pet_healthy');
+  const aId = (await a.peek()).pet!.id;
+  await a.transaction(state => finish(state, 'healthy-operation', START + HOUR));
+  const b = await hatchling(store, 'pet_broken_snapshot', 'pet_broken_snapshot', START + 2 * HOUR);
+  const bId = (await b.peek()).pet!.id;
+  await b.transaction(state => {
+    state.pending = {
+      id: 'broken-operation',
+      triggerId: 'fixture',
+      petId: bId,
+      baseRevision: 0,
+      startedAt: START,
+      mode: 'story',
+      steps: [],
+    };
+  });
+  const snapshot = path.join(b.petDirectory(bId), 'stories', 'broken-operation.json');
+  await rename(snapshot, path.join(store.base, 'missing-snapshot-original.json'));
+  const damaged = await store.listPets();
+  assert.equal(damaged.find(pet => pet.id === aId)!.error, undefined);
+  assert.ok(damaged.find(pet => pet.id === bId)!.error!.includes(snapshot));
+  const beforeRouting = await readFile(store.registryFile);
+  await assert.rejects(store.resolveActive('pet_broken_snapshot'), error => String(error).includes(snapshot));
+  assert.deepEqual(await readFile(store.registryFile), beforeRouting);
+  assert.equal((await (await store.forOperation('healthy-operation')).peek()).pet!.id, aId);
+  await assert.rejects(store.forOperation('broken-operation'), error => String(error).includes(snapshot));
+  const routed = await store.resolveActive('pet_healthy', START + 3 * HOUR);
+  assert.equal(routed.petId, aId);
+  assert.ok(routed.errors!.some(error => error.petId === bId && error.error!.includes(snapshot)));
+  await writeFile(path.join(store.base, 'before-broken-json.json'), await readFile(b.file));
+  await writeFile(b.file, '{broken');
+  const listed = await store.listPets();
+  assert.ok(listed.find(pet => pet.id === bId)!.error!.includes(b.file));
+  assert.equal((await store.resolveActive('pet_healthy')).petId, aId);
+  assert.equal((await (await store.forOperation('healthy-operation')).peek()).pet!.id, aId);
+  await a.transaction(state => {
+    state.pet!.revision++;
+  });
+  await assert.rejects(b.peek(), error => String(error).includes(b.file));
+  assert.equal(await readFile(b.file, 'utf8'), '{broken');
 });
 
 test('unit file writes publish only the state-authorized prefix, preserve interrupted attempts, and forbid edits', async () => {
@@ -517,6 +561,8 @@ test('a returned main-environment transfer replaces stale activity facts and pre
   incoming.growthClock!.lastActivatedAt = START + 10 * DAY;
   incoming.growthClock!.lastInactiveAt = START + HOUR;
   const expected = growth(incoming, START + 10 * DAY)!;
+  const beforeInstallRegistry = await readFile(store.registryFile, 'utf8');
+  await writeFile(path.join(store.base, 'before-transfer-registry.json'), beforeInstallRegistry);
   const installed = await store.installTransfer(incoming, START + 10 * DAY);
   assert.equal(installed.growthClock!.pausedMs, incoming.growthClock!.pausedMs);
   assert.equal(growth(installed, START + 10 * DAY)!.advanceBy, expected.advanceBy);
@@ -526,6 +572,13 @@ test('a returned main-environment transfer replaces stale activity facts and pre
     registry.pets.find((pet: { id: string }) => pet.id === installed.pet!.id).pausedMs,
     incoming.growthClock!.pausedMs,
   );
+  // Recreate an interruption after state publication but before the registry commit.
+  await writeFile(path.join(store.base, 'published-transfer-registry.json'), await readFile(store.registryFile));
+  await writeFile(store.registryFile, beforeInstallRegistry);
+  await assert.rejects(store.peek(), /transfer activity is not committed/);
+  const resumed = await store.installTransfer(incoming, START + 10 * DAY);
+  assert.equal(resumed.growthClock!.pausedMs, incoming.growthClock!.pausedMs);
+  assert.equal(growth(resumed, START + 10 * DAY)!.advanceBy, expected.advanceBy);
   await store.transaction(state => {
     finish(state, 'after-transfer', START + 10 * DAY + HOUR, 'A meaningful new memory after returning.');
   });

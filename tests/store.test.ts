@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, writeFile, access } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile, access, rename } from 'node:fs/promises';
 import path from 'node:path';
 import { Store } from '../src/store.js';
 import { createPet } from '../src/model.js';
@@ -81,4 +81,36 @@ test('immutable soul fields can be filled once and never replaced by a later cal
     /completed story/,
   );
   assert.equal(await readFile(store.file, 'utf8'), before);
+});
+
+test('a missing selected or explicit Pet reports its identity and path and never becomes a fresh adoption', async () => {
+  const store = new Store(await rootFor('store-missing-record'));
+  const first = await store.createPet({ confirmed: true });
+  const a = store.forPet(first.pet!.id);
+  const second = await store.createPet({ confirmed: true });
+  const b = store.forPet(second.pet!.id);
+  const registry = await readFile(store.registryFile);
+  await rename(b.file, path.join(store.base, 'missing-active-original.json'));
+  const missing = (error: any) => {
+    assert.equal(error.code, 'GENPET_RECORD_MISSING');
+    assert.equal(error.registered, true);
+    assert.ok(error.message.includes(second.pet!.id));
+    assert.ok(error.message.includes(b.file));
+    return true;
+  };
+  await assert.rejects(store.peek(), missing);
+  await assert.rejects(b.peek(), missing);
+  await assert.rejects(store.resolveActive(undefined), missing);
+  await assert.rejects(store.createPet({ confirmed: true }), missing);
+  assert.equal((await a.peek()).pet!.id, first.pet!.id);
+  const listed = await store.listPets();
+  assert.equal(listed.length, 2);
+  assert.ok(listed.find(pet => pet.id === second.pet!.id)!.error!.includes(b.file));
+  assert.deepEqual(await readFile(store.registryFile), registry);
+  await assert.rejects(store.forPet('explicit-unknown').peek(), (error: any) => {
+    assert.equal(error.code, 'GENPET_RECORD_MISSING');
+    assert.equal(error.registered, false);
+    assert.ok(error.message.includes('explicit-unknown'));
+    return true;
+  });
 });

@@ -250,7 +250,7 @@ Product boundaries live in meta.md; roles and execution documents refer to them.
 | Main entry, chat, naming and five internal roles | Implemented; twelve unit contracts | Actual routing and one menu entry per command |
 | validateArt/findAvatar/setAppearance/diagnose | Implemented; migration mapping, same-ID updates, separate downloads and supported refresh tested | Actual displayed image remains unavailable from these interfaces |
 | Same-ID cloud updates and actual artwork fingerprints | Implemented; actual V1–V4 stored RGBA and brief readbacks match | Dots own-avatar linkage |
-| Parallel images, mirrors, bounded repairs and two reviews | Implemented; full V4 repeat17m12s,18m11s through brief;no static fallback | Current target20minutes;one result is not a universal guarantee |
+| Parallel images, mirrors, bounded repairs and two reviews | Implemented; new B travel set 17m42s and D mechanic set 13m24s, including 9 actions/16 directions, review, same-ID update and pixels/brief readback, no prior-art fallback | Current target20minutes; a few results are not a universal guarantee |
 | Diagnosis, same-identity repair and read-only debugger | Implemented; isolated browser reads preserve records | Actual G host conditions |
 | Pet brief, complete transfer, one writer and stale-transfer rejection | Implemented; isolated protocol tests pass | New Dots sessions and actual cross-end scheduling/readback |
 | Persistent Dots voice, setup and proactive exchange | Same-session stage/state replies and reported shared-rule readback observed | New-session and cross-environment work deferred at user's request |

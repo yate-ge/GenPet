@@ -8,6 +8,8 @@ Run story then evolution as separate results. State, growth and memory follow th
 
 Build and save one plan, then continue artwork/host work without rerolling content. Finish-story commits valid state/memory/history together. Output reads actual saved media and completed facts; outfit-only content may be silent, ordinary text says what it thinks instead of narrating an already visible action. Growth has a new-image portrait; hatch includes its home and one naming invitation.
 
+Keep the detailed internal story separate from final output. Read the final text without its earlier episodes: ordinary object names and a necessary short connection should suffice. Give the Pet a clear reason to care and a small discovery; do not publish placement lists, temporary object labels or visual-review explanations. Images carry visible actions and layout, words add the thought they cannot show.
+
 For /genpet-chat, read current Pet and run chat; note-chat preserves valuable safe user words. It changes no state, memory, art or home, and the note later joins normal context. Generic main-entry status/rename/fault requests do not call chat.
 
 Check meaningful real user contact, individual actions, a life centered on home/user, progressing unfinished business, continuity of items, natural language, no user evaluation, no invitation/next-time preview, and grounded memory. Record unexpected sameness as an observation; do not add fixed topics, personality presets or type caps.
