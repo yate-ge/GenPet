@@ -18,7 +18,7 @@
 
 ---
 
-The 0.10.0 development branch is undergoing the full [implementation and acceptance plan](docs/evidence/README.md). It has not been publicly released; the marketplace release remains 0.9.4.
+The marketplace version is **0.10.0**. See the [implementation and acceptance results](docs/evidence/README.md) for completed work and remaining host checks.
 
 A Codex desktop pet normally keeps the same look forever. GenPet gives it a life: your pet starts as an egg made just for you, hatches into a creature nobody else has, and grows up through its own stories. Every time it changes, the new look shows up on your desktop.
 

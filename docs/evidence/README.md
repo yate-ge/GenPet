@@ -1,8 +1,15 @@
 # GenPet 开发与验收摘要
 
-开发版本为 `0.10.0`，尚未公开发布或升级用户实际安装。原始报告、图片、请求及测试数据保留在本地 `output/` 和 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet。
+市场主干版本为 `0.10.0`。原始报告、图片、请求及测试数据保留在本地 `output/` 和 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet，安装验收仅在隔离 CODEX_HOME 中执行。
 
 [成果汇报 PDF](https://drive.google.com/file/d/13oSP60mjBLSoC6R1xSrA9HYetCxodSng/view) · [Word](https://docs.google.com/document/d/1WP0MAtJONsqVWJNEyP7JhSVXjJ4is6Bx/edit) · [成果目录](https://drive.google.com/drive/folders/11WW2UEENWFibU8VG2jzycz_arD-6-tCF)
+
+## 2026-10-11 同步 main
+
+- 从 `codex/full-implementation` 快进同步到 `main`，市场版本由 `0.9.4` 升级为 `0.10.0`；根包、锁文件、插件 manifest 与生成包版本一致。
+- 按发布规则运行 `npm run verify:release`：150 项通过、1 项平台跳过；类型、格式、插件重建、版本门禁、隔离安装、已安装 CLI 与可选调试器检查全部通过。
+- 隔离市场源 commit 为 `8d37bfccd6b4975f7806a5e467f7e0470c2033d7`，安装版本 `0.10.0`，安装路径 `C:/Users/geyat/Documents/workingProjects/GenPet/output/main-sync-20261011/release-tests/release-RndKhT/codex-home/plugins/cache/genpet/genpet/0.10.0`，86 个文件哈希与源包相同。检查后只更新根 README 四种语言的市场状态和本页日志，交付插件文件未变。
+- [发布检查日志](https://drive.google.com/file/d/1cYa3OiJdKYja38l3UB45TvJrp2A8IOJA/view)与[验证工程数据](https://drive.google.com/file/d/1sbZ4g0sn5U_b2UaroVqjKW0-1hhB_Mi-/view)已归档，797 个源文件含合成 fixture、隔离安装与原始输出，路径及 SHA 见[清单](https://drive.google.com/file/d/1skySZbGxq-_K72fox0tRo_QuRlRsRsAC/view)。既有生成图片仍直接保存在分类文件夹。
 
 ## 2026-10-11 最新 AGENTS.md 补齐
 
