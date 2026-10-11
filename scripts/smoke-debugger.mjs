@@ -45,5 +45,5 @@ try {
       200,
     );
   }
-  await rm(root, { recursive: true, force: true });
+  console.log(`Debugger fixtures retained: ${root}`);
 }

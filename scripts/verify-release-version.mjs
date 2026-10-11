@@ -28,7 +28,7 @@ for (let i = 0; i < 3; i++)
     comparison = Math.sign(a[i] - b[i]);
     break;
   }
-const changed = git('diff', base, '--', 'plugins', '.agents');
+const changed = git('diff', '--name-only', base, '--', 'plugins', '.agents');
 const untracked = git('ls-files', '--others', '--exclude-standard', 'plugins', '.agents');
 if (comparison < 0 || (comparison === 0 && (changed || untracked)))
   throw new Error(`Changed release must increment ${previous}; current ${current} (base ${base})`);

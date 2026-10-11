@@ -1,31 +1,27 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { refreshNativePet, isLiveDestination } from '../src/hosts/desktop/refresh.js';
+import { hostTestDirectory } from './host-fixtures.js';
 
 test('refresh for an isolated destination reports unconfirmed and never claims automatic refresh', async () => {
-  const dir = await mkdtemp(path.join(tmpdir(), 'genpet-refresh-'));
-  try {
-    const sprite = path.join(dir, 'spritesheet.webp');
-    await writeFile(sprite, Buffer.from('fixture-sprite-bytes'));
-    const outcome = await refreshNativePet({
-      expectedSpritePath: sprite,
-      timeoutMs: 200,
-    });
-    assert.equal(outcome.automaticRefresh, false);
-    assert.equal(outcome.displayStatus, 'unconfirmed');
-    assert.equal(outcome.strategy, 'none');
-    assert.equal(
-      outcome.expectedSpriteSha256,
-      createHash('sha256').update(Buffer.from('fixture-sprite-bytes')).digest('hex'),
-    );
-    assert.match(outcome.notice, /unconfirmed/i);
-  } finally {
-    await rm(dir, { recursive: true, force: true });
-  }
+  const dir = await hostTestDirectory('refresh');
+  const sprite = path.join(dir, 'spritesheet.webp');
+  await writeFile(sprite, Buffer.from('fixture-sprite-bytes'));
+  const outcome = await refreshNativePet({
+    expectedSpritePath: sprite,
+    timeoutMs: 200,
+  });
+  assert.equal(outcome.automaticRefresh, false);
+  assert.equal(outcome.displayStatus, 'unconfirmed');
+  assert.equal(outcome.strategy, 'none');
+  assert.equal(
+    outcome.expectedSpriteSha256,
+    createHash('sha256').update(Buffer.from('fixture-sprite-bytes')).digest('hex'),
+  );
+  assert.match(outcome.notice, /unconfirmed/i);
 });
 
 test('isLiveDestination matches GenPet entries in the current Codex home unless skipped', () => {

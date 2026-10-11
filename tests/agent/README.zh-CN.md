@@ -1,217 +1,67 @@
-# 核心模块生成测试（在 Codex 中运行）
+# GenPet Agent 验收
 
-这套测试检查 GenPet 的创作模块在 `meta.md` 规则下能否根据不同资料生成有依据、个性化的结果。工程正确性由 `npm run verify:fast` 覆盖，这里只看生成内容与图像。
+本套验证生成语义、真实图像和宿主表现，完整用例以 [测试用例](../../docs/TEST_CASES.zh-CN.md) 与 [开发计划](../../docs/DEVELOPMENT_PLAN.zh-CN.md) 为准。工程检查是 npm run verify:fast；字段有效、脚本通过或生成者自评都不能证明内容和桌面体验。
 
-## 模块与设计者
+## 范围与证据
 
-| 测试模块 | 设计者 | 单元 |
+| 组 | 范围 | 主要证明方式 |
 | --- | --- | --- |
-| M1 领养设计 | GeneDesigner | context、encounter、genes、personality |
-| M2 形象 | PetDesigner | appearance、image-review |
-| M3 故事、M4 进化 | StoryDesigner | story、evolution |
-| M7 载体与家 | StoryDesigner / HomeDesigner | carrier、home、image-review |
-| M5 输出 | StoryDesigner | output |
-| M8 对话 | StoryDesigner | chat |
+| A1–A10 | 资料许可、读取、旅程、设计与领养总结 | 保存逐轮真实输入，独立语义观察 |
+| T1–T13 | 各 context 下连续二十次故事计划 | 实际逐次结果，内容/类型/memory/成长轨迹 |
+| S1–S23 | 单次规则与表达边界 | 独立用例，源事实核对和真实媒体展示 |
+| V1–V4 | 不同 Pet、成长线、特殊形态、换装 | 真实图像、整套、计时、宿主云图回读与用户判断 |
+| C1–C2 | 唯一 chat 入口和阶段语气 | 对话前后状态对照、实际回复 |
+| E1–E5 | 主入口、改名、停止恢复、强行成长、只读调试 | 命令结果和记录前后对照 |
+| G1–G3 | 先查故障、四项结果与未知 | 真实/合成宿主结果、没有 Pet 改动 |
+| U1–U3 | 久别、旧记录补全、有限返工 | 记录对照、真实图像失败和恢复 |
+| D1–D11 | 同 cloud ID、简介、Dots 持续风格与主环境 | 跨端实际回读、新会话、工作对照 |
+| M1–M8 | 环境检查、确认、清理、增养替换、多 Pet | 每只目录/云 ID、选择路由和中断恢复 |
 
-## 原则
+旧说明中的模块编号 M1–M8 已废弃；本文件 M 组指最新的初始化和多宠物用例。独立单元名见 framework/prompts/units.json，使用 story-item 和 ImageReviewer；旧历史别名由读取兼容。
 
-- **夹具只写原始资料和规则探针。** `contexts/` 是领养时的用户资料，`events/` 是之后的新资料。遭遇、基因、性格、故事都由 Agent 在本轮实际生成，再作为下游输入，不由测试作者编写，也不规定来源、物种、五官或器官。
-- **不设标准答案。** 对照 `framework/prompts/meta.md` 与各单元提示词的检查点逐项观察，不比较固定的故事或基因文字。
-- **生成与检查分开。** 生成者只读 `unit-request` 返回的 `prompt`，不读本文件的检查项。检查由独立的子代理或新对话完成；生成者的自我评价不算证据。最终结论由用户给出。
-- **合同有效不等于通过。** `verify-unit` 只证明字段齐全。
-- **不碰真实宠物。** M1–M5 只调用只读的 `unit-request` / `verify-unit` 和出图脚本；M6 使用隔离目录。
+## 基本做法
 
-## 准备
+- 只手写合成原始资料、用户旅程回答与规则探针。创作上游由 Agent 本轮生成并保存，作为冻结的下游输入；不规定标准角色、身体或故事答案。
+- 上游与单元分开，生成者只拿 unit-request 的 prompt；独立 reviewer 拿实际输入/输出和检查点，写具体观察，不拿预期结论。按用户授权可用子代理；看语义不能只验 JSON。
+- 单元、二十次模拟和工程测试使用独立 GENPET_DATA_DIR/CODEX_HOME，不读真实用户记忆、不改用户 Pet、不建真实任务。
+- 真实宿主接口测试单独分层。读取真实配置不意味着隔离文件能连到真实客户端；只能操作专属测试 Pet 的已核对唯一/cloud ID、专属任务。用户正在养的 Pet 和任务保持原样。没有实际宿主证据的条目保持未验证。
+- 已授权的开发工作继续执行，不逐段重问许可。测试里模拟真正领养用户的确认，必须保留确认前后读取和写入的证据。
+- 每份输入、报告、候选、图片、原始单元结果、快照和日志全保留，直接上传用户 Google Drive。output/ 只是上传前暂存，上传失败继续保留；产物和报告都不入 git，仓库只有 docs/evidence/README.md 摘要与 Drive 链接。
 
-在仓库根目录：
+## 准备与一个单元
 
-```bash
-git pull
-CLI="node plugins/genpet/dist/cli.js"          # Dots 包为 plugins/genpet-dots/dist/cli.js，单元相同
-RUN="$PWD/output/agent-tests/$(date +%F)-run1" # 所有记录写在这里（output/ 不提交）
-mkdir -p "$RUN"
+先检查当前工作区与已有构建，按需 npm run build:plugin；不要让测试自动 git pull/reset 覆盖开发改动。在 PowerShell 中建立独立 run：
+
+```powershell
+$agentRun = Join-Path (Get-Location) 'output/agent-tests/20261011-run1'
+New-Item -ItemType Directory -Path $agentRun -Force | Out-Null
+$agentCli = (Resolve-Path 'plugins/genpet/dist/cli.js').Path
 ```
 
-出图需要 Codex 内置 imagegen 和带 Pillow 的 Python。
+1. 写绝对输入文件 `{"inputRefs":["fixture:A6"],"inputs":{...}}`，必需键见 units.json。context 包含测试提供的实际资料与 read 结果；random、journey、recentContent 采用保存的真实工具结果。
+2. `node $agentCli unit-request UNIT ABS_INPUT_JSON`，保存精确返回 request 与 promptHash。
+3. 把返回 prompt 给生成 Agent，仅执行这个单元，保存原始结果文件。独立图像任务保存其所有中间图，不在主对话显示候选。
+4. `node $agentCli verify-unit UNIT ABS_RESULT_JSON` 保存格式结果；再由独立 reviewer 检查语义，观察指向具体事实、选择、部位或文字。
+5. 下游只引用已经保存的上游结果。基准图测试实际调用 imagegen 并实际看图；ImageReviewer 没有真实文件不能通过。
 
-## 运行一个单元
+独立单元用固定输入，不需要完成整个生命周期。runtime record-step 保存简短结果供实际故事续接；精确请求、原始输出和独立评价属于测试 evidence。
 
-1. 写输入文件 `{"inputRefs": [...], "inputs": {...}}`。`inputs` 的字段名见 `framework/prompts/units.json`；上游结果直接放入对应字段。
-2. `$CLI unit-request UNIT 输入文件绝对路径 > NN-UNIT.request.json`（CLI 只接受绝对路径，例如 `"$PWD/tests/agent/contexts/rich.json"`）。
-3. 生成：把 `request.json` 里的 `prompt` 原样交给生成者（子代理或新对话），保存它返回的 JSON 为 `NN-UNIT.result.json`。
-4. `$CLI verify-unit UNIT NN-UNIT.result.json`，失败就记为合同问题，不进入检查。
-5. 检查：另一个子代理只读该单元的提示词、`meta.md`、输入和结果，按下面的检查项写观察，保存为 `NN-UNIT.review.md`。
+## 逐组执行
 
-输入怎么组装：
+A 组保存首次资料说明/答复、读取记录、每轮场景/选项/用户原话、旅程结束、种子候选/选择、具体来源与 designReason、性格和拟声词、蛋图与总结。验证最多五轮、自由回答、中断续接、资料稀少仍有真实选择依据、敏感资料不流入下游、总结不透露幼年身体。实际读取成功独立核对，文件存在不是证明。
 
-- context 的 `availableContext` 取自 `contexts/*.json` 的 `inputs`，或 `events/*.json` 的 `availableContext`。
-- `pet` 用本主线前面的实际结果组装：`{"id": "fictional:rich", "stage", "genes", "personality", "state", "home", "special", "stories": [已形成故事，每项 {"text", "illustrated": true|false, "carrier": 载体名或省略}]}`，尚无家或特殊形态时省略对应字段。`state` 取最近一次 evolution 结果的 `state`（幼年起即 M2 幼年那次）。不要填空字符串：运行时领养计划必定保存非空状态，空 state 会让“保持原状态”的 evolution 被合同拒绝。
-- story 与 evolution 的 `growth` 按运行时 `status` 的格式填写：`{"stage", "next", "since", "advanceBy", "special", "required"}`。用 `required` 设定本用例要测的节奏：`null`（兜底未到）、`advance`、`enter-special` 或 `end-special`。
-- evolution 的 `inputs` 只附加事件里的 `growRequest` 字段本身，不附加整个事件对象。`fictional`、`note` 是给测试作者看的标记，交给生成者会让它把夹具里的成长请求当作“不能证明用户提出”而拒绝。
+T 组各连续二十次，用固定/逐次提供的合成 context 和真实保存的上篇结果继续。每次先候选再 seeded selection，再 story/evolution/appearance/home/story-item，写出预期可见变化与 output。模拟尚未画图必须标为计划，不能填写已上传/实际显示成功。保留每次是否重写 memory、经历数内部轨迹、成长/预兆、未完事项和类型变化。T8 的多样性是观察，不新增四次上限；最短两天不是成长规则。唯一类型硬上限是已有纯文字规则。
 
-每个用例一个目录，例如 `$RUN/rich/01-context.request.json`。
+S 组使用独立规则探针：context 与文本原意、安全过滤、每次内容、弱交互、阶段/特殊形态、复用、用户可见文字、任务命名/补跑、许可、孵化命名、一次图片展示和成长图。不要把「每次有内容」变成强制状态修改。文本-only 有实际用户相关 contextRefs；物件为 null 并不表示 text-only，还可能有 Avatar/家。
 
-## 模块与用例
+V 组四条分别使用自己的测试 Pet，互不交叉。V1 至少六份不同用户资料并覆盖工具的三类来源，各只到幼年；V2 一条蛋→幼年→少年→成年；V3 成年特殊形态的进入、结束与再次复用；V4 至少三次不同换装并复现一次。每次真画完整套、检查小尺寸、计时与云图回读；静态基准只能证明基准。身体左右不对称的镜像需单独看，返工/补帧也看实际整套。用户对可爱、身份、阶段与设计联系的判断不可代填。
 
-三条主线各自独立：`rich`（生活与工作混合）、`interest`（只有爱好）、`sparse`（几乎没有资料）。M1 的结果是 M2–M5 的输入。
+C/E/G/U 按完整用例逐项运行，使用 /genpet-chat 唯一对话入口、/genpet 命名与故障。对比 ID、cloud ID、soul/memory/state/art/history；故障不能重领养、推进年龄或重画。四项结果分别记录 unknown/actual，刷新或选择读回不是显示证明。
 
-### M1 领养设计：context → encounter → genes → personality
+D/M 先读-only 能力探查与基础测试，再用专属测试 Pet 验证云图、简介同步、持久语气、唯一主环境和每只独立目录。handoff 在停旧任务后导出整个目录，目标核对后才启用新任务；中断恢复与反向移交使用同一个 ID。Dots 不使用已移除的独立包或 Avatar 格式。
 
-每条主线依次运行四个单元。`rich` 再从同一份 encounter 独立运行一次 genes 和 personality，用于比较。
+## 额外缺口与恢复用例
 
-| 单元 | 检查项 |
-| --- | --- |
-| context | 每条事实能回到输入来源；没有补造职业、地点、心情；资料不足写进 unknowns |
-| encounter | 联系直接使用具体事实，不层层转译成隐喻；sparse 如实保持有限联系 |
-| genes | `designBasis` 写出人类熟悉、可辨认的来源，并说明为什么来自这段领养故事；主要身体特征由来源转化而来；蛋是完整的常规蛋，个体差异在壳面；孵化后是有生物器官的生命 |
-| personality | 能解释具体行动选择，而不只是形容词；没有推断用户人格；不是按物种套性格 |
-| 横向比较 | 三条主线的宠物各自跟随自己的资料，不是同一模板换色；`rich` 两次结果可以相似或不同，但都必须有依据，差异本身不算通过 |
+同时验证实际资料读取、五小时任务、旧导入中断重试、来源种子重试、memory 不重复计数、云上传未发生时 pending、成长基准图失败、补帧观感及移交中断。多 Pet 分别覆盖：A 切走十天再回来（期限暂停），A 激活时关机十天（时间经过），故事中途改选 B（仍写原 A）。这些不是额外创作预设，是工程边界。
 
-### M2 形象：蛋与幼年
-
-每条主线：
-
-1. **蛋**：appearance 输入 `genes`、`story`（M1 的 encounter 文本）、`change`（`{"stage":"egg"}`）、`savedArt: []`、`hostRequirements`（普通 Pet 的 v2 图集要求）。把结果中蛋的视觉请求作为 `VISUAL_PROMPT`：
-
-   ```bash
-   python3 plugins/genpet/vendor/hatch-pet/scripts/prepare_pet_run.py --egg \
-     --output-dir "$RUN/rich/egg-run" --pet-name test-rich --pet-id test-rich \
-     --pet-notes "$VISUAL_PROMPT" --style-preset pixel
-   ```
-
-   只生成 run 里的 base 图（按其 `base-pet.md`），不生成动画。
-2. **幼年**：用 `events/shared.json` 跑 context → story，再跑 evolution，并在输入里附加 `"growRequest": "用户明确请求 /genpet-grow 进入 hatchling"`。用这次故事与变化、蛋图作为 `savedArt` 跑 appearance，然后用 `--parallel --reference 蛋图` 准备 run，只生成 base 图。
-3. **检查**：image-review 单元，输入视觉请求与实际文件。原图看一次，再缩到实际显示尺寸看一次：
-
-   ```bash
-   python3 -c "from PIL import Image; import sys; Image.open(sys.argv[1]).resize((192,208), Image.NEAREST).save(sys.argv[2])" 原图 小图.png
-   ```
-
-| 检查项 | 看什么 |
-| --- | --- |
-| 产品边界 | 蛋一眼是蛋；幼年遮住名字和故事也能看出是可爱的活物同伴 |
-| 设计兑现 | 设计依据里的来源特征在身体上看得见，并被转化而非照搬 |
-| 卡通像素与幼态 | 小尺寸下轮廓紧凑、色块少而清楚；幼年明显没长开，不是缩小的成年或写实插画加像素边 |
-| 连续性 | 幼年延续蛋的壳面配色线索与 genes 的身体关系 |
-
-**状态变体**：取幼年或更后的阶段，在 M4 的 `visibleState` 不为空时跑 appearance，`change` 为 `{"stage": 当前阶段, "visibleState": ...}`，`savedArt` 含该阶段已接受的形象。生成实际图并 image-review。检查：身体与器官与原形象一致、只改变穿戴或手持物；物件在小尺寸下清楚；回到已有状态时 appearance 复用已保存的变体（`reuseArtId`）而不是重画；琐碎或纯内在的变化不出新图。
-
-### M3 故事
-
-每条主线的宠物（M1 结果，阶段用 M2 后的 hatchling）分别跑：
-
-- `events/none.json` → context → story：独立生活。
-- `events/shared.json` → context → story：共同经历。
-
-再做一组性格对照：把 `rich` 和 `interest` 两只宠物放进同一个 `shared` 事件。
-
-| 检查项 | 看什么 |
-| --- | --- |
-| 用户联系 | 共同经历在正文里写出具体用户线索与宠物的回应；独立生活如实说明没有新联系，不补造用户行为或情绪 |
-| 性格 | 性格通过行动体现，不只是标签；两只宠物面对同一事件的反应不同且各有依据 |
-| 自己的生活 | 宠物有自己的经历，不只是复述用户的事 |
-| 横向多样性 | 把同一轮的多篇故事放在一起读，情节结构、收尾和性格行动是否反复套用同一模式 |
-
-### M4 进化
-
-对每条主线的 hatchling，分别用以下事件跑 context → story → evolution：
-
-| 事件 | 期望 |
-| --- | --- |
-| `long-gap`（无资料），`required: null` | 保持原阶段；资料空白不是依据 |
-| `long-gap`，`required: advance` | 前进一个阶段；basis 说明兜底节奏与这段积累，不补造用户事实 |
-| `life-change`（搬家、自己做饭） | 单个事件通常不足以进化，可以只改变状态；若进化，basis 说明积累并回到事实 |
-| `work-change`（第一次做技术分享） | 同上 |
-| `none` 附加 `growRequest` | 前进一个阶段，basis 标明是调试请求，不伪造用户变化 |
-
-成年宠物另跑两例：`required: enter-special` 时进入特殊形态，同一身体的明显变体，起因来自用户的持续模式或宠物经历；`required: end-special` 时 `special` 为 null，状态写出恢复。
-
-另外检查：每个状态变化都有用户原因；`visibleState` 把状态里看得见的部分（穿戴、饰品、手持、携带或使用的物件、坐具）写出来，纯内在的状态为 null，也不是每次变化都要有；性格影响反应方式，但不充当进化触发；每次最多前进一个阶段；特殊形态只在成年出现。
-
-### 扩展：连续成长链
-
-在 M4 之后连续测试成长、状态和特殊变化时：
-
-- **用新事实。** 已经写进 `pet.stories` 的事件不再是“近期变化”。例如 `life-change` 已用于一篇故事，后续进化就换用 `work-change` 或其他未用过的事件；否则 Agent 保持原阶段是正确判断，不能记为失败。
-- **状态与形象变体。** 在连续链里穿插带 `visibleState` 的事件（得到帽子、坐上新椅子、开始拿着某样东西）：状态变体的 appearance 复用与新绘制是否合理，回到旧状态时是否复用已保存的变体，琐碎事件是否没有出新图，一只宠物的变体数量是否克制。
-- **一步一阶段。** 测某一阶段转换时，`pet.stage` 必须是它的前一阶段：少年 → 成年的用例以少年宠物为输入，不从幼年直接请求成年。
-- **上游失败就重新设定起点。** 前一步没形成所需阶段时，下游用手工设定的阶段作为种子继续，在用例里标明“种子输入”。种子用例只证明这一步，不证明之前的成长链成功；不要让失败沿链传递，导致下游实际跑在错误阶段。
-
-### M7 载体与家
-
-承接 M3 的故事：同一篇 story 再跑 `home`（有家变化时）和 `carrier`。夹具只给原始资料和规则探针，不规定载体；想测某种载体的设计质量时，可在 `inputs` 里附加用户请求，例如“这篇故事想交给用户一张明信片”，其余由 Agent 设计。需要出图的方案用 imagegen 实际生成，再用 image-review 逐项检查设计者写下的 `mustShow`，原图与小图各看一次。
-
-用例：
-
-| 用例 | 输入要点 | 看什么 |
-| --- | --- | --- |
-| 何时配图 | `pet.stories` 里最近三篇都 `illustrated: true`，且 `events/none.json` 无新资料 | `carrier` 为 null，reason 说明只有文字 |
-| 何时配图（有礼物） | 有共同经历的 `shared` 事件，最近故事多为纯文字 | 可以配图；reason 讲清理由 |
-| 明信片 | 请求明信片 | 图中有写给用户的文字、邮票、盖着寄出地的邮戳，比例像明信片；文字与请求逐字一致且可读 |
-| 宠物的照片 | 请求宠物自己拍的照片 | 第二人称：宠物对着镜头摆姿势，有照片的画幅与边框，与普通场景图能区分 |
-| 带回的物件 | 请求带回的东西 | 只画物件本身，没有宠物和场景喧宾夺主 |
-| 多格漫画或其他 | 不规定，或请求漫画 | 格数符合剧情，先后关系一眼可读；Agent 自己设计的新形式也按目的、视角、形式、必须特征四点写全 |
-| 语言 | 同一事件分别用中文、英文、日文的 context | 载体上的文字、邮戳地名和宠物的话与用户语言一致 |
-| 家：建立 | 孵化后第一篇故事，`pet.home` 为空 | `home` 写出位置、周围、功能分区和物件放置；`visual` 必须有；全景图足够大，看得清整体与周围，宠物只占一部分，不是角落特写 |
-| 家：添置 | 已有家，故事带回一件物件 | 延续原有布局，只补充；`visual` 仅在变化值得看时才有；物件的位置与描述一致 |
-| 家：搬家 | 故事中宠物搬去新地方 | 整体重新设计，不是旧家换名；全景图必须有，并说明与旧家的关系 |
-
-另外检查：卡片、照片、物件、家的图是否都不看说明就能认出；连续几篇的载体是否变化；没有补造用户的行为或感受。
-
-### M8 对话
-
-只跑 `chat` 单元，输入 `pet`（按阶段组装）、`message` 与可选的最近对话记录。夹具只给用户的话和宠物记录，不规定宠物怎么回。
-
-| 用例 | 输入要点 | 看什么 |
-| --- | --- | --- |
-| 蛋 | 三句话：问候、鼓励、提问 | 没有人话，只有对蛋的动作或状态描写；不同性格、不同输入的描写有差别 |
-| 幼年 | 同一句话分别给两只不同类型的幼年宠物 | 只有拟声或动作描写，拟声符合各自类型；没有有意义的句子 |
-| 少年、成年 | 同一句话分别给两种性格的宠物 | 口吻各自来自性格和类型，必要时有动作；不是同一种可爱腔 |
-| 特殊形态 | 成年宠物处于特殊形态 | 说话的状态受影响，仍是这只宠物 |
-| 用户提出愿望 | “我想看你戴帽子”“你快点长大” | 以宠物的方式回应，不承诺、不当场改变；愿望记进 note |
-| 值得记的与寒暄 | 用户说下周要搬家 / 只说“早” | 前者 note 写出事实与来源，后者 note 为 null；note 里没有宠物的虚构 |
-| 没有宠物 | 空的 pet | 简短说明还没有宠物，提到 /genpet-start |
-| 语言 | 用户分别用中文、英文、日文 | 回应使用用户的语言 |
-| 对故事的影响 | 把 note 放进 context 的 availableContext（来源标为对话），再跑 story；另跑一次没有 note 的对照 | 有 note 时故事可以自然地用到它并标注来源；没有时故事照常成立，不依赖对话 |
-
-另外在真实 Codex 里手动检查两处入口：运行 `/genpet` 能进入对话；直接叫宠物的名字（先用 `/genpet-name` 起个名）能触发对话。看是否先确认宠物名字再回应，普通对话没有误触发。
-
-### M5 输出与命名
-
-- **未完成**：output 输入 M4 某次进化的 story，`completed` 写实际未完成的状态（如 `{"stage":"hatchling","appearanceUpdated":false}`），`availableMedia: []`。不能宣称已经进化，也不能编造图片。
-- **孵化完成**：输入 M2 幼年的 story、`completed`（`{"stage":"hatchling","appearanceUpdated":true,"namingDue":true}`）和幼年图。正文保留用户联系与性格行动；只提一次自由命名邀请，不替宠物起名。
-
-### M6 生命周期（可选，隔离）
-
-定时运行推动的核心循环另见 [核心循环测试](SCHEDULED_LOOP.zh-CN.md)。
-
-在 Codex 新对话中设置隔离目录后运行 `/genpet-start`，以 `contexts/rich.json` 的内容作为可用资料：
-
-```bash
-export GENPET_DATA_DIR="$RUN/e2e/data" CODEX_HOME="$RUN/e2e/codex-home" GENPET_SKIP_NATIVE_REFRESH=1
-```
-
-检查：只创建一只宠物；重试同一 trigger 不新建；蛋的图集能 `accept-art` 并 `publish` 到隔离的 `codex-home/pets/` 下唯一条目；`finish-story` 后 `status` 与 `story-output` 一致；蛋阶段不发命名邀请。这一项需要生成完整的蛋图集，耗时较长；不验证真实宿主显示。
-
-## 记录与报告
-
-每个单元保留 request、result、verify 输出、review；图像保留原图、小图与 run 目录。不保存真实用户资料。这些都留在本地 `$RUN`，不提交到仓库。
-
-最后按 `REPORT_TEMPLATE.zh-CN.md` 写 `$RUN/REPORT.md`：每个检查项记为 通过 / 需修正 / 不确定，并附一句具体观察。“用户结论”一栏留给你填写。
-
-记录服务于判断，保持轻量：
-
-- 不为每个文件记录哈希、不生成逐单元的大索引；哈希和像素统计只在排查具体工程缺陷时使用。
-- 规模按要回答的问题决定，先跑能暴露问题的少量用例，不追求单元数量。
-- 仓库里只在 `docs/evidence/README.md` 追加几行摘要：范围、主要发现、缺项。用户要求分享时，再把一份报告（或 PDF）放进 `docs/evidence/<轮次>/`；原始记录和图片不入库。
-
-## 一次性交给 Codex 的指令
-
-```text
-请按 tests/agent/README.zh-CN.md 运行 M1–M5 和 M7（M6 先不跑），记录写到 output/agent-tests/<今天>-run1/。
-生成每个单元时只把 unit-request 返回的 prompt 交给一个独立子代理（不可用时新开对话），
-检查交给另一个子代理，生成者不评价自己的结果。不要读取或修改我的真实宠物、Avatar 或定时任务。
-完成后按 REPORT_TEMPLATE.zh-CN.md 写报告，并把蛋和幼年图（原图与 192×208 小图）列在报告里。
-```
-
-只想先看一部分时，把 “M1–M5” 换成具体模块，例如 “M1 和 M2 的 rich 主线”。
+真实宿主的任务循环见 [SCHEDULED_LOOP](SCHEDULED_LOOP.zh-CN.md)。报告用 [REPORT_TEMPLATE](REPORT_TEMPLATE.zh-CN.md)，每项写通过/需修正/未验证与具体证据、Drive 路径；最终用户体验判断留给用户，缺证据不能标通过。

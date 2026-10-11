@@ -8,11 +8,13 @@ import net from 'node:net';
 import path from 'node:path';
 import { codexHome } from '../../config.js';
 import { encodeFrame, readFrames } from './frames.js';
+import { readMigrationMap } from './mapping.js';
 
 export interface PetEntry {
   id: string;
   displayName: string;
-  source: 'builtin' | 'local';
+  source: 'builtin' | 'local' | 'cloud';
+  localId?: string;
 }
 
 // Static catalog verified in Codex 26.924.2738.0; it does not include account-specific cloud pets.
@@ -31,10 +33,11 @@ const BUILTIN_PETS: PetEntry[] = [
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-/** Builtin pets plus local manifests; one broken manifest is reported without hiding the rest. */
+/** Builtins and local entries, resolving migrated aliases to the current account's cloud IDs. */
 export async function listPets(home = codexHome()): Promise<{ pets: PetEntry[]; errors?: string[] }> {
   const errors: string[] = [];
   const local = new Map<string, PetEntry>();
+  const migration = await readMigrationMap(home);
   for (const [directory, filename] of [
     ['avatars', 'avatar.json'],
     ['pets', 'pet.json'],
@@ -62,9 +65,11 @@ export async function listPets(home = codexHome()): Promise<{ pets: PetEntry[]; 
         for (const key of ['id', 'displayName'])
           if (manifest[key] !== undefined && (typeof manifest[key] !== 'string' || !(manifest[key] as string).trim()))
             throw new Error('Invalid name');
-        const id = `custom:${entry.name}`;
+        const localId = `custom:${entry.name}`;
+        const cloudId = migration.available ? migration.mappings[localId] : undefined;
+        const id = cloudId ?? localId;
         const displayName = ((manifest.displayName ?? manifest.id ?? entry.name) as string).trim();
-        local.set(id, { id, displayName, source: 'local' });
+        local.set(id, { id, displayName, source: cloudId ? 'cloud' : 'local', ...(cloudId ? { localId } : {}) });
       } catch {
         errors.push(`${directory}/${entry.name}/${filename}: 无法读取有效宠物清单`);
       }
@@ -78,6 +83,7 @@ export interface AppToolsOptions {
   /** Explicit null disables the environment fallback, for isolated tests. */
   pipePath?: string | null;
   threadId?: string | null;
+  turnId?: string | null;
   timeoutMs?: number;
 }
 
@@ -139,9 +145,28 @@ export async function switchPet(args: string[]) {
   if (target.startsWith('-') && target !== '--list') throw new Error(SWITCH_USAGE);
   const catalog = await listPets();
   if (target === '--list') return catalog;
-  if (!catalog.pets.some(pet => pet.id === target))
-    throw new Error(`Unknown pet ID: ${target}. Use switch-pet --list.`);
-  return selectPet(target);
+  const entry = catalog.pets.find(pet => pet.id === target || pet.localId === target);
+  if (!entry) throw new Error(`Unknown pet ID: ${target}. Use switch-pet --list.`);
+  appToolsConnection({});
+  if (!process.env.CODEX_TURN_ID?.trim())
+    return {
+      operation: 'select-pet',
+      targetId: entry.id,
+      selected: false,
+      agentSteps: entry.id.startsWith('custom:')
+        ? []
+        : [
+            { tool: 'select_pet', arguments: { pet_id: entry.id } },
+            {
+              command: 'switch-pet --current',
+              check: 'Independently confirm the exact selected ID; display is unknown.',
+            },
+          ],
+      notice: entry.id.startsWith('custom:')
+        ? `The active turn ID is unavailable. Select ${entry.displayName} (${entry.id}) in the host Pet settings.`
+        : 'Use the supported host selection tool; the CLI has no current active turn ID and has not changed selection.',
+    };
+  return selectPet(entry.id);
 }
 
 const SELECTED_KEY = 'selected-avatar-id';
@@ -175,6 +200,9 @@ function projectSelection(value: unknown): Selection {
 /** One app-tools call: read_settings, or write_settings for the single pet field. */
 async function callSettings(options: AppToolsOptions, petId?: string): Promise<Selection> {
   const { pipePath, threadId, timeoutMs } = appToolsConnection(options);
+  const turnId = (Object.hasOwn(options, 'turnId') ? options.turnId : process.env.CODEX_TURN_ID)?.trim();
+  if (petId !== undefined && !turnId)
+    throw new Error('The current active turn ID is unavailable; use the host select_pet tool for known pets.');
   const id = 1;
   const request = {
     jsonrpc: '2.0',
@@ -187,8 +215,8 @@ async function callSettings(options: AppToolsOptions, petId?: string): Promise<S
       callerSource: 'codex',
       threadId,
       callId: `mcp-call-${randomUUID()}`,
-      // These fallbacks follow the bundled app-tools MCP's request metadata.
-      turnId: `mcp-turn-${randomUUID()}`,
+      // The host checks the active turn on writes; a fabricated ID cannot authorize a write.
+      turnId: turnId ?? `mcp-turn-${randomUUID()}`,
     },
   };
   return new Promise((resolve, reject) => {
@@ -226,7 +254,15 @@ async function callSettings(options: AppToolsOptions, petId?: string): Promise<S
         8 * 1024 * 1024,
         response => {
           if (settled || !isRecord(response) || response.id !== id) return;
-          if (response.error !== undefined) return finish(new Error('Codex rejected the app tool request.'));
+          if (response.error !== undefined) {
+            const error = response.error;
+            const code = isRecord(error) && typeof error.code === 'number' ? ` (${error.code})` : '';
+            const message =
+              isRecord(error) && typeof error.message === 'string'
+                ? error.message.replace(/[\x00-\x1f\x7f]/g, ' ').slice(0, 512)
+                : 'No host error message';
+            return finish(new Error(`Codex rejected ${request.params.tool}${code}: ${message}`));
+          }
           const result = response.result;
           if (!isRecord(result) || result.success !== true || !Array.isArray(result.contentItems))
             return finish(new Error('Codex could not complete the pet settings request.'));

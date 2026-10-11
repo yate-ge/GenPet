@@ -1,8 +1,8 @@
 ---
 name: genpet-story
-description: Testing shortcut for an explicit /genpet-story request — immediately run one story outside the schedule. Scheduled runs and Dots proactive work are the normal story source.
+description: Run one immediate GenPet story on an explicit /genpet-story request, using the current Pet without changing its schedule.
 ---
 
 # genpet-story
 
-Before starting, ask the user one short confirmation, in the pet's world and following `prompts/output.md`, that the pet will have an extra experience now, and continue only after a clear yes. Use only on the user's explicit request, with a `manual:UUID` trigger; it does not change the schedule. Follow [the shared workflow](../../references/workflow.md), `prompts/story.md`, `prompts/evolution.md` and `prompts/output.md`. Form the new story first. Resume an unfinished story before starting another. Save and publish required assets under the same pet ID and bound Avatar. Present only the actual story and its visuals.
+Use [the main skill](../genpet/SKILL.md), StoryDesigner and [workflow](../../references/workflow.md). Bind the selected Pet by ID, resume pending work before a new manual trigger, read actual context, then form candidate stories and preserve the seeded choice. The story decides full outfit, item/home, memory or growth changes; complete accepted visuals and same-cloud readback. Present only actual content and final media. No Pet means direct guidance through /genpet, not implicit adoption; this explicit request does not require a repeated generic confirmation.

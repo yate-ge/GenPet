@@ -10,15 +10,18 @@ import shutil
 import subprocess
 import sys
 import time
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 from compose_atlas import ROW_SPECS, clear_transparent_rgb
 from extract_strip_frames import extract_state, parse_hex_color
 from render_animation_previews import ROW_DURATIONS, save_preview
 from prepare_pet_run import CANONICAL_BASE_PATH
+from prepare_strip import clean_strip, slot_crops
+from extract_strip_frames import register_frames, fit_registered_frames
 
 SCRIPTS = Path(__file__).resolve().parent
 EGG_STATE_SOURCES = {
@@ -34,6 +37,11 @@ def read_json(path):
 
 def write_json(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_file():
+        history = path.parent / ".history" / f"{path.stem}-{digest(path)}{path.suffix}"
+        if not history.exists():
+            history.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, history)
     temporary = path.with_name(path.name + ".pending")
     temporary.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
     temporary.replace(path)
@@ -47,8 +55,12 @@ def record_review(run, job_id, verdict, note):
     """Record a human/agent visual decision; this helper does not judge pixels."""
     run = Path(run).resolve()
     manifest = read_json(run / "imagegen-jobs.json")
-    job = next(job for job in manifest["jobs"] if job["id"] == job_id)
-    source = (run / job["output_path"]).resolve()
+    if manifest.get("schema_version", 1) >= 2 and job_id not in ("base", "final"):
+        raise ValueError("New GenPet runs review only the base and the final assembled atlas")
+    job = next((job for job in manifest["jobs"] if job["id"] == job_id), None)
+    source = (run / (job["output_path"] if job else "final/spritesheet.webp")).resolve()
+    if job is None and job_id != "final":
+        raise ValueError("Unknown image job")
     if not source.is_relative_to(run) or not note.strip() or verdict not in ("pass", "fail"):
         raise ValueError("A valid source, verdict and concrete review note are required")
     with Image.open(source) as opened:
@@ -57,9 +69,69 @@ def record_review(run, job_id, verdict, note):
     records = read_json(path) if path.exists() else {}
     entry = {"sha256": digest(source), "verdict": verdict, "note": note,
              "reviewed_at": datetime.now(timezone.utc).isoformat()}
+    if job_id == "final":
+        validation = read_json(run / "qa/final-validation.json")
+        if not validation.get("ok"):
+            raise ValueError("Final visual review requires a structurally valid exact atlas")
+        entry["sources"] = source_fingerprint(run, manifest)
     records.setdefault(job_id, []).append(entry)
     write_json(path, records)
+    archive_source(run, source, job_id)
+    if job_id == "base" and verdict == "pass" and job.get("failure_summary", {}).get("base_blocked"):
+        # A later actual accepted image can unblock the same pending run; historical failures remain.
+        job["failure_summary"]["base_blocked"] = False
+        job["failure_summary"]["recovered_by_review"] = entry["reviewed_at"]
+        job["status"] = "complete"
+        write_json(run / "imagegen-jobs.json", manifest)
+    if job_id == "base" and verdict == "fail":
+        record_failure(run, job_id, "base-visual-review", note)
     return {"job_id": job_id, **entry}
+
+
+def archive_source(run, source, label):
+    if source.is_file():
+        archive = run / "qa/source-history" / f"{label}-{digest(source)}{source.suffix}"
+        if not archive.exists():
+            archive.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, archive)
+
+
+def source_fingerprint(run, manifest):
+    return {job["id"]: digest(run / job["output_path"]) if (run / job["output_path"]).is_file() else None
+            for job in manifest["jobs"]}
+
+
+def record_failure(run, job_id, error, note, attempt_id=None, frame_indices=None):
+    """Keep actual failed attempts; repeated observation of one source does not spend another retry."""
+    run = Path(run).resolve()
+    manifest = read_json(run / "imagegen-jobs.json")
+    job = next(job for job in manifest["jobs"] if job["id"] == job_id)
+    if not error.strip() or not note.strip():
+        raise ValueError("Failure requires the actual error and a concrete observation")
+    source = (run / job["output_path"]).resolve()
+    if not source.is_relative_to(run):
+        raise ValueError("Job output escapes run directory")
+    source_sha = digest(source) if source.is_file() else None
+    attempt = attempt_id or source_sha
+    if not attempt:
+        raise ValueError("A failed generation with no image requires its actual attempt/tool-call ID")
+    history = job.setdefault("failures", [])
+    repeated = next((entry for entry in history if entry["attempt"] == attempt and entry["error"] == error), None)
+    if not repeated:
+        count = job.get("frames") or dict((state, frames) for state, _row, frames in ROW_SPECS).get(job_id, 8)
+        if frame_indices is not None and (not frame_indices or any(type(index) is not int or index < 0 or index >= count for index in frame_indices)):
+            raise ValueError("Failed frame indices must name actual cells in this job")
+        history.append({"attempt": attempt, "source_sha256": source_sha, "error": error.strip(), "note": note.strip(),
+                        "at": datetime.now(timezone.utc).isoformat(), "frame_indices": frame_indices})
+    attempts = len({entry["attempt"] for entry in history})
+    summary = {"failed_attempts": attempts, "max_redraws": 2, "redraws_remaining": max(0, 3 - attempts),
+               "change_approach": sum(entry["error"] == error for entry in history) >= 2,
+               "bounded_fallback": attempts >= 3 and job_id != "base", "base_blocked": attempts >= 3 and job_id == "base"}
+    job["failure_summary"] = summary
+    job["status"] = "blocked" if summary["base_blocked"] else "fallback" if summary["bounded_fallback"] else "retry-needed"
+    write_json(run / "imagegen-jobs.json", manifest)
+    archive_source(run, source, job_id)
+    return {"job_id": job_id, **summary, "duplicate_observation": repeated is not None}
 
 
 def reconcile(run, manifest):
@@ -67,6 +139,9 @@ def reconcile(run, manifest):
     blockers = []
     review_path = run / "qa/source-reviews.json"
     reviews = read_json(review_path) if review_path.exists() else {}
+    base_job = next(job for job in manifest["jobs"] if job["id"] == "base")
+    base_source = run / base_job["output_path"]
+    base_sha = digest(base_source) if base_source.is_file() else None
     for job in manifest["jobs"]:
         source = (run / job["output_path"]).resolve()
         if not source.is_relative_to(run):
@@ -77,10 +152,16 @@ def reconcile(run, manifest):
                 job.pop(key, None)
             continue
         try:
+            archive_source(run, source, job["id"])
             with Image.open(source) as opened:
                 opened.load()
             sha = digest(source)
-            if manifest.get("source_review_required"):
+            if manifest.get("schema_version", 1) >= 2 and job["id"] != "base":
+                if job.get("source_sha256") == sha and job.get("generated_from_base") and job["generated_from_base"] != base_sha:
+                    job["status"] = "stale-base"
+                    continue
+                job["generated_from_base"] = base_sha
+            if manifest.get("source_review_required") or ("base" in manifest.get("review_policy", []) and job["id"] == "base"):
                 history = reviews.get(job["id"], [])
                 review = history[-1] if history else {}
                 if review.get("sha256") != sha or review.get("verdict") != "pass":
@@ -91,9 +172,15 @@ def reconcile(run, manifest):
             if job.get("source_sha256") != sha or not job.get("completed_at"):
                 job["completed_at"] = datetime.now(timezone.utc).isoformat()
             job.update(status="complete", source_path=str(source), source_sha256=sha,
-                       completion_basis="visual-pass-and-decodable-source" if manifest.get("source_review_required") else "saved-decodable-source")
+                       completion_basis="visual-pass-and-decodable-source" if job["id"] == "base" and manifest.get("review_policy") or manifest.get("source_review_required") else "saved-decodable-source")
         except (OSError, ValueError) as error:
             job["status"] = "invalid"
+            if manifest.get("schema_version", 1) >= 2:
+                # A corrupted generated file is an actual failed source, not a reason to retry forever.
+                write_json(run / "imagegen-jobs.json", manifest)
+                record_failure(run, job["id"], str(error), "Saved generated source could not be decoded")
+                updated = read_json(run / "imagegen-jobs.json")
+                job.update(next(item for item in updated["jobs"] if item["id"] == job["id"]))
             blockers.append({"job": job["id"], "error": str(error),
                              "action": "Recover or inspect the existing source before considering generation."})
     write_json(run / "imagegen-jobs.json", manifest)
@@ -102,7 +189,7 @@ def reconcile(run, manifest):
 
 def ready_jobs(run, jobs):
     complete = {job["id"] for job in jobs if job["status"] == "complete"}
-    ready = [job["id"] for job in jobs if job["status"] == "pending"
+    ready = [job["id"] for job in jobs if job["status"] in ("pending", "stale-base")
              and set(job["depends_on"]).issubset(complete)
              and all((run / ref["path"]).is_file() for ref in job["input_images"])]
     return ready
@@ -130,6 +217,8 @@ class Processor:
             return True
         started = time.monotonic()
         try:
+            for output in outputs:
+                archive_source(self.run, output, f"processed-{name}-{output.stem}")
             action()
             self.cache[name] = {"signature": signature,
                                 "outputs": {str(p): digest(p) for p in outputs}}
@@ -146,7 +235,7 @@ class Processor:
     def command(self, name, *args):
         result = subprocess.run([sys.executable, str(SCRIPTS / name), *map(str, args)],
                                 capture_output=True, text=True, encoding="utf-8", errors="replace")
-        log = self.run / "qa/logs" / (Path(name).stem + ".log")
+        log = self.run / "qa/logs" / (Path(name).stem + f"-{time.time_ns()}.log")
         log.parent.mkdir(parents=True, exist_ok=True)
         log.write_text(result.stdout + result.stderr, encoding="utf-8")
         if result.returncode:
@@ -259,7 +348,7 @@ def process_egg(processor, jobs, available, key):
     return finish_atlas(processor, extended, key)
 
 
-def process(run, previews=False):
+def process_legacy(run, previews=False):
     run = Path(run).resolve()
     manifest = read_json(run / "imagegen-jobs.json")
     request = read_json(run / "pet_request.json")
@@ -368,6 +457,233 @@ def process(run, previews=False):
     return result
 
 
+def mirrored_look_frames(upper, lower):
+    """Viewer-clockwise 16 directions; flip individual frames, never the strip or temporal order."""
+    right = [*upper, *lower]
+    if len(right) != 9:
+        raise ValueError("Mirrored look production requires nine right-side directions including up and down")
+    return [*right, *[ImageOps.mirror(right[index]) for index in range(7, 0, -1)]]
+
+
+def fallback_row(processor, job, base_frame, count, key):
+    run = processor.run
+    root = run / "frames" / job["id"]
+    frames = [root / f"{index:02d}.png" for index in range(count)]
+    source = run / job["output_path"]
+    failed = job["failures"][-1]
+    indices = failed.get("frame_indices") or list(range(count))
+    report = run / "qa" / f"fallback-{job['id']}.json"
+    def fill():
+        root.mkdir(parents=True, exist_ok=True)
+        if len(indices) != count:
+            if not source.is_file():
+                raise ValueError("Partial fallback requires an existing source for the unaffected cells")
+            try:
+                result = extract_state(source, "running-right" if job["id"].startswith("egg-") else job["id"],
+                                       run / "qa/fallback-source" / job["id"], parse_hex_color(key), 96, "auto")
+                candidates = [Image.open(file).convert("RGBA") for file in result["frames"]]
+            except (OSError, ValueError, SystemExit):
+                with Image.open(source) as opened:
+                    cleaned, _report = clean_strip(opened, count)
+                candidates = register_frames(slot_crops(cleaned, count))
+            for index, image in enumerate(candidates):
+                if index not in indices and image.getbbox() is None:
+                    raise ValueError("An unaffected fallback cell is empty; identify all failed cells or use whole-row baseline fill")
+                image.save(frames[index])
+        with Image.open(base_frame) as opened:
+            baseline = opened.convert("RGBA")
+        for index in indices:
+            baseline.save(frames[index])
+        write_json(report, {"job": job["id"], "method": "accepted-base-frame-fill", "frame_indices": indices,
+                            "source_base_sha256": digest(base_frame), "failure": failed,
+                            "limitation": "These cells show the accepted baseline pose; the requested motion/gaze is incomplete."})
+    if processor.step(f"fallback-{job['id']}", [base_frame, *([source] if source.is_file() else [])], [*frames, report], fill, indices):
+        return frames, read_json(report)
+    return None, None
+
+
+def process_optimized(run, previews=False):
+    started = time.monotonic()
+    run = Path(run).resolve()
+    manifest = read_json(run / "imagegen-jobs.json")
+    request = read_json(run / "pet_request.json")
+    processor = Processor(run, True)
+    processor.blockers.extend(reconcile(run, manifest))
+    jobs = {job["id"]: job for job in manifest["jobs"]}
+    reviews_file = run / "qa/source-reviews.json"
+    reviews = read_json(reviews_file) if reviews_file.exists() else {}
+    key = request["chroma_key"]["hex"]
+    for directory in ("qa", "frames", "final", "references"):
+        (run / directory).mkdir(exist_ok=True)
+    available = {name for name, job in jobs.items() if job["status"] == "complete"}
+    review_jobs, limitations, rows = [], [], {}
+    base = jobs["base"]
+    if base["status"] == "awaiting-review":
+        review_jobs.append("base")
+    base_frame = run / "qa/base-frame.png"
+    if "base" in available:
+        source = run / base["output_path"]
+        canonical = run / CANONICAL_BASE_PATH
+        processor.step("canonical-reference", [source], [canonical], lambda: shutil.copyfile(source, canonical))
+        def normalize_base():
+            result = extract_state(source, "base", run / "qa/base-normalized", parse_hex_color(key), 96, "auto")
+            shutil.copyfile(result["frames"][0], base_frame)
+        if not processor.step("normalize-base", [source], [base_frame], normalize_base, key):
+            record_failure(run, "base", processor.blockers[-1]["error"], "The accepted base cannot be normalized into a usable complete frame")
+    manifest = read_json(run / "imagegen-jobs.json")
+    jobs = {job["id"]: job for job in manifest["jobs"]}
+    base_blocked = jobs["base"].get("failure_summary", {}).get("base_blocked", False)
+    for name, job in jobs.items():
+        failure = job.get("failures", [])[-1] if job.get("failures") else None
+        current_sha = digest(run / job["output_path"]) if (run / job["output_path"]).is_file() else None
+        shared_fit_reprocess = name == "jumping" and failure and failure["error"].startswith("Jump does not fit at idle size (")
+        if failure and failure.get("source_sha256") == current_sha and not failure.get("resolved_by_processing") and not shared_fit_reprocess:
+            latest_base_review = reviews.get("base", [])[-1] if reviews.get("base") else {}
+            recovered = name == "base" and latest_base_review.get("verdict") == "pass" and latest_base_review.get("sha256") == current_sha and latest_base_review.get("reviewed_at", "") > failure["at"]
+            if not recovered:
+                job["status"] = "fallback" if job.get("failure_summary", {}).get("bounded_fallback") else "retry-needed"
+                available.discard(name)
+        if job.get("failure_summary", {}).get("bounded_fallback"):
+            job["status"] = "fallback"
+    write_json(run / "imagegen-jobs.json", manifest)
+    processor.blockers = [blocker for blocker in processor.blockers
+                          if not jobs.get(blocker.get("job"), {}).get("failure_summary", {}).get("bounded_fallback")]
+    if jobs["base"].get("status") != "awaiting-review":
+        review_jobs = [name for name in review_jobs if name != "base"]
+    required = set(jobs) - {"base"}
+    sources_ready = "base" in available and base_frame.is_file() and all(jobs[name]["status"] in ("complete", "fallback") for name in required)
+    if sources_ready:
+        egg = manifest["workflow_profile"] == "genpet-egg-three"
+        specs = [(name, 8) for name in EGG_STATE_SOURCES.values()]
+        specs = list(dict.fromkeys(specs)) if egg else [(state, count) for state, _row, count in ROW_SPECS]
+        if not egg:
+            specs += [(name, len(job.get("directions", [])) or 8) for name, job in jobs.items() if name.startswith("look-")]
+        for state, count in specs:
+            job = jobs[state]
+            if job["status"] == "fallback":
+                frames, limitation = fallback_row(processor, job, base_frame, count, key)
+                if frames:
+                    rows[state] = frames
+                    limitations.append(limitation)
+                continue
+            source = run / job["output_path"]
+            frames = [run / "frames" / state / f"{index:02d}.png" for index in range(count)]
+            report = run / "qa" / f"extraction-{state}.json"
+            idle = rows.get("idle", [base_frame])[0] if state == "jumping" else None
+            def extract(source=source, state=state, report=report, idle=idle):
+                reference = None
+                if idle:
+                    with Image.open(idle) as opened:
+                        reference = opened.convert("RGBA")
+                extract_name = "running-right" if egg else state
+                result = extract_state(source, extract_name, run / "qa/egg-frames" / state if egg else run / "frames", parse_hex_color(key), 96, "auto", reference, state == "jumping" and not egg)
+                if egg:
+                    for index, generated in enumerate(result["frames"]):
+                        frames[index].parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copyfile(generated, frames[index])
+                write_json(report, result)
+            if processor.step(f"extract-{state}", [source, *([idle] if idle else [])], [*frames, report], extract, key):
+                rows[state] = frames
+            else:
+                failure = record_failure(run, state, processor.blockers[-1]["error"], "Actual saved source failed deterministic extraction")
+                available.discard(state)
+                if failure["bounded_fallback"]:
+                    job = next(item for item in read_json(run / "imagegen-jobs.json")["jobs"] if item["id"] == state)
+                    processor.blockers.pop()
+                    frames, limitation = fallback_row(processor, job, base_frame, count, key)
+                    if frames:
+                        rows[state] = frames
+                        limitations.append(limitation)
+        if len(rows) == len(specs) and not processor.blockers:
+            if not egg:
+                original_rows = rows
+                fitted_rows = {state: [run / "qa/shared-fit" / state / file.name for file in files] for state, files in rows.items()}
+                fitted_base = run / "qa/shared-fit/base.png"
+                fit_report = run / "qa/shared-fit.json"
+                sources = [base_frame, *[file for files in rows.values() for file in files]]
+                outputs = [fitted_base, *[file for files in fitted_rows.values() for file in files], fit_report]
+                def shared_fit():
+                    jump = read_json(run / "qa/extraction-jumping.json")
+                    paths, offsets = [base_frame], [(0, 0)]
+                    for state, files in original_rows.items():
+                        paths.extend(files)
+                        offsets.extend([tuple(jump.get("registration_offset", (0, 0))) if state == "jumping" else (0, 0)] * len(files))
+                    images = [Image.open(file).convert("RGBA") for file in paths]
+                    fitted, report = fit_registered_frames(images, offsets)
+                    for image, file in zip(fitted, outputs[:-1]):
+                        file.parent.mkdir(parents=True, exist_ok=True)
+                        image.save(file)
+                    report["jump_registration_offset"] = jump.get("registration_offset", (0, 0))
+                    write_json(fit_report, report)
+                if processor.step("shared-atlas-fit", [*sources, run / "qa/extraction-jumping.json"], outputs, shared_fit):
+                    rows, base_frame = fitted_rows, fitted_base
+                    for failure in jobs["jumping"].get("failures", []):
+                        if failure["error"].startswith("Jump does not fit at idle size ("):
+                            failure["resolved_by_processing"] = {"method": "shared-atlas-affine", "report": str(fit_report), "code_sha256": digest(SCRIPTS / "extract_strip_frames.py")}
+                    write_json(run / "imagegen-jobs.json", manifest)
+            extended = run / "qa/extended-raw.png"
+            if egg:
+                composed = processor.step("egg-atlas", [file for group in rows.values() for file in group], [extended, run / "qa/egg-frame-mapping.json"],
+                                          lambda: compose_egg(rows, extended, run / "qa/egg-frame-mapping.json"))
+            else:
+                def compose():
+                    image = Image.new("RGBA", (1536, 2288))
+                    for state, row, count in ROW_SPECS:
+                        for col, file in enumerate(rows[state]):
+                            with Image.open(file) as frame:
+                                image.alpha_composite(frame.convert("RGBA"), (192 * col, 208 * row))
+                    with Image.open(base_frame) as baseline:
+                        image.alpha_composite(baseline.convert("RGBA"), (192 * 6, 0))
+                    direction_sources = [*rows["look-right-upper"], *rows["look-right-lower"]] if manifest.get("mirror_look") else [*rows["look-row-9"], *rows["look-row-10"]]
+                    directions = []
+                    for file in direction_sources:
+                        with Image.open(file) as frame:
+                            directions.append(frame.convert("RGBA"))
+                    if manifest.get("mirror_look"):
+                        directions = mirrored_look_frames(directions[:5], directions[5:])
+                    for index, frame in enumerate(directions):
+                        image.alpha_composite(frame, ((index % 8) * 192, (9 + index // 8) * 208))
+                    clear_transparent_rgb(image).save(extended)
+                    write_json(run / "qa/look-frame-mapping.json", {"mirror_look": manifest.get("mirror_look"), "mirror_reason": manifest.get("mirror_reason"),
+                              "directions": [index * 22.5 for index in range(16)], "right_source_indices": list(range(9)) + list(range(7, 0, -1)) if manifest.get("mirror_look") else list(range(16))})
+                composed = processor.step("parallel-atlas", [base_frame, *[file for group in rows.values() for file in group]], [extended, run / "qa/look-frame-mapping.json"], compose)
+            if composed:
+                finish_atlas(processor, extended, key)
+    atlas = run / "final/spritesheet.webp"
+    validation = run / "qa/final-validation.json"
+    candidate = sources_ready and len(rows) == len(specs) and not processor.blockers and atlas.is_file() and validation.is_file() and read_json(validation).get("ok")
+    final_review = reviews.get("final", [])[-1] if reviews.get("final") else {}
+    accepted = bool(candidate and final_review.get("verdict") == "pass" and final_review.get("sha256") == digest(atlas)
+                    and final_review.get("sources") == source_fingerprint(run, manifest))
+    if candidate and not accepted:
+        review_jobs.append("final")
+    manifest = read_json(run / "imagegen-jobs.json")
+    # Ordinary sources need structural processing, not individual visual review.
+    ready = [] if base_blocked or processor.blockers and "base" not in available else ready_jobs(run, manifest["jobs"])
+    if "base" in available and not base_blocked:
+        ready += [job["id"] for job in manifest["jobs"] if job.get("status") == "retry-needed" and job["id"] != "base"]
+    if jobs["base"].get("status") == "retry-needed" and not base_blocked:
+        ready = ["base"]
+    result = {"ok": not processor.blockers and not base_blocked, "run_dir": str(run), "source_complete": sorted(available),
+              "ready_jobs": list(dict.fromkeys(ready)), "pending_jobs": [name for name in jobs if name not in available],
+              "review_jobs": review_jobs, "executed": processor.executed, "reused": processor.reused, "blockers": processor.blockers,
+              "candidate_atlas": str(atlas) if candidate else None, "atlas": str(atlas) if accepted else None,
+              "portrait": str(run / "final/portrait.png") if accepted else None, "visual_review_required": bool(review_jobs),
+              "limitations": limitations, "base_blocked": base_blocked,
+              "processing_seconds": round(time.monotonic() - started, 3),
+              "preview_files": [str(path) for path in sorted((run / "qa/previews").glob("*.gif"))] if candidate else [],
+              "contact_sheet": str(run / "qa/final-contact-sheet.png") if candidate else None,
+              "retry_guidance": {job["id"]: job["failure_summary"] for job in manifest["jobs"] if job.get("failure_summary")},
+              "note": "Only base and final require visual review. Saved pass records and structural validity alone do not prove semantic correctness. Preserve actual review evidence. A blocked base leaves the Pet operation pending; no old-stage art is substituted."}
+    write_json(run / "qa/processing-result.json", result)
+    return result
+
+
+def process(run, previews=False):
+    manifest = read_json(Path(run).resolve() / "imagegen-jobs.json")
+    return process_optimized(run, previews) if manifest.get("schema_version", 1) >= 2 else process_legacy(run, previews)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", required=True)
@@ -375,7 +691,17 @@ def main():
     parser.add_argument("--record-review", metavar="JOB_ID")
     parser.add_argument("--verdict", choices=("pass", "fail"))
     parser.add_argument("--note")
+    parser.add_argument("--record-failure", metavar="JOB_ID")
+    parser.add_argument("--error")
+    parser.add_argument("--attempt-id")
+    parser.add_argument("--frame-indices", help="Comma-separated failed zero-based cells; omitted means whole row")
     args = parser.parse_args()
+    if args.record_failure:
+        if not args.error or not args.note:
+            parser.error("--record-failure requires --error and --note")
+        indices = [int(value) for value in args.frame_indices.split(",")] if args.frame_indices else None
+        print(json.dumps(record_failure(args.run_dir, args.record_failure, args.error, args.note, args.attempt_id, indices), indent=2))
+        return
     if args.record_review:
         if not args.verdict or not args.note:
             parser.error("--record-review requires --verdict and --note")

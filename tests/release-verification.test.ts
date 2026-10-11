@@ -1,6 +1,7 @@
+import { retainFixture as rm } from './evidence.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, cp, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, cp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawnSync, execFileSync } from 'node:child_process';

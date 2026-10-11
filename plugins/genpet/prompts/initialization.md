@@ -1,10 +1,12 @@
-# 领养流程 · initialization
+# 领养编排
 
-本文件只编排各单元，不是另一个创作单元。规则见 meta.md；单元合同与测试见 ../references/generation-units.md；对话遵循 output.md。
+本文件是流程说明。读取本文件前先走主 skill 的环境检查、已有宠物选择，以及第一次领养的资料说明与确认；确认之前不开始资料读取或领养记录。
 
-1. **context** → **encounter** → **genes** → **personality**：依次使用前一步的结果。
-2. **appearance**：以获得故事、genes 与 eggAppearance、egg 阶段、已保存素材及宿主要求，决定蛋的视觉方案。
-3. **计划**：组装 StoryPlan——text、place、connection 来自 encounter；genes 来自 genes，stage 为 egg；personality 来自 personality；state 与 appearance 由获得故事和蛋的形象形成；basis 摘要记录采用的依据与不足。保存后完成图像生成、image-review 与宿主更新。
-4. **output**：基于实际完成的结果表达获得故事；孵化前不发命名邀请。
+1. 按 ../references/user-context.md 实际读取，保存 context 的简短结果。
+2. 通过 encounter 逐轮生成旅程。待答场景先 record-step 保存，收到真实回答后保存场景、选项与原话到 `journey-step OPERATION_ID STEP_JSON`，结束用 complete:true，重进时从保存的 journey 和待答单元结果续接。
+3. 旅程结束，`random-source OPERATION_ID [SEED]` 给来源类型。列候选后 `random-choice OPERATION_ID CANDIDATES_JSON [SEED]`，purpose 为 genes；将保存的结果交给 genes，再给 personality。
+4. appearance 只设计蛋。组装计划：text/place/connection 来自旅程；genes/designReason 来自设计；personality 写进 soul；memory 写旅程和相处出发点；stage 为 egg；reason 记录采用的真实来源与限度。用 contextRefs 引用实际使用的事实。
+5. 保存 plan，生成并审查蛋的真实图，更新同一个绑定 Pet 并回读，通过 `finish-story` 完成，output 给领养总结。
+6. 完成之后建立或恢复定时检查，记录真实任务引用。蛋阶段不邀请命名。
 
-各单元结果用 record-step 保存，完整计划用 plan-story 保存。计划保存前可修订某个单元并重新核对下游；保存后的图像修正继续同一份基因与故事。偏差记录到具体单元及其输入，而非给整段流程一个总评。
+结果文件和计划保存后，失败继续同一 operation、同一选择与设计。检查点：许可先于读取；旅程先于设计；结束前没有提前透出身体；soul 与初始 memory 有据；目标 cloud ID 与已接受图回读一致。

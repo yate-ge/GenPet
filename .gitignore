@@ -14,3 +14,4 @@ __pycache__/
 # Test evidence stays local; only the summary index is tracked
 /docs/evidence/*
 !/docs/evidence/README.md
+/docs/IMPLEMENTATION_STATUS.zh-CN.md

@@ -17,7 +17,7 @@ export function pluginRoot(): string {
 export function packageHost(): Host {
   const file = path.join(pluginRoot(), 'config', 'host.json');
   const host = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')).host : 'desktop';
-  if (!['desktop', 'dots'].includes(host)) throw new Error('Invalid package host');
+  if (!['desktop', 'cloud'].includes(host)) throw new Error('Invalid package host');
   return host;
 }
 
@@ -36,7 +36,7 @@ function readPromptFile(fileName: string) {
 }
 
 export function readPrompt(name: string) {
-  if (!/^[a-z][a-z0-9-]*$/.test(name)) throw new Error('Invalid prompt module');
+  if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(name)) throw new Error('Invalid prompt module');
   return readPromptFile(`${name}.md`);
 }
 

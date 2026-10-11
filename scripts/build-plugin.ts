@@ -1,5 +1,5 @@
 /**
- * Build both plugin packages from the shared framework.
+ * Build the desktop plugin package from the shared framework.
  * Copied into each package: framework/{prompts,references,debugger-web} and every framework/skills/* skill.
  * Kept per package: manifest, config/host.json, README, host-only skills, scripts/verify-install.mjs.
  * Generated: dist/ (bundled runtime) and package.json.
@@ -13,7 +13,7 @@ const source = path.resolve(import.meta.dirname, '..');
 const framework = path.join(source, 'framework');
 const pkg = JSON.parse(await readFile(path.join(source, 'package.json'), 'utf8'));
 
-for (const name of ['genpet', 'genpet-dots']) {
+for (const name of ['genpet']) {
   const target = path.join(source, 'plugins', name);
   const manifest = JSON.parse(await readFile(path.join(target, '.codex-plugin/plugin.json'), 'utf8'));
   if (manifest.version !== pkg.version) throw new Error(`Version mismatch: ${name}`);
@@ -22,6 +22,10 @@ for (const name of ['genpet', 'genpet-dots']) {
 
   for (const folder of ['prompts', 'references', 'debugger-web'])
     await replace(path.join(framework, folder), target, folder);
+  const sharedNames = new Set(await readdir(path.join(framework, 'skills')));
+  for (const skill of await readdir(path.join(target, 'skills')))
+    if (skill !== 'genpet-switch' && skill !== 'genpet-debugger' && !sharedNames.has(skill))
+      await rm(path.join(target, 'skills', skill), { recursive: true, force: true });
   for (const skill of await readdir(path.join(framework, 'skills')))
     await replace(path.join(framework, 'skills', skill), target, path.join('skills', skill));
 

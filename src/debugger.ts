@@ -4,7 +4,7 @@ import path from 'node:path';
 import { dataRoot, packageHost } from './config.js';
 import { Store } from './store.js';
 export async function launchDebugger(
-  port = Number(process.env.GENPET_PORT || (packageHost() === 'dots' ? 47832 : 47831)),
+  port = Number(process.env.GENPET_PORT || (packageHost() === 'cloud' ? 47832 : 47831)),
 ) {
   if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('Invalid debugger port');
   const url = `http://127.0.0.1:${port}`,
@@ -23,6 +23,7 @@ export async function launchDebugger(
   }
   if (await inspect()) return { url, reused: true };
   const child = spawn(process.execPath, [path.join(import.meta.dirname, 'debugger-server.js')], {
+    windowsHide: true,
     detached: true,
     stdio: 'ignore',
     env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: path.resolve(dataRoot()) },

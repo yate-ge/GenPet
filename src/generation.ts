@@ -1,7 +1,7 @@
 /** Generation units: assemble a unit request, check a result's data contract, keep results with the story. */
 import { createHash } from 'node:crypto';
 import { readPrompt, readUnits } from './config.js';
-import { pendingFor } from './lifecycle.js';
+import { pendingFor } from './pending.js';
 import { text, type GenerationStep } from './model.js';
 import type { Store } from './store.js';
 

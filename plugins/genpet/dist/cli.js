@@ -21,9 +21,9 @@ var __commonJS = (cb, mod) => function __require2() {
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    for (let key2 of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key2) && key2 !== except)
+        __defProp(to, key2, { get: () => from[key2], enumerable: !(desc = __getOwnPropDesc(from, key2)) || desc.enumerable });
   }
   return to;
 };
@@ -2125,17 +2125,80 @@ var require_png = __commonJS({
 });
 
 // src/cli.ts
-import { readFile as readFile8 } from "node:fs/promises";
-import path10 from "node:path";
-import { randomUUID as randomUUID10 } from "node:crypto";
+import { readFile as readFile13 } from "node:fs/promises";
+import path17 from "node:path";
+import { randomUUID as randomUUID12 } from "node:crypto";
 
 // src/art.ts
-import { mkdir as mkdir4, readFile as readFile7, rename as rename3, rm as rm2, stat as stat2, writeFile as writeFile3 } from "node:fs/promises";
-import { createHash as createHash4, randomUUID as randomUUID8 } from "node:crypto";
-import path8 from "node:path";
+import { mkdir as mkdir3, readFile as readFile9, rename as rename2, rm, stat as stat3, writeFile as writeFile3 } from "node:fs/promises";
+import { createHash as createHash5, randomUUID as randomUUID6 } from "node:crypto";
+import path10 from "node:path";
+
+// src/pending.ts
+import { createHash } from "node:crypto";
+function pendingFor(state, id) {
+  const pending = state.pending;
+  if (!pending || pending.id !== id || !state.pet || pending.petId !== state.pet.id || pending.baseRevision !== state.pet.revision)
+    throw new Error("Stale story operation; read the persisted record before continuing");
+  return pending;
+}
+function requestId(state) {
+  const pending = state.pending;
+  if (!pending?.plan) return null;
+  return createHash("sha256").update(JSON.stringify([pending.id, pending.petId, pending.baseRevision, pending.plan])).digest("hex").slice(0, 24);
+}
 
 // src/appearance.ts
-import { createHash as createHash3 } from "node:crypto";
+function appearanceFor(state, stage, id) {
+  const art = state.art.find(
+    (art2) => art2.id === id && art2.petId === state.pet.id && art2.kind === "atlas" && art2.stage === stage
+  );
+  if (!art)
+    throw new Error("Reusable appearance is missing, belongs to another pet, or is incompatible with this host/stage");
+  return art;
+}
+function desiredAppearance(state) {
+  const plan = state.pending?.plan;
+  if (!plan?.appearance) return state.art.find((art) => art.id === state.pet?.state.appearanceId);
+  if (plan.appearance.reuseArtId) return appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
+  const current = requestId(state);
+  return state.art.findLast((art) => art.petId === state.pet?.id && art.requestId === current && art.kind === "atlas");
+}
+
+// src/config.ts
+import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+var here = path.dirname(fileURLToPath(import.meta.url));
+function pluginRoot() {
+  const candidates = [path.resolve(here, ".."), path.resolve(here, "..", "plugins", "genpet")];
+  return candidates.find((dir) => existsSync(path.join(dir, ".codex-plugin", "plugin.json"))) ?? candidates[0];
+}
+function packageHost() {
+  const file = path.join(pluginRoot(), "config", "host.json");
+  const host2 = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")).host : "desktop";
+  if (!["desktop", "cloud"].includes(host2)) throw new Error("Invalid package host");
+  return host2;
+}
+var dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), ".genpet");
+var codexHome = () => process.env.CODEX_HOME || path.join(homedir(), ".codex");
+function readPromptFile(fileName) {
+  const candidates = [
+    path.resolve(here, "..", "framework", "prompts", fileName),
+    path.join(pluginRoot(), "prompts", fileName)
+  ];
+  const file = candidates.find(existsSync);
+  if (!file) throw new Error(`Missing prompt file: ${fileName}`);
+  return readFileSync(file, "utf8");
+}
+function readPrompt(name2) {
+  if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(name2)) throw new Error("Invalid prompt module");
+  return readPromptFile(`${name2}.md`);
+}
+function readUnits() {
+  return JSON.parse(readPromptFile("units.json")).units;
+}
 
 // src/hosts/desktop/atlas.ts
 var ATLAS = { width: 1536, height: 2288, columns: 8, rows: 11, cellWidth: 192, cellHeight: 208 };
@@ -2172,1171 +2235,75 @@ function checkAtlas(image) {
 }
 
 // src/hosts/desktop/publish.ts
-import { copyFile as copyFile2, mkdir as mkdir3, readFile as readFile5, rename as rename2, writeFile as writeFile2 } from "node:fs/promises";
-import { createHash as createHash2, randomUUID as randomUUID7 } from "node:crypto";
+import { copyFile, mkdir, readFile as readFile6, rename, writeFile } from "node:fs/promises";
+import { createHash as createHash4, randomUUID as randomUUID4 } from "node:crypto";
 import path7 from "node:path";
 
-// src/config.ts
-import { existsSync, readFileSync } from "node:fs";
-import { homedir } from "node:os";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-var here = path.dirname(fileURLToPath(import.meta.url));
-function pluginRoot() {
-  const candidates = [path.resolve(here, ".."), path.resolve(here, "..", "plugins", "genpet")];
-  return candidates.find((dir) => existsSync(path.join(dir, ".codex-plugin", "plugin.json"))) ?? candidates[0];
-}
-function packageHost() {
-  const file = path.join(pluginRoot(), "config", "host.json");
-  const host = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")).host : "desktop";
-  if (!["desktop", "dots"].includes(host)) throw new Error("Invalid package host");
-  return host;
-}
-var dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), ".genpet");
-var codexHome = () => process.env.CODEX_HOME || path.join(homedir(), ".codex");
-function readPromptFile(fileName) {
-  const candidates = [
-    path.resolve(here, "..", "framework", "prompts", fileName),
-    path.join(pluginRoot(), "prompts", fileName)
-  ];
-  const file = candidates.find(existsSync);
-  if (!file) throw new Error(`Missing prompt file: ${fileName}`);
-  return readFileSync(file, "utf8");
-}
-function readPrompt(name2) {
-  if (!/^[a-z][a-z0-9-]*$/.test(name2)) throw new Error("Invalid prompt module");
-  return readPromptFile(`${name2}.md`);
-}
-function readUnits() {
-  return JSON.parse(readPromptFile("units.json")).units;
-}
-
-// src/lifecycle.ts
-import { randomUUID as randomUUID4 } from "node:crypto";
-import { access } from "node:fs/promises";
-import path4 from "node:path";
-
-// src/model.ts
-import { randomUUID } from "node:crypto";
-var stages = ["egg", "hatchling", "juvenile", "adult"];
-var artKinds = ["portrait", "atlas", "avatar", "story", "artifact"];
-var fresh = (host) => ({ version: 2, host, pet: null, stories: [], art: [], pending: null });
-function createPet(name2, now = Date.now()) {
-  return {
-    id: `genpet-${randomUUID()}`,
-    name: name2 === void 0 ? "GenPet" : text(name2, "name"),
-    adoptedAt: now,
-    revision: 0,
-    naming: name2 === void 0 ? { status: "unasked" } : { status: "named", namedAt: now },
-    genes: null,
-    stage: "egg",
-    state: { description: "", updatedAt: now }
-  };
-}
-function text(value, field) {
-  if (typeof value !== "string" || !value.trim()) throw new Error(`${field} must be nonempty text`);
-  return value.trim();
-}
-function identifier(value, field = "id") {
-  const result = text(value, field);
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$/.test(result)) throw new Error(`Invalid ${field}`);
-  return result;
-}
-function validateStage(current, target2) {
-  if (!stages.includes(target2)) throw new Error("Invalid stage");
-  if (stages.indexOf(target2) < stages.indexOf(current))
-    throw new Error("Evolution cannot reverse the current stage");
-  return target2;
-}
-
-// src/growth.ts
-var HOUR = 36e5;
-var DAY = 24 * HOUR;
-var STAGE_CEILING = { egg: 5 * HOUR, hatchling: 7 * DAY, juvenile: 7 * DAY };
-var SPECIAL_INTERVAL = 7 * DAY;
-var SPECIAL_DURATION = 2 * DAY;
-var iso = (time) => new Date(time).toISOString();
-function stageSince(state) {
-  const pet = state.pet;
-  const origin = state.legacy?.importedAt ?? pet.adoptedAt;
-  if (pet.stage === "egg") return origin;
-  return state.stories.find((story) => story.petId === pet.id && story.stage === pet.stage)?.at ?? origin;
-}
-function growth(state, now = Date.now()) {
-  const pet = state.pet;
-  if (!pet?.genes) return null;
-  const since = stageSince(state), ceiling = STAGE_CEILING[pet.stage], deadline = ceiling === void 0 ? null : since + ceiling;
-  let required = deadline !== null && now >= deadline ? "advance" : null;
-  let special = null;
-  if (pet.stage === "adult") {
-    const active = !!pet.special && pet.special.endedAt === void 0;
-    const start = active ? pet.special.since : Math.max(since, pet.special?.endedAt ?? 0);
-    const due = start + (active ? SPECIAL_DURATION : SPECIAL_INTERVAL);
-    if (now >= due) required = active ? "end-special" : "enter-special";
-    special = {
-      active,
-      ...active ? { description: pet.special.description } : {},
-      since: iso(start),
-      [active ? "endBy" : "enterBy"]: iso(due)
-    };
-  }
-  return {
-    stage: pet.stage,
-    next: stages[stages.indexOf(pet.stage) + 1] ?? null,
-    since: iso(since),
-    advanceBy: deadline === null ? null : iso(deadline),
-    special,
-    required
-  };
-}
-
-// src/migration.ts
-import { readFile as readFile2, copyFile, mkdir as mkdir2 } from "node:fs/promises";
-import path3 from "node:path";
-import { randomUUID as randomUUID3 } from "node:crypto";
-
-// src/store.ts
-import { mkdir, readFile, rename, writeFile, rm, stat } from "node:fs/promises";
-import path2 from "node:path";
-import { randomUUID as randomUUID2 } from "node:crypto";
-async function atomicJson(file, value) {
-  await mkdir(path2.dirname(file), { recursive: true, mode: 448 });
-  const tmp = `${file}.${randomUUID2()}.tmp`;
-  try {
-    await writeFile(tmp, JSON.stringify(value, null, 2) + "\n", { mode: 384, flag: "wx" });
-    await rename(tmp, file);
-  } finally {
-    await rm(tmp, { force: true });
-  }
-}
-var Store = class {
-  constructor(root = dataRoot(), host = "desktop") {
-    this.host = host;
-    this.base = path2.resolve(root);
-    this.root = path2.resolve(this.base, host);
-    this.file = path2.join(this.root, "state.json");
-  }
-  host;
-  base;
-  root;
-  file;
-  /** Read-only; a missing file is an empty record, and elapsed time never changes a pet. */
-  async peek() {
-    try {
-      const state = JSON.parse(await readFile(this.file, "utf8"));
-      if (state.version !== 2 || state.host !== this.host) throw new Error("Unsupported or mismatched pet record");
-      const pet = state.pet;
-      if (pet) {
-        identifier(pet.id, "petId");
-        validateStage("egg", pet.stage);
-        if (pet.personality !== void 0 && (typeof pet.personality !== "string" || !pet.personality.trim()))
-          throw new Error("Invalid personality");
-        if (pet.naming?.status === "deferred") pet.naming.status = "asked";
-        if (pet.naming && !["unasked", "asked", "named"].includes(pet.naming.status))
-          throw new Error("Invalid naming status");
-      }
-      return state;
-    } catch (error) {
-      if (error.code === "ENOENT") return fresh(this.host);
-      throw error;
+// src/status.ts
+var RECENT = { stories: 5, art: 30, chats: 10 };
+function briefForPet(pet) {
+  return JSON.stringify({
+    id: pet.id,
+    name: pet.name,
+    soul: {
+      genes: pet.soul.genes,
+      ...pet.soul.personality ? { personality: pet.soul.personality } : {},
+      ...pet.soul.acquisition ? { acquisition: { place: pet.soul.acquisition.place, connection: pet.soul.acquisition.connection } } : {}
+    },
+    memory: pet.memory.text,
+    state: {
+      stage: pet.state.stage,
+      description: pet.state.description,
+      ...pet.state.home ? { home: pet.state.home } : {},
+      ...pet.state.special && pet.state.special.endedAt === void 0 ? { special: pet.state.special.description } : {}
     }
+  });
+}
+function cloudBriefForPet(pet, draft) {
+  const source = briefForPet(pet);
+  if (draft !== void 0) {
+    if (!draft || draft.petId !== pet.id || draft.revision !== pet.revision)
+      throw new Error("Brief draft must match the current Pet ID and revision");
+    if (typeof draft.description !== "string" || !draft.description.trim() || [...draft.description].length > 500)
+      throw new Error("Cloud Pet description must contain at most 500 characters");
   }
-  /** Serializes changes across processes; the record is written only if `fn` succeeds. */
-  async transaction(fn) {
-    await mkdir(this.root, { recursive: true, mode: 448 });
-    const lock = this.file + ".lock";
-    let acquired = false;
-    for (let i = 0; i < 100 && !acquired; i++) {
-      try {
-        await mkdir(lock);
-        acquired = true;
-      } catch (error) {
-        if (error.code !== "EEXIST") throw error;
-        const age = await stat(lock).then(
-          (info) => Date.now() - info.mtimeMs,
-          () => 0
-        );
-        if (age > 12e4) await rm(lock, { recursive: true, force: true });
-        else await new Promise((resolve) => setTimeout(resolve, 50));
-      }
-    }
-    if (!acquired) throw new Error("Another pet operation is running; resume it before starting another");
-    try {
-      const state = await this.peek();
-      const result = await fn(state);
-      await atomicJson(this.file, state);
-      return result;
-    } finally {
-      await rm(lock, { recursive: true, force: true });
-    }
-  }
-};
-
-// src/migration.ts
-async function findLegacyRecord(store2) {
-  if (store2.host !== "desktop") return null;
-  const file = path3.join(store2.base, "state.json");
-  try {
-    const old = JSON.parse(await readFile2(file, "utf8"));
-    return old.version === 1 && old.pet ? file : null;
-  } catch (error) {
-    if (error.code === "ENOENT") return null;
-    throw error;
-  }
-}
-async function migrateLegacy(store2, file, design) {
-  if (store2.host !== "desktop") throw new Error("Legacy migration is for desktop records");
-  if (!path3.isAbsolute(file)) throw new Error("Legacy file must be absolute");
-  const legacy = JSON.parse(await readFile2(file, "utf8"));
-  if (legacy.version !== 1 || !legacy.pet) throw new Error("No v1 pet to migrate");
-  const genes = text(design.genes, "observed legacy identity"), place = text(design.place, "origin"), connection = text(design.connection, "connection");
-  return store2.transaction(async (state) => {
-    if (state.legacy && state.pet?.id === legacy.pet.id) return state;
-    if (state.pet) throw new Error("Migration never replaces an existing v2 pet");
-    const petId = identifier(legacy.pet.id, "legacy petId");
-    const stage = validateStage("egg", legacy.pet.stage);
-    const backup = path3.join(store2.root, "backups", `legacy-${randomUUID3()}.json`);
-    await atomicJson(backup, legacy);
-    state.pet = {
-      id: petId,
-      name: text(legacy.pet.profile?.name ?? "GenPet", "name"),
-      adoptedAt: legacy.pet.adoptedAt,
-      revision: 1,
-      genes,
-      stage,
-      acquisition: { place, connection, storyId: "legacy" },
-      state: { description: legacy.pet.state?.reason || "Continuing the existing companion", updatedAt: Date.now() }
-    };
-    state.legacy = { backup, importedAt: Date.now() };
-    const destination = legacy.nativeExport?.destination;
-    if (destination)
-      state.pet.binding = { host: "desktop", avatarId: `custom:${path3.basename(destination)}`, destination };
-    const dir = path3.join(store2.root, "pets", petId, "assets");
-    await mkdir2(dir, { recursive: true });
-    for (const art of legacy.art ?? []) {
-      if (!["portrait", "atlas"].includes(art.kind) || !path3.isAbsolute(art.file)) continue;
-      const id = `art-${randomUUID3()}`, target2 = path3.join(dir, id + path3.extname(art.file));
-      try {
-        await copyFile(art.file, target2);
-      } catch (error) {
-        if (error.code === "ENOENT") continue;
-        throw error;
-      }
-      state.art.push({
-        id,
-        petId,
-        requestId: "legacy",
-        stage: validateStage("egg", art.stage),
-        description: "Imported existing artwork",
-        file: target2,
-        kind: art.kind,
-        createdAt: art.createdAt,
-        provenance: art.provenance || "Preserved v1 artwork"
-      });
-      if (art.kind === "atlas" && art.stage === stage) state.pet.state.appearanceId = id;
-    }
-    return state;
-  });
-}
-
-// src/naming.ts
-function namingDue(state) {
-  return !state.pending && !!state.pet && state.pet.stage !== "egg" && state.pet.naming?.status === "unasked";
-}
-function target(state, petId) {
-  identifier(petId, "petId");
-  if (!state.pet || state.pet.id !== petId) throw new Error("Naming reply belongs to another or missing pet");
-  if (state.pending) throw new Error("Finish the unfinished story before naming this pet");
-  return state.pet;
-}
-async function markNameAsked(store2, petId) {
-  return store2.transaction((state) => {
-    const pet = target(state, petId);
-    if (!namingDue(state)) return { petId, asked: false, status: pet.naming?.status ?? "named" };
-    pet.naming = { status: "asked", askedAt: Date.now() };
-    return { petId, asked: true, status: pet.naming.status };
-  });
-}
-async function namePet(store2, petId, userName) {
-  const name2 = text(userName, "user supplied name");
-  if (name2.length > 100 || /[\u0000-\u001f\u007f]/.test(name2))
-    throw new Error("Name must be one line of at most 100 characters");
-  return store2.transaction((state) => {
-    const pet = target(state, petId);
-    if (pet.name === name2 && pet.naming?.status === "named") return pet;
-    pet.name = name2;
-    pet.naming = {
-      status: "named",
-      namedAt: Date.now(),
-      ...pet.naming?.askedAt ? { askedAt: pet.naming.askedAt } : {}
-    };
-    pet.revision++;
-    return pet;
-  });
-}
-
-// src/schedule.ts
-var CHECK_INTERVAL = 5 * 36e5;
-function dueStory(state, now = Date.now(), timezone = state.schedule?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone) {
-  const period = state.pet ? Math.floor((now - state.pet.adoptedAt) / CHECK_INTERVAL) : 0;
-  const triggerId = period >= 1 ? `period:${period}` : null;
-  const stopped = isStopped(state);
+  const description = draft?.description ?? ([...source].length <= 500 ? source : null);
   return {
-    timezone,
-    intervalHours: CHECK_INTERVAL / 36e5,
-    triggerId,
-    stopped,
-    due: !stopped && !!triggerId && !state.stories.some((story) => story.triggerId === triggerId),
-    pending: state.pending?.id ?? null
-  };
-}
-var isStopped = (state) => state.schedule?.stoppedAt !== void 0 && state.schedule.resumedAt === void 0;
-var iso2 = (time) => new Date(time).toISOString();
-function timeSense(state, now = Date.now()) {
-  const last = state.stories.at(-1)?.at ?? state.pet?.adoptedAt;
-  if (last === void 0) return null;
-  const schedule = state.schedule;
-  const pause = schedule?.stoppedAt !== void 0 && schedule.stoppedAt >= last;
-  return {
-    lastStoryAt: iso2(last),
-    hoursSinceLastStory: Math.round((now - last) / 36e5 * 10) / 10,
-    checkIntervalHours: CHECK_INTERVAL / 36e5,
-    ...state.pending ? {
-      pendingStartedAt: iso2(state.pending.startedAt),
-      pendingHours: Math.round((now - state.pending.startedAt) / 36e5 * 10) / 10
-    } : {},
-    ...pause ? { userStoppedCheckAt: iso2(schedule.stoppedAt) } : {},
-    ...pause && schedule.resumedAt !== void 0 ? { checkResumedAt: iso2(schedule.resumedAt) } : {}
-  };
-}
-async function setSchedule(store2, timezone, reference) {
-  const zone = text(timezone, "timezone");
-  new Intl.DateTimeFormat("en", { timeZone: zone });
-  const ref = text(reference, "schedule reference");
-  return store2.transaction((state) => {
-    const previous = state.schedule;
-    const resumedAt = previous?.stoppedAt !== void 0 ? previous.resumedAt ?? Date.now() : void 0;
-    return state.schedule = {
-      timezone: zone,
-      reference: ref,
-      ...previous?.stoppedAt !== void 0 ? { stoppedAt: previous.stoppedAt, resumedAt } : {}
-    };
-  });
-}
-async function stopSchedule(store2) {
-  return store2.transaction((state) => {
-    const previous = state.schedule;
-    if (isStopped(state)) return { stopped: true, stoppedAt: previous.stoppedAt, previousReference: null };
-    state.schedule = {
-      timezone: previous?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
-      stoppedAt: Date.now()
-    };
-    return { stopped: true, stoppedAt: state.schedule.stoppedAt, previousReference: previous?.reference ?? null };
-  });
-}
-
-// src/lifecycle.ts
-function pendingFor(state, id) {
-  const pending = state.pending;
-  if (!pending || pending.id !== id || !state.pet || pending.petId !== state.pet.id || pending.baseRevision !== state.pet.revision)
-    throw new Error("Stale story operation; read the persisted record before continuing");
-  return pending;
-}
-function startPending(pet, triggerId, mode) {
-  return {
-    id: `story-${randomUUID4()}`,
-    triggerId,
     petId: pet.id,
-    baseRevision: pet.revision,
-    startedAt: Date.now(),
-    mode
+    revision: pet.revision,
+    sourceBrief: JSON.parse(source),
+    description,
+    maxDescriptionLength: 500,
+    needsSummary: description === null
   };
 }
-async function beginStory(store2, triggerId) {
-  identifier(triggerId, "triggerId");
-  return store2.transaction(async (state) => {
-    const completed = state.stories.find((story) => story.triggerId === triggerId);
-    if (completed) return { status: "completed", story: completed };
-    if (state.pending) {
-      if (state.pending.triggerId !== triggerId)
-        throw new Error(`Unfinished story ${state.pending.id}; resume it first`);
-      return {
-        status: "pending",
-        pending: state.pending,
-        pet: state.pet,
-        growth: growth(state),
-        time: timeSense(state)
-      };
-    }
-    if (!state.pet && await findLegacyRecord(store2))
-      throw new Error("Existing legacy pet found; migrate it before creating a new identity");
-    state.pet ??= createPet();
-    state.pending = startPending(state.pet, triggerId, state.pet.genes ? "story" : "initialization");
-    return { status: "pending", pending: state.pending, pet: state.pet, growth: growth(state), time: timeSense(state) };
-  });
-}
-function validatePlan(state, input) {
-  const pet = state.pet;
-  const plan = {
-    text: text(input.text, "story text"),
-    basis: text(input.basis, "decision basis"),
-    state: text(input.state, "state"),
-    stage: validateStage(pet.stage, input.stage ?? pet.stage)
-  };
-  if (plan.stage !== pet.stage && plan.stage !== stages[stages.indexOf(pet.stage) + 1])
-    throw new Error("A story advances at most one stage");
-  if (input.home !== void 0) {
-    plan.home = text(input.home, "home");
-    if (plan.stage === "egg") throw new Error("The home begins after hatching");
-  }
-  const specialActive = !!pet.special && pet.special.endedAt === void 0;
-  if (input.special === null) {
-    if (!specialActive) throw new Error("There is no special form to end");
-    plan.special = null;
-  } else if (input.special !== void 0) {
-    plan.special = text(input.special, "special form");
-    if (pet.stage !== "adult") throw new Error("Special forms begin in adulthood");
-  }
-  if (input.personality !== void 0) {
-    plan.personality = text(input.personality, "personality");
-    if (pet.personality && pet.personality !== plan.personality)
-      throw new Error("An existing pet retains its personality");
-  } else if (pet.personality) plan.personality = pet.personality;
-  if (!pet.genes) {
-    if (plan.stage !== "egg") throw new Error("Initialization begins with an egg");
-    plan.genes = text(input.genes, "open gene description");
-    plan.place = text(input.place, "acquisition place");
-    plan.connection = text(input.connection, "user connection");
-    if (!plan.personality) throw new Error("Initialization requires an individual personality");
-    if (!input.appearance) throw new Error("Initialization requires an egg appearance");
-  } else if (input.genes !== void 0 && input.genes !== pet.genes)
-    throw new Error("An existing pet retains its genes");
-  if (input.appearance)
-    plan.appearance = {
-      description: text(input.appearance.description, "appearance description"),
-      ...input.appearance.reuseArtId ? { reuseArtId: identifier(input.appearance.reuseArtId, "reuseArtId") } : {}
-    };
-  if (plan.stage !== pet.stage && !plan.appearance)
-    throw new Error("Evolution requires an appearance for the new stage");
-  if ((plan.special === null || plan.special !== void 0 && !specialActive) && !plan.appearance)
-    throw new Error("Entering or leaving a special form requires an appearance");
-  const required = growth(state)?.required;
-  if (required === "advance" && plan.stage === pet.stage)
-    throw new Error(`Growth is due: this story advances to ${stages[stages.indexOf(pet.stage) + 1]}`);
-  if (required === "enter-special" && typeof plan.special !== "string")
-    throw new Error("A special form is due: this story enters one");
-  if (required === "end-special" && plan.special !== null)
-    throw new Error("The special form is due to end in this story");
-  if (plan.appearance?.reuseArtId) appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
-  if (input.mediaIds !== void 0) {
-    if (!Array.isArray(input.mediaIds)) throw new Error("mediaIds must be an array");
-    plan.mediaIds = input.mediaIds.map((id) => identifier(id, "mediaId"));
-    for (const id of plan.mediaIds)
-      if (!state.art.some((art) => art.id === id && art.petId === pet.id))
-        throw new Error("Media belongs to another pet or is missing");
-  }
-  return plan;
-}
-async function planStory(store2, id, input) {
-  return store2.transaction((state) => {
-    const pending = pendingFor(state, id);
-    if (pending.plan && JSON.stringify(input) === JSON.stringify(pending.plan)) return pending;
-    const plan = validatePlan(state, input);
-    if (pending.plan && JSON.stringify(pending.plan) !== JSON.stringify(plan))
-      throw new Error("The story plan is saved; resume it or cancel explicitly before redesigning");
-    pending.plan = plan;
-    return pending;
-  });
-}
-function hostUpdateComplete(result, appearanceId) {
-  if (!result?.updated || result.appearanceId !== appearanceId || result.error) return false;
-  return result.active === false || result.refreshRequested || result.refreshUnavailable === true || result.displayStatus === "confirmed";
-}
-async function finishStory(store2, id) {
-  return store2.transaction(async (state) => {
-    const previous = state.stories.find((story2) => story2.id === id);
-    if (previous) return previous;
-    const pending = pendingFor(state, id);
-    const plan = pending.plan;
-    if (!plan) throw new Error("Save a story plan before completing it");
-    const pet = state.pet;
-    const appearance = desiredAppearance(state);
-    if (plan.appearance) {
-      if (!appearance) throw new Error("Appearance artwork is unfinished");
-      await access(appearance.file);
-      if (!hostUpdateComplete(pending.hostResult, appearance.id))
-        throw new Error("Host update or active Avatar refresh is unfinished; resume it");
-    }
-    const current = requestId(state);
-    const storyMedia = state.art.filter(
-      (art) => art.requestId === current && (art.kind === "story" || art.kind === "artifact")
-    );
-    const mediaIds = [.../* @__PURE__ */ new Set([...plan.mediaIds ?? [], ...storyMedia.map((art) => art.id)])];
-    for (const mediaId of mediaIds)
-      await access(state.art.find((art) => art.id === mediaId && art.petId === pet.id).file);
-    const story = {
-      id,
-      triggerId: pending.triggerId,
-      petId: pet.id,
-      at: Date.now(),
-      text: plan.text,
-      basis: plan.basis,
-      stage: plan.stage,
-      state: plan.state,
-      ...plan.home !== void 0 ? { home: plan.home } : {},
-      ...plan.special !== void 0 ? { special: plan.special } : {},
-      ...appearance ? { appearanceId: appearance.id } : {},
-      mediaIds,
-      ...pending.steps?.length ? { steps: pending.steps } : {},
-      ...pending.hostResult ? { hostResult: pending.hostResult } : {}
-    };
-    if (!pet.genes) {
-      pet.genes = plan.genes;
-      pet.acquisition = { place: plan.place, connection: plan.connection, storyId: id };
-    }
-    if (plan.personality) pet.personality ??= plan.personality;
-    pet.stage = plan.stage;
-    if (plan.home !== void 0) pet.home = plan.home;
-    if (plan.special === null) pet.special.endedAt = story.at;
-    else if (plan.special !== void 0)
-      pet.special = pet.special && pet.special.endedAt === void 0 ? { ...pet.special, description: plan.special } : { description: plan.special, since: story.at, storyId: id };
-    pet.revision++;
-    pet.state = {
-      description: plan.state,
-      storyId: id,
-      updatedAt: story.at,
-      ...appearance ? { appearanceId: appearance.id } : {}
-    };
-    state.stories.push(story);
-    state.pending = null;
-    return story;
-  });
-}
-async function cancelStory(store2, id) {
-  return store2.transaction((state) => {
-    const pending = pendingFor(state, id);
-    if (pending.mode === "initialization" && pending.plan)
-      throw new Error("Initialization genes are saved; resume it or explicitly reset the pet");
-    state.pending = null;
-    return { cancelled: pending.id };
-  });
-}
-async function resetPet(store2, operationId) {
-  const triggerId = `reset:${identifier(operationId, "reset operationId")}`;
-  return store2.transaction(async (state) => {
-    const completed = state.stories.find((story) => story.triggerId === triggerId);
-    if (completed) return { status: "completed", story: completed };
-    if (state.pending?.triggerId === triggerId) return { status: "pending", pending: state.pending, pet: state.pet };
-    if (state.pending && state.pending.mode !== "initialization")
-      throw new Error("Resume or cancel the unfinished story before an explicit reset");
-    if (!state.pet && await findLegacyRecord(store2))
-      throw new Error("Migrate the existing legacy pet before resetting its identity");
-    const backup = path4.join(store2.root, "backups", `reset-${Date.now()}-${randomUUID4()}.json`);
-    await atomicJson(backup, state);
-    const previous = state.pet;
-    const schedule = state.schedule;
-    for (const key of Object.keys(state)) delete state[key];
-    Object.assign(state, fresh(store2.host), { pet: createPet(), ...schedule ? { schedule } : {} });
-    const pet = state.pet;
-    if (previous?.binding) pet.binding = previous.binding;
-    if (previous) state.replacesPetId = previous.id;
-    state.pending = startPending(pet, triggerId, "initialization");
-    return { status: "pending", pending: state.pending, pet, backup };
-  });
-}
-function storyOutput(state, storyId) {
-  const story = storyId ? state.stories.find((story2) => story2.id === storyId) : state.stories.at(-1);
-  if (!story) throw new Error("No completed story");
+function statusView(state) {
+  const chats = state.chats ?? [];
+  const pending = state.pending ? (({ steps, ...record2 }) => record2)(state.pending) : null;
   return {
-    text: story.text,
-    media: state.art.filter((art) => story.mediaIds.includes(art.id)),
-    appearance: state.art.find((art) => art.id === story.appearanceId),
-    naming: { due: namingDue(state), petId: state.pet?.id, status: state.pet?.naming?.status ?? "named" },
-    prompt: readPrompt("output")
+    version: state.version,
+    host: state.host,
+    pet: state.pet,
+    pending,
+    ...state.schedule ? { schedule: state.schedule } : {},
+    ...state.legacy ? { legacy: state.legacy } : {},
+    ...state.needsImport ? { needsImport: true, legacyFile: state.legacyFile } : {},
+    ...state.handoff ? { handoff: state.handoff } : {},
+    storyCount: state.stories.length,
+    stories: state.stories.slice(-RECENT.stories).map(({ steps, hostResult: hostResult2, ...story }) => story),
+    artCount: state.art.length,
+    art: state.art.slice(-RECENT.art).map(({ id, stage, kind, description, file }) => ({ id, stage, kind, description, file })),
+    chatCount: chats.length,
+    chats: chats.slice(-RECENT.chats).map(({ at, text: text2 }) => ({ at, text: text2 }))
   };
 }
 
-// src/hosts/result.ts
-function validateHostResult(state, operationId, input) {
-  const pending = pendingFor(state, operationId);
-  const binding = state.pet?.binding;
-  if (!binding) throw new Error("Bind the actual host target before recording an update");
-  if (input.petId !== pending.petId || input.operationId !== operationId)
-    throw new Error("Host result belongs to another pet or operation");
-  if (input.appearanceId !== desiredAppearance(state)?.id)
-    throw new Error("Host result belongs to a different appearance");
-  const avatarId = text(input.avatarId, "avatarId");
-  if (binding.avatarId !== avatarId) throw new Error("Host updated a different Avatar from the persisted target");
-  if (typeof input.updated !== "boolean" || ![true, false, null].includes(input.active) || typeof input.refreshRequested !== "boolean" || !["confirmed", "unconfirmed"].includes(input.displayStatus))
-    throw new Error("Invalid host result");
-  if (input.refreshUnavailable !== void 0 && typeof input.refreshUnavailable !== "boolean")
-    throw new Error("Invalid host result");
-  if (input.refreshUnavailable && !input.notice?.trim()) throw new Error("refreshUnavailable requires a notice");
-  if (input.displayStatus === "confirmed" && !input.evidence?.trim())
-    throw new Error("Confirmed display requires evidence");
-  return {
-    petId: input.petId,
-    operationId,
-    appearanceId: input.appearanceId,
-    avatarId,
-    updated: input.updated,
-    active: input.active,
-    refreshRequested: input.refreshRequested,
-    displayStatus: input.displayStatus,
-    ...input.refreshUnavailable ? { refreshUnavailable: true, notice: text(input.notice, "notice") } : {},
-    ...input.evidence ? { evidence: text(input.evidence, "evidence") } : {},
-    ...input.error ? { error: text(input.error, "error") } : {}
-  };
-}
-async function recordHostResult(store2, operationId, input) {
-  return store2.transaction((state) => {
-    const pending = pendingFor(state, operationId);
-    if (!pending.plan?.appearance) throw new Error("No planned appearance update");
-    if (!desiredAppearance(state)) throw new Error("Complete or select appearance artwork first");
-    return pending.hostResult = validateHostResult(state, operationId, input);
-  });
-}
-
-// src/hosts/desktop/refresh.ts
-import net from "node:net";
-import { lstat, readFile as readFile3 } from "node:fs/promises";
-import { createHash, randomUUID as randomUUID5 } from "node:crypto";
-import path5 from "node:path";
-
-// src/hosts/desktop/frames.ts
-function encodeFrame(message) {
-  const body = Buffer.from(JSON.stringify(message));
-  const header = Buffer.alloc(4);
-  header.writeUInt32LE(body.length);
-  return Buffer.concat([header, body]);
-}
-function readFrames(maxBytes, onMessage, onError) {
-  let buffer = Buffer.alloc(0);
-  let failed = false;
-  return (chunk) => {
-    if (failed) return;
-    buffer = Buffer.concat([buffer, chunk]);
-    while (buffer.length >= 4) {
-      const length = buffer.readUInt32LE(0);
-      if (length > maxBytes) {
-        failed = true;
-        return onError("too-large");
-      }
-      if (buffer.length < length + 4) return;
-      const body = buffer.subarray(4, length + 4);
-      buffer = buffer.subarray(length + 4);
-      let message;
-      try {
-        message = JSON.parse(body.toString("utf8"));
-      } catch {
-        failed = true;
-        return onError("invalid-json");
-      }
-      onMessage(message);
-    }
-  };
-}
-
-// src/hosts/desktop/refresh.ts
-var INVALIDATE = { queryKey: ["custom-avatars"], reset: false };
-function desktopIpcPath() {
-  return process.platform === "win32" ? "\\\\.\\pipe\\codex-ipc" : path5.join(codexHome(), "ipc", "ipc.sock");
-}
-function isLiveDestination(destination) {
-  if (process.env.GENPET_SKIP_NATIVE_REFRESH === "1") return false;
-  const relative = path5.relative(path5.resolve(codexHome(), "pets"), path5.resolve(destination));
-  return /^genpet-[a-zA-Z0-9_-]+$/.test(relative);
-}
-async function refreshNativePet(options) {
-  const expectedSpriteSha256 = createHash("sha256").update(await readFile3(options.expectedSpritePath)).digest("hex");
-  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || isLiveDestination(path5.dirname(options.expectedSpritePath)));
-  const errors = [];
-  if (useIpc) {
-    try {
-      const ipc = await refreshViaIpc(options.ipcSocketPath ?? void 0, options.timeoutMs ?? 2e3);
-      return {
-        automaticRefresh: true,
-        refreshRequested: true,
-        displayStatus: "unconfirmed",
-        strategy: "ipc-query-invalidate",
-        ipc,
-        expectedSpriteSha256,
-        notice: "Automatic refresh requested through the existing desktop IPC channel. Router relay confirmed; the displayed sprite hash was not measured."
-      };
-    } catch (error) {
-      errors.push(`ipc: ${error.message}`);
-    }
-  }
-  return {
-    automaticRefresh: false,
-    refreshRequested: false,
-    displayStatus: "unconfirmed",
-    strategy: "none",
-    expectedSpriteSha256,
-    notice: useIpc ? "Files committed to the same GenPet entry. IPC refresh failed; retry when the desktop is running and ready. Visible update remains unconfirmed." : "Files committed to the same GenPet entry. IPC refresh was skipped for this destination. Visible update remains unconfirmed.",
-    ...errors.length ? { errors } : {}
-  };
-}
-async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
-  await assertPrivateSocket(socketPath);
-  const sockets = /* @__PURE__ */ new Set();
-  const waiting = /* @__PURE__ */ new Set();
-  let failure;
-  const fail = (error) => {
-    failure ??= error;
-    for (const reject of [...waiting]) reject(error);
-  };
-  const deadline = setTimeout(() => fail(Error("IPC refresh timed out")), timeoutMs);
-  const connect = () => new Promise((resolve, reject) => {
-    if (failure) return reject(failure);
-    waiting.add(reject);
-    const socket = net.createConnection(socketPath);
-    sockets.add(socket);
-    const requestId2 = randomUUID5();
-    let listener;
-    const send = (message) => {
-      if (failure) throw failure;
-      socket.write(encodeFrame(message));
-    };
-    socket.on("error", fail);
-    socket.on("close", () => fail(Error("IPC connection closed")));
-    socket.on(
-      "connect",
-      () => send({
-        type: "request",
-        requestId: requestId2,
-        sourceClientId: "genpet",
-        version: 0,
-        method: "initialize",
-        params: { clientType: "genpet" }
-      })
-    );
-    socket.on(
-      "data",
-      readFrames(
-        16 * 1024 * 1024,
-        (value) => {
-          if (!value || typeof value !== "object") return fail(Error("Invalid IPC message"));
-          const message = value;
-          if (message.type === "response" && message.requestId === requestId2) {
-            if (message.resultType !== "success" || typeof message.result?.clientId !== "string")
-              return fail(Error("IPC initialization rejected"));
-            waiting.delete(reject);
-            resolve({ id: message.result.clientId, send, onMessage: (fn) => listener = fn });
-          }
-          listener?.(message);
-        },
-        (problem) => fail(Error(problem === "too-large" ? "IPC frame too large" : "Invalid IPC JSON"))
-      )
-    );
-  });
-  try {
-    const observer = await connect();
-    const sender = await connect();
-    await new Promise((resolve, reject) => {
-      if (failure) return reject(failure);
-      waiting.add(reject);
-      observer.onMessage((message) => {
-        if (message.type === "broadcast" && message.method === "query-cache-invalidate" && message.version === 0 && message.sourceClientId === sender.id && JSON.stringify(message.params) === JSON.stringify(INVALIDATE)) {
-          waiting.delete(reject);
-          resolve();
-        }
-      });
-      sender.send({
-        type: "broadcast",
-        method: "query-cache-invalidate",
-        version: 0,
-        sourceClientId: sender.id,
-        params: INVALIDATE
-      });
-    });
-    return { socketPath, handshakeConfirmed: true, relayConfirmed: true, hostRefreshRequested: true };
-  } finally {
-    clearTimeout(deadline);
-    for (const socket of sockets) {
-      socket.removeAllListeners("close");
-      socket.destroy();
-    }
-  }
-}
-async function assertPrivateSocket(socketPath) {
-  if (process.platform === "win32") {
-    if (!socketPath.startsWith("\\\\.\\pipe\\")) throw Error("Expected a local Windows named pipe");
-    return;
-  }
-  const [file, directory] = await Promise.all([lstat(socketPath), lstat(path5.dirname(socketPath))]);
-  const uid = process.getuid?.();
-  if (uid == null || file.uid !== uid || directory.uid !== uid || !file.isSocket() || !directory.isDirectory() || directory.mode & 18)
-    throw Error("IPC socket must belong to the current user in a protected directory");
-}
-
-// src/hosts/desktop/switch.ts
-import { readFile as readFile4, readdir } from "node:fs/promises";
-import { randomUUID as randomUUID6 } from "node:crypto";
-import net2 from "node:net";
-import path6 from "node:path";
-var BUILTIN_PETS = [
-  ["codex", "Codex"],
-  ["dewey", "Dewey"],
-  ["fireball", "Fireball"],
-  ["hoots", "Hoots"],
-  ["rocky", "Rocky"],
-  ["seedy", "Seedy"],
-  ["stacky", "Stacky"],
-  ["bsod", "BSOD"],
-  ["null-signal", "Null Signal"]
-].map(([id, displayName]) => ({ id, displayName, source: "builtin" }));
-var isRecord = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
-async function listPets(home = codexHome()) {
-  const errors = [];
-  const local = /* @__PURE__ */ new Map();
-  for (const [directory, filename] of [
-    ["avatars", "avatar.json"],
-    ["pets", "pet.json"]
-  ]) {
-    let entries;
-    try {
-      entries = await readdir(path6.join(home, directory), { withFileTypes: true });
-    } catch (error) {
-      if (error.code !== "ENOENT") errors.push(`${directory}: \u65E0\u6CD5\u8BFB\u53D6\u5BA0\u7269\u76EE\u5F55`);
-      continue;
-    }
-    for (const entry of entries) {
-      if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
-      let text2;
-      try {
-        text2 = await readFile4(path6.join(home, directory, entry.name, filename), "utf8");
-      } catch (error) {
-        if (error.code === "ENOENT") continue;
-        errors.push(`${directory}/${entry.name}/${filename}: \u65E0\u6CD5\u8BFB\u53D6\u6709\u6548\u5BA0\u7269\u6E05\u5355`);
-        continue;
-      }
-      try {
-        const manifest = JSON.parse(text2);
-        if (!isRecord(manifest)) throw new Error("Invalid manifest");
-        for (const key of ["id", "displayName"])
-          if (manifest[key] !== void 0 && (typeof manifest[key] !== "string" || !manifest[key].trim()))
-            throw new Error("Invalid name");
-        const id = `custom:${entry.name}`;
-        const displayName = (manifest.displayName ?? manifest.id ?? entry.name).trim();
-        local.set(id, { id, displayName, source: "local" });
-      } catch {
-        errors.push(`${directory}/${entry.name}/${filename}: \u65E0\u6CD5\u8BFB\u53D6\u6709\u6548\u5BA0\u7269\u6E05\u5355`);
-      }
-    }
-  }
-  const sorted = [...local.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
-  return { pets: [...BUILTIN_PETS.map((pet) => ({ ...pet })), ...sorted], ...errors.length ? { errors } : {} };
-}
-async function readSelectedPet(options = {}) {
-  try {
-    return { available: true, ...await callSettings(options) };
-  } catch (error) {
-    return {
-      available: false,
-      reason: error instanceof Error ? error.message : "Live Codex pet selection is unavailable."
-    };
-  }
-}
-async function selectPet(petId, options = {}) {
-  if (typeof petId !== "string" || petId.trim() !== petId || petId.length === 0 || petId.length > 512 || /[\x00-\x1f\x7f]/.test(petId))
-    throw new Error("A valid pet ID is required.");
-  await callSettings(options, petId);
-  const result = await callSettings(options);
-  if (result.selectedPetId !== petId || result.effectiveSelectedPetId !== petId)
-    throw new Error("The live Codex selection did not match the requested pet; its current selection is unconfirmed.");
-  return {
-    ...result,
-    immediate: true,
-    restartRequired: false,
-    hostStateConfirmed: true,
-    visualVerified: false
-  };
-}
-var SWITCH_USAGE = "Usage: switch-pet [PET_ID|--current|--list|--help]";
-async function switchPet(args2) {
-  if (args2.length > 1) throw new Error(SWITCH_USAGE);
-  const target2 = args2[0] ?? "--current";
-  if (target2 === "--help")
-    return { usage: SWITCH_USAGE, examples: ["switch-pet --list", "switch-pet --current", "switch-pet dewey"] };
-  if (target2 === "--current") {
-    const current = await readSelectedPet();
-    if (!current.available) throw new Error(current.reason);
-    return current;
-  }
-  if (target2.startsWith("-") && target2 !== "--list") throw new Error(SWITCH_USAGE);
-  const catalog = await listPets();
-  if (target2 === "--list") return catalog;
-  if (!catalog.pets.some((pet) => pet.id === target2))
-    throw new Error(`Unknown pet ID: ${target2}. Use switch-pet --list.`);
-  return selectPet(target2);
-}
-var SELECTED_KEY = "selected-avatar-id";
-function appToolsConnection(options) {
-  const pick = (key, env) => (Object.hasOwn(options, key) ? options[key] : env)?.trim();
-  const pipePath = pick("pipePath", process.env.CODEX_APP_TOOLS_PIPE_PATH);
-  const threadId = pick("threadId", process.env.CODEX_THREAD_ID);
-  if (!pipePath || !threadId) throw new Error("The current Codex app tools pipe and thread ID are unavailable.");
-  if (process.platform === "win32" && !pipePath.startsWith("\\\\.\\pipe\\"))
-    throw new Error("Expected a local Windows named pipe for Codex app tools.");
-  const timeoutMs = options.timeoutMs ?? 5e3;
-  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error("The Codex app tools timeout must be positive.");
-  return { pipePath, threadId, timeoutMs };
-}
-function projectSelection(value) {
-  if (!isRecord(value) || !isRecord(value.settings) || !isRecord(value.effectiveSettings))
-    throw new Error("Codex returned an invalid settings response.");
-  const selectedPetId = value.settings[SELECTED_KEY] ?? null;
-  const effectiveSelectedPetId = value.effectiveSettings[SELECTED_KEY] ?? null;
-  if (selectedPetId !== null && typeof selectedPetId !== "string" || effectiveSelectedPetId !== null && typeof effectiveSelectedPetId !== "string")
-    throw new Error("Codex returned an invalid pet selection.");
-  return { selectedPetId, effectiveSelectedPetId };
-}
-async function callSettings(options, petId) {
-  const { pipePath, threadId, timeoutMs } = appToolsConnection(options);
-  const id = 1;
-  const request = {
-    jsonrpc: "2.0",
-    id,
-    method: "tools/call",
-    params: {
-      namespace: "codex_app",
-      tool: petId === void 0 ? "read_settings" : "write_settings",
-      arguments: petId === void 0 ? { include_config: false } : { settings: { [SELECTED_KEY]: petId } },
-      callerSource: "codex",
-      threadId,
-      callId: `mcp-call-${randomUUID6()}`,
-      // These fallbacks follow the bundled app-tools MCP's request metadata.
-      turnId: `mcp-turn-${randomUUID6()}`
-    }
-  };
-  return new Promise((resolve, reject) => {
-    const socket = net2.createConnection(pipePath);
-    let settled = false;
-    let sent = false;
-    const finish = (error, result, cancel = false) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      if (cancel && sent && !socket.destroyed) {
-        socket.end(encodeFrame({ jsonrpc: "2.0", id, method: "tools/cancel" }));
-        socket.destroySoon();
-      } else socket.destroy();
-      if (error) reject(error);
-      else resolve(result);
-    };
-    const timer = setTimeout(
-      () => finish(new Error("Codex app tools timed out; the current selection is unconfirmed."), void 0, true),
-      timeoutMs
-    );
-    socket.once("connect", () => {
-      sent = true;
-      socket.write(encodeFrame(request));
-    });
-    socket.on(
-      "error",
-      (error) => finish(
-        new Error(`Codex app tools connection failed (${error.code ?? "socket error"}).`)
-      )
-    );
-    socket.on("close", () => finish(new Error("Codex app tools closed before confirming the pet selection.")));
-    socket.on(
-      "data",
-      readFrames(
-        8 * 1024 * 1024,
-        (response) => {
-          if (settled || !isRecord(response) || response.id !== id) return;
-          if (response.error !== void 0) return finish(new Error("Codex rejected the app tool request."));
-          const result = response.result;
-          if (!isRecord(result) || result.success !== true || !Array.isArray(result.contentItems))
-            return finish(new Error("Codex could not complete the pet settings request."));
-          const item = result.contentItems.find((item2) => isRecord(item2) && item2.type === "inputText");
-          if (!isRecord(item) || typeof item.text !== "string")
-            return finish(new Error("Codex returned no pet settings result."));
-          try {
-            finish(void 0, projectSelection(JSON.parse(item.text)));
-          } catch {
-            finish(new Error("Codex returned an invalid pet settings result."));
-          }
-        },
-        (problem) => finish(
-          new Error(
-            problem === "too-large" ? "Codex app tools response exceeded the size limit." : "Codex app tools returned invalid JSON."
-          )
-        )
-      )
-    );
-  });
-}
-
-// src/hosts/desktop/publish.ts
-function desktopDestination(state) {
-  if (!state.pet) throw new Error("No pet");
-  const pets = path7.resolve(codexHome(), "pets");
-  const destination = state.pet.binding?.destination ?? path7.join(pets, state.pet.id);
-  const relative = path7.relative(pets, path7.resolve(destination));
-  if (!relative || relative.startsWith("..") || path7.isAbsolute(relative) || relative.includes(path7.sep))
-    throw new Error("Target must be one entry in this Codex home");
-  if (state.pet.binding && state.pet.binding.avatarId !== `custom:${path7.basename(destination)}`)
-    throw new Error("Avatar binding does not match its destination");
-  return destination;
-}
-var desktopLabel = (petId) => petId.slice(0, "genpet-".length + 6);
-async function exportNative(state, destination) {
-  if (!state.pet || state.host !== "desktop") throw new Error("Native export requires a desktop pet");
-  const art = desiredAppearance(state);
-  if (!art || art.kind !== "atlas") throw new Error("Complete or select a validated atlas first");
-  await validateImage(art.file, "atlas");
-  let previous;
-  try {
-    previous = await readFile5(path7.join(destination, "pet.json"), "utf8");
-    const old = JSON.parse(previous);
-    const boundHere = state.pet.binding?.destination === destination;
-    const ours = old.genpetId === state.pet.id || boundHere && state.replacesPetId && old.genpetId === state.replacesPetId || // explicit reset
-    boundHere && state.legacy && !old.genpetId;
-    if (!ours) throw new Error("Target entry belongs to another pet; it was preserved");
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
-  }
-  await mkdir3(destination, { recursive: true });
-  const bytes = await readFile5(art.file);
-  const spritesheetPath = `spritesheet-${createHash2("sha256").update(bytes).digest("hex").slice(0, 16)}${path7.extname(art.file)}`;
-  const tmp = path7.join(destination, `.pending-${randomUUID7()}`);
-  await copyFile2(art.file, tmp);
-  await rename2(tmp, path7.join(destination, spritesheetPath));
-  const manifest = {
-    id: path7.basename(destination),
-    genpetId: state.pet.id,
-    displayName: desktopLabel(state.pet.id),
-    description: "GenPet \xB7 a companion with its own stories",
-    spriteVersionNumber: 2,
-    spritesheetPath
-  };
-  if (previous) await writeFile2(path7.join(destination, "previous-pet.json"), previous);
-  const manifestTmp = path7.join(destination, `.pet-${randomUUID7()}.json`);
-  await writeFile2(manifestTmp, JSON.stringify(manifest, null, 2));
-  await rename2(manifestTmp, path7.join(destination, "pet.json"));
-  return { destination, manifest, artId: art.id, filesCommitted: true };
-}
-async function installNative(store2, options = {}) {
-  if (store2.host !== "desktop") throw new Error("Dots updates its own Avatar through host-request and host-result");
-  return store2.transaction(async (state) => {
-    if (!state.pending?.plan?.appearance) throw new Error("No planned appearance update");
-    const operationId = state.pending.id;
-    const destination = desktopDestination(state);
-    const avatarId = `custom:${path7.basename(destination)}`;
-    const result = await exportNative(state, destination);
-    state.pet.binding = { host: "desktop", avatarId, destination };
-    const selection = await (options.selection ?? readSelectedPet)();
-    const active = selection.available ? selection.effectiveSelectedPetId === avatarId : null;
-    const refresh = await (options.refresh ?? refreshNativePet)({
-      expectedSpritePath: path7.join(destination, result.manifest.spritesheetPath)
-    });
-    const mustRefresh = active === true || active === null && isLiveDestination(destination);
-    const hostResult = validateHostResult(state, operationId, {
-      petId: state.pet.id,
-      operationId,
-      appearanceId: result.artId,
-      avatarId,
-      updated: true,
-      active,
-      refreshRequested: refresh.refreshRequested,
-      displayStatus: refresh.displayStatus,
-      // No delivery channel (app closed, or a Codex version whose channel is missing or changed) must not leave the
-      // story unfinished forever: the files are committed and appear when Codex next loads Pets.
-      ...mustRefresh && !refresh.automaticRefresh ? {
-        refreshUnavailable: true,
-        notice: `Files committed; the desktop refresh was not delivered (${refresh.errors?.join("; ") || "no live app channel"}). The new look appears when Codex next loads Pets.`
-      } : {}
-    });
-    state.pending.hostResult = hostResult;
-    return { ...result, ...hostResult, refresh };
-  });
-}
-
-// src/hosts/desktop/index.ts
-var desktop = {
-  appearanceKind: "atlas",
-  artContract: ATLAS_CONTRACT,
-  commands: {
-    publish: { usage: "publish", run: (_, store2) => installNative(store2) },
-    "switch-pet": { usage: "switch-pet [PET_ID|--current|--list|--help]", run: (args2) => switchPet(args2) }
-  }
-};
-
-// src/hosts/dots.ts
-async function bindAvatar(store2, avatarId) {
-  if (store2.host !== "dots") throw new Error("bind-avatar is for a real Dots pet");
-  return store2.transaction((state) => {
-    if (!state.pet) throw new Error("Allocate the pet identity first");
-    const id = text(avatarId, "avatarId");
-    if (state.pet.binding && state.pet.binding.avatarId !== id)
-      throw new Error("Target is already bound; preserve the existing Avatar");
-    return state.pet.binding ??= { host: "dots", avatarId: id };
-  });
-}
-function hostRequest(state) {
-  if (state.host !== "dots") throw new Error("This handoff is for Dots Avatar updates");
-  if (!state.pending?.plan?.appearance) throw new Error("No planned Avatar update");
-  if (!state.pet?.binding) throw new Error("Bind the actual Dots Avatar before requesting an update");
-  const pending = pendingFor(state, state.pending.id);
-  const art = desiredAppearance(state);
-  if (!art || art.kind !== "avatar") throw new Error("Complete or select Dots Avatar artwork first");
-  return {
-    operation: "update-avatar",
-    petId: pending.petId,
-    operationId: pending.id,
-    name: state.pet.name,
-    target: state.pet.binding,
-    file: art.file,
-    appearanceId: art.id,
-    description: state.pending.plan.appearance.description,
-    stage: state.pending.plan.stage,
-    refreshWhenActive: true,
-    preserveCurrentSelection: true
-  };
-}
-var dots = {
-  appearanceKind: "avatar",
-  artContract: null,
-  commands: {
-    "bind-avatar": { usage: "bind-avatar AVATAR_ID", run: (args2, store2) => bindAvatar(store2, args2[0]) },
-    "host-request": { usage: "host-request", run: async (_, store2) => hostRequest(await store2.peek()) }
-  }
-};
-
-// src/hosts/index.ts
-function hostFor(host) {
-  return { desktop, dots }[host];
-}
-
-// src/appearance.ts
-function requestId(state) {
-  const pending = state.pending;
-  if (!pending?.plan) return null;
-  return createHash3("sha256").update(JSON.stringify([pending.id, pending.petId, pending.baseRevision, pending.plan])).digest("hex").slice(0, 24);
-}
-function appearanceFor(state, stage, id) {
-  const kind = hostFor(state.host).appearanceKind;
-  const art = state.art.find(
-    (art2) => art2.id === id && art2.petId === state.pet.id && art2.kind === kind && art2.stage === stage
-  );
-  if (!art)
-    throw new Error("Reusable appearance is missing, belongs to another pet, or is incompatible with this host/stage");
-  return art;
-}
-function desiredAppearance(state) {
-  const plan = state.pending?.plan;
-  if (!plan?.appearance) return state.art.find((art) => art.id === state.pet?.state.appearanceId);
-  if (plan.appearance.reuseArtId) return appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
-  const kind = hostFor(state.host).appearanceKind;
-  const current = requestId(state);
-  return state.art.findLast((art) => art.petId === state.pet?.id && art.requestId === current && art.kind === kind);
-}
+// src/hosts/art.ts
+import { stat } from "node:fs/promises";
 
 // src/image.ts
 var import_pngjs = __toESM(require_png(), 1);
-import { readFile as readFile6 } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { existsSync as existsSync2, readFileSync as readFileSync2 } from "node:fs";
 import { createRequire } from "node:module";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
@@ -3381,11 +2348,11 @@ var Module = (() => {
     var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
     var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions == "object" && typeof process.versions.node == "string";
     var scriptDirectory = "";
-    function locateFile(path11) {
+    function locateFile(path18) {
       if (Module2["locateFile"]) {
-        return Module2["locateFile"](path11, scriptDirectory);
+        return Module2["locateFile"](path18, scriptDirectory);
       }
-      return scriptDirectory + path11;
+      return scriptDirectory + path18;
     }
     var read_, readAsync, readBinary, setWindowTitle;
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -4781,7 +3748,7 @@ function imageInfo(buf) {
   throw new Error("Use a PNG or WebP image");
 }
 async function readImageInfo(file) {
-  return imageInfo(await readFile6(file));
+  return imageInfo(await readFile(file));
 }
 var webpReady;
 function webpWasm() {
@@ -4789,7 +3756,7 @@ function webpWasm() {
   return existsSync2(bundled) ? bundled : createRequire(import.meta.url).resolve("@jsquash/webp/codec/dec/webp_dec.wasm");
 }
 async function decodeRgba(file) {
-  const buf = await readFile6(file);
+  const buf = await readFile(file);
   const info = imageInfo(buf);
   if (info.format === "png") return { ...info, data: import_pngjs.PNG.sync.read(buf).data };
   globalThis.ImageData ??= class {
@@ -4810,6 +3777,1126 @@ async function decodeRgba(file) {
   return { ...info, data: new Uint8Array(decoded.data.buffer, decoded.data.byteOffset, decoded.data.byteLength) };
 }
 
+// src/hosts/art.ts
+async function validateArt(file) {
+  const info = await stat(file);
+  if (!info.isFile() || info.size > 64 * 1024 * 1024) throw new Error("Artwork must be a regular file below 64 MiB");
+  const meta = await readImageInfo(file);
+  if (!meta.hasAlpha) throw new Error("Pet images must have an alpha channel");
+  if (meta.width * meta.height > 16e6) throw new Error("Image exceeds size limit");
+  checkAtlas(await decodeRgba(file));
+  return meta;
+}
+
+// src/hosts/artwork.ts
+import { createHash as createHash2 } from "node:crypto";
+import { readFile as readFile2, stat as stat2 } from "node:fs/promises";
+import path2 from "node:path";
+async function artworkFingerprint(file) {
+  if (!path2.isAbsolute(file)) throw new Error("Artwork readback must be an absolute local file");
+  const info = await stat2(file);
+  if (!info.isFile() || info.size > 64 * 1024 * 1024)
+    throw new Error("Artwork readback must be a regular file below 64 MiB");
+  const image = await decodeRgba(file);
+  const pixels = new Uint8Array(image.data);
+  for (let at = 0; at < pixels.length; at += 4)
+    if (pixels[at + 3] === 0) pixels[at] = pixels[at + 1] = pixels[at + 2] = 0;
+  return {
+    fileSha256: createHash2("sha256").update(await readFile2(file)).digest("hex"),
+    artworkSha256: createHash2("sha256").update(JSON.stringify([image.width, image.height])).update(pixels).digest("hex"),
+    width: image.width,
+    height: image.height
+  };
+}
+async function verifyStoredArtwork(acceptedFile, readbackFile) {
+  const [accepted, stored] = await Promise.all([artworkFingerprint(acceptedFile), artworkFingerprint(readbackFile)]);
+  return {
+    storedArtworkVerified: accepted.artworkSha256 === stored.artworkSha256,
+    acceptedArtworkSha256: accepted.artworkSha256,
+    storedArtworkSha256: stored.artworkSha256,
+    acceptedFileSha256: accepted.fileSha256,
+    storedFileSha256: stored.fileSha256
+  };
+}
+
+// src/hosts/cloud-request.ts
+async function cloudAppearanceRequest(state, target2) {
+  if (!state.pending?.plan?.appearance) throw new Error("No planned appearance update");
+  const pending = pendingFor(state, state.pending.id);
+  const art = desiredAppearance(state);
+  if (!art || art.kind !== "atlas") throw new Error("Complete or select validated Pet atlas artwork first");
+  if (!target2.cloudId || target2.avatarId !== target2.cloudId)
+    throw new Error(target2.reason ?? "Resolve the actual cloud Pet ID first");
+  await validateArt(art.file);
+  const accepted = await artworkFingerprint(art.file);
+  return {
+    operation: "update-cloud-pet",
+    petId: pending.petId,
+    operationId: pending.id,
+    appearanceId: art.id,
+    avatarId: target2.cloudId,
+    cloudId: target2.cloudId,
+    target: { avatarId: target2.cloudId, cloudId: target2.cloudId, localAvatarId: target2.localAvatarId },
+    file: art.file,
+    acceptedArtworkSha256: accepted.artworkSha256,
+    updated: false,
+    storedArtworkVerified: null,
+    active: target2.active,
+    refreshRequested: false,
+    displayStatus: "unconfirmed",
+    preserveCurrentSelection: true,
+    agentSteps: cloudUploadSteps(art.file, target2.cloudId, {
+      command: "host-result",
+      operationId: pending.id,
+      check: "Pass the actual downloaded readbackFile and observed tool results. Runtime compares accepted and stored pixels; a boolean alone cannot prove the update."
+    }),
+    notice: "The cloud Pet still needs upload and actual host readback. This story remains pending until the stored artwork matches."
+  };
+}
+function cloudUploadSteps(file, cloudId, finalStep) {
+  return [
+    {
+      tool: "validate_pet_spritesheet",
+      arguments: { file },
+      check: "Repair structural errors while preserving the accepted design."
+    },
+    { tool: "prepare_pet_upload", arguments: { file }, save: "upload_session_id" },
+    {
+      tool: "update_pet",
+      arguments: { pet_id: cloudId, updates: { upload_session_id: "<prepared upload_session_id>" } },
+      check: "Update this exact existing Pet ID; preserve name, description and selection."
+    },
+    {
+      tool: "get_pet_download_link",
+      arguments: { pet_id: cloudId },
+      check: "Use this fresh host URL immediately to save a separate readback file. Do not reuse the upload input or persist the temporary URL."
+    },
+    finalStep
+  ];
+}
+
+// src/hosts/desktop/mapping.ts
+import { readFile as readFile3 } from "node:fs/promises";
+import path3 from "node:path";
+var record = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
+var isCloudId = (value) => typeof value === "string" && /^pet_[a-zA-Z0-9_-]+$/.test(value);
+async function readMigrationMap(home = codexHome()) {
+  try {
+    const state = JSON.parse(await readFile3(path3.join(home, ".codex-global-state.json"), "utf8"));
+    if (!record(state)) throw new Error("Invalid host Pet state");
+    const atoms = state["electron-persisted-atom-state"] ?? {};
+    if (!record(atoms)) throw new Error("Invalid host Pet state");
+    const migrations = atoms["migrated-cloud-pet-ids-v1"] ?? {};
+    const pending = atoms["pending-cloud-pet-migrations-v1"] ?? {};
+    if (!record(migrations) || !record(pending)) throw new Error("Invalid host Pet migration map");
+    const cache = atoms["cloud-pet-artwork-cache"];
+    const accountKey = record(cache) && typeof cache.accountId === "string" && cache.accountId.trim() && typeof cache.userId === "string" && cache.userId.trim() ? JSON.stringify([cache.accountId, cache.userId]) : void 0;
+    const scopes = [.../* @__PURE__ */ new Set([...Object.keys(migrations), ...Object.keys(pending)])];
+    if (accountKey === void 0 && scopes.length > 0)
+      return { available: false, mappings: {}, pending: [], reason: "Current Pet account scope is unknown" };
+    const scope = accountKey;
+    const mappings = scope ? migrations[scope] ?? {} : {};
+    const unfinished = scope ? pending[scope] ?? {} : {};
+    if (!record(mappings) || !record(unfinished)) throw new Error("Invalid host Pet migration scope");
+    const result = {};
+    for (const [localId, cloudId] of Object.entries(mappings)) {
+      if (!localId.startsWith("custom:") || !isCloudId(cloudId)) throw new Error("Invalid host Pet migration target");
+      result[localId] = cloudId;
+    }
+    return {
+      available: true,
+      mappings: result,
+      pending: Object.keys(unfinished).filter((id) => id.startsWith("custom:"))
+    };
+  } catch (error) {
+    const code = error.code;
+    return {
+      available: false,
+      mappings: {},
+      pending: [],
+      reason: code === "ENOENT" ? "Host Pet migration state is unavailable" : "Host Pet migration state cannot be read safely"
+    };
+  }
+}
+
+// src/hosts/desktop/switch.ts
+import { readFile as readFile4, readdir } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import net from "node:net";
+import path4 from "node:path";
+
+// src/hosts/desktop/frames.ts
+function encodeFrame(message) {
+  const body = Buffer.from(JSON.stringify(message));
+  const header = Buffer.alloc(4);
+  header.writeUInt32LE(body.length);
+  return Buffer.concat([header, body]);
+}
+function readFrames(maxBytes, onMessage, onError) {
+  let buffer = Buffer.alloc(0);
+  let failed = false;
+  return (chunk) => {
+    if (failed) return;
+    buffer = Buffer.concat([buffer, chunk]);
+    while (buffer.length >= 4) {
+      const length = buffer.readUInt32LE(0);
+      if (length > maxBytes) {
+        failed = true;
+        return onError("too-large");
+      }
+      if (buffer.length < length + 4) return;
+      const body = buffer.subarray(4, length + 4);
+      buffer = buffer.subarray(length + 4);
+      let message;
+      try {
+        message = JSON.parse(body.toString("utf8"));
+      } catch {
+        failed = true;
+        return onError("invalid-json");
+      }
+      onMessage(message);
+    }
+  };
+}
+
+// src/hosts/desktop/switch.ts
+var BUILTIN_PETS = [
+  ["codex", "Codex"],
+  ["dewey", "Dewey"],
+  ["fireball", "Fireball"],
+  ["hoots", "Hoots"],
+  ["rocky", "Rocky"],
+  ["seedy", "Seedy"],
+  ["stacky", "Stacky"],
+  ["bsod", "BSOD"],
+  ["null-signal", "Null Signal"]
+].map(([id, displayName]) => ({ id, displayName, source: "builtin" }));
+var isRecord = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
+async function listPets(home = codexHome()) {
+  const errors = [];
+  const local = /* @__PURE__ */ new Map();
+  const migration = await readMigrationMap(home);
+  for (const [directory, filename] of [
+    ["avatars", "avatar.json"],
+    ["pets", "pet.json"]
+  ]) {
+    let entries;
+    try {
+      entries = await readdir(path4.join(home, directory), { withFileTypes: true });
+    } catch (error) {
+      if (error.code !== "ENOENT") errors.push(`${directory}: \u65E0\u6CD5\u8BFB\u53D6\u5BA0\u7269\u76EE\u5F55`);
+      continue;
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
+      let text2;
+      try {
+        text2 = await readFile4(path4.join(home, directory, entry.name, filename), "utf8");
+      } catch (error) {
+        if (error.code === "ENOENT") continue;
+        errors.push(`${directory}/${entry.name}/${filename}: \u65E0\u6CD5\u8BFB\u53D6\u6709\u6548\u5BA0\u7269\u6E05\u5355`);
+        continue;
+      }
+      try {
+        const manifest = JSON.parse(text2);
+        if (!isRecord(manifest)) throw new Error("Invalid manifest");
+        for (const key2 of ["id", "displayName"])
+          if (manifest[key2] !== void 0 && (typeof manifest[key2] !== "string" || !manifest[key2].trim()))
+            throw new Error("Invalid name");
+        const localId = `custom:${entry.name}`;
+        const cloudId = migration.available ? migration.mappings[localId] : void 0;
+        const id = cloudId ?? localId;
+        const displayName = (manifest.displayName ?? manifest.id ?? entry.name).trim();
+        local.set(id, { id, displayName, source: cloudId ? "cloud" : "local", ...cloudId ? { localId } : {} });
+      } catch {
+        errors.push(`${directory}/${entry.name}/${filename}: \u65E0\u6CD5\u8BFB\u53D6\u6709\u6548\u5BA0\u7269\u6E05\u5355`);
+      }
+    }
+  }
+  const sorted = [...local.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
+  return { pets: [...BUILTIN_PETS.map((pet) => ({ ...pet })), ...sorted], ...errors.length ? { errors } : {} };
+}
+async function readSelectedPet(options = {}) {
+  try {
+    return { available: true, ...await callSettings(options) };
+  } catch (error) {
+    return {
+      available: false,
+      reason: error instanceof Error ? error.message : "Live Codex pet selection is unavailable."
+    };
+  }
+}
+async function selectPet(petId2, options = {}) {
+  if (typeof petId2 !== "string" || petId2.trim() !== petId2 || petId2.length === 0 || petId2.length > 512 || /[\x00-\x1f\x7f]/.test(petId2))
+    throw new Error("A valid pet ID is required.");
+  await callSettings(options, petId2);
+  const result = await callSettings(options);
+  if (result.selectedPetId !== petId2 || result.effectiveSelectedPetId !== petId2)
+    throw new Error("The live Codex selection did not match the requested pet; its current selection is unconfirmed.");
+  return {
+    ...result,
+    immediate: true,
+    restartRequired: false,
+    hostStateConfirmed: true,
+    visualVerified: false
+  };
+}
+var SWITCH_USAGE = "Usage: switch-pet [PET_ID|--current|--list|--help]";
+async function switchPet(args2) {
+  if (args2.length > 1) throw new Error(SWITCH_USAGE);
+  const target2 = args2[0] ?? "--current";
+  if (target2 === "--help")
+    return { usage: SWITCH_USAGE, examples: ["switch-pet --list", "switch-pet --current", "switch-pet dewey"] };
+  if (target2 === "--current") {
+    const current = await readSelectedPet();
+    if (!current.available) throw new Error(current.reason);
+    return current;
+  }
+  if (target2.startsWith("-") && target2 !== "--list") throw new Error(SWITCH_USAGE);
+  const catalog = await listPets();
+  if (target2 === "--list") return catalog;
+  const entry = catalog.pets.find((pet) => pet.id === target2 || pet.localId === target2);
+  if (!entry) throw new Error(`Unknown pet ID: ${target2}. Use switch-pet --list.`);
+  appToolsConnection({});
+  if (!process.env.CODEX_TURN_ID?.trim())
+    return {
+      operation: "select-pet",
+      targetId: entry.id,
+      selected: false,
+      agentSteps: entry.id.startsWith("custom:") ? [] : [
+        { tool: "select_pet", arguments: { pet_id: entry.id } },
+        {
+          command: "switch-pet --current",
+          check: "Independently confirm the exact selected ID; display is unknown."
+        }
+      ],
+      notice: entry.id.startsWith("custom:") ? `The active turn ID is unavailable. Select ${entry.displayName} (${entry.id}) in the host Pet settings.` : "Use the supported host selection tool; the CLI has no current active turn ID and has not changed selection."
+    };
+  return selectPet(entry.id);
+}
+var SELECTED_KEY = "selected-avatar-id";
+function appToolsConnection(options) {
+  const pick = (key2, env) => (Object.hasOwn(options, key2) ? options[key2] : env)?.trim();
+  const pipePath = pick("pipePath", process.env.CODEX_APP_TOOLS_PIPE_PATH);
+  const threadId = pick("threadId", process.env.CODEX_THREAD_ID);
+  if (!pipePath || !threadId) throw new Error("The current Codex app tools pipe and thread ID are unavailable.");
+  if (process.platform === "win32" && !pipePath.startsWith("\\\\.\\pipe\\"))
+    throw new Error("Expected a local Windows named pipe for Codex app tools.");
+  const timeoutMs = options.timeoutMs ?? 5e3;
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error("The Codex app tools timeout must be positive.");
+  return { pipePath, threadId, timeoutMs };
+}
+function projectSelection(value) {
+  if (!isRecord(value) || !isRecord(value.settings) || !isRecord(value.effectiveSettings))
+    throw new Error("Codex returned an invalid settings response.");
+  const selectedPetId = value.settings[SELECTED_KEY] ?? null;
+  const effectiveSelectedPetId = value.effectiveSettings[SELECTED_KEY] ?? null;
+  if (selectedPetId !== null && typeof selectedPetId !== "string" || effectiveSelectedPetId !== null && typeof effectiveSelectedPetId !== "string")
+    throw new Error("Codex returned an invalid pet selection.");
+  return { selectedPetId, effectiveSelectedPetId };
+}
+async function callSettings(options, petId2) {
+  const { pipePath, threadId, timeoutMs } = appToolsConnection(options);
+  const turnId = (Object.hasOwn(options, "turnId") ? options.turnId : process.env.CODEX_TURN_ID)?.trim();
+  if (petId2 !== void 0 && !turnId)
+    throw new Error("The current active turn ID is unavailable; use the host select_pet tool for known pets.");
+  const id = 1;
+  const request = {
+    jsonrpc: "2.0",
+    id,
+    method: "tools/call",
+    params: {
+      namespace: "codex_app",
+      tool: petId2 === void 0 ? "read_settings" : "write_settings",
+      arguments: petId2 === void 0 ? { include_config: false } : { settings: { [SELECTED_KEY]: petId2 } },
+      callerSource: "codex",
+      threadId,
+      callId: `mcp-call-${randomUUID()}`,
+      // The host checks the active turn on writes; a fabricated ID cannot authorize a write.
+      turnId: turnId ?? `mcp-turn-${randomUUID()}`
+    }
+  };
+  return new Promise((resolve, reject) => {
+    const socket = net.createConnection(pipePath);
+    let settled = false;
+    let sent = false;
+    const finish = (error, result, cancel = false) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (cancel && sent && !socket.destroyed) {
+        socket.end(encodeFrame({ jsonrpc: "2.0", id, method: "tools/cancel" }));
+        socket.destroySoon();
+      } else socket.destroy();
+      if (error) reject(error);
+      else resolve(result);
+    };
+    const timer = setTimeout(
+      () => finish(new Error("Codex app tools timed out; the current selection is unconfirmed."), void 0, true),
+      timeoutMs
+    );
+    socket.once("connect", () => {
+      sent = true;
+      socket.write(encodeFrame(request));
+    });
+    socket.on(
+      "error",
+      (error) => finish(
+        new Error(`Codex app tools connection failed (${error.code ?? "socket error"}).`)
+      )
+    );
+    socket.on("close", () => finish(new Error("Codex app tools closed before confirming the pet selection.")));
+    socket.on(
+      "data",
+      readFrames(
+        8 * 1024 * 1024,
+        (response) => {
+          if (settled || !isRecord(response) || response.id !== id) return;
+          if (response.error !== void 0) {
+            const error = response.error;
+            const code = isRecord(error) && typeof error.code === "number" ? ` (${error.code})` : "";
+            const message = isRecord(error) && typeof error.message === "string" ? error.message.replace(/[\x00-\x1f\x7f]/g, " ").slice(0, 512) : "No host error message";
+            return finish(new Error(`Codex rejected ${request.params.tool}${code}: ${message}`));
+          }
+          const result = response.result;
+          if (!isRecord(result) || result.success !== true || !Array.isArray(result.contentItems))
+            return finish(new Error("Codex could not complete the pet settings request."));
+          const item = result.contentItems.find((item2) => isRecord(item2) && item2.type === "inputText");
+          if (!isRecord(item) || typeof item.text !== "string")
+            return finish(new Error("Codex returned no pet settings result."));
+          try {
+            finish(void 0, projectSelection(JSON.parse(item.text)));
+          } catch {
+            finish(new Error("Codex returned an invalid pet settings result."));
+          }
+        },
+        (problem) => finish(
+          new Error(
+            problem === "too-large" ? "Codex app tools response exceeded the size limit." : "Codex app tools returned invalid JSON."
+          )
+        )
+      )
+    );
+  });
+}
+
+// src/hosts/identity.ts
+async function selectedAvatar() {
+  const result = await readSelectedPet();
+  return result.available ? { available: true, id: result.effectiveSelectedPetId } : { available: false, id: null, error: result.reason };
+}
+async function findAvatar(state, options = {}) {
+  if (!state.pet) throw new Error("No pet");
+  const binding = state.pet.binding;
+  const selected = await (options.selection ?? readSelectedPet)();
+  const localId = binding?.avatarId.startsWith("custom:") ? binding.avatarId : !binding ? `custom:${state.pet.id}` : null;
+  const mapping = state.host === "desktop" ? await (options.mapping ?? (() => readMigrationMap(options.home ?? codexHome())))() : { available: true, mappings: {}, pending: [] };
+  const directCloud = isCloudId(binding?.avatarId) ? binding.avatarId : state.host === "cloud" && isCloudId(binding?.cloudId) ? binding.cloudId : null;
+  const mappedCloud = localId && mapping.available ? mapping.mappings[localId] ?? null : null;
+  const cloudId = directCloud ?? mappedCloud;
+  const migrationPending = Boolean(localId && mapping.pending.includes(localId));
+  let avatarId = cloudId ?? (state.host === "desktop" ? localId : null);
+  let reason;
+  if (state.host === "desktop" && binding && localId && !mapping.available) {
+    avatarId = null;
+    reason = mapping.reason ?? "The host Pet migration mapping is unavailable";
+  } else if (state.host === "desktop" && localId && binding?.cloudId && !mappedCloud) {
+    avatarId = null;
+    reason = "The current host migration map does not confirm the saved cloud binding";
+  } else if (migrationPending && !cloudId) {
+    avatarId = null;
+    reason = "The host is still migrating this local Pet; resume after its cloud ID is available";
+  } else if (!avatarId) reason = "Bind the existing cloud Pet ID before updating this Pet";
+  const aliases = [...new Set([localId, cloudId].filter((id) => Boolean(id)))];
+  const active = avatarId && selected.available ? aliases.includes(selected.effectiveSelectedPetId ?? "") : null;
+  return {
+    petId: state.pet.id,
+    avatarId,
+    localAvatarId: localId,
+    cloudId,
+    aliases,
+    mappingAvailable: mapping.available,
+    migrationPending,
+    active,
+    selection: selected,
+    ...binding?.destination ? { destination: binding.destination } : {},
+    ...reason ? { reason } : {}
+  };
+}
+
+// src/hosts/result.ts
+import path6 from "node:path";
+
+// src/model.ts
+import { randomUUID as randomUUID2 } from "node:crypto";
+var stages = ["egg", "hatchling", "juvenile", "adult"];
+var artKinds = ["portrait", "atlas", "story", "artifact"];
+var fresh = (host2) => ({ version: 3, host: host2, pet: null, stories: [], art: [], pending: null });
+function createPet(name2, now = Date.now()) {
+  return {
+    id: `genpet-${randomUUID2()}`,
+    name: name2 === void 0 ? "GenPet" : text(name2, "name"),
+    adoptedAt: now,
+    revision: 0,
+    naming: name2 === void 0 ? { status: "unasked" } : { status: "named", namedAt: now },
+    soul: { genes: null },
+    memory: { text: "", updatedAt: now },
+    state: { stage: "egg", description: "", updatedAt: now }
+  };
+}
+function text(value, field) {
+  if (typeof value !== "string" || !value.trim()) throw new Error(`${field} must be nonempty text`);
+  return value.trim();
+}
+function identifier(value, field = "id") {
+  const result = text(value, field);
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,199}$/.test(result)) throw new Error(`Invalid ${field}`);
+  return result;
+}
+function validateStage(current, target2) {
+  if (!stages.includes(target2)) throw new Error("Invalid stage");
+  if (stages.indexOf(target2) < stages.indexOf(current))
+    throw new Error("Evolution cannot reverse the current stage");
+  return target2;
+}
+
+// src/hosts/desktop/refresh.ts
+import net2 from "node:net";
+import { lstat, readFile as readFile5 } from "node:fs/promises";
+import { createHash as createHash3, randomUUID as randomUUID3 } from "node:crypto";
+import path5 from "node:path";
+var CLOUD_PET_QUERY = ["cloud-pets", "list"];
+function desktopIpcPath() {
+  return process.platform === "win32" ? "\\\\.\\pipe\\codex-ipc" : path5.join(codexHome(), "ipc", "ipc.sock");
+}
+function isLiveDestination(destination) {
+  if (process.env.GENPET_SKIP_NATIVE_REFRESH === "1") return false;
+  const relative = path5.relative(path5.resolve(codexHome(), "pets"), path5.resolve(destination));
+  return /^genpet-[a-zA-Z0-9_-]+$/.test(relative);
+}
+async function refreshNativePet(options) {
+  const expectedSpriteSha256 = createHash3("sha256").update(await readFile5(options.expectedSpritePath)).digest("hex");
+  const useIpc = options.ipcSocketPath !== null && (typeof options.ipcSocketPath === "string" || options.cloudId !== void 0 && process.env.GENPET_SKIP_NATIVE_REFRESH !== "1" || isLiveDestination(path5.dirname(options.expectedSpritePath)));
+  const errors = [];
+  if (useIpc) {
+    try {
+      const ipc = await refreshViaIpc(options.ipcSocketPath ?? void 0, options.timeoutMs ?? 2e3, [
+        options.cloudId ? CLOUD_PET_QUERY : ["custom-avatars"]
+      ]);
+      return {
+        automaticRefresh: true,
+        refreshRequested: true,
+        displayStatus: "unconfirmed",
+        strategy: "ipc-query-invalidate",
+        ipc,
+        expectedSpriteSha256,
+        notice: "Automatic refresh requested through the existing desktop IPC channel. Router relay confirmed; the displayed sprite hash was not measured."
+      };
+    } catch (error) {
+      errors.push(`ipc: ${error.message}`);
+    }
+  }
+  return {
+    automaticRefresh: false,
+    refreshRequested: false,
+    displayStatus: "unconfirmed",
+    strategy: "none",
+    expectedSpriteSha256,
+    notice: useIpc ? "Files committed to the same GenPet entry. IPC refresh failed; retry when the desktop is running and ready. Visible update remains unconfirmed." : "Files committed to the same GenPet entry. IPC refresh was skipped for this destination. Visible update remains unconfirmed.",
+    ...errors.length ? { errors } : {}
+  };
+}
+async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3, queryKeys = [["custom-avatars"]]) {
+  return relayInvalidations(socketPath, timeoutMs, queryKeys, false);
+}
+async function probeIpc(socketPath = desktopIpcPath(), timeoutMs = 2e3) {
+  return relayInvalidations(socketPath, timeoutMs, [["custom-avatars"]], true);
+}
+async function relayInvalidations(socketPath, timeoutMs, queryKeys, observerOnly) {
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw Error("IPC timeout must be positive");
+  if (!queryKeys.length || queryKeys.some(
+    (key2) => JSON.stringify(key2) !== JSON.stringify(["custom-avatars"]) && JSON.stringify(key2) !== JSON.stringify(CLOUD_PET_QUERY)
+  ))
+    throw Error("Only known Pet resource query keys may be refreshed");
+  await assertPrivateSocket(socketPath);
+  const sockets = /* @__PURE__ */ new Set();
+  const waiting = /* @__PURE__ */ new Set();
+  let failure;
+  const fail = (error) => {
+    failure ??= error;
+    for (const reject of [...waiting]) reject(error);
+  };
+  const deadline = setTimeout(() => fail(Error("IPC refresh timed out")), timeoutMs);
+  const connect = () => new Promise((resolve, reject) => {
+    if (failure) return reject(failure);
+    waiting.add(reject);
+    const socket = net2.createConnection(socketPath);
+    sockets.add(socket);
+    const requestId2 = randomUUID3();
+    let listener;
+    const send = (message) => {
+      if (failure) throw failure;
+      socket.write(encodeFrame(message));
+    };
+    socket.on("error", fail);
+    socket.on("close", () => fail(Error("IPC connection closed")));
+    socket.on(
+      "connect",
+      () => send({
+        type: "request",
+        requestId: requestId2,
+        sourceClientId: "genpet",
+        version: 0,
+        method: "initialize",
+        params: { clientType: "genpet" }
+      })
+    );
+    socket.on(
+      "data",
+      readFrames(
+        16 * 1024 * 1024,
+        (value) => {
+          if (!value || typeof value !== "object") return fail(Error("Invalid IPC message"));
+          const message = value;
+          if (message.type === "response" && message.requestId === requestId2) {
+            if (message.resultType !== "success" || typeof message.result?.clientId !== "string")
+              return fail(Error("IPC initialization rejected"));
+            waiting.delete(reject);
+            resolve({ id: message.result.clientId, send, onMessage: (fn) => listener = fn });
+          }
+          listener?.(message);
+        },
+        (problem) => fail(Error(problem === "too-large" ? "IPC frame too large" : "Invalid IPC JSON"))
+      )
+    );
+  });
+  try {
+    const observer = await connect();
+    const sender = await connect();
+    for (const queryKey of queryKeys)
+      await new Promise((resolve, reject) => {
+        const invalidate = { queryKey, reset: false };
+        if (failure) return reject(failure);
+        waiting.add(reject);
+        observer.onMessage((message) => {
+          if (message.type === "broadcast" && message.method === "query-cache-invalidate" && message.version === 0 && message.sourceClientId === sender.id && JSON.stringify(message.params) === JSON.stringify(invalidate)) {
+            waiting.delete(reject);
+            resolve();
+          }
+        });
+        sender.send({
+          type: "broadcast",
+          method: "query-cache-invalidate",
+          version: 0,
+          sourceClientId: sender.id,
+          params: invalidate,
+          ...observerOnly ? { targetClientIds: [observer.id] } : {}
+        });
+      });
+    return {
+      socketPath,
+      handshakeConfirmed: true,
+      relayConfirmed: true,
+      hostRefreshRequested: !observerOnly,
+      queryKeys
+    };
+  } finally {
+    clearTimeout(deadline);
+    for (const socket of sockets) {
+      socket.removeAllListeners("close");
+      socket.destroy();
+    }
+  }
+}
+async function assertPrivateSocket(socketPath) {
+  if (process.platform === "win32") {
+    if (!socketPath.startsWith("\\\\.\\pipe\\")) throw Error("Expected a local Windows named pipe");
+    return;
+  }
+  const [file, directory] = await Promise.all([lstat(socketPath), lstat(path5.dirname(socketPath))]);
+  const uid = process.getuid?.();
+  if (uid == null || file.uid !== uid || directory.uid !== uid || !file.isSocket() || !directory.isDirectory() || directory.mode & 18)
+    throw Error("IPC socket must belong to the current user in a protected directory");
+}
+
+// src/hosts/result.ts
+var hash = (value) => typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+function validateHostResult(state, operationId, input, target2) {
+  const pending = pendingFor(state, operationId);
+  const binding = state.pet?.binding;
+  if (!binding) throw new Error("Bind the actual host target before recording an update");
+  if (input.petId !== pending.petId || input.operationId !== operationId)
+    throw new Error("Host result belongs to another pet or operation");
+  if (input.appearanceId !== desiredAppearance(state)?.id)
+    throw new Error("Host result belongs to a different appearance");
+  const avatarId = text(input.avatarId, "avatarId");
+  if (avatarId !== (target2?.avatarId ?? binding.cloudId ?? binding.avatarId))
+    throw new Error("Host updated a different Avatar from the actual bound target");
+  if (typeof input.updated !== "boolean" || ![true, false, null].includes(input.storedArtworkVerified) || ![true, false, null].includes(input.active) || typeof input.refreshRequested !== "boolean" || !["confirmed", "unconfirmed"].includes(input.displayStatus))
+    throw new Error("Invalid host result");
+  if (input.storedArtworkVerified === true && (!input.updated || !hash(input.acceptedArtworkSha256) || !hash(input.storedArtworkSha256) || input.acceptedArtworkSha256 !== input.storedArtworkSha256 || !input.observed?.trim()))
+    throw new Error("Verified stored artwork requires matching runtime readback hashes and observed host facts");
+  if (input.refreshUnavailable !== void 0 && typeof input.refreshUnavailable !== "boolean")
+    throw new Error("Invalid host result");
+  if (input.refreshUnavailable && !input.notice?.trim()) throw new Error("refreshUnavailable requires a notice");
+  if (input.displayStatus === "confirmed" && !input.observed?.trim())
+    throw new Error("Confirmed display requires observed host evidence");
+  return {
+    petId: input.petId,
+    operationId,
+    appearanceId: input.appearanceId,
+    avatarId,
+    ...target2?.cloudId ? { cloudId: target2.cloudId } : input.cloudId ? { cloudId: text(input.cloudId, "cloudId") } : {},
+    updated: input.updated,
+    storedArtworkVerified: input.storedArtworkVerified,
+    active: input.active,
+    refreshRequested: input.refreshRequested,
+    displayStatus: input.displayStatus,
+    ...input.acceptedArtworkSha256 ? { acceptedArtworkSha256: input.acceptedArtworkSha256 } : {},
+    ...input.storedArtworkSha256 ? { storedArtworkSha256: input.storedArtworkSha256 } : {},
+    ...input.acceptedFileSha256 ? { acceptedFileSha256: input.acceptedFileSha256 } : {},
+    ...input.storedFileSha256 ? { storedFileSha256: input.storedFileSha256 } : {},
+    ...input.refreshUnavailable ? { refreshUnavailable: true, notice: text(input.notice, "notice") } : {},
+    ...input.observed ? { observed: text(input.observed, "observed") } : {},
+    ...input.error ? { error: text(input.error, "error") } : {}
+  };
+}
+async function recordHostResult(store2, operationId, input, options = {}) {
+  return store2.transaction(async (state) => {
+    const pending = pendingFor(state, operationId);
+    if (!pending.plan?.appearance) throw new Error("No planned appearance update");
+    const art = desiredAppearance(state);
+    if (!art) throw new Error("Complete or select appearance artwork first");
+    if (!state.pet.binding) throw new Error("Bind the actual host target before recording an update");
+    const target2 = await findAvatar(state, options);
+    if (!target2.avatarId) throw new Error(target2.reason ?? "Host target is unknown");
+    if (input.avatarId !== target2.avatarId)
+      throw new Error("Host updated a different Avatar from the actual bound target");
+    if (input.storedArtworkVerified === true && !input.readbackFile)
+      throw new Error("Stored artwork must be checked from an actual host readback file");
+    if (input.readbackFile && path6.resolve(input.readbackFile) === path6.resolve(art.file))
+      throw new Error("Host readback must be a separate file retrieved from the host");
+    const checks = input.readbackFile ? await verifyStoredArtwork(art.file, input.readbackFile) : { storedArtworkVerified: null };
+    if (target2.cloudId) state.pet.binding.cloudId = target2.cloudId;
+    let resultInput = {
+      ...input,
+      ...checks,
+      ...state.host === "desktop" ? { active: target2.active } : {}
+    };
+    if (state.host === "desktop" && target2.cloudId && checks.storedArtworkVerified === true && input.updated) {
+      const refresh = await (options.refresh ?? refreshNativePet)({
+        expectedSpritePath: art.file,
+        cloudId: target2.cloudId
+      });
+      delete resultInput.refreshUnavailable;
+      delete resultInput.notice;
+      resultInput = {
+        ...resultInput,
+        refreshRequested: refresh.refreshRequested,
+        displayStatus: "unconfirmed",
+        observed: `${input.observed ?? ""} Cloud Pet artwork was independently compared with accepted pixels. ${refresh.notice}`.trim(),
+        ...!refresh.automaticRefresh && target2.active !== false ? {
+          refreshUnavailable: true,
+          notice: "Cloud artwork was uploaded and verified; desktop resource refresh is unavailable. The updated artwork will load when this Pet is next fetched."
+        } : {}
+      };
+    }
+    return pending.hostResult = validateHostResult(state, operationId, resultInput, target2);
+  });
+}
+
+// src/hosts/desktop/publish.ts
+function desktopDestination(state) {
+  if (!state.pet) throw new Error("No pet");
+  const pets = path7.resolve(codexHome(), "pets");
+  const destination = path7.resolve(state.pet.binding?.destination ?? path7.join(pets, state.pet.id));
+  const relative = path7.relative(pets, destination);
+  if (!relative || relative.startsWith("..") || path7.isAbsolute(relative) || relative.includes(path7.sep))
+    throw new Error("Target must be one entry in this Codex home");
+  const localId = `custom:${path7.basename(destination)}`;
+  if (state.pet.binding?.avatarId.startsWith("custom:") && state.pet.binding.avatarId !== localId)
+    throw new Error("Avatar binding does not match its destination");
+  return destination;
+}
+var desktopLabel = (petId2) => petId2.slice(0, "genpet-".length + 6);
+async function exportNative(state, destination) {
+  if (!state.pet || state.host !== "desktop") throw new Error("Native export requires a desktop pet");
+  if (!path7.isAbsolute(destination)) throw new Error("Local export requires an absolute destination");
+  if (state.pet.binding && path7.resolve(destination) !== desktopDestination(state))
+    throw new Error("Local export must use the bound Pet destination");
+  const art = desiredAppearance(state);
+  if (!art || art.kind !== "atlas") throw new Error("Complete or select a validated atlas first");
+  await validateArt(art.file);
+  let previous;
+  try {
+    previous = await readFile6(path7.join(destination, "pet.json"), "utf8");
+    const old = JSON.parse(previous);
+    const boundHere = state.pet.binding?.destination === destination;
+    const ours = old.genpetId === state.pet.id || boundHere && state.replacesPetId && old.genpetId === state.replacesPetId || boundHere && state.legacy && !old.genpetId;
+    if (!ours) throw new Error("Target entry belongs to another pet; it was preserved");
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  await mkdir(destination, { recursive: true });
+  const bytes = await readFile6(art.file);
+  const spritesheetPath = `spritesheet-${createHash4("sha256").update(bytes).digest("hex").slice(0, 16)}${path7.extname(art.file)}`;
+  const tmp = path7.join(destination, `.pending-${randomUUID4()}`);
+  await copyFile(art.file, tmp);
+  await rename(tmp, path7.join(destination, spritesheetPath));
+  const manifest = {
+    id: path7.basename(destination),
+    genpetId: state.pet.id,
+    displayName: desktopLabel(state.pet.id),
+    description: briefForPet(state.pet),
+    spriteVersionNumber: 2,
+    spritesheetPath
+  };
+  if (previous) {
+    await writeFile(path7.join(destination, `previous-pet-${Date.now()}-${randomUUID4()}.json`), previous);
+    await writeFile(path7.join(destination, "previous-pet.json"), previous);
+  }
+  const manifestTmp = path7.join(destination, `.pet-${randomUUID4()}.json`);
+  await writeFile(manifestTmp, JSON.stringify(manifest, null, 2));
+  await rename(manifestTmp, path7.join(destination, "pet.json"));
+  const readback = JSON.parse(await readFile6(path7.join(destination, "pet.json"), "utf8"));
+  if (readback.genpetId !== state.pet.id || readback.spritesheetPath !== spritesheetPath)
+    throw new Error("Host local manifest readback does not match the intended Pet");
+  const checks = await verifyStoredArtwork(art.file, path7.join(destination, readback.spritesheetPath));
+  return { destination, manifest, artId: art.id, filesCommitted: true, ...checks };
+}
+async function installNative(store2, options = {}) {
+  if (store2.host !== "desktop") throw new Error("Use the shared cloud Pet appearance interface in this environment");
+  return store2.transaction(async (state) => {
+    if (!state.pending?.plan?.appearance) throw new Error("No planned appearance update");
+    const pending = pendingFor(state, state.pending.id);
+    const lookup = { selection: options.selection, mapping: options.mapping ?? (() => readMigrationMap()) };
+    let target2 = await findAvatar(state, lookup);
+    if (!target2.avatarId) throw new Error(target2.reason ?? "Host target is unknown");
+    if (target2.cloudId) {
+      state.pet.binding = {
+        ...state.pet.binding,
+        host: "desktop",
+        avatarId: target2.localAvatarId ?? target2.cloudId,
+        cloudId: target2.cloudId
+      };
+      const request = await cloudAppearanceRequest(state, target2);
+      state.pending.hostResult = validateHostResult(state, pending.id, request, target2);
+      return request;
+    }
+    const destination = desktopDestination(state);
+    const result = await exportNative(state, destination);
+    const avatarId = `custom:${path7.basename(destination)}`;
+    state.pet.binding = { host: "desktop", avatarId, destination };
+    if (target2.mappingAvailable) {
+      target2 = await findAvatar(state, lookup);
+      if (!target2.avatarId) throw new Error(target2.reason ?? "Host target is unknown");
+      if (target2.cloudId) {
+        state.pet.binding.cloudId = target2.cloudId;
+        const request = await cloudAppearanceRequest(state, target2);
+        state.pending.hostResult = validateHostResult(state, pending.id, request, target2);
+        return { local: result, ...request };
+      }
+    }
+    const selection = await (options.selection ?? readSelectedPet)();
+    const active = selection.available ? target2.aliases.includes(selection.effectiveSelectedPetId ?? "") : null;
+    const refresh = await (options.refresh ?? refreshNativePet)({
+      expectedSpritePath: path7.join(destination, result.manifest.spritesheetPath)
+    });
+    const mustRefresh = active === true || active === null && isLiveDestination(destination);
+    const hostResult2 = validateHostResult(
+      state,
+      pending.id,
+      {
+        petId: pending.petId,
+        operationId: pending.id,
+        appearanceId: result.artId,
+        avatarId,
+        updated: true,
+        ...result,
+        active,
+        refreshRequested: refresh.refreshRequested,
+        displayStatus: "unconfirmed",
+        observed: `Local host manifest and sprite were independently read back. ${refresh.notice}`,
+        ...mustRefresh && !refresh.automaticRefresh ? {
+          refreshUnavailable: true,
+          notice: `Local host artwork was verified; refresh delivery is unavailable (${refresh.errors?.join("; ") || "no live app channel"}). It will load when the host next reads this entry.`
+        } : {}
+      },
+      target2
+    );
+    state.pending.hostResult = hostResult2;
+    return { ...result, ...hostResult2, refresh };
+  });
+}
+
+// src/hosts/diagnose.ts
+import { access, readFile as readFile7 } from "node:fs/promises";
+import path8 from "node:path";
+async function diagnose(store2, options = {}) {
+  const state = await store2.peek();
+  const home = options.home ?? codexHome();
+  const target2 = state.pet ? await findAvatar(state, options) : null;
+  const selected = target2?.selection;
+  const catalog = state.host === "desktop" ? await listPets(home) : null;
+  let refresh = {
+    available: false,
+    error: "No desktop IPC in this environment"
+  };
+  if (state.host === "desktop" && options.ipcSocketPath !== null && process.env.GENPET_SKIP_NATIVE_REFRESH !== "1") {
+    try {
+      refresh = {
+        available: true,
+        observed: await probeIpc(options.ipcSocketPath ?? void 0, options.timeoutMs ?? 1500)
+      };
+    } catch (error) {
+      refresh = { available: false, error: error.message };
+    }
+  }
+  let localArtwork = null;
+  const destination = state.pet?.binding?.destination;
+  const art = state.art.find(
+    (art2) => art2.id === state.pet?.state.appearanceId && art2.petId === state.pet.id && art2.kind === "atlas"
+  );
+  const acceptedArtwork = art ? await artworkFingerprint(art.file).then(
+    (checks) => ({ appearanceId: art.id, file: art.file, ...checks }),
+    (error) => ({ appearanceId: art.id, file: art.file, error: error.message })
+  ) : null;
+  if (destination && art) {
+    try {
+      const manifest = JSON.parse(await readFile7(path8.join(destination, "pet.json"), "utf8"));
+      if (typeof manifest.spritesheetPath !== "string" || path8.basename(manifest.spritesheetPath) !== manifest.spritesheetPath)
+        throw Error("Invalid local Pet sprite path");
+      localArtwork = await verifyStoredArtwork(art.file, path8.join(destination, manifest.spritesheetPath));
+    } catch (error) {
+      localArtwork = { storedArtworkVerified: null, error: error.message };
+    }
+  }
+  const recordExists = await access(store2.file).then(
+    () => true,
+    () => false
+  );
+  return {
+    record: {
+      exists: recordExists,
+      file: store2.file,
+      version: state.version,
+      petId: state.pet?.id ?? null,
+      pendingOperationId: state.pending?.id ?? null
+    },
+    target: target2,
+    catalog,
+    selected: selected?.available ? { available: true, id: selected.effectiveSelectedPetId } : {
+      available: false,
+      id: null,
+      error: selected && !selected.available ? selected.reason : "No Pet record; use selectedAvatar for host selection"
+    },
+    acceptedArtwork,
+    localArtwork,
+    refresh,
+    schedule: { saved: state.schedule ?? null, hostConfirmed: null },
+    agentSteps: [
+      {
+        tool: "list_pets",
+        check: "Find the exact actual cloud ID in the host list; preserve selection. Runtime local catalog does not prove cloud presence."
+      },
+      ...target2?.cloudId && art ? [
+        {
+          tool: "get_pet_download_link",
+          arguments: { pet_id: target2.cloudId },
+          check: "Read back actual cloud artwork and compare it with the accepted image. A local atlas match proves only local storage."
+        }
+      ] : [],
+      {
+        check: "Read the saved schedule reference using the host automation tools; confirm enabled state and target Pet. Repair the same identity only."
+      },
+      ...acceptedArtwork && target2?.avatarId ? [
+        {
+          command: "repair-appearance",
+          check: "Restore this current accepted image to the same target ID. Preserve Pet records, stage and story history."
+        }
+      ] : []
+    ],
+    displayStatus: "unconfirmed"
+  };
+}
+
+// src/hosts/repair.ts
+import { randomUUID as randomUUID5 } from "node:crypto";
+import { mkdir as mkdir2, readFile as readFile8, writeFile as writeFile2 } from "node:fs/promises";
+import path9 from "node:path";
+function currentAcceptedArt(state) {
+  const art = state.art.find(
+    (art2) => art2.id === state.pet?.state.appearanceId && art2.petId === state.pet.id && art2.kind === "atlas"
+  );
+  if (!art)
+    throw new Error("This Pet has no saved current accepted atlas; preserve its records and resume unfinished work");
+  if (state.pending?.hostResult?.updated && state.pending.hostResult.appearanceId !== art.id)
+    throw new Error("A newer pending appearance is already on the host; resume that story before repairing");
+  return art;
+}
+async function saveReport(store2, petId2, result) {
+  const directory = path9.join(store2.root, "pets", petId2, "diagnostics");
+  await mkdir2(directory, { recursive: true });
+  const reportFile = path9.join(directory, `repair-${Date.now()}-${randomUUID5()}.json`);
+  await writeFile2(reportFile, JSON.stringify(result, null, 2), { flag: "wx", mode: 384 });
+  return { ...result, reportFile };
+}
+async function repairAppearance(store2, options = {}) {
+  const state = await store2.peek();
+  if (!state.pet?.binding) throw new Error("Bind the existing host Pet before repairing its appearance");
+  const art = currentAcceptedArt(state);
+  await validateArt(art.file);
+  const target2 = await findAvatar(state, options);
+  if (!target2.avatarId) throw new Error(target2.reason ?? "The actual host Pet target is unknown");
+  const fingerprint = await artworkFingerprint(art.file);
+  const base = {
+    petId: state.pet.id,
+    appearanceId: art.id,
+    avatarId: target2.avatarId,
+    cloudId: target2.cloudId,
+    file: art.file,
+    acceptedArtworkSha256: fingerprint.artworkSha256,
+    active: target2.active,
+    preserveCurrentSelection: true,
+    displayStatus: "unconfirmed"
+  };
+  const cloudRequest = (cloudId) => ({
+    ...base,
+    operation: "repair-cloud-pet",
+    avatarId: cloudId,
+    cloudId,
+    updated: false,
+    storedArtworkVerified: null,
+    refreshRequested: false,
+    agentSteps: cloudUploadSteps(art.file, cloudId, {
+      command: "repair-result",
+      petId: state.pet.id,
+      check: "Save avatarId, appearanceId, updated, readbackFile and observed host facts to an absolute JSON file. Runtime verifies the actual host image; no new story is created."
+    })
+  });
+  if (target2.cloudId) return saveReport(store2, state.pet.id, cloudRequest(target2.cloudId));
+  const local = await exportNative({ ...state, pending: null }, desktopDestination(state));
+  const after = await findAvatar(state, options);
+  if (!after.avatarId) throw new Error(after.reason ?? "The host target changed during repair");
+  if (after.cloudId) return saveReport(store2, state.pet.id, { local, ...cloudRequest(after.cloudId) });
+  const refresh = await (options.refresh ?? refreshNativePet)({
+    expectedSpritePath: path9.join(local.destination, local.manifest.spritesheetPath)
+  });
+  return saveReport(store2, state.pet.id, {
+    ...base,
+    operation: "repair-local-pet",
+    updated: true,
+    ...local,
+    refreshRequested: refresh.refreshRequested,
+    refresh,
+    observed: "The existing accepted image was written to this same local Pet and independently read back."
+  });
+}
+async function repairResult(store2, petId2, input, options = {}) {
+  const state = await store2.peek();
+  if (state.pet?.id !== petId2) throw new Error("Repair result belongs to a different Pet");
+  const art = currentAcceptedArt(state);
+  const target2 = await findAvatar(state, options);
+  if (!target2.avatarId || input.avatarId !== target2.avatarId || input.appearanceId !== art.id)
+    throw new Error("Repair result does not match the current accepted image and actual host Pet");
+  if (typeof input.updated !== "boolean" || typeof input.observed !== "string" || !input.observed.trim())
+    throw new Error("Repair requires observed host update facts");
+  if (!path9.isAbsolute(input.readbackFile) || path9.resolve(input.readbackFile) === path9.resolve(art.file))
+    throw new Error("Repair requires a separate absolute host readback file");
+  const checks = await verifyStoredArtwork(art.file, input.readbackFile);
+  const refresh = state.host === "desktop" && checks.storedArtworkVerified && input.updated ? await (options.refresh ?? refreshNativePet)({
+    expectedSpritePath: art.file,
+    ...target2.cloudId ? { cloudId: target2.cloudId } : {}
+  }) : null;
+  return saveReport(store2, petId2, {
+    petId: petId2,
+    appearanceId: art.id,
+    avatarId: target2.avatarId,
+    cloudId: target2.cloudId,
+    updated: input.updated,
+    ...checks,
+    active: target2.active,
+    refreshRequested: refresh?.refreshRequested ?? input.refreshRequested ?? false,
+    displayStatus: "unconfirmed",
+    observed: input.observed.trim(),
+    ...refresh ? { refresh } : {}
+  });
+}
+var repairCommands = {
+  "repair-appearance": { usage: "repair-appearance", run: (_, store2) => repairAppearance(store2) },
+  "repair-result": {
+    usage: "repair-result PET_ID RESULT_JSON_FILE",
+    run: async (args2, store2) => {
+      if (!args2[0] || !args2[1] || !path9.isAbsolute(args2[1]))
+        throw new Error("repair-result requires a Pet ID and an absolute result JSON file");
+      return repairResult(store2.forPet(args2[0]), args2[0], JSON.parse(await readFile8(args2[1], "utf8")));
+    }
+  }
+};
+
+// src/hosts/desktop/index.ts
+var desktop = {
+  appearanceKind: "atlas",
+  artContract: ATLAS_CONTRACT,
+  validateArt,
+  findAvatar,
+  selectedAvatar,
+  setAppearance: installNative,
+  diagnose,
+  commands: {
+    ...repairCommands,
+    publish: { usage: "publish", run: (_, store2) => installNative(store2) },
+    "switch-pet": { usage: "switch-pet [PET_ID|--current|--list|--help]", run: (args2) => switchPet(args2) }
+  }
+};
+
+// src/hosts/cloud.ts
+async function bindCloud(store2, cloudId) {
+  const id = text(cloudId, "cloudId");
+  if (!isCloudId(id)) throw new Error("Bind an existing pet_ cloud Pet ID");
+  return store2.transaction(async (state) => {
+    if (!state.pet) throw new Error("Allocate the pet identity first");
+    const old = state.pet.binding;
+    if (state.host === "desktop" && old?.avatarId.startsWith("custom:")) {
+      const target2 = await findAvatar(state);
+      if (target2.cloudId !== id)
+        throw new Error("The fresh host migration mapping must confirm this local/cloud binding");
+    }
+    if (old?.cloudId && old.cloudId !== id) throw new Error("Target is already bound; preserve the existing cloud Pet");
+    if (old && isCloudId(old.avatarId) && old.avatarId !== id)
+      throw new Error("Target is already bound; preserve the existing cloud Pet");
+    return state.pet.binding = { ...old, host: state.host, avatarId: old?.avatarId ?? id, cloudId: id };
+  });
+}
+async function setCloudAppearance(store2, options = {}) {
+  return store2.transaction(async (state) => {
+    const target2 = await findAvatar(state, options);
+    const request = await cloudAppearanceRequest(state, target2);
+    state.pending.hostResult = validateHostResult(state, request.operationId, request, target2);
+    return request;
+  });
+}
+var cloud = {
+  appearanceKind: "atlas",
+  artContract: ATLAS_CONTRACT,
+  validateArt,
+  findAvatar,
+  selectedAvatar,
+  setAppearance: setCloudAppearance,
+  diagnose,
+  commands: {
+    "bind-cloud": { usage: "bind-cloud CLOUD_PET_ID", run: (args2, store2) => bindCloud(store2, args2[0]) },
+    ...repairCommands
+  }
+};
+
+// src/hosts/index.ts
+function hostFor(host2) {
+  const adapter = { desktop, cloud }[host2];
+  if (!adapter) throw new Error("Unsupported host environment");
+  return adapter;
+}
+
 // src/art.ts
 function artRequest(state) {
   if (!state.pet || !state.pending?.plan) return null;
@@ -4824,8 +4911,8 @@ function artRequest(state) {
     stage: plan.stage,
     name: pet.name,
     naming: pet.naming,
-    personality: pet.personality ?? plan.personality,
-    genes: pet.genes ?? plan.genes,
+    personality: pet.soul.personality ?? plan.personality,
+    genes: pet.soul.genes ?? plan.genes,
     story: plan.text,
     appearance: plan.appearance,
     // The Agent chooses identity references and reusable appearances from this pet's accepted art.
@@ -4836,7 +4923,7 @@ function artRequest(state) {
   };
 }
 async function validateImage(file, kind) {
-  const info = await stat2(file);
+  const info = await stat3(file);
   if (!info.isFile() || info.size > 64 * 1024 * 1024) throw new Error("Artifact must be a regular file below 64 MiB");
   if (kind === "artifact") return { format: "artifact", width: 0, height: 0, hasAlpha: false };
   const meta = await readImageInfo(file);
@@ -4844,15 +4931,15 @@ async function validateImage(file, kind) {
     throw new Error("Pet images must have an alpha channel");
   if (meta.width * meta.height > 16e6) throw new Error("Image exceeds size limit");
   const decoded = await decodeRgba(file);
-  if (kind === "atlas") checkAtlas(decoded);
+  if (kind === "atlas") await hostFor("desktop").validateArt(file);
   return meta;
 }
 async function acceptArt(store2, input) {
-  if (!path8.isAbsolute(input.file)) throw new Error("Artifact file must be an absolute local path");
+  if (!path10.isAbsolute(input.file)) throw new Error("Artifact file must be an absolute local path");
   if (!artKinds.includes(input.kind)) throw new Error("Unknown artifact kind");
-  if (!input.provenance?.trim()) throw new Error("Record generation and validation provenance");
+  if (!input.source?.trim()) throw new Error("Record generation and validation source");
   await validateImage(input.file, input.kind);
-  const bytes = await readFile7(input.file);
+  const bytes = await readFile9(input.file);
   return store2.transaction(async (state) => {
     if (requestId(state) !== input.requestId) throw new Error("Stale design request");
     const appearanceKind = hostFor(state.host).appearanceKind;
@@ -4860,23 +4947,23 @@ async function acceptArt(store2, input) {
       throw new Error("Artwork uses the other host format");
     const pet = state.pet;
     const plan = state.pending.plan;
-    const id = `art-${createHash4("sha256").update(pet.id + input.requestId + input.kind).update(bytes).digest("hex").slice(0, 24)}`;
+    const id = `art-${createHash5("sha256").update(pet.id + input.requestId + input.kind).update(bytes).digest("hex").slice(0, 24)}`;
     const previous = state.art.find((art) => art.id === id);
     if (previous) {
-      await stat2(previous.file);
+      await stat3(previous.file);
       return previous;
     }
-    const dir = path8.join(store2.root, "pets", pet.id, "assets");
-    await mkdir4(dir, { recursive: true, mode: 448 });
-    const file = path8.join(dir, id + path8.extname(input.file).toLowerCase());
-    const tmp = `${file}.${randomUUID8()}.tmp`;
+    const dir = path10.join(store2.root, "pets", pet.id, "assets");
+    await mkdir3(dir, { recursive: true, mode: 448 });
+    const file = path10.join(dir, id + path10.extname(input.file).toLowerCase());
+    const tmp = `${file}.${randomUUID6()}.tmp`;
     try {
       await writeFile3(tmp, bytes, { mode: 384, flag: "wx" });
-      await rename3(tmp, file);
+      await rename2(tmp, file);
     } finally {
-      await rm2(tmp, { force: true });
+      await rm(tmp, { force: true });
     }
-    const record = {
+    const record2 = {
       id,
       petId: pet.id,
       requestId: input.requestId,
@@ -4885,22 +4972,22 @@ async function acceptArt(store2, input) {
       file,
       kind: input.kind,
       createdAt: Date.now(),
-      provenance: input.provenance
+      source: input.source
     };
-    state.art.push(record);
-    return record;
+    state.art.push(record2);
+    return record2;
   });
 }
 
 // src/chat.ts
-import { randomUUID as randomUUID9 } from "node:crypto";
-async function noteChat(store2, petId, note) {
-  identifier(petId, "petId");
+import { randomUUID as randomUUID7 } from "node:crypto";
+async function noteChat(store2, petId2, note) {
+  identifier(petId2, "petId");
   const brief = text(note, "chat note");
   if (brief.length > 1e3) throw new Error("A chat note is a brief record of at most 1000 characters");
   return store2.transaction((state) => {
-    if (!state.pet || state.pet.id !== petId) throw new Error("Chat note belongs to another or missing pet");
-    const chat = { id: `chat-${randomUUID9()}`, petId, at: Date.now(), text: brief };
+    if (!state.pet || state.pet.id !== petId2) throw new Error("Chat note belongs to another or missing pet");
+    const chat = { id: `chat-${randomUUID7()}`, petId: petId2, at: Date.now(), text: brief };
     (state.chats ??= []).push(chat);
     return chat;
   });
@@ -4908,8 +4995,901 @@ async function noteChat(store2, petId, note) {
 
 // src/debugger.ts
 import { spawn } from "node:child_process";
-import path9 from "node:path";
-async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageHost() === "dots" ? 47832 : 47831))) {
+import path13 from "node:path";
+
+// src/store.ts
+import { mkdir as mkdir5, readFile as readFile11, readdir as readdir2, rename as rename3, writeFile as writeFile4, rm as rm2, stat as stat4 } from "node:fs/promises";
+import path12 from "node:path";
+import { randomUUID as randomUUID8 } from "node:crypto";
+
+// src/growth.ts
+var HOUR = 36e5;
+var DAY = 24 * HOUR;
+var STAGE_CEILING = { egg: 5 * HOUR, hatchling: 7 * DAY, juvenile: 7 * DAY };
+var SPECIAL_INTERVAL = 7 * DAY;
+var SPECIAL_DURATION = 2 * DAY;
+var EXPERIENCES_TO_GROW = 5;
+var iso = (time) => new Date(time).toISOString();
+function stageOrigin(state) {
+  const pet = state.pet;
+  const origin = state.legacy?.importedAt ?? pet.adoptedAt;
+  if (pet.state.stage === "egg") return origin;
+  const times = state.stories.filter((story) => story.petId === pet.id && story.stage === pet.state.stage).map((story) => story.at);
+  return times.length ? Math.min(...times) : origin;
+}
+function initialClock(state) {
+  const pet = state.pet;
+  const special = pet.state.special;
+  return {
+    stage: pet.state.stage,
+    stageSince: stageOrigin(state),
+    experiences: 0,
+    pausedMs: 0,
+    stagePausedMs: 0,
+    specialPausedMs: 0,
+    ...special ? { specialSince: special.endedAt ?? special.since } : {}
+  };
+}
+function ensureGrowthClock(state) {
+  if (!state.pet) return null;
+  return state.growthClock ??= initialClock(state);
+}
+function pausedTime(state, now = Date.now()) {
+  const clock = state.growthClock;
+  return clock ? clock.pausedMs + (clock.pausedAt === void 0 ? 0 : Math.max(0, now - clock.pausedAt)) : 0;
+}
+function commitExperience(state, storyId, memoryText, at = Date.now(), count = true) {
+  const pet = state.pet;
+  if (!pet) throw new Error("No Pet to remember this story");
+  const id = identifier(storyId, "memory storyId");
+  const value = text(memoryText, "memory");
+  if (pet.memory.storyId === id || pet.memory.text === value || state.stories.some((story) => story.id === id))
+    return false;
+  const clock = ensureGrowthClock(state);
+  pet.memory = { text: value, updatedAt: at, storyId: id };
+  if (count && state.pending?.mode !== "initialization" && clock.lastExperienceStoryId !== id) {
+    clock.experiences++;
+    clock.lastExperienceStoryId = id;
+  }
+  return true;
+}
+function stageAdvance(state, at = Date.now()) {
+  const pet = state.pet;
+  if (!pet) return;
+  const clock = ensureGrowthClock(state);
+  const totalPaused = pausedTime(state, at);
+  if (clock.stage !== pet.state.stage) {
+    clock.stage = pet.state.stage;
+    clock.stageSince = at;
+    clock.experiences = 0;
+    delete clock.lastExperienceStoryId;
+    clock.stagePausedMs = totalPaused;
+    clock.specialPausedMs = totalPaused;
+  }
+  const specialSince = pet.state.special ? pet.state.special.endedAt ?? pet.state.special.since : void 0;
+  if (clock.specialSince !== specialSince) {
+    clock.specialSince = specialSince;
+    clock.specialPausedMs = totalPaused;
+  }
+}
+function growth(state, now = Date.now()) {
+  const pet = state.pet;
+  if (!pet?.soul.genes || state.needsImport) return null;
+  const clock = state.growthClock ?? initialClock(state);
+  const since = clock.stage === pet.state.stage ? clock.stageSince : stageOrigin(state);
+  const paused = pausedTime(state, now);
+  const stagePause = Math.max(0, paused - clock.stagePausedMs);
+  const ceiling = STAGE_CEILING[pet.state.stage];
+  const deadline = ceiling === void 0 ? null : since + ceiling + stagePause;
+  let required = deadline !== null && now >= deadline ? "advance" : null;
+  let special = null;
+  if (pet.state.stage === "adult") {
+    const active = !!pet.state.special && pet.state.special.endedAt === void 0;
+    const start = active ? pet.state.special.since : Math.max(since, pet.state.special?.endedAt ?? 0);
+    const specialPause = Math.max(0, paused - clock.specialPausedMs);
+    const due = start + (active ? SPECIAL_DURATION : SPECIAL_INTERVAL) + specialPause;
+    if (now >= due) required = active ? "end-special" : "enter-special";
+    special = {
+      active,
+      ...active ? { description: pet.state.special.description } : {},
+      since: iso(start),
+      ...active ? { endBy: iso(due) } : { enterBy: iso(due) }
+    };
+  }
+  const experiences = clock.stage === pet.state.stage ? clock.experiences : 0;
+  return {
+    stage: pet.state.stage,
+    next: stages[stages.indexOf(pet.state.stage) + 1] ?? null,
+    since: iso(since),
+    advanceBy: deadline === null ? null : iso(deadline),
+    experiences,
+    canAdvance: pet.state.stage !== "adult" && (required === "advance" || pet.state.stage !== "egg" && experiences >= EXPERIENCES_TO_GROW),
+    paused: clock.pausedAt !== void 0,
+    special,
+    required
+  };
+}
+
+// src/migration.ts
+import { copyFile as copyFile2, mkdir as mkdir4, readFile as readFile10 } from "node:fs/promises";
+import path11 from "node:path";
+import { createHash as createHash6 } from "node:crypto";
+var object = (value) => !!value && typeof value === "object" && !Array.isArray(value);
+var number = (value, fallback) => typeof value === "number" && Number.isFinite(value) ? value : fallback;
+var optionalText = (value, field) => value === void 0 || value === null ? void 0 : text(value, field);
+function savedAliases(value) {
+  if (Array.isArray(value)) return value.map(savedAliases);
+  if (!object(value)) return value;
+  const result = {};
+  const aliases = {
+    basis: "reason",
+    designBasis: "designReason",
+    provenance: "source",
+    evidence: "observed",
+    evidenceIds: "factIds"
+  };
+  for (const [key2, item] of Object.entries(value)) {
+    const target2 = aliases[key2] ?? key2;
+    if (target2 !== key2 && Object.hasOwn(value, target2)) continue;
+    result[target2] = savedAliases(item);
+  }
+  if (result.unit === "carrier") result.unit = "story-item";
+  if (result.unit === "image-review") result.unit = "ImageReviewer";
+  return result;
+}
+function hostResult(input) {
+  if (!object(input)) return void 0;
+  const result = savedAliases(input);
+  const verified = result.storedArtworkVerified === true && typeof result.acceptedArtworkSha256 === "string" && result.acceptedArtworkSha256 === result.storedArtworkSha256;
+  result.storedArtworkVerified = verified ? true : result.storedArtworkVerified === false ? false : null;
+  return result;
+}
+function normalizeStep(step) {
+  return savedAliases(step);
+}
+function normalizeRecord(input, host2, file, importing = false) {
+  if (!object(input) || ![1, 2, 3].includes(input.version)) throw new Error("Unsupported pet record");
+  const old = input.version !== 3;
+  const sourceHost = input.host === "dots" ? "cloud" : input.host;
+  if (input.version !== 1 && sourceHost !== host2 && !importing) throw new Error("Mismatched pet record host");
+  const record2 = savedAliases(input);
+  const result = { ...fresh(host2), ...record2, version: 3, host: host2 };
+  if (record2.pet) {
+    const source = record2.pet;
+    const adoptedAt = number(source.adoptedAt, number(record2.legacy?.importedAt, 0));
+    const state = source.state ?? {};
+    const shell = createPet(source.name ?? source.profile?.name ?? "GenPet", adoptedAt);
+    const soul = source.soul ?? {
+      genes: source.genes ?? null,
+      personality: source.personality,
+      acquisition: source.acquisition
+    };
+    result.pet = {
+      ...shell,
+      id: identifier(source.id, "petId"),
+      revision: number(source.revision, 0),
+      ...source.naming ? { naming: { ...source.naming, status: source.naming.status === "deferred" ? "asked" : source.naming.status } } : {},
+      soul: {
+        ...soul,
+        genes: soul.genes === null || soul.genes === void 0 ? null : text(soul.genes, "genes"),
+        ...optionalText(soul.personality, "personality") ? { personality: soul.personality } : {}
+      },
+      memory: source.memory ? { ...source.memory } : { text: "", updatedAt: number(state.updatedAt, adoptedAt) },
+      state: {
+        ...state,
+        stage: validateStage("egg", state.stage ?? source.stage),
+        description: state.description ?? state.reason ?? "",
+        updatedAt: number(state.updatedAt, adoptedAt),
+        ...source.home !== void 0 && state.home === void 0 ? { home: source.home } : {},
+        ...source.special !== void 0 && state.special === void 0 ? { special: source.special } : {}
+      },
+      ...source.binding ? {
+        binding: {
+          ...source.binding,
+          host: source.binding.host === "dots" || importing ? host2 : source.binding.host
+        }
+      } : {}
+    };
+    if (result.pet.naming && !["unasked", "asked", "named"].includes(result.pet.naming.status))
+      throw new Error("Invalid naming status");
+    if (typeof result.pet.memory.text !== "string") throw new Error("Invalid memory");
+  } else result.pet = null;
+  result.stories = (record2.stories ?? []).map((story) => ({
+    ...story,
+    reason: story.reason ?? "Legacy story; its reason was not recorded",
+    mediaIds: story.mediaIds ?? [],
+    ...story.hostResult ? { hostResult: hostResult(story.hostResult) } : {},
+    ...story.steps ? { steps: story.steps.map(normalizeStep) } : {}
+  }));
+  result.art = (record2.art ?? []).map((art) => ({ ...art, source: art.source ?? "Preserved legacy artwork" }));
+  if (result.pending) {
+    if (result.pending.hostResult) result.pending.hostResult = hostResult(result.pending.hostResult);
+    if (result.pending.steps) result.pending.steps = result.pending.steps.map(normalizeStep);
+  }
+  if (old) {
+    result.needsImport = true;
+    if (file) result.legacyFile = file;
+  }
+  return result;
+}
+async function findLegacyRecord(store2) {
+  const candidates = [path11.join(store2.root, "state.json")];
+  if (store2.host === "desktop") candidates.push(path11.join(store2.base, "state.json"));
+  else candidates.push(path11.join(store2.base, "dots", "state.json"));
+  for (const file of candidates) {
+    try {
+      const old = JSON.parse(await readFile10(file, "utf8"));
+      if ([1, 2].includes(old.version) && old.pet) return file;
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+  }
+  return null;
+}
+async function inspectLegacyRecords(base) {
+  const files = ["state.json", "desktop/state.json", "cloud/state.json", "dots/state.json"].map(
+    (file) => path11.join(base, file)
+  );
+  const found = [];
+  for (const file of files) {
+    let bytes;
+    try {
+      bytes = await readFile10(file, "utf8");
+    } catch (error) {
+      if (error.code !== "ENOENT")
+        found.push({ file, problem: `Record read failed (${error.code ?? "unknown"})` });
+      continue;
+    }
+    try {
+      const record2 = JSON.parse(bytes);
+      if (!object(record2) || ![1, 2].includes(record2.version)) continue;
+      found.push({
+        file,
+        version: record2.version,
+        ...typeof record2.pet?.id === "string" ? { petId: record2.pet.id } : {},
+        ...typeof record2.host === "string" ? { host: record2.host } : {}
+      });
+    } catch {
+      found.push({ file, problem: "Record is not valid JSON; preserved for explicit review" });
+    }
+  }
+  return found;
+}
+async function prepareImport(store2, file, options, now) {
+  if (!options.confirmed) throw new Error("Import requires explicit user confirmation");
+  if (!path11.isAbsolute(file)) throw new Error("Legacy file must be absolute");
+  const bytes = await readFile10(file);
+  const original = JSON.parse(bytes.toString("utf8"));
+  if (![1, 2, 3].includes(original.version) || !original.pet) throw new Error("No Pet to import");
+  const state = normalizeRecord(original, store2.host, file, true);
+  const pet = state.pet;
+  if (original.version === 1) {
+    pet.soul.genes = text(options.genes, "observed legacy identity");
+    pet.soul.acquisition = {
+      place: text(options.place, "origin"),
+      connection: text(options.connection, "connection"),
+      storyId: "legacy"
+    };
+    const destination = original.nativeExport?.destination;
+    if (destination)
+      pet.binding = {
+        host: store2.host,
+        avatarId: original.nativeExport?.avatarId ?? `custom:${path11.basename(destination)}`,
+        destination,
+        ...original.nativeExport?.cloudId ? { cloudId: original.nativeExport.cloudId } : {}
+      };
+    state.art = state.art.map((art) => ({
+      ...art,
+      id: art.id ?? `art-${createHash6("sha256").update(JSON.stringify([art.file, art.kind, art.stage, art.createdAt])).digest("hex").slice(0, 24)}`,
+      petId: pet.id,
+      requestId: art.requestId ?? "legacy",
+      description: art.description ?? "Imported existing artwork",
+      stage: validateStage("egg", art.stage),
+      createdAt: number(art.createdAt, now)
+    }));
+  }
+  if (options.personality !== void 0 && !pet.soul.personality)
+    pet.soul.personality = text(options.personality, "personality");
+  if (options.memory !== void 0 && !pet.memory.text)
+    pet.memory = { text: text(options.memory, "memory"), updatedAt: now, storyId: "legacy" };
+  const digest = createHash6("sha256").update(bytes).digest("hex").slice(0, 16);
+  const backup = path11.join(store2.root, "backups", `legacy-v${original.version}-${pet.id}-${digest}.json`);
+  await mkdir4(path11.dirname(backup), { recursive: true });
+  await copyFile2(file, backup);
+  state.legacy = { backup, importedAt: now, source: file, sourceVersion: original.version };
+  if (options.memory !== void 0 && pet.memory.storyId === "legacy") state.legacy.memorySupplementedAt = now;
+  delete state.needsImport;
+  delete state.legacyFile;
+  if (original.version !== 3) {
+    state.growthClock = {
+      stage: pet.state.stage,
+      stageSince: now,
+      experiences: 0,
+      pausedMs: 0,
+      stagePausedMs: 0,
+      specialPausedMs: 0
+    };
+  }
+  for (const art of state.art) {
+    if (art.petId !== pet.id || !path11.isAbsolute(art.file)) continue;
+    const target2 = path11.join(
+      store2.petDirectory(pet.id),
+      "assets",
+      identifier(art.id, "artId") + path11.extname(art.file)
+    );
+    if (path11.resolve(art.file) !== path11.resolve(target2)) {
+      await mkdir4(path11.dirname(target2), { recursive: true });
+      try {
+        await copyFile2(art.file, target2);
+      } catch (error) {
+        if (error.code === "ENOENT") continue;
+        throw error;
+      }
+    }
+    art.file = target2;
+    if (original.version === 1 && art.kind === "atlas" && art.stage === pet.state.stage)
+      pet.state.appearanceId = art.id;
+  }
+  return state;
+}
+async function migrateLegacy(store2, file, design) {
+  return store2.importRecord(file, { ...design, confirmed: true });
+}
+
+// src/store.ts
+async function atomicJson(file, value) {
+  await mkdir5(path12.dirname(file), { recursive: true, mode: 448 });
+  const tmp = `${file}.${randomUUID8()}.tmp`;
+  try {
+    await writeFile4(tmp, JSON.stringify(value, null, 2) + "\n", { mode: 384, flag: "wx" });
+    for (let attempt = 0; ; attempt++) {
+      try {
+        await rename3(tmp, file);
+        break;
+      } catch (error) {
+        const code = error.code;
+        if (process.platform !== "win32" || !["EPERM", "EACCES", "EBUSY"].includes(code ?? "") || attempt >= 4)
+          throw error;
+        await new Promise((resolve) => setTimeout(resolve, 20 * 2 ** attempt));
+      }
+    }
+  } finally {
+    await rm2(tmp, { force: true });
+  }
+}
+async function readJson(file) {
+  try {
+    return JSON.parse(await readFile11(file, "utf8"));
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  }
+}
+var jsonEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+var key = (id) => encodeURIComponent(identifier(id)).replace(/\./g, "%2E");
+var Store = class _Store {
+  constructor(root = dataRoot(), host2 = "desktop", petId2) {
+    this.host = host2;
+    this.base = path12.resolve(root);
+    this.root = path12.join(this.base, host2);
+    this.registryFile = path12.join(this.root, "registry.json");
+    this.pinnedId = petId2 === void 0 ? void 0 : identifier(petId2, "petId");
+    this.selectedId = this.pinnedId;
+  }
+  host;
+  base;
+  root;
+  registryFile;
+  selectedId;
+  pinnedId;
+  get file() {
+    return this.selectedId ? path12.join(this.petDirectory(this.selectedId), "state.json") : path12.join(this.root, "current.json");
+  }
+  petDirectory(id) {
+    return path12.join(this.root, "pets", key(id));
+  }
+  forPet(id) {
+    return new _Store(this.base, this.host, id);
+  }
+  async canonicalIds() {
+    try {
+      const dirs = await readdir2(path12.join(this.root, "pets"), { withFileTypes: true });
+      const ids = [];
+      for (const dir of dirs) {
+        if (!dir.isDirectory()) continue;
+        const record2 = await readJson(path12.join(this.root, "pets", dir.name, "state.json"));
+        if (record2?.version === 3 && record2.pet) ids.push(identifier(record2.pet.id, "petId"));
+      }
+      return ids;
+    } catch (error) {
+      if (error.code === "ENOENT") return [];
+      throw error;
+    }
+  }
+  async registry() {
+    const raw = await readJson(this.registryFile);
+    if (raw) {
+      if (raw.version !== 1 || raw.host !== this.host || !Array.isArray(raw.pets))
+        throw new Error("Invalid Pet registry");
+      for (const pet of raw.pets) {
+        identifier(pet.id, "registered petId");
+        if (!Number.isFinite(pet.pausedMs) || pet.pausedMs < 0) throw new Error("Invalid activation clock");
+      }
+      return raw;
+    }
+    const ids = await this.canonicalIds();
+    const records = await Promise.all(ids.map((id) => readJson(path12.join(this.petDirectory(id), "state.json"))));
+    const order = ids.map((id, index) => ({ id, at: records[index]?.pet?.adoptedAt ?? 0 })).sort((a, b) => a.at - b.at);
+    const activePetId = order.at(-1)?.id;
+    return {
+      version: 1,
+      host: this.host,
+      ...activePetId ? { activePetId } : {},
+      pets: ids.map((id, index) => ({
+        id,
+        pausedMs: records[index]?.growthClock?.pausedMs ?? 0,
+        ...records[index]?.growthClock?.pausedAt !== void 0 ? { pausedAt: records[index].growthClock.pausedAt } : {}
+      }))
+    };
+  }
+  async readPet(id, registry) {
+    const file = path12.join(this.petDirectory(id), "state.json");
+    const raw = await readJson(file);
+    if (!raw) return fresh(this.host);
+    const state = normalizeRecord(raw, this.host, file);
+    if (state.pet?.id !== id) throw new Error("Pet directory identity mismatch");
+    const activity = registry.pets.find((pet) => pet.id === id);
+    if (activity && state.pet) {
+      const clock = ensureGrowthClock(state);
+      clock.pausedMs = activity.pausedMs;
+      if (activity.pausedAt !== void 0) clock.pausedAt = activity.pausedAt;
+      else delete clock.pausedAt;
+      if (activity.lastActivatedAt !== void 0) clock.lastActivatedAt = activity.lastActivatedAt;
+      if (activity.lastInactiveAt !== void 0) clock.lastInactiveAt = activity.lastInactiveAt;
+    }
+    await this.hydrateSteps(state);
+    return state;
+  }
+  async hydrateSteps(state) {
+    if (!state.pet) return;
+    for (const owner of [...state.stories, ...state.pending ? [state.pending] : []]) {
+      if (owner.stepsCount === void 0) continue;
+      if (!Number.isSafeInteger(owner.stepsCount) || owner.stepsCount < 0) throw new Error("Invalid story steps count");
+      const file = path12.join(this.petDirectory(state.pet.id), "stories", `${key(owner.id)}.json`);
+      const saved = await readJson(file);
+      if (!saved || saved.petId !== state.pet.id || saved.storyId !== owner.id || !Array.isArray(saved.steps) || saved.steps.length < owner.stepsCount)
+        throw new Error("Story unit snapshot is missing or incomplete");
+      owner.steps = saved.steps.slice(0, owner.stepsCount).map(normalizeStep);
+    }
+  }
+  /** No files, registry entries, legacy migrations, or time-based Pet changes are written here. */
+  async peek() {
+    const registry = await this.registry();
+    const id = this.pinnedId ?? registry.activePetId;
+    if (id) {
+      this.selectedId = id;
+      return this.readPet(id, registry);
+    }
+    this.selectedId = void 0;
+    const legacyFile = path12.join(this.root, "state.json");
+    const legacy = await readJson(legacyFile);
+    if (legacy) return normalizeRecord(legacy, this.host, legacyFile);
+    const empty = await readJson(this.file);
+    return empty ? normalizeRecord(empty, this.host, this.file) : fresh(this.host);
+  }
+  async listPets() {
+    const registry = await this.registry();
+    const ids = [.../* @__PURE__ */ new Set([...registry.pets.map((pet) => pet.id), ...await this.canonicalIds()])];
+    const result = [];
+    for (const id of ids) {
+      const state = await this.readPet(id, registry);
+      if (!state.pet) continue;
+      const entry = registry.pets.find((pet) => pet.id === id);
+      result.push({
+        id,
+        name: state.pet.name,
+        stage: state.pet.state.stage,
+        ...state.pet.binding ? { binding: state.pet.binding } : {},
+        active: registry.activePetId === id,
+        archived: !!entry?.archived,
+        directory: this.petDirectory(id),
+        file: path12.join(this.petDirectory(id), "state.json")
+      });
+    }
+    return result;
+  }
+  /** An operation stays attached to its original Pet even when the host selection changes. */
+  async forOperation(id) {
+    identifier(id, "operationId");
+    for (const pet of await this.listPets()) {
+      const candidate = this.forPet(pet.id), state = await candidate.peek();
+      if (state.pending?.id === id) {
+        if (pet.archived) throw new Error("This pending operation belongs to an archived Pet");
+        return candidate;
+      }
+      if (state.stories.some((story) => story.id === id)) return candidate;
+    }
+    const current = await this.peek();
+    if (current.pending?.id === id || current.stories.some((story) => story.id === id)) return this;
+    throw new Error("Operation belongs to a missing Pet");
+  }
+  async readSteps(storyId) {
+    const state = await this.peek();
+    const owner = state.pending?.id === storyId ? state.pending : state.stories.find((story) => story.id === storyId);
+    if (!owner) throw new Error("No story unit snapshot for this Pet");
+    return owner.steps ?? [];
+  }
+  async locked(fn) {
+    await mkdir5(this.root, { recursive: true, mode: 448 });
+    const lock = this.registryFile + ".lock";
+    let acquired = false;
+    for (let i = 0; i < 100 && !acquired; i++) {
+      try {
+        await mkdir5(lock);
+        acquired = true;
+      } catch (error) {
+        if (error.code !== "EEXIST") throw error;
+        const age = await stat4(lock).then(
+          (info) => Date.now() - info.mtimeMs,
+          () => 0
+        );
+        if (age > 12e4) await rm2(lock, { recursive: true, force: true });
+        else await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+    }
+    if (!acquired) throw new Error("Another Pet operation is running; resume it before starting another");
+    try {
+      return await fn();
+    } finally {
+      await rm2(lock, { recursive: true, force: true });
+    }
+  }
+  activate(registry, id, now) {
+    const current = registry.pets.find((pet) => pet.id === registry.activePetId);
+    if (current && current.id !== id && current.pausedAt === void 0) {
+      current.pausedAt = now;
+      current.lastInactiveAt = now;
+    }
+    let target2 = registry.pets.find((pet) => pet.id === id);
+    if (!target2) {
+      target2 = { id, pausedMs: 0 };
+      registry.pets.push(target2);
+    }
+    if (target2.archived) throw new Error("An archived Pet must be explicitly restored before activation");
+    if (target2.pausedAt !== void 0) {
+      target2.pausedMs += Math.max(0, now - target2.pausedAt);
+      delete target2.pausedAt;
+    }
+    if (registry.activePetId !== id || target2.lastActivatedAt === void 0) target2.lastActivatedAt = now;
+    registry.activePetId = id;
+  }
+  /** Only GenPet's activation ledger changes; this does not change the user's host selection. */
+  async selectPet(id, now = Date.now()) {
+    identifier(id, "petId");
+    return this.locked(async () => {
+      const registry = await this.registry(), state = await this.readPet(id, registry);
+      if (!state.pet || state.needsImport) throw new Error("No adopted v3 Pet to activate");
+      if (!registry.pets.some((pet) => pet.id === id))
+        registry.pets.push({
+          id,
+          pausedMs: state.growthClock?.pausedMs ?? 0,
+          ...state.growthClock?.pausedAt !== void 0 ? { pausedAt: state.growthClock.pausedAt } : {}
+        });
+      this.activate(registry, id, now);
+      await atomicJson(this.registryFile, registry);
+      this.selectedId = id;
+      if (this.pinnedId !== void 0) this.pinnedId = id;
+      return { petId: id, active: true };
+    });
+  }
+  async resolveActive(selectedHostId, now = Date.now()) {
+    const pets = await this.listPets();
+    const migration = selectedHostId && this.host === "desktop" && pets.some((pet) => !pet.archived && pet.binding?.avatarId.startsWith("custom:")) ? await readMigrationMap() : null;
+    const matches = selectedHostId ? pets.filter((pet) => {
+      const binding = pet.binding;
+      if (pet.archived || !binding) return false;
+      const cloudId = this.host === "desktop" && binding.avatarId.startsWith("custom:") ? migration?.available ? migration.mappings[binding.avatarId] : void 0 : binding.cloudId;
+      return [binding.avatarId, cloudId].includes(selectedHostId);
+    }) : [];
+    if (matches.length > 1) throw new Error("Host binding maps to more than one GenPet");
+    const registry = await this.registry();
+    const id = matches[0]?.id ?? registry.activePetId ?? pets.find((pet) => !pet.archived)?.id;
+    if (id) await this.selectPet(id, now);
+    return {
+      petId: id ?? null,
+      matched: !!matches.length,
+      selectionRead: selectedHostId !== void 0,
+      selectedHostId: selectedHostId ?? null
+    };
+  }
+  validate(state, before) {
+    if (state.version !== 3 || state.host !== this.host || state.needsImport)
+      throw new Error("Only an adopted v3 record may be written");
+    const pet = state.pet;
+    if (!pet) return;
+    identifier(pet.id, "petId");
+    validateStage("egg", pet.state.stage);
+    if (typeof pet.memory.text !== "string" || !Number.isFinite(pet.memory.updatedAt))
+      throw new Error("Invalid memory record");
+    if (state.pending && state.pending.petId !== pet.id) throw new Error("Pending story belongs to another Pet");
+    if (state.stories.some((story) => story.petId !== pet.id) || state.art.some((art) => art.petId !== pet.id))
+      throw new Error("Pet records must not mix identities");
+    const old = before?.pet;
+    if (old?.id !== pet.id) return;
+    if (old.binding) {
+      const binding = pet.binding;
+      if (!binding) throw new Error("An existing Pet retains its host binding");
+      const cloudId = old.binding.cloudId ?? (old.binding.avatarId.startsWith("pet_") ? old.binding.avatarId : void 0);
+      const stableLocalAlias = old.binding.avatarId.startsWith("custom:") && binding.avatarId === old.binding.avatarId && binding.destination === old.binding.destination;
+      if (cloudId && !stableLocalAlias && (binding.cloudId !== void 0 && binding.cloudId !== cloudId || binding.cloudId === void 0 && binding.avatarId !== cloudId))
+        throw new Error("An existing Pet retains its cloud binding");
+      if (old.binding.cloudId && !stableLocalAlias && binding.cloudId !== old.binding.cloudId)
+        throw new Error("An existing Pet retains its cloud binding");
+      if (stableLocalAlias && old.binding.cloudId && !binding.cloudId)
+        throw new Error("An existing Pet retains its mapped cloud binding");
+      if (binding.avatarId !== old.binding.avatarId && !(old.binding.avatarId.startsWith("custom:") && cloudId && binding.avatarId === cloudId && binding.cloudId === cloudId))
+        throw new Error("An existing Pet retains its Avatar binding");
+      if (binding.host !== old.binding.host || old.binding.destination !== void 0 && binding.destination !== old.binding.destination)
+        throw new Error("An existing Pet retains its host binding");
+    }
+    for (const field of ["genes", "personality", "acquisition", "designReason"]) {
+      const value = old.soul[field];
+      if (value !== null && value !== void 0 && !jsonEqual(value, pet.soul[field]))
+        throw new Error(`An existing Pet retains its soul.${field}`);
+    }
+    validateStage(old.state.stage, pet.state.stage);
+    if (!jsonEqual(old.memory, pet.memory) && !state.stories.some(
+      (story) => story.id === pet.memory.storyId && !before.stories.some((previous) => previous.id === story.id)
+    ))
+      throw new Error("Memory is written only by a completed story");
+  }
+  async validateBindingUniqueness(state, registry) {
+    const pet = state.pet;
+    if (!pet?.binding) return;
+    const aliases = [
+      text(pet.binding.avatarId, "Avatar ID"),
+      ...pet.binding.cloudId ? [text(pet.binding.cloudId, "cloud ID")] : []
+    ];
+    const ids = /* @__PURE__ */ new Set([...registry.pets.map((peer) => peer.id), ...await this.canonicalIds()]);
+    for (const id of ids) {
+      if (id === pet.id || registry.pets.find((peer) => peer.id === id)?.archived) continue;
+      const saved = await readJson(path12.join(this.petDirectory(id), "state.json"));
+      const binding = saved?.pet?.binding;
+      if (binding && [binding.avatarId, binding.cloudId].some((alias) => alias && aliases.includes(alias)))
+        throw new Error(`Host binding is already assigned to Pet ${id}`);
+    }
+  }
+  async persist(state, registry, before, now = Date.now()) {
+    this.validate(state, before);
+    const id = state.pet?.id;
+    if (!id) {
+      await atomicJson(path12.join(this.root, "current.json"), state);
+      return;
+    }
+    ensureGrowthClock(state);
+    const entry = registry.pets.find((pet) => pet.id === id);
+    if (!entry) this.activate(registry, id, now);
+    else if (before?.pet && before.pet.id !== id) this.activate(registry, id, now);
+    if (state.replacesPetId && state.replacesPetId !== id) {
+      const replaced = registry.pets.find((pet) => pet.id === state.replacesPetId);
+      if (replaced) replaced.archived ??= { at: now, replacesPetId: id };
+    }
+    await this.validateBindingUniqueness(state, registry);
+    const record2 = structuredClone(state);
+    delete record2.needsImport;
+    delete record2.legacyFile;
+    for (const owner of [...record2.stories, ...record2.pending ? [record2.pending] : []]) {
+      if (owner.steps === void 0) continue;
+      const steps = owner.steps;
+      const previous = before?.pending?.id === owner.id ? before.pending : before?.stories.find((story) => story.id === owner.id);
+      const committed = previous?.steps ?? [];
+      if (steps.length < committed.length || committed.some((step, index) => !jsonEqual(step, steps[index])))
+        throw new Error("Committed generation units are append-only");
+      if (previous?.stepsCount === steps.length && jsonEqual(committed, steps)) {
+        owner.stepsCount = steps.length;
+        delete owner.steps;
+        continue;
+      }
+      const file = path12.join(this.petDirectory(id), "stories", `${key(owner.id)}.json`);
+      const existing = await readJson(file);
+      const uncommittedAttempts = existing?.uncommittedAttempts ?? [];
+      if (existing?.steps?.length > committed.length && !jsonEqual(existing.steps, steps))
+        uncommittedAttempts.push({ at: now, steps: existing.steps.slice(committed.length) });
+      await atomicJson(file, {
+        version: 1,
+        petId: id,
+        storyId: owner.id,
+        steps,
+        ...uncommittedAttempts.length ? { uncommittedAttempts } : {}
+      });
+      owner.stepsCount = steps.length;
+      delete owner.steps;
+    }
+    await atomicJson(path12.join(this.petDirectory(id), "state.json"), record2);
+    await atomicJson(this.registryFile, registry);
+    this.selectedId = id;
+    if (this.pinnedId !== void 0) this.pinnedId = id;
+  }
+  /** One host lock serializes Pet writes and selection, while failed callbacks publish nothing. */
+  async transaction(fn) {
+    return this.locked(async () => {
+      const state = await this.peek();
+      if (state.needsImport) throw new Error("The legacy Pet needs explicit import before it can be changed");
+      const before = structuredClone(state), registry = await this.registry();
+      if (state.pet && registry.pets.find((pet) => pet.id === state.pet.id)?.archived)
+        throw new Error("An archived Pet is read-only until explicitly restored");
+      const result = await fn(state);
+      if (before.handoff?.status === "exported") {
+        const frozen = [
+          "pet",
+          "stories",
+          "art",
+          "pending",
+          "chats",
+          "growthClock",
+          "schedule",
+          "handoff",
+          "legacy",
+          "replacesPetId"
+        ];
+        if (frozen.some((field) => !jsonEqual(before[field], state[field])))
+          throw new Error("The exported Pet record is read-only until its main environment is transferred back");
+      }
+      await this.persist(state, registry, before);
+      return result;
+    });
+  }
+  /** Confirmed new adoption can keep all historical files separate without first importing them. */
+  async createPet(options, now = Date.now()) {
+    if (!options.confirmed) throw new Error("New adoption requires explicit user confirmation");
+    return this.locked(async () => {
+      const before = await this.peek(), registry = await this.registry();
+      if (options.replace && before.handoff?.status === "exported")
+        throw new Error("Transfer the Pet back to this environment before replacing its bound resource");
+      if (before.pending?.mode === "story")
+        throw new Error("Finish or cancel the existing story before adopting another Pet");
+      const state = { ...fresh(this.host), pet: createPet(options.name, now) };
+      if (options.replace && before.pet) {
+        const backup = path12.join(this.root, "backups", `replaced-${before.pet.id}-${now}.json`);
+        await atomicJson(backup, before);
+        if (before.pet.binding) state.pet.binding = structuredClone(before.pet.binding);
+        state.replacesPetId = before.pet.id;
+        if (before.schedule) state.schedule = structuredClone(before.schedule);
+      }
+      await this.persist(state, registry, void 0, now);
+      return this.readPet(state.pet.id, registry);
+    });
+  }
+  async importRecord(file, options, now = Date.now()) {
+    if (!options.confirmed) throw new Error("Import requires explicit user confirmation");
+    if (!path12.isAbsolute(file)) throw new Error("Legacy file must be absolute");
+    return this.locked(async () => {
+      const source = await readJson(file);
+      if (!source?.pet?.id) throw new Error("No Pet to import");
+      const id = identifier(source.pet.id, "petId"), registry = await this.registry();
+      const existing = await this.readPet(id, registry);
+      if (existing.pet) {
+        this.activate(registry, id, now);
+        await atomicJson(this.registryFile, registry);
+        this.selectedId = id;
+        if (this.pinnedId !== void 0) this.pinnedId = id;
+        return this.readPet(id, registry);
+      }
+      const state = await prepareImport(this, file, options, now);
+      await this.persist(state, registry, void 0, now);
+      return this.readPet(id, registry);
+    });
+  }
+  /** Publish a checked handoff under one lock, replacing the old host's activity facts with the incoming clock. */
+  async installTransfer(input, now = Date.now()) {
+    const state = structuredClone(input);
+    this.validate(state);
+    if (!state.pet || state.handoff?.status !== "imported" || state.handoff.target !== this.host)
+      throw new Error("Install a validated transfer for this main environment");
+    const id = identifier(state.pet.id, "transferred petId");
+    return this.locked(async () => {
+      const registry = await this.registry();
+      const existing = await this.readPet(id, registry);
+      if (existing.pet) {
+        if (existing.handoff?.status === "imported" && existing.handoff.id === state.handoff.id) {
+          this.activate(registry, id, now);
+          await atomicJson(this.registryFile, registry);
+          this.selectedId = id;
+          if (this.pinnedId !== void 0) this.pinnedId = id;
+          return this.readPet(id, registry);
+        }
+        if (existing.handoff?.status !== "exported") throw new Error("The destination Pet is already writable");
+        if (state.handoff.previousTransferId !== existing.handoff.id)
+          throw new Error("This transfer does not follow the destination ownership receipt");
+      }
+      const clock = ensureGrowthClock(state);
+      if (!Number.isFinite(clock.pausedMs) || clock.pausedMs < 0 || clock.pausedAt !== void 0 && !Number.isFinite(clock.pausedAt))
+        throw new Error("Invalid transferred activation clock");
+      const entry = {
+        id,
+        pausedMs: clock.pausedMs,
+        ...clock.pausedAt !== void 0 ? { pausedAt: clock.pausedAt } : {},
+        ...clock.lastActivatedAt !== void 0 ? { lastActivatedAt: clock.lastActivatedAt } : {},
+        ...clock.lastInactiveAt !== void 0 ? { lastInactiveAt: clock.lastInactiveAt } : {}
+      };
+      const previousIndex = registry.pets.findIndex((pet) => pet.id === id);
+      if (previousIndex < 0) registry.pets.push(entry);
+      else registry.pets[previousIndex] = entry;
+      this.activate(registry, id, now);
+      clock.pausedMs = entry.pausedMs;
+      delete clock.pausedAt;
+      if (entry.lastActivatedAt !== void 0) clock.lastActivatedAt = entry.lastActivatedAt;
+      if (entry.lastInactiveAt !== void 0) clock.lastInactiveAt = entry.lastInactiveAt;
+      if (state.replacesPetId && state.replacesPetId !== id) {
+        const replaced = registry.pets.find((pet) => pet.id === state.replacesPetId);
+        if (replaced) replaced.archived ??= { at: now, replacesPetId: id };
+      }
+      await this.validateBindingUniqueness(state, registry);
+      await atomicJson(this.registryFile, registry);
+      await this.persist(state, registry, void 0, now);
+      return this.readPet(id, registry);
+    });
+  }
+  /** The Agent supplies a source-backed upgrade summary or missing voice once, without a growth experience. */
+  async supplementLegacy(options, now = Date.now()) {
+    if (!options.confirmed) throw new Error("Legacy supplementation requires explicit user confirmation");
+    return this.locked(async () => {
+      const state = await this.peek(), registry = await this.registry();
+      if (!state.pet || !state.legacy || state.needsImport)
+        throw new Error("Import the legacy Pet before filling its missing records");
+      if (state.handoff?.status === "exported")
+        throw new Error("The exported Pet record is read-only until its main environment is transferred back");
+      if (state.pending) throw new Error("Finish the pending story before supplementing its records");
+      let changed = false;
+      for (const field of ["personality", "designReason"]) {
+        if (options[field] === void 0) continue;
+        const value = text(options[field], field), current = state.pet.soul[field];
+        if (current !== void 0 && current !== value) throw new Error(`An existing Pet retains its soul.${field}`);
+        if (current === void 0) {
+          state.pet.soul[field] = value;
+          changed = true;
+        }
+      }
+      if (options.voice !== void 0) {
+        if (state.legacy.sourceVersion === 3)
+          throw new Error("Speaking habits are supplemented only for imported legacy Pets");
+        const voice = text(options.voice, "voice");
+        const previous = state.legacy.voiceSupplement;
+        if (previous && previous.text !== voice) throw new Error("Legacy speaking habits are supplemented only once");
+        if (!previous) {
+          if (!state.pet.soul.personality)
+            throw new Error("Fill the legacy personality before adding its missing speaking habits");
+          state.pet.soul.personality += `
+
+Speaking habits:
+${voice}`;
+          state.legacy.voiceSupplement = { text: voice, at: now };
+          changed = true;
+        }
+      }
+      if (options.memory !== void 0) {
+        const value = text(options.memory, "memory");
+        if (state.pet.memory.text && state.pet.memory.text !== value)
+          throw new Error("Legacy memory is supplemented only once");
+        if (!state.pet.memory.text) {
+          if (state.legacy.memorySupplementedAt !== void 0)
+            throw new Error("Legacy memory was already supplemented");
+          state.pet.memory = { text: value, updatedAt: now, storyId: "legacy" };
+          state.legacy.memorySupplementedAt = now;
+          changed = true;
+        }
+      }
+      if (changed) {
+        state.pet.revision++;
+        await this.persist(state, registry, void 0, now);
+      }
+      return state;
+    });
+  }
+};
+
+// src/debugger.ts
+async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageHost() === "cloud" ? 47832 : 47831))) {
   if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("Invalid debugger port");
   const url = `http://127.0.0.1:${port}`, root = new Store(void 0, packageHost()).root;
   async function inspect() {
@@ -4925,10 +5905,11 @@ async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageH
     return true;
   }
   if (await inspect()) return { url, reused: true };
-  const child = spawn(process.execPath, [path9.join(import.meta.dirname, "debugger-server.js")], {
+  const child = spawn(process.execPath, [path13.join(import.meta.dirname, "debugger-server.js")], {
+    windowsHide: true,
     detached: true,
     stdio: "ignore",
-    env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: path9.resolve(dataRoot()) }
+    env: { ...process.env, GENPET_PORT: String(port), GENPET_DATA_DIR: path13.resolve(dataRoot()) }
   });
   let failure;
   child.once("error", (error) => {
@@ -4945,8 +5926,8 @@ async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageH
 }
 
 // src/generation.ts
-import { createHash as createHash5 } from "node:crypto";
-var object = (value) => !!value && typeof value === "object" && !Array.isArray(value);
+import { createHash as createHash7 } from "node:crypto";
+var object2 = (value) => !!value && typeof value === "object" && !Array.isArray(value);
 function definition(unit) {
   const units = readUnits();
   if (!Object.hasOwn(units, unit)) throw new Error(`Unknown generation unit: ${unit}`);
@@ -4958,11 +5939,11 @@ function references(value) {
 }
 function validateUnitResult(unit, input) {
   const contract = definition(unit);
-  if (!object(input) || !object(input.result)) throw new Error("A unit result requires an object envelope and result");
+  if (!object2(input) || !object2(input.result)) throw new Error("A unit result requires an object envelope and result");
   const inputRefs = references(input.inputRefs), result = input.result;
   for (const [field, type] of Object.entries(contract.result)) {
     const value = result[field];
-    const valid = type === "string" ? typeof value === "string" && !!value.trim() : type === "array" ? Array.isArray(value) : type === "object" ? object(value) : type === "nullable-string" ? value === null || typeof value === "string" && !!value.trim() : type === "nullable-object" ? value === null || object(value) : false;
+    const valid = type === "string" ? typeof value === "string" && !!value.trim() : type === "array" ? Array.isArray(value) : type === "object" ? object2(value) : type === "nullable-string" ? value === null || typeof value === "string" && !!value.trim() : type === "nullable-object" ? value === null || object2(value) : false;
     if (!Object.hasOwn(result, field) || !valid) throw new Error(`${unit}.${field} requires ${type}`);
   }
   for (const [field, choices] of Object.entries(contract.choices ?? {}))
@@ -4971,7 +5952,7 @@ function validateUnitResult(unit, input) {
 }
 function unitRequest(unit, fixture) {
   const contract = definition(unit);
-  if (!object(fixture) || !object(fixture.inputs)) throw new Error("A unit fixture requires inputs");
+  if (!object2(fixture) || !object2(fixture.inputs)) throw new Error("A unit fixture requires inputs");
   for (const field of contract.inputs)
     if (!Object.hasOwn(fixture.inputs, field)) throw new Error(`Missing ${unit} input: ${field}`);
   const inputRefs = references(fixture.inputRefs ?? []);
@@ -4982,13 +5963,13 @@ function unitRequest(unit, fixture) {
     `\u8FD4\u56DE\u4E00\u4E2A JSON \u5BF9\u8C61\uFF1AinputRefs \u4E3A\u8F93\u5165\u5F15\u7528\u5217\u8868\uFF0Cresult \u4E3A\u672C\u5355\u5143\u7ED3\u679C\u3002\u6240\u9700\u5B57\u6BB5\u4E0E\u7C7B\u578B\uFF1A${JSON.stringify(contract.result)}\u3002${contract.choices ? `\u5DE5\u7A0B\u53D6\u503C\uFF1A${JSON.stringify(contract.choices)}\u3002` : ""}\u53EF\u589E\u52A0\u5B57\u6BB5\uFF0C\u5185\u5BB9\u4FDD\u6301\u5F00\u653E\u3002\u4E0D\u8981\u8F93\u51FA\u989D\u5916\u7684\u6D41\u7A0B\u8BF4\u660E\u3002`,
     `\u56FA\u5B9A\u8F93\u5165\uFF1A${JSON.stringify({ inputRefs, inputs: fixture.inputs }, null, 2)}`
   ].join("\n\n");
-  return { unit, inputRefs, prompt, promptHash: createHash5("sha256").update(prompt).digest("hex") };
+  return { unit, inputRefs, prompt, promptHash: createHash7("sha256").update(prompt).digest("hex") };
 }
 function canonical(value) {
   return JSON.stringify(
     value,
-    (_, item) => object(item) ? Object.fromEntries(
-      Object.keys(item).sort().map((key) => [key, item[key]])
+    (_, item) => object2(item) ? Object.fromEntries(
+      Object.keys(item).sort().map((key2) => [key2, item[key2]])
     ) : item
   );
 }
@@ -4997,7 +5978,7 @@ async function recordStep(store2, operationId, unit, input) {
   return store2.transaction((state) => {
     const owner = state.pending?.id === operationId ? pendingFor(state, operationId) : state.stories.find((story) => story.id === operationId && story.petId === state.pet?.id);
     if (!owner) throw new Error("Generation step belongs to another or missing story");
-    const id = `step-${createHash5("sha256").update(canonical([operationId, unit, output])).digest("hex").slice(0, 24)}`;
+    const id = `step-${createHash7("sha256").update(canonical([operationId, unit, output])).digest("hex").slice(0, 24)}`;
     const steps = owner.steps ??= [], previous = steps.find((step2) => step2.id === id);
     if (previous) return previous;
     const step = { id, unit, at: Date.now(), ...output };
@@ -5006,30 +5987,813 @@ async function recordStep(store2, operationId, unit, input) {
   });
 }
 
-// src/status.ts
-var RECENT = { stories: 5, art: 30, chats: 10 };
-function statusView(state) {
-  const chats = state.chats ?? [];
+// src/lifecycle.ts
+import { randomUUID as randomUUID9 } from "node:crypto";
+import { access as access2 } from "node:fs/promises";
+import path14 from "node:path";
+
+// src/naming.ts
+function namingDue(state) {
+  return !state.pending && !!state.pet && state.pet.state.stage !== "egg" && state.pet.naming?.status === "unasked";
+}
+function target(state, petId2, allowPending = false) {
+  identifier(petId2, "petId");
+  if (!state.pet || state.pet.id !== petId2) throw new Error("Naming reply belongs to another or missing pet");
+  if (state.pending && !allowPending) throw new Error("Finish the unfinished story before naming this pet");
+  return state.pet;
+}
+async function markNameAsked(store2, petId2) {
+  return store2.transaction((state) => {
+    const pet = target(state, petId2, true);
+    if (pet.state.stage === "egg" || pet.naming?.status !== "unasked")
+      return { petId: petId2, asked: false, status: pet.naming?.status ?? "named" };
+    pet.naming = { status: "asked", askedAt: Date.now() };
+    return { petId: petId2, asked: true, status: pet.naming.status };
+  });
+}
+async function namePet(store2, petId2, userName) {
+  const name2 = text(userName, "user supplied name");
+  if (name2.length > 100 || /[\u0000-\u001f\u007f]/.test(name2))
+    throw new Error("Name must be one line of at most 100 characters");
+  return store2.transaction((state) => {
+    const pet = target(state, petId2);
+    if (pet.name === name2 && pet.naming?.status === "named") return pet;
+    pet.name = name2;
+    pet.naming = {
+      status: "named",
+      namedAt: Date.now(),
+      ...pet.naming?.askedAt ? { askedAt: pet.naming.askedAt } : {}
+    };
+    pet.revision++;
+    return pet;
+  });
+}
+
+// src/schedule.ts
+var CHECK_INTERVAL = 5 * 36e5;
+function dueStory(state, now = Date.now(), timezone = state.schedule?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone) {
+  const period = state.pet ? Math.floor((now - state.pet.adoptedAt) / CHECK_INTERVAL) : 0;
+  const growing = growth(state, now);
+  const special = growing?.special;
+  const deadlineAt = growing?.advanceBy ?? (special ? "endBy" in special ? special.endBy : special.enterBy : null);
+  const deadline = deadlineAt === null ? null : Date.parse(deadlineAt);
+  const growthTrigger = growing?.required && state.pet ? `growth:${state.pet.id}:${growing.stage}:${growing.required}:${deadline}` : null;
+  const triggerId = growthTrigger ?? (period >= 1 ? `period:${period}` : null);
+  const stopped = isStopped(state) || state.handoff?.status === "exported" || state.needsImport === true || state.growthClock?.pausedAt !== void 0;
+  const completed = !!triggerId && state.stories.some((story) => story.triggerId === triggerId);
+  const periodCovered = !growthTrigger && !!state.pet && state.stories.some(
+    (story) => story.petId === state.pet.id && story.triggerId.startsWith("growth:") && Math.floor((story.at - state.pet.adoptedAt) / CHECK_INTERVAL) === period
+  );
+  const due = !stopped && !!triggerId && !completed && !periodCovered;
+  const nextPeriod = state.pet ? state.pet.adoptedAt + (Math.max(0, period) + 1) * CHECK_INTERVAL : null;
+  const nextCheck = stopped || nextPeriod === null ? null : due ? now : Math.min(nextPeriod, deadline !== null && deadline > now ? deadline : Infinity);
   return {
-    version: state.version,
-    host: state.host,
-    pet: state.pet,
-    pending: state.pending,
-    ...state.schedule ? { schedule: state.schedule } : {},
-    ...state.legacy ? { legacy: state.legacy } : {},
-    storyCount: state.stories.length,
-    stories: state.stories.slice(-RECENT.stories).map(({ steps, hostResult, ...story }) => story),
-    artCount: state.art.length,
-    art: state.art.slice(-RECENT.art).map(({ id, stage, kind, description, file }) => ({ id, stage, kind, description, file })),
-    chatCount: chats.length,
-    chats: chats.slice(-RECENT.chats).map(({ at, text: text2 }) => ({ at, text: text2 }))
+    timezone,
+    intervalHours: CHECK_INTERVAL / 36e5,
+    triggerId,
+    stopped,
+    due,
+    pending: state.pending?.id ?? null,
+    growthRequired: growing?.required ?? null,
+    growthDeadlineAt: deadlineAt,
+    nextCheckAt: nextCheck === null ? null : iso2(nextCheck)
   };
+}
+var isStopped = (state) => state.schedule?.stoppedAt !== void 0 && state.schedule.resumedAt === void 0;
+var iso2 = (time) => new Date(time).toISOString();
+function timeSense(state, now = Date.now()) {
+  const last = state.stories.at(-1)?.at ?? state.pet?.adoptedAt;
+  if (last === void 0) return null;
+  const schedule = state.schedule;
+  const pause = schedule?.stoppedAt !== void 0 && schedule.stoppedAt >= last;
+  return {
+    lastStoryAt: iso2(last),
+    hoursSinceLastStory: Math.round((now - last) / 36e5 * 10) / 10,
+    checkIntervalHours: CHECK_INTERVAL / 36e5,
+    ...state.pending ? {
+      pendingStartedAt: iso2(state.pending.startedAt),
+      pendingHours: Math.round((now - state.pending.startedAt) / 36e5 * 10) / 10
+    } : {},
+    ...pause ? { userStoppedCheckAt: iso2(schedule.stoppedAt) } : {},
+    ...pause && schedule.resumedAt !== void 0 ? { checkResumedAt: iso2(schedule.resumedAt) } : {}
+  };
+}
+async function setSchedule(store2, timezone, reference) {
+  const zone = text(timezone, "timezone");
+  new Intl.DateTimeFormat("en", { timeZone: zone });
+  const ref = text(reference, "schedule reference");
+  return store2.transaction((state) => {
+    const previous = state.schedule;
+    const resumedAt = previous?.stoppedAt !== void 0 ? previous.resumedAt ?? Date.now() : void 0;
+    return state.schedule = {
+      timezone: zone,
+      reference: ref,
+      ...previous?.stoppedAt !== void 0 ? { stoppedAt: previous.stoppedAt, resumedAt } : {}
+    };
+  });
+}
+async function stopSchedule(store2) {
+  return store2.transaction((state) => {
+    const previous = state.schedule;
+    if (isStopped(state))
+      return { stopped: true, stoppedAt: previous.stoppedAt, previousReference: previous?.reference ?? null };
+    state.schedule = {
+      ...previous,
+      timezone: previous?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+      stoppedAt: Date.now()
+    };
+    delete state.schedule.resumedAt;
+    return { stopped: true, stoppedAt: state.schedule.stoppedAt, previousReference: previous?.reference ?? null };
+  });
+}
+
+// src/variety.ts
+import { createHash as createHash8, randomBytes } from "node:crypto";
+var SOURCE_WEIGHTS = { natural: 70, object: 20, imagined: 10 };
+function seededValue(seed, purpose) {
+  return createHash8("sha256").update(`${seed}\0${purpose}`).digest().readUInt32BE(0) / 4294967296;
+}
+function sourceFromSeed(seed) {
+  const value = seededValue(seed, "source") * 100;
+  return value < SOURCE_WEIGHTS.natural ? "natural" : value < SOURCE_WEIGHTS.natural + SOURCE_WEIGHTS.object ? "object" : "imagined";
+}
+function storyOutputs(story, previous, state) {
+  const result = [];
+  const appearanceChanged = typeof story.appearanceChanged === "boolean" ? story.appearanceChanged : previous ? story.appearanceId !== previous.appearanceId : state?.pet?.soul.acquisition?.storyId === story.id;
+  if (story.appearanceId && appearanceChanged) result.push("appearance");
+  if (story.mediaIds.some((id) => !state || state.art.some((art) => art.id === id && art.kind !== "artifact"))) {
+    if (story.home !== void 0 && story.home !== previous?.home) result.push("home");
+    else result.push("item");
+  }
+  return result;
+}
+function recentContent(state, count = 10) {
+  const items = state.stories.slice(-Math.max(1, count)).map((story, index, stories) => ({
+    id: story.id,
+    at: story.at,
+    outputs: storyOutputs(story, index ? stories[index - 1] : state.stories[state.stories.indexOf(story) - 1], state),
+    stage: story.stage,
+    special: story.special,
+    text: story.text,
+    reason: story.reason
+  }));
+  let textOnlyStreak = 0;
+  for (const item of [...items].reverse()) {
+    if (item.outputs.length) break;
+    textOnlyStreak++;
+  }
+  return { items, textOnlyStreak, visualRequired: textOnlyStreak >= 2, memory: state.pet?.memory ?? null };
+}
+async function chooseSource(store2, operationId, seed) {
+  return store2.transaction((state) => {
+    const pending = pendingFor(state, operationId);
+    if (pending.sourceChoice) {
+      if (seed && seed !== pending.sourceChoice.seed) throw new Error("The source seed is already saved");
+      return pending.sourceChoice;
+    }
+    const value = seed ? text(seed, "seed") : randomBytes(16).toString("hex");
+    return pending.sourceChoice = { seed: value, sourceType: sourceFromSeed(value) };
+  });
+}
+async function chooseCandidate(store2, operationId, input, seed) {
+  if (!["story", "genes"].includes(input.purpose)) throw new Error("Choice purpose must be story or genes");
+  if (!Array.isArray(input.candidates) || input.candidates.length < 2)
+    throw new Error("Provide at least two grounded candidates");
+  const candidates = input.candidates.map((candidate) => ({
+    id: identifier(candidate.id, "candidateId"),
+    description: text(candidate.description, "candidate description"),
+    contextRefs: candidate.contextRefs.map((ref) => text(ref, "context reference")),
+    ...candidate.outputs ? { outputs: candidate.outputs } : {}
+  }));
+  if (new Set(candidates.map((candidate) => candidate.id)).size !== candidates.length)
+    throw new Error("Candidate IDs must be unique");
+  if (candidates.some((candidate) => candidate.outputs?.some((output) => !["appearance", "home", "item"].includes(output))))
+    throw new Error("Unknown visual output");
+  const hash2 = createHash8("sha256").update(JSON.stringify(candidates)).digest("hex");
+  return store2.transaction((state) => {
+    const pending = pendingFor(state, operationId);
+    if (pending.selection) {
+      if (pending.selection.candidateHash !== hash2 || pending.selection.purpose !== input.purpose || seed && seed !== pending.selection.seed)
+        throw new Error("The selected candidates and seed are already saved; resume them");
+      return { ...pending.selection, candidates: pending.candidates };
+    }
+    const value = seed ?? pending.sourceChoice?.seed ?? randomBytes(16).toString("hex");
+    const recent = recentContent(state);
+    if (input.purpose === "story" && !candidates.some((candidate) => candidate.outputs?.length))
+      throw new Error("Include a candidate with a visible output");
+    const weights = candidates.map((candidate) => {
+      if (input.purpose !== "story") return 1;
+      if (!candidate.outputs?.length) return recent.visualRequired || !candidate.contextRefs.length ? 0 : 1;
+      const last = recent.items.findLastIndex(
+        (item) => item.outputs.some((output) => candidate.outputs.includes(output))
+      );
+      return recent.items.length - last;
+    });
+    let pick = seededValue(value, input.purpose) * weights.reduce((sum, weight) => sum + weight, 0);
+    let index = weights.length - 1;
+    for (let i = 0; i < weights.length; i++) {
+      pick -= weights[i];
+      if (pick < 0) {
+        index = i;
+        break;
+      }
+    }
+    pending.candidates = candidates;
+    pending.selection = {
+      seed: value,
+      purpose: input.purpose,
+      candidateId: candidates[index].id,
+      candidateHash: hash2,
+      ...pending.sourceChoice ? { sourceType: pending.sourceChoice.sourceType } : {}
+    };
+    return { ...pending.selection, candidates, weights };
+  });
+}
+
+// src/lifecycle.ts
+function startPending(pet, triggerId, mode) {
+  return {
+    id: `story-${randomUUID9()}`,
+    triggerId,
+    petId: pet.id,
+    baseRevision: pet.revision,
+    startedAt: Date.now(),
+    mode
+  };
+}
+async function beginStory(store2, triggerId, options = {}) {
+  identifier(triggerId, "triggerId");
+  return store2.transaction(async (state) => {
+    if (state.handoff?.status === "exported")
+      throw new Error("This environment handed the Pet to another host; import it back before writing stories");
+    const completed = state.stories.find((story) => story.triggerId === triggerId);
+    if (completed) return { status: "completed", story: completed };
+    if (state.pending) {
+      if (state.pending.triggerId !== triggerId)
+        throw new Error(`Unfinished story ${state.pending.id}; resume it first`);
+      return {
+        status: "pending",
+        pending: state.pending,
+        pet: state.pet,
+        growth: growth(state),
+        time: timeSense(state)
+      };
+    }
+    if (!state.pet && await findLegacyRecord(store2))
+      throw new Error("Existing legacy pet found; migrate it before creating a new identity");
+    state.pet ??= createPet();
+    state.pending = startPending(state.pet, triggerId, state.pet.soul.genes ? "story" : "initialization");
+    if (options.forceGrowth) state.pending.forceGrowth = true;
+    return { status: "pending", pending: state.pending, pet: state.pet, growth: growth(state), time: timeSense(state) };
+  });
+}
+function validatePlan(state, input) {
+  const pet = state.pet;
+  const plan = {
+    text: text(input.text, "story text"),
+    reason: text(input.reason, "decision reason"),
+    state: text(input.state, "state"),
+    stage: validateStage(pet.state.stage, input.stage ?? pet.state.stage)
+  };
+  if (input.contextRefs !== void 0) {
+    if (!Array.isArray(input.contextRefs)) throw new Error("contextRefs must be an array");
+    plan.contextRefs = input.contextRefs.map((ref) => text(ref, "context reference"));
+  }
+  if (input.memory !== void 0) plan.memory = text(input.memory, "memory");
+  if (input.designReason !== void 0) plan.designReason = text(input.designReason, "design reason");
+  if (plan.stage !== pet.state.stage && plan.stage !== stages[stages.indexOf(pet.state.stage) + 1])
+    throw new Error("A story advances at most one stage");
+  if (plan.stage !== pet.state.stage && !state.pending?.forceGrowth && !growth(state)?.canAdvance)
+    throw new Error("Growth needs five experiences or its latest-time deadline; use explicit grow for a forced change");
+  if (input.home !== void 0) {
+    plan.home = text(input.home, "home");
+    if (plan.stage === "egg") throw new Error("The home begins after hatching");
+  }
+  const specialActive = !!pet.state.special && pet.state.special.endedAt === void 0;
+  if (input.special === null) {
+    if (!specialActive) throw new Error("There is no special form to end");
+    plan.special = null;
+  } else if (input.special !== void 0) {
+    plan.special = text(input.special, "special form");
+    if (pet.state.stage !== "adult") throw new Error("Special forms begin in adulthood");
+  }
+  if (input.personality !== void 0) {
+    plan.personality = text(input.personality, "personality");
+    if (pet.soul.personality && pet.soul.personality !== plan.personality)
+      throw new Error("An existing pet retains its personality");
+  } else if (pet.soul.personality) plan.personality = pet.soul.personality;
+  if (!pet.soul.genes) {
+    if (!state.pending?.journey?.completed || !state.pending.journey.rounds.length)
+      throw new Error("Complete the adoption choice journey before planning its genes and egg");
+    if (plan.stage !== "egg") throw new Error("Initialization begins with an egg");
+    plan.genes = text(input.genes, "open gene description");
+    plan.place = text(input.place, "acquisition place");
+    plan.connection = text(input.connection, "user connection");
+    if (!plan.personality) throw new Error("Initialization requires an individual personality");
+    if (!input.appearance) throw new Error("Initialization requires an egg appearance");
+  } else if (input.genes !== void 0 && input.genes !== pet.soul.genes)
+    throw new Error("An existing pet retains its genes");
+  if (input.appearance)
+    plan.appearance = {
+      description: text(input.appearance.description, "appearance description"),
+      ...input.appearance.reuseArtId ? { reuseArtId: identifier(input.appearance.reuseArtId, "reuseArtId") } : {}
+    };
+  if (plan.stage !== pet.state.stage && !plan.appearance)
+    throw new Error("Evolution requires an appearance for the new stage");
+  if ((plan.special === null || plan.special !== void 0 && !specialActive) && !plan.appearance)
+    throw new Error("Entering or leaving a special form requires an appearance");
+  const required = growth(state)?.required;
+  if (required === "advance" && plan.stage === pet.state.stage)
+    throw new Error(`Growth is due: this story advances to ${stages[stages.indexOf(pet.state.stage) + 1]}`);
+  if (required === "enter-special" && typeof plan.special !== "string")
+    throw new Error("A special form is due: this story enters one");
+  if (required === "end-special" && plan.special !== null)
+    throw new Error("The special form is due to end in this story");
+  if (plan.appearance?.reuseArtId) appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
+  if (input.mediaIds !== void 0) {
+    if (!Array.isArray(input.mediaIds)) throw new Error("mediaIds must be an array");
+    plan.mediaIds = input.mediaIds.map((id) => identifier(id, "mediaId"));
+    for (const id of plan.mediaIds)
+      if (!state.art.some((art) => art.id === id && art.petId === pet.id))
+        throw new Error("Media belongs to another pet or is missing");
+  }
+  return plan;
+}
+async function planStory(store2, id, input) {
+  return store2.transaction((state) => {
+    const pending = pendingFor(state, id);
+    if (pending.plan && JSON.stringify(input) === JSON.stringify(pending.plan)) return pending;
+    const plan = validatePlan(state, input);
+    if (pending.plan && JSON.stringify(pending.plan) !== JSON.stringify(plan))
+      throw new Error("The story plan is saved; resume it or cancel explicitly before redesigning");
+    pending.plan = plan;
+    return pending;
+  });
+}
+function hostUpdateComplete(result, appearanceId) {
+  if (!result?.updated || result.appearanceId !== appearanceId || result.error) return false;
+  return result.storedArtworkVerified === true;
+}
+async function finishStory(store2, id) {
+  return store2.transaction(async (state) => {
+    const previous = state.stories.find((story2) => story2.id === id);
+    if (previous) return previous;
+    const pending = pendingFor(state, id);
+    const plan = pending.plan;
+    if (!plan) throw new Error("Save a story plan before completing it");
+    const pet = state.pet;
+    const previousStage = pet.state.stage;
+    const appearance = desiredAppearance(state);
+    if (plan.appearance) {
+      if (!appearance) throw new Error("Appearance artwork is unfinished");
+      await access2(appearance.file);
+      if (!hostUpdateComplete(pending.hostResult, appearance.id))
+        throw new Error("Host update or active Avatar refresh is unfinished; resume it");
+      const target2 = await hostFor(state.host).findAvatar(state);
+      if (!target2.avatarId || target2.avatarId !== pending.hostResult.avatarId)
+        throw new Error("The host target changed or is unresolved; update the actual Pet before completing");
+    }
+    const current = requestId(state);
+    const storyMedia = state.art.filter(
+      (art) => art.requestId === current && (art.kind === "story" || art.kind === "artifact")
+    );
+    const mediaIds = [.../* @__PURE__ */ new Set([...plan.mediaIds ?? [], ...storyMedia.map((art) => art.id)])];
+    for (const mediaId of mediaIds)
+      await access2(state.art.find((art) => art.id === mediaId && art.petId === pet.id).file);
+    const appearanceChanged = !!plan.appearance && appearance?.id !== pet.state.appearanceId;
+    const hasVisibleMedia = mediaIds.some(
+      (mediaId) => state.art.some((art) => art.id === mediaId && art.kind !== "artifact")
+    );
+    const item = pending.steps?.findLast((step) => step.unit === "story-item");
+    const home = pending.steps?.findLast((step) => step.unit === "home");
+    if ((item?.result.item || home?.result.visual) && !hasVisibleMedia)
+      throw new Error("The final story item or home requests an image; accept its actual media before completing");
+    if (pending.mode === "story" && !appearanceChanged && !hasVisibleMedia) {
+      if (!plan.contextRefs?.length) throw new Error("A text-only story needs a user-related context reference");
+      const sources = /* @__PURE__ */ new Set();
+      for (const story2 of state.stories) {
+        sources.add(story2.id);
+        for (const ref of story2.contextRefs ?? []) sources.add(ref);
+      }
+      for (const owner of [...state.stories, pending])
+        for (const step of owner.steps ?? []) {
+          if (step.unit !== "context") continue;
+          const facts = Array.isArray(step.result.facts) ? step.result.facts : [];
+          if (facts.length) for (const ref of step.inputRefs) sources.add(ref);
+          for (const fact of facts) {
+            if (fact && typeof fact === "object" && typeof fact.id === "string")
+              sources.add(fact.id);
+          }
+        }
+      for (const round of pet.soul.acquisition?.journey?.rounds ?? [])
+        for (const ref of round.inputRefs) sources.add(ref);
+      for (const chat of state.chats ?? []) sources.add(chat.id);
+      if (pet.memory.storyId) sources.add(pet.memory.storyId);
+      if (plan.contextRefs.some((ref) => !sources.has(ref)))
+        throw new Error("The context reference is not present in the saved inputs or shared history");
+      if (recentContent(state).visualRequired)
+        throw new Error("At most two text-only stories in a row; produce a visible result");
+    }
+    const story = {
+      id,
+      triggerId: pending.triggerId,
+      petId: pet.id,
+      at: Date.now(),
+      text: plan.text,
+      reason: plan.reason,
+      ...plan.designReason ? { designReason: plan.designReason } : {},
+      ...plan.memory !== void 0 ? { memory: plan.memory } : {},
+      ...pending.journey ? { journey: pending.journey } : {},
+      ...pending.selection || pending.sourceChoice ? {
+        random: {
+          sourceChoice: pending.sourceChoice,
+          selection: pending.selection,
+          candidates: pending.candidates
+        }
+      } : {},
+      ...plan.contextRefs?.length ? { contextRefs: plan.contextRefs } : {},
+      stage: plan.stage,
+      state: plan.state,
+      ...plan.home !== void 0 ? { home: plan.home } : {},
+      ...plan.special !== void 0 ? { special: plan.special } : {},
+      ...appearance ? { appearanceId: appearance.id } : {},
+      appearanceChanged,
+      mediaIds,
+      ...pending.steps?.length ? { steps: pending.steps } : {},
+      ...pending.hostResult ? { hostResult: pending.hostResult } : {}
+    };
+    if (!pet.soul.genes) {
+      pet.soul.genes = plan.genes;
+      pet.soul.acquisition = {
+        place: plan.place,
+        connection: plan.connection,
+        storyId: id,
+        ...pending.journey ? { journey: pending.journey } : {}
+      };
+      if (plan.designReason) pet.soul.designReason = plan.designReason;
+    }
+    if (plan.personality) pet.soul.personality ??= plan.personality;
+    pet.state.stage = plan.stage;
+    if (plan.home !== void 0) pet.state.home = plan.home;
+    if (plan.special === null) pet.state.special.endedAt = story.at;
+    else if (plan.special !== void 0)
+      pet.state.special = pet.state.special && pet.state.special.endedAt === void 0 ? { ...pet.state.special, description: plan.special } : { description: plan.special, since: story.at, storyId: id };
+    pet.revision++;
+    pet.state = {
+      ...pet.state,
+      stage: plan.stage,
+      description: plan.state,
+      storyId: id,
+      updatedAt: story.at,
+      ...appearance ? { appearanceId: appearance.id } : {}
+    };
+    if (pending.mode === "initialization") {
+      pet.adoptedAt = story.at;
+      const clock = ensureGrowthClock(state);
+      clock.stageSince = story.at;
+      clock.stagePausedMs = pausedTime(state, story.at);
+    }
+    stageAdvance(state, story.at);
+    if (plan.memory !== void 0)
+      commitExperience(
+        state,
+        id,
+        plan.memory,
+        story.at,
+        pending.mode !== "initialization" && previousStage === story.stage
+      );
+    state.stories.push(story);
+    state.pending = null;
+    return story;
+  });
+}
+async function cancelStory(store2, id) {
+  return store2.transaction((state) => {
+    const pending = pendingFor(state, id);
+    if (pending.mode === "initialization" && pending.plan)
+      throw new Error("Initialization genes are saved; resume it or explicitly reset the pet");
+    state.pending = null;
+    return { cancelled: pending.id };
+  });
+}
+async function resetPet(store2, operationId) {
+  const triggerId = `reset:${identifier(operationId, "reset operationId")}`;
+  return store2.transaction(async (state) => {
+    const completed = state.stories.find((story) => story.triggerId === triggerId);
+    if (completed) return { status: "completed", story: completed };
+    if (state.pending?.triggerId === triggerId) return { status: "pending", pending: state.pending, pet: state.pet };
+    if (state.pending && state.pending.mode !== "initialization")
+      throw new Error("Resume or cancel the unfinished story before an explicit reset");
+    if (!state.pet && await findLegacyRecord(store2))
+      throw new Error("Migrate the existing legacy pet before resetting its identity");
+    const backup = path14.join(store2.root, "backups", `reset-${Date.now()}-${randomUUID9()}.json`);
+    await atomicJson(backup, state);
+    const previous = state.pet;
+    const schedule = state.schedule;
+    for (const key2 of Object.keys(state)) delete state[key2];
+    Object.assign(state, fresh(store2.host), { pet: createPet(), ...schedule ? { schedule } : {} });
+    const pet = state.pet;
+    if (previous?.binding) pet.binding = previous.binding;
+    if (previous) state.replacesPetId = previous.id;
+    state.pending = startPending(pet, triggerId, "initialization");
+    return { status: "pending", pending: state.pending, pet, backup };
+  });
+}
+function storyOutput(state, storyId) {
+  const story = storyId ? state.stories.find((story2) => story2.id === storyId) : state.stories.at(-1);
+  if (!story) throw new Error("No completed story");
+  const appearance = state.art.find((art) => art.id === story.appearanceId);
+  return {
+    text: story.text,
+    media: state.art.filter((art) => story.mediaIds.includes(art.id)),
+    appearance,
+    portrait: state.art.findLast(
+      (art) => art.petId === story.petId && art.kind === "portrait" && art.requestId === appearance?.requestId
+    ) ?? null,
+    naming: { due: namingDue(state), petId: state.pet?.id, status: state.pet?.naming?.status ?? "named" },
+    prompt: readPrompt("output")
+  };
+}
+
+// src/journey.ts
+async function journeyStep(store2, operationId, input) {
+  const scene = text(input.scene, "scene");
+  const userInput = input.userInput === void 0 ? void 0 : text(input.userInput, "the user's actual choice");
+  if (!Array.isArray(input.options) || !Array.isArray(input.inputRefs))
+    throw new Error("options and inputRefs must be arrays");
+  const offered = {
+    scene,
+    options: input.options.map((option) => text(option, "option")),
+    inputRefs: input.inputRefs.map((ref) => text(ref, "input reference"))
+  };
+  return store2.transaction((state) => {
+    const pending = pendingFor(state, operationId);
+    if (pending.mode !== "initialization" || pending.plan)
+      throw new Error("Choices belong to an unplanned adoption journey");
+    const journey = pending.journey ??= { background: input.background?.trim() || scene, rounds: [] };
+    if (userInput === void 0) {
+      if (journey.completed || journey.rounds.length >= 5) throw new Error("The journey is complete");
+      if (journey.awaiting && JSON.stringify(journey.awaiting) !== JSON.stringify(offered))
+        throw new Error("Resume the offered scene before replacing it");
+      journey.awaiting ??= offered;
+      return journey;
+    }
+    if (journey.awaiting && (journey.awaiting.scene !== scene || JSON.stringify(journey.awaiting.options) !== JSON.stringify(offered.options)))
+      throw new Error("The answer belongs to a different scene");
+    const round = { ...offered, userInput };
+    const last = journey.rounds.at(-1);
+    if (last && JSON.stringify(last) === JSON.stringify(round)) {
+      if (input.complete) {
+        journey.completed = true;
+        delete journey.awaiting;
+      }
+      return journey;
+    }
+    if (journey.completed || journey.rounds.length >= 5)
+      throw new Error("The journey is complete; continue with its gene design");
+    journey.rounds.push(round);
+    delete journey.awaiting;
+    if (input.complete || journey.rounds.length === 5) journey.completed = true;
+    return journey;
+  });
+}
+
+// src/handoff.ts
+import { access as access3, cp, mkdir as mkdir6, readFile as readFile12 } from "node:fs/promises";
+import path15 from "node:path";
+import { randomUUID as randomUUID10 } from "node:crypto";
+async function exportPet(store2, target2, destination) {
+  if (target2 === store2.host || !["desktop", "cloud"].includes(target2))
+    throw new Error("Choose the other main environment");
+  if (!path15.isAbsolute(destination)) throw new Error("Transfer destination must be an absolute directory");
+  const before = await store2.peek();
+  if (!before.pet) throw new Error("No Pet to transfer");
+  if (before.pending) throw new Error("Finish the current story before handing off");
+  const owner = store2.forPet(before.pet.id);
+  const directory = path15.join(destination, before.pet.id);
+  const source = path15.join(store2.root, "pets", before.pet.id);
+  if (path15.resolve(directory).startsWith(path15.resolve(source) + path15.sep) || path15.resolve(directory) === path15.resolve(source))
+    throw new Error("Transfer destination must be outside the source Pet directory");
+  const transferId = before.handoff?.status === "exported" && before.handoff.target === target2 ? before.handoff.id : `handoff-${randomUUID10()}`;
+  const previousSchedule = before.schedule;
+  if (before.handoff?.status === "exported" && before.handoff.target !== target2)
+    throw new Error("This Pet already has an outstanding transfer to another environment");
+  if (before.handoff?.status !== "exported")
+    await owner.transaction((state) => {
+      if (state.pending) throw new Error("Finish the current story before handing off");
+      state.handoff = {
+        id: transferId,
+        target: target2,
+        status: "exported",
+        at: Date.now(),
+        ...state.handoff?.id ? { previousTransferId: state.handoff.id } : {}
+      };
+      state.schedule = { ...state.schedule, timezone: state.schedule?.timezone ?? "UTC", stoppedAt: Date.now() };
+      delete state.schedule.resumedAt;
+    });
+  await mkdir6(destination, { recursive: true });
+  await cp(source, directory, { recursive: true, force: false, errorOnExist: false });
+  const exported = await owner.peek();
+  await atomicJson(path15.join(directory, "transfer.json"), {
+    version: 1,
+    transferId,
+    petId: before.pet.id,
+    source: store2.host,
+    target: target2,
+    previousTransferId: exported.handoff?.previousTransferId,
+    state: exported
+  });
+  return {
+    transferId,
+    petId: before.pet.id,
+    directory,
+    previousSchedule,
+    steps: [
+      "Pause the previous host task by its saved reference.",
+      "Transfer this entire directory to the target.",
+      "Import it, then create the target host task."
+    ],
+    sourceStopped: true
+  };
+}
+async function importPet(store2, directory) {
+  if (!path15.isAbsolute(directory)) throw new Error("Transfer source must be an absolute directory");
+  const manifest = JSON.parse(await readFile12(path15.join(directory, "transfer.json"), "utf8"));
+  identifier(manifest.petId, "petId");
+  identifier(manifest.transferId, "transferId");
+  if (manifest.version !== 1 || !["desktop", "cloud"].includes(manifest.source) || manifest.target !== store2.host || manifest.source === store2.host || manifest.state.host !== manifest.source || manifest.state.pet?.id !== manifest.petId || manifest.state.handoff?.id !== manifest.transferId || manifest.state.handoff?.target !== manifest.target || manifest.state.handoff?.previousTransferId !== manifest.previousTransferId || manifest.state.handoff?.status !== "exported")
+    throw new Error("Invalid or mismatched Pet transfer");
+  const existing = await store2.forPet(manifest.petId).peek();
+  if (existing.handoff?.id === manifest.transferId && existing.handoff.status === "imported")
+    return { petId: manifest.petId, transferId: manifest.transferId, imported: true, duplicate: true };
+  if (existing.pet && existing.handoff?.status !== "exported")
+    throw new Error("The destination Pet is already writable; finish its handoff first");
+  if (existing.pet && existing.handoff?.id !== manifest.previousTransferId)
+    throw new Error("Stale transfer; its predecessor does not match the latest handoff");
+  const target2 = path15.join(store2.root, "pets", manifest.petId);
+  await mkdir6(target2, { recursive: true });
+  const sourceStateFile = path15.resolve(directory, "state.json");
+  await cp(directory, target2, {
+    recursive: true,
+    force: true,
+    filter: (source) => path15.resolve(source) !== sourceStateFile
+  });
+  const state = manifest.state;
+  state.host = store2.host;
+  state.handoff = {
+    id: manifest.transferId,
+    target: store2.host,
+    status: "imported",
+    at: Date.now(),
+    ...manifest.previousTransferId ? { previousTransferId: manifest.previousTransferId } : {}
+  };
+  if (state.pet.binding) state.pet.binding.host = store2.host;
+  for (const art of state.art) {
+    const local = path15.join(target2, "assets", path15.basename(art.file));
+    await access3(local);
+    art.file = local;
+  }
+  await store2.installTransfer(state);
+  return {
+    petId: manifest.petId,
+    transferId: manifest.transferId,
+    imported: true,
+    directory: target2,
+    schedule: "Create the new host task and save its reference before resuming."
+  };
+}
+
+// src/pipeline.ts
+import { execFile } from "node:child_process";
+import { existsSync as existsSync3 } from "node:fs";
+import { mkdir as mkdir7, writeFile as writeFile5 } from "node:fs/promises";
+import { randomUUID as randomUUID11 } from "node:crypto";
+import path16 from "node:path";
+import { promisify } from "node:util";
+var execute = promisify(execFile);
+var helperDirectory = () => path16.join(pluginRoot(), "vendor", "hatch-pet", "scripts");
+async function pipelineRuntime(python) {
+  const candidates = [
+    ...new Set(
+      [python, process.env.GENPET_PYTHON, "python", "python3"].filter((value) => Boolean(value))
+    )
+  ];
+  for (const executable of candidates) {
+    try {
+      const { stdout } = await execute(
+        executable,
+        [
+          "-c",
+          'import json,sys,PIL;print(json.dumps({"python":sys.executable,"pythonVersion":sys.version.split()[0],"pillowVersion":PIL.__version__}))'
+        ],
+        { timeout: 5e3, windowsHide: true, env: { ...process.env, PYTHONDONTWRITEBYTECODE: "1", PYTHONUTF8: "1" } }
+      );
+      return { available: true, ...JSON.parse(stdout), helpers: helperDirectory() };
+    } catch {
+    }
+  }
+  return {
+    available: false,
+    reason: "A Python runtime with Pillow is unavailable. Ask the host workspace dependencies tool for its Python path and pass it as python or GENPET_PYTHON."
+  };
+}
+async function callHelper(script, args2, runDir, python, preparing = false) {
+  if (!path16.isAbsolute(runDir)) throw new Error("Pipeline runDir must be an absolute local path");
+  const runtime = await pipelineRuntime(python);
+  if (!runtime.available) return { ok: false, runtime, run_dir: runDir };
+  const helper = path16.join(runtime.helpers, script);
+  if (!existsSync3(helper))
+    return { ok: false, runtime, run_dir: runDir, error: "Installed deterministic image helper is missing" };
+  let stdout = "", stderr = "", exitCode = 0;
+  try {
+    const output = await execute(runtime.python, [helper, ...args2], {
+      timeout: 55e3,
+      maxBuffer: 16 * 1024 * 1024,
+      windowsHide: true,
+      env: { ...process.env, PYTHONDONTWRITEBYTECODE: "1", PYTHONUTF8: "1" }
+    });
+    stdout = output.stdout;
+    stderr = output.stderr;
+  } catch (error) {
+    const output = error;
+    stdout = output.stdout ?? "";
+    stderr = output.stderr ?? output.message;
+    exitCode = output.code ?? 1;
+  }
+  const reportFile = preparing && !existsSync3(path16.join(runDir, "imagegen-jobs.json")) ? `${runDir}.prepare-${randomUUID11()}.json` : path16.join(runDir, "qa", "wrapper-runs", `${script.replace(".py", "")}-${Date.now()}-${randomUUID11()}.json`);
+  await mkdir7(path16.dirname(reportFile), { recursive: true });
+  await writeFile5(reportFile, JSON.stringify({ runtime, helper, args: args2, stdout, stderr, exitCode }, null, 2), {
+    flag: "wx"
+  });
+  try {
+    return { ...JSON.parse(stdout), runtime, reportFile };
+  } catch {
+    return {
+      ok: false,
+      runtime,
+      reportFile,
+      run_dir: runDir,
+      error: stderr.trim() || "Image helper did not return a structured result"
+    };
+  }
+}
+async function pipelinePrepare(input) {
+  if (!input.notes?.trim() || !input.petName?.trim())
+    throw new Error("Pipeline needs the actual Pet name and appearance notes");
+  const args2 = [
+    input.stage === "egg" ? "--egg" : "--parallel",
+    "--stage",
+    input.stage,
+    "--output-dir",
+    input.runDir,
+    "--pet-id",
+    input.requestId ? `genpet-${input.requestId}` : "genpet",
+    "--pet-name",
+    input.petName,
+    "--pet-notes",
+    input.notes,
+    "--style-preset",
+    "pixel"
+  ];
+  if (input.requestId) args2.push("--request-id", input.requestId);
+  if (input.noMirrorLook) args2.push("--no-mirror-look", input.noMirrorLook);
+  for (const reference of input.references ?? []) {
+    if (!path16.isAbsolute(reference)) throw new Error("Pipeline references must be absolute local paths");
+    args2.push("--reference", reference);
+  }
+  return callHelper("prepare_pet_run.py", args2, input.runDir, input.python, true);
+}
+async function pipelineProcess(runDir, options = {}) {
+  if (options.review && options.failure) throw new Error("Record one review or failed attempt at a time");
+  const args2 = ["--run-dir", runDir, "--previews"];
+  if (options.review)
+    args2.push(
+      "--record-review",
+      options.review.jobId,
+      "--verdict",
+      options.review.verdict,
+      "--note",
+      options.review.note
+    );
+  if (options.failure) {
+    args2.push(
+      "--record-failure",
+      options.failure.jobId,
+      "--error",
+      options.failure.error,
+      "--note",
+      options.failure.note
+    );
+    if (options.failure.attemptId) args2.push("--attempt-id", options.failure.attemptId);
+    if (options.failure.frameIndices) args2.push("--frame-indices", options.failure.frameIndices.join(","));
+  }
+  return callHelper("process_pet_run.py", args2, runDir, options.python);
 }
 
 // src/cli.ts
 async function jsonFile(file) {
-  if (!path10.isAbsolute(file ?? "")) throw new Error("JSON input requires an absolute file");
-  return JSON.parse(await readFile8(file, "utf8"));
+  if (!path17.isAbsolute(file ?? "")) throw new Error("JSON input requires an absolute file");
+  return JSON.parse(await readFile13(file, "utf8"));
 }
 var shared = {
   status: {
@@ -5049,8 +6813,24 @@ var shared = {
   },
   // Story lifecycle
   "begin-story": {
-    usage: "begin-story [TRIGGER_ID]",
-    run: ([trigger], store2) => beginStory(store2, trigger || `manual:${randomUUID10()}`)
+    usage: "begin-story [TRIGGER_ID] [--grow]",
+    run: ([trigger, flag], store2) => beginStory(store2, trigger || `manual:${randomUUID12()}`, { forceGrowth: flag === "--grow" })
+  },
+  "journey-step": {
+    usage: "journey-step OPERATION_ID STEP_JSON",
+    run: async ([id, file], store2) => journeyStep(store2, id, await jsonFile(file))
+  },
+  "random-source": {
+    usage: "random-source OPERATION_ID [SEED]",
+    run: ([id, seed], store2) => chooseSource(store2, id, seed)
+  },
+  "random-choice": {
+    usage: "random-choice OPERATION_ID CANDIDATES_JSON [SEED]",
+    run: async ([id, file, seed], store2) => chooseCandidate(store2, id, await jsonFile(file), seed)
+  },
+  "recent-content": {
+    usage: "recent-content [COUNT]",
+    run: async ([count], store2) => recentContent(await store2.peek(), count ? Number(count) : 10)
   },
   "plan-story": {
     usage: "plan-story OPERATION_ID PLAN_JSON",
@@ -5059,12 +6839,53 @@ var shared = {
   "finish-story": { usage: "finish-story OPERATION_ID", run: ([id], store2) => finishStory(store2, id) },
   "cancel-story": { usage: "cancel-story OPERATION_ID", run: ([id], store2) => cancelStory(store2, id) },
   "story-output": { usage: "story-output [STORY_ID]", run: async ([id], store2) => storyOutput(await store2.peek(), id) },
-  reset: { usage: "reset [OPERATION_ID]", run: ([id], store2) => resetPet(store2, id || randomUUID10()) },
+  reset: { usage: "reset [OPERATION_ID]", run: ([id], store2) => resetPet(store2, id || randomUUID12()) },
   // Artwork and host updates
   "art-request": { usage: "art-request", run: async (_, store2) => artRequest(await store2.peek()) },
+  "find-avatar": { usage: "find-avatar", run: async (_, store2) => hostFor(store2.host).findAvatar(await store2.peek()) },
+  "bind-cloud": { usage: "bind-cloud CLOUD_PET_ID", run: ([id], store2) => bindCloud(store2, id) },
+  "set-appearance": { usage: "set-appearance", run: (_, store2) => hostFor(store2.host).setAppearance(store2) },
+  diagnose: { usage: "diagnose", run: (_, store2) => hostFor(store2.host).diagnose(store2) },
+  "companion-brief": {
+    usage: "companion-brief [BRIEF_DRAFT_JSON]",
+    run: async ([file], store2) => {
+      const state = await store2.peek();
+      if (!state.pet) throw new Error("No Pet");
+      const target2 = await hostFor(store2.host).findAvatar(state);
+      const brief = cloudBriefForPet(state.pet, file ? await jsonFile(file) : void 0);
+      return {
+        ...brief,
+        cloudId: target2.cloudId,
+        agentSteps: brief.needsSummary ? [
+          {
+            command: "companion-brief ABSOLUTE_DRAFT_JSON",
+            check: "Summarize sourceBrief into at most 500 characters, preserving the actual name, soul and speaking habits, shared memory and current stage/state. Save {petId, revision, description}; review the summary against the source, then rerun this command. Do not truncate fields or invent facts."
+          }
+        ] : target2.cloudId ? [
+          {
+            tool: "update_pet",
+            arguments: { pet_id: target2.cloudId, updates: { description: brief.description } }
+          },
+          {
+            tool: "list_pets",
+            check: "Read the exact Pet ID back and compare its description with this generated brief before claiming synchronization."
+          }
+        ] : []
+      };
+    }
+  },
+  "pipeline-runtime": { usage: "pipeline-runtime [PYTHON_PATH]", run: ([python]) => pipelineRuntime(python) },
+  "pipeline-prepare": {
+    usage: "pipeline-prepare INPUT_JSON",
+    run: async ([file]) => pipelinePrepare(await jsonFile(file))
+  },
+  "pipeline-process": {
+    usage: "pipeline-process RUN_DIRECTORY [OPTIONS_JSON]",
+    run: async ([run, file]) => pipelineProcess(run, file ? await jsonFile(file) : {})
+  },
   "accept-art": {
-    usage: "accept-art REQUEST_ID FILE portrait|atlas|avatar|story|artifact PROVENANCE [DESCRIPTION]",
-    run: ([requestId2, file, kind, provenance, description], store2) => acceptArt(store2, { requestId: requestId2, file, kind, provenance, description })
+    usage: "accept-art REQUEST_ID FILE portrait|atlas|story|artifact SOURCE [DESCRIPTION]",
+    run: ([requestId2, file, kind, source, description], store2) => acceptArt(store2, { requestId: requestId2, file, kind, source, description })
   },
   "host-result": {
     usage: "host-result OPERATION_ID RESULT_JSON",
@@ -5101,12 +6922,65 @@ var shared = {
     usage: "migrate-legacy V1_FILE DESIGN_JSON",
     run: async ([file, design], store2) => migrateLegacy(store2, file, await jsonFile(design))
   },
+  "import-record": {
+    usage: "import-record OLD_STATE_JSON DESIGN_JSON",
+    run: async ([file, design], store2) => store2.importRecord(file, { ...await jsonFile(design), confirmed: true })
+  },
+  "supplement-legacy": {
+    usage: "supplement-legacy DESIGN_JSON",
+    run: async ([file], store2) => store2.supplementLegacy({ ...await jsonFile(file), confirmed: true })
+  },
+  "new-pet": {
+    usage: "new-pet [--replace]",
+    run: ([flag], store2) => store2.createPet({ confirmed: true, replace: flag === "--replace" })
+  },
+  "list-pets": { usage: "list-pets", run: (_, store2) => store2.listPets() },
+  "inspect-records": {
+    usage: "inspect-records",
+    run: async (_, store2) => ({
+      dataDirectory: store2.base,
+      records: {
+        desktop: await new Store(store2.base, "desktop").listPets(),
+        cloud: await new Store(store2.base, "cloud").listPets()
+      },
+      legacy: await inspectLegacyRecords(store2.base)
+    })
+  },
+  "activate-pet": { usage: "activate-pet PET_ID", run: ([id], store2) => store2.selectPet(id) },
+  "resolve-active": { usage: "resolve-active [HOST_AVATAR_ID]", run: ([id], store2) => store2.resolveActive(id ?? null) },
+  "handoff-export": {
+    usage: "handoff-export desktop|cloud DESTINATION_DIR",
+    run: ([host2, dir], store2) => exportPet(store2, host2, dir)
+  },
+  "handoff-import": { usage: "handoff-import TRANSFER_DIR", run: ([dir], store2) => importPet(store2, dir) },
   debugger: { usage: "debugger", run: () => launchDebugger() }
 };
-var store = new Store(void 0, packageHost());
+var argv = process.argv.slice(2);
+var hostIndex = argv.indexOf("--host");
+var host = hostIndex >= 0 ? argv.splice(hostIndex, 2)[1] : packageHost();
+if (host !== "desktop" && host !== "cloud") throw new Error("Host must be desktop or cloud");
+var petIndex = argv.indexOf("--pet");
+var petId = petIndex >= 0 ? argv.splice(petIndex, 2)[1] : void 0;
+var store = new Store(void 0, host, petId);
 var commands = { ...shared, ...hostFor(store.host).commands };
-var [name, ...args] = process.argv.slice(2);
+var [name, ...args] = argv;
 try {
+  if ([
+    "plan-story",
+    "finish-story",
+    "cancel-story",
+    "host-result",
+    "record-step",
+    "journey-step",
+    "random-source",
+    "random-choice",
+    "story-output"
+  ].includes(name) && args[0])
+    store = await store.forOperation(args[0]);
+  else if (!petId && ["begin-story", "due", "name-pet", "name-asked", "note-chat", "reset", "new-pet"].includes(name)) {
+    const selected = await hostFor(store.host).selectedAvatar?.();
+    await store.resolveActive(selected?.available ? selected.id : void 0);
+  }
   const command = commands[name];
   if (!command)
     throw new Error(

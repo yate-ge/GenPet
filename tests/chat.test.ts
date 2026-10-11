@@ -1,6 +1,7 @@
+import { retainFixture as rm } from './evidence.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Store } from '../src/store.js';
@@ -10,7 +11,7 @@ import { initialization } from './fixtures.js';
 
 test('a chat note is kept for later stories without touching the pet or an unfinished story', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-chat-')),
-    store = new Store(root, 'dots');
+    store = new Store(root, 'cloud');
   try {
     await assert.rejects(() => noteChat(store, 'genpet-none', 'No pet yet'), /another or missing pet/);
     const op = await initialization(store);

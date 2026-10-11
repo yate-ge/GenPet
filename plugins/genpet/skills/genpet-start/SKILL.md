@@ -1,8 +1,8 @@
 ---
 name: genpet-start
-description: Start or resume this environment’s GenPet with /genpet-start. Initializes an egg only when no pet exists and completes the current story, Avatar and schedule.
+description: Start or resume GenPet with /genpet-start, preserving an existing Pet and enabling its scheduled stories; a new adoption uses a short choice journey.
 ---
 
 # genpet-start
 
-Before doing anything, ask the user one short confirmation, in the pet's world and following `prompts/output.md`, about bringing the pet into their life (a new egg if none exists, otherwise carrying on), and continue only after a clear yes. Follow [the shared workflow](../../references/workflow.md). Read status first, migrate an existing legacy record where reported, and resume pending work. If a completed pet exists, keep it and present its latest relevant story; generate a new story only if requested or due. With no pet, use a stable trigger ID. Follow `prompts/initialization.md`; complete the egg's real visuals and host update, then set up the 5-hourly [story checks](../../references/scheduling.md); if the user had stopped them with /genpet-stop, this sets them up again (`schedule` records the resume). Conversation follows `prompts/output.md`.
+Follow [the main skill](../genpet/SKILL.md) for environment intake, existing-record choice and first adoption notice. Resume a current Pet/pending operation; if no Pet, only after the notice is accepted, read actual user context and start the saved journey through GeneDesigner. Complete its literal egg image and same-ID host update, then [set or resume the real task](../../references/scheduling.md). Existing start keeps identity/history/cloud ID; do not replace or add without the separate explicit choice. Do not repeat an already completed consent or confirmation.

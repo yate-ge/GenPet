@@ -1,16 +1,19 @@
-import { writeFile } from 'node:fs/promises';
+import { copyFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import { PNG } from 'pngjs';
 import { desiredAppearance } from '../src/appearance.js';
 import { actions } from '../src/hosts/desktop/atlas.js';
-import { bindAvatar } from '../src/hosts/dots.js';
+import { bindCloud } from '../src/hosts/cloud.js';
 import { recordHostResult } from '../src/hosts/result.js';
 import { beginStory, planStory } from '../src/lifecycle.js';
 import type { Store } from '../src/store.js';
+import { journeyStep } from '../src/journey.js';
 export const personality =
   'Patient and curious. Offers quiet company without assuming the user needs help. Draws its feelers close when listening and unfolds them when exploring. A fictional individual met beside an unfinished drawing; not a claim about user personality.';
 export const initialPlan = {
   text: 'You found an egg beside the unfinished drawing.',
-  basis: 'The user is working on a drawing; the encounter is fictional.',
+  reason: 'The user is working on a drawing; the encounter is fictional.',
+  contextRefs: ['fixture:creative-task'],
   state: 'A quiet intact egg.',
   stage: 'egg' as const,
   genes:
@@ -23,8 +26,18 @@ export const initialPlan = {
 export async function initialization(store: Store, trigger = 'test:init') {
   const result = await beginStory(store, trigger);
   if (result.status !== 'pending' || !result.pending) throw new Error('Expected pending initialization');
+  await journeyReady(store, result.pending.id);
   await planStory(store, result.pending.id, initialPlan);
   return result.pending.id;
+}
+export async function journeyReady(store: Store, operationId: string) {
+  return journeyStep(store, operationId, {
+    scene: 'A fictional unfinished drawing beside a lamp',
+    options: ['Inspect the drawing', 'Follow the lamp'],
+    userInput: 'I inspect the drawing',
+    inputRefs: ['fixture:creative-task', 'fixture:synthetic-context', 'fixture:shared-event'],
+    complete: true,
+  });
 }
 export async function image(file: string, atlas = false, badUnused = false) {
   const width = atlas ? 1536 : 32,
@@ -45,14 +58,20 @@ export async function image(file: string, atlas = false, badUnused = false) {
 }
 /** Stand-in for the host step: record an inactive, updated target so a story can finish in isolated data. */
 export async function hostDone(store: Store, op: string) {
-  if (store.host === 'dots' && !(await store.peek()).pet!.binding) await bindAvatar(store, 'dots:test');
+  if (!(await store.peek()).pet!.binding) await bindCloud(store, 'pet_testfixture');
   const state = await store.peek();
+  const art = desiredAppearance(state)!;
+  const readbackFile = path.join(store.root, `host-fixture-${op}.png`);
+  await copyFile(art.file, readbackFile);
   return recordHostResult(store, op, {
     petId: state.pet!.id,
     operationId: op,
-    appearanceId: desiredAppearance(state)!.id,
-    avatarId: state.pet!.binding?.avatarId ?? `custom:${state.pet!.id}`,
+    appearanceId: art.id,
+    avatarId: state.pet!.binding!.cloudId ?? state.pet!.binding!.avatarId,
     updated: true,
+    storedArtworkVerified: null,
+    readbackFile,
+    observed: 'Independent synthetic host copy, no live host or visual acceptance claimed.',
     active: false,
     refreshRequested: false,
     displayStatus: 'unconfirmed',

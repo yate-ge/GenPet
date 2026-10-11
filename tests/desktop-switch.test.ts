@@ -9,9 +9,11 @@ const response = (id: number, selection: string | null) => settingsResponse(id, 
 
 function withHost(
   handler: (request: AppToolsRequest, socket: net.Socket) => void,
-  run: (options: { pipePath: string; threadId: string; timeoutMs: number }) => Promise<void>,
+  run: (options: { pipePath: string; threadId: string; turnId: string; timeoutMs: number }) => Promise<void>,
 ) {
-  return withAppTools(handler, ({ pipePath }) => run({ pipePath, threadId: 'isolated-test-thread', timeoutMs: 1000 }));
+  return withAppTools(handler, ({ pipePath }) =>
+    run({ pipePath, threadId: 'isolated-test-thread', turnId: 'isolated-test-turn', timeoutMs: 1000 }),
+  );
 }
 
 test('read projects only pet fields and handles fragmented native pipe frames', async () => {
@@ -42,6 +44,7 @@ test('select writes only the pet key, then confirms with an independent read', a
     (request, socket) => {
       calls.push(request.params!.tool);
       if (request.params?.tool === 'write_settings') {
+        assert.equal(request.params.turnId, 'isolated-test-turn');
         assert.deepEqual(request.params.arguments, { settings: { 'selected-avatar-id': 'dewey' } });
         selected = 'dewey';
       }
@@ -57,6 +60,32 @@ test('select writes only the pet key, then confirms with an independent read', a
         visualVerified: false,
       });
       assert.deepEqual(calls, ['write_settings', 'read_settings']);
+    },
+  );
+});
+
+test('a missing active turn cannot write, and real RPC rejection preserves bounded code/message', async () => {
+  const calls: AppToolsRequest[] = [];
+  await withHost(
+    (request, socket) => {
+      calls.push(request);
+      socket.write(
+        frame({
+          jsonrpc: '2.0',
+          id: request.id,
+          error: { code: -32000, message: 'Codex app tool request failed', data: { private: 'must-not-escape' } },
+        }),
+      );
+    },
+    async options => {
+      await assert.rejects(selectPet('dewey', { ...options, turnId: null }), /active turn ID is unavailable/);
+      assert.equal(calls.length, 0);
+      await assert.rejects(selectPet('dewey', options), error => {
+        assert.match(String(error), /write_settings.*-32000.*Codex app tool request failed/);
+        assert.doesNotMatch(String(error), /must-not-escape/);
+        return true;
+      });
+      assert.equal(calls.length, 1);
     },
   );
 });

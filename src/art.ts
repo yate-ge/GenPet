@@ -4,7 +4,6 @@ import { createHash, randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { desiredAppearance, requestId } from './appearance.js';
 import { readPrompt } from './config.js';
-import { checkAtlas } from './hosts/desktop/atlas.js';
 import { hostFor } from './hosts/index.js';
 import { decodeRgba, readImageInfo } from './image.js';
 import { artKinds, type ArtKind, type ArtRecord, type State } from './model.js';
@@ -24,8 +23,8 @@ export function artRequest(state: State) {
     stage: plan.stage,
     name: pet.name,
     naming: pet.naming,
-    personality: pet.personality ?? plan.personality,
-    genes: pet.genes ?? plan.genes,
+    personality: pet.soul.personality ?? plan.personality,
+    genes: pet.soul.genes ?? plan.genes,
     story: plan.text,
     appearance: plan.appearance,
     // The Agent chooses identity references and reusable appearances from this pet's accepted art.
@@ -46,18 +45,18 @@ export async function validateImage(file: string, kind: ArtKind) {
     throw new Error('Pet images must have an alpha channel');
   if (meta.width * meta.height > 16_000_000) throw new Error('Image exceeds size limit');
   const decoded = await decodeRgba(file); // Rejects a truncated image before storing it.
-  if (kind === 'atlas') checkAtlas(decoded);
+  if (kind === 'atlas') await hostFor('desktop').validateArt(file);
   return meta;
 }
 
 /** `accept-art`: copy a reviewed file into this pet's assets under the current request. Idempotent. */
 export async function acceptArt(
   store: Store,
-  input: { requestId: string; file: string; kind: ArtKind; provenance: string; description?: string },
+  input: { requestId: string; file: string; kind: ArtKind; source: string; description?: string },
 ) {
   if (!path.isAbsolute(input.file)) throw new Error('Artifact file must be an absolute local path');
   if (!artKinds.includes(input.kind)) throw new Error('Unknown artifact kind');
-  if (!input.provenance?.trim()) throw new Error('Record generation and validation provenance');
+  if (!input.source?.trim()) throw new Error('Record generation and validation source');
   await validateImage(input.file, input.kind);
   const bytes = await readFile(input.file);
   return store.transaction(async state => {
@@ -96,7 +95,7 @@ export async function acceptArt(
       file,
       kind: input.kind,
       createdAt: Date.now(),
-      provenance: input.provenance,
+      source: input.source,
     };
     state.art.push(record);
     return record;

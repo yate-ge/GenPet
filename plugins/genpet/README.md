@@ -1,9 +1,9 @@
 # GenPet
 
-Version 0.9.2. Lightweight story-driven pixel Pet framework.
+Version 0.10.0 development package. Lightweight story-driven pixel Pet framework. Full acceptance is still in progress; it is not a public release.
 
 Each Pet starts as a literal egg designed from its adoption story and hatches into a living creature. Product rules are in [prompts/meta.md](prompts/meta.md).
 
-Use `/genpet-start` to initialize or resume; it then sets up a story check every 5 hours, and scheduled runs drive new stories and evolution. `/genpet-stop` turns the checks off; the pet stays, and its next story notices how long it was left. `/genpet-name` saves the user's chosen name. A completed hatch invites naming once. Each Pet's saved personality shapes its stories and states; user connections appear in the text. `/genpet-story`, `/genpet-grow` and `/genpet-reset` are explicit testing shortcuts, not the core loop. Conversation replies are pet stories and actual visuals, with naming interaction allowed.
+Use `/genpet` for status, naming, diagnosis and actions, `/genpet-start` to adopt or resume, and `/genpet-chat` to talk. Adoption begins with a data notice and consent, then a journey of up to five choices. Scheduled checks run every five hours while the host is available; `/genpet-stop` pauses them. A completed hatch invites naming once. `/genpet-story`, `/genpet-grow` and `/genpet-reset` request a story, forced growth or a confirmed replacement.
 
-This package runs in the **desktop** environment. It has its own pet records and Avatar binding. See [workflow](references/workflow.md), [storage](references/storage.md), [desktop integration](references/desktop.md) and [scheduling](references/scheduling.md). `prompts/`, `references/` and the shared skills are build copies; developers edit the repository's `framework/` sources. Installing alone does not create a pet or a task.
+The shared runtime supports desktop and cloud main environments. v3 records have soul, memory and state, one directory per Pet and one active Pet. Accepted artwork and the brief target the same cloud Pet ID; stored-image verification, refresh and actual display are separate results. Cross-end persistence and Dots setup require actual host checks. See [workflow](references/workflow.md), [storage](references/storage.md), [desktop integration](references/desktop.md), [Dots](references/dots.md) and [scheduling](references/scheduling.md). `prompts/`, `references/` and shared skills are build copies of `framework/`. Installing alone creates no Pet or task.

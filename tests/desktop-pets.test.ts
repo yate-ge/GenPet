@@ -1,17 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readdir, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { listPets } from '../src/hosts/desktop/switch.js';
+import { hostTestDirectory } from './host-fixtures.js';
 
 async function withHome(run: (home: string) => Promise<void>) {
-  const home = await mkdtemp(path.join(tmpdir(), 'genpet-catalog-'));
-  try {
-    await run(home);
-  } finally {
-    await rm(home, { recursive: true, force: true });
-  }
+  const home = await hostTestDirectory('catalog');
+  await run(home);
 }
 
 async function manifest(home: string, folder: string, id: string, data: unknown) {

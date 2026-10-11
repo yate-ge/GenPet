@@ -1,16 +1,23 @@
-/** Both installed packages, outside repository dependencies and real Pet data. */
+/** Installed package outside repository dependencies, with isolated Pet and host fixtures. */
+import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtemp, rm, readFile, readdir, writeFile, mkdir, copyFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import assert from 'node:assert/strict';
-const plugin = path.resolve(process.argv[2]),
-  source = path.resolve(process.argv[3]),
-  temp = await mkdtemp(path.join(tmpdir(), 'genpet-installed-'));
+const plugin = path.resolve(process.argv[2]);
+const source = path.resolve(process.argv[3]);
+const parent = path.resolve(
+  process.env.GENPET_TEST_EVIDENCE_DIR || path.join(source, 'output/implementation-20261011/installed-tests'),
+);
+await mkdir(parent, { recursive: true });
+const run = await mkdtemp(path.join(parent, 'installed-'));
+const home = path.join(run, 'codex-home');
+await mkdir(home);
+await writeFile(path.join(home, '.codex-global-state.json'), '{}');
 const env = {
   ...process.env,
-  GENPET_DATA_DIR: path.join(temp, 'data'),
-  CODEX_HOME: path.join(temp, 'codex'),
+  GENPET_DATA_DIR: path.join(run, 'data'),
+  CODEX_HOME: home,
   CODEX_APP_TOOLS_PIPE_PATH: '',
   CODEX_THREAD_ID: '',
   GENPET_SKIP_NATIVE_REFRESH: '1',
@@ -18,150 +25,116 @@ const env = {
 const call = (...args) =>
   JSON.parse(
     execFileSync(process.execPath, [path.join(plugin, 'dist/cli.js'), ...args], {
-      cwd: temp,
+      cwd: run,
       env,
       encoding: 'utf8',
       maxBuffer: 16 * 1024 * 1024,
     }),
   );
-const file = async (name, value) => {
-  const p = path.join(temp, name);
-  await writeFile(p, JSON.stringify(value));
-  return p;
+const input = async (name, value) => {
+  const file = path.join(run, name + '.json');
+  await writeFile(file, JSON.stringify(value));
+  return file;
 };
-try {
-  const status = call('status'),
-    host = status.host;
-  assert.equal(status.pet, null);
-  const op = call('begin-story', 'smoke:init'),
-    petId = op.pet.id;
-  assert.equal(call('begin-story', 'smoke:init').pet.id, petId);
-  const plan = {
-    text: 'A synthetic smoke-test adoption story.',
-    basis: 'Test fixture only',
-    state: 'A folded test egg',
-    stage: 'egg',
-    genes: 'A distinct faceless folded construction; layers unfold through development.',
-    personality:
-      'A patient, curious test companion; it listens beside the user and folds its feelers while resting. Synthetic character fixture, not a user personality inference.',
-    place: 'A fictional test location',
-    connection: 'Isolated engineering fixture',
-    appearance: { description: 'A folded pixel egg' },
-  };
-  call('plan-story', op.pending.id, await file('plan.json', plan));
-  const request = call('art-request'),
-    fixture = path.join(source, 'tests/fixtures/mystery-egg.webp');
-  call('accept-art', request.id, fixture, 'portrait', 'Isolated existing fixture; not generated visual evidence');
-  const art = call(
-    'accept-art',
-    request.id,
-    fixture,
-    host === 'desktop' ? 'atlas' : 'avatar',
-    'Isolated existing fixture; not generated visual evidence',
-  );
-  let destination;
-  if (host === 'dots') {
-    call('bind-avatar', 'dots-smoke-avatar');
-  } else {
-    await mkdir(env.CODEX_HOME, { recursive: true });
-    await writeFile(path.join(env.CODEX_HOME, 'config.toml'), '[desktop]\nselected-avatar-id = "dewey"\n');
-  }
-  // Live selection is unavailable with host IPC disabled. Record only the known
-  // inactive synthetic fixture; do not weaken runtime completion or claim display.
-  const publishFixture = async () => {
-    if (host === 'dots') {
-      // Stand-in for the Dots Agent's own Avatar tools: host-request in, host-result out.
-      const r = call('host-request');
-      await copyFile(r.file, path.join(temp, 'host-avatar.webp'));
-      return call(
-        'host-result',
-        r.operationId,
-        await file('dots-host.json', {
-          petId: r.petId,
-          operationId: r.operationId,
-          appearanceId: r.appearanceId,
-          avatarId: r.target.avatarId,
-          updated: true,
-          active: true,
-          refreshRequested: true,
-          displayStatus: 'unconfirmed',
-        }),
-      );
-    }
-    const result = call('publish');
-    assert.equal(result.active, null);
-    assert.equal(result.refreshRequested, false);
-    assert.equal(result.displayStatus, 'unconfirmed');
-    const reported = call(
-      'host-result',
-      result.operationId,
-      await file('inactive-host.json', {
-        petId: result.petId,
-        operationId: result.operationId,
-        appearanceId: result.appearanceId,
-        avatarId: result.avatarId,
-        updated: result.updated,
-        active: false,
-        refreshRequested: false,
-        displayStatus: 'unconfirmed',
-        evidence: 'Isolated inactive fixture with dewey selected; live host IPC disabled.',
-      }),
-    );
-    return { ...result, ...reported, error: reported.error };
-  };
-  const published = await publishFixture();
-  assert.equal(published.petId, petId);
-  assert.equal(published.appearanceId, art.id);
-  assert.equal(published.displayStatus, 'unconfirmed');
-  if (host === 'desktop') {
-    destination = published.destination;
-    assert.equal(path.basename(destination), petId);
-    const manifest = JSON.parse(await readFile(path.join(destination, 'pet.json'), 'utf8'));
-    assert.equal(manifest.genpetId, petId);
-    assert.equal(manifest.spriteVersionNumber, 2);
-    assert.deepEqual(await readFile(path.join(destination, manifest.spritesheetPath)), await readFile(fixture));
-    assert.equal(
-      await readFile(path.join(env.CODEX_HOME, 'config.toml'), 'utf8'),
-      '[desktop]\nselected-avatar-id = "dewey"\n',
-    );
-  } else assert.deepEqual(await readFile(path.join(temp, 'host-avatar.webp')), await readFile(fixture));
-  call('finish-story', op.pending.id);
-  assert.equal(call('begin-story', 'smoke:init').status, 'completed');
-  assert.equal(call('status').pet.personality, plan.personality);
-  assert.equal(call('status').namingDue, false);
-  call('name-pet', petId, 'User fixture name');
-  assert.equal(call('status').pet.name, 'User fixture name');
-  const next = call('begin-story', 'smoke:reuse').pending.id;
-  call(
-    'plan-story',
-    next,
-    await file('reuse.json', {
-      text: 'The synthetic pet revisited its folded resting state.',
-      basis: 'Existing state fits',
-      state: 'Resting',
-      appearance: { description: 'Reuse', reuseArtId: art.id },
-    }),
-  );
-  assert.equal(call('art-request').status, 'ready');
-  await publishFixture();
-  call('finish-story', next);
-  assert.equal(call('status').artCount, 2);
-  assert.equal(call('status').storyCount, 2);
-  const reset = call('reset', 'smoke-reset');
-  assert.notEqual(reset.pet.id, petId);
-  assert.equal(reset.pet.binding.avatarId, published.avatarId);
-  call('plan-story', reset.pending.id, await file('reset-plan.json', plan));
-  const resetRequest = call('art-request');
-  call('accept-art', resetRequest.id, fixture, host === 'desktop' ? 'atlas' : 'avatar', 'Isolated reset fixture');
-  await publishFixture();
-  call('finish-story', reset.pending.id);
-  assert.equal(call('reset', 'smoke-reset').status, 'completed');
-  assert.equal(call('status').pet.id, reset.pet.id);
-  if (host === 'desktop')
-    assert.deepEqual(await readdir(path.join(env.CODEX_HOME, 'pets')), [path.basename(destination)]);
-  console.log(
-    `${host}: installed initialization, stable identity, artwork, publication, reuse and reset passed (isolated fixtures).`,
-  );
-} finally {
-  await rm(temp, { recursive: true, force: true });
-}
+assert.equal(call('status').pet, null);
+const begun = call('begin-story', 'smoke:adopt');
+const petId = begun.pet.id;
+assert.equal(call('begin-story', 'smoke:adopt').pet.id, petId);
+call(
+  'journey-step',
+  begun.pending.id,
+  await input('journey', {
+    scene: 'A fictional lantern by a bridge',
+    options: ['Bridge', 'Garden'],
+    userInput: 'I walk into the garden',
+    inputRefs: ['fixture:simulated-choice'],
+    complete: true,
+  }),
+);
+const plan = {
+  text: 'A synthetic garden encounter ended with a literal egg.',
+  reason: 'Synthetic test data',
+  contextRefs: ['fixture:simulated-choice'],
+  memory: 'The fictional journey began beside a bridge.',
+  state: 'An intact quiet egg',
+  stage: 'egg',
+  genes: 'Synthetic pixel moth companion; literal egg first.',
+  personality: 'A patient curious companion whose fluttering hello is ff.',
+  place: 'A fictional garden',
+  connection: 'Simulated choice of the garden',
+  appearance: { description: 'A conventional egg with pale moss markings' },
+};
+call('plan-story', begun.pending.id, await input('plan', plan));
+const request = call('art-request');
+const fixture = path.join(source, 'tests/fixtures/mystery-egg.webp');
+const art = call(
+  'accept-art',
+  request.id,
+  fixture,
+  'atlas',
+  'Synthetic installed format fixture; no generated visual acceptance',
+);
+const published = call('set-appearance');
+assert.equal(published.petId, petId);
+assert.equal(published.storedArtworkVerified, true);
+assert.equal(published.displayStatus, 'unconfirmed');
+const manifest = JSON.parse(await readFile(path.join(published.destination, 'pet.json'), 'utf8'));
+assert.equal(manifest.genpetId, petId);
+assert.deepEqual(await readFile(path.join(published.destination, manifest.spritesheetPath)), await readFile(fixture));
+call('finish-story', begun.pending.id);
+assert.equal(call('begin-story', 'smoke:adopt').status, 'completed');
+assert.equal(call('status').pet.soul.personality, plan.personality);
+assert.equal(call('status').namingDue, false);
+assert.equal(call('status').version, 3);
+call('name-pet', petId, 'Fixture name');
+assert.equal(call('status').pet.name, 'Fixture name');
+const story = call('begin-story', 'smoke:reuse').pending.id;
+call(
+  'plan-story',
+  story,
+  await input('reuse', {
+    text: 'The companion remembers the garden.',
+    reason: 'Synthetic shared choice',
+    contextRefs: ['fixture:simulated-choice'],
+    state: 'Quiet',
+    appearance: { description: 'Saved appearance', reuseArtId: art.id },
+  }),
+);
+assert.equal(call('art-request').status, 'ready');
+call('set-appearance');
+call('finish-story', story);
+assert.equal(call('status').artCount, 1);
+assert.equal(call('status').storyCount, 2);
+const reset = call('reset', 'smoke:replace');
+assert.notEqual(reset.pet.id, petId);
+assert.equal(reset.pet.binding.avatarId, published.avatarId);
+call(
+  'journey-step',
+  reset.pending.id,
+  await input('replacement-journey', {
+    scene: 'A new fictional garden path',
+    options: ['Lantern', 'Gate'],
+    userInput: 'I choose the lantern',
+    inputRefs: ['fixture:simulated-replacement-choice'],
+    complete: true,
+  }),
+);
+call('plan-story', reset.pending.id, await input('replacement-plan', plan));
+const replacementRequest = call('art-request');
+call('accept-art', replacementRequest.id, fixture, 'atlas', 'Synthetic replacement fixture');
+call('set-appearance');
+call('finish-story', reset.pending.id);
+assert.equal(call('reset', 'smoke:replace').status, 'completed');
+assert.equal(call('status').pet.id, reset.pet.id);
+await writeFile(
+  path.join(run, 'RESULT.json'),
+  JSON.stringify(
+    { ok: true, isolated: true, visualAcceptance: false, petId, replacementPetId: reset.pet.id, sourcePlugin: plugin },
+    null,
+    2,
+  ),
+);
+console.log(
+  'Installed v3 CLI, adoption choices, accepted-art host readback, identity, reuse and replacement: passed. Evidence: ' +
+    run,
+);

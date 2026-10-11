@@ -1,9 +1,10 @@
 /** A fake Codex app-tools pipe for desktop switch tests: decodes requests and lets each test reply. */
 import net from 'node:net';
 import { randomUUID } from 'node:crypto';
-import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { writeFile } from 'node:fs/promises';
 import { encodeFrame } from '../src/hosts/desktop/frames.js';
+import { hostTestDirectory } from './host-fixtures.js';
 
 export const frame = encodeFrame;
 /** Placed in every reply; must never appear in GenPet output. */
@@ -18,6 +19,7 @@ export type AppToolsRequest = {
     arguments: { settings?: Record<string, unknown>; include_config?: boolean };
     callerSource: string;
     threadId: string;
+    turnId?: string;
   };
 };
 
@@ -33,10 +35,11 @@ export async function withAppTools(
   handler: (request: AppToolsRequest, socket: net.Socket) => void,
   run: (host: { pipePath: string; calls: AppToolsRequest[]; connections: () => number }) => Promise<void>,
 ) {
+  const evidence = await hostTestDirectory('app-tools');
   const pipePath =
     process.platform === 'win32'
       ? `\\\\.\\pipe\\genpet-app-tools-${randomUUID()}`
-      : path.join(tmpdir(), `genpet-app-tools-${randomUUID()}.sock`);
+      : path.join(evidence, 'app-tools.sock');
   const calls: AppToolsRequest[] = [];
   const sockets = new Set<net.Socket>();
   let connections = 0;
@@ -64,6 +67,7 @@ export async function withAppTools(
   try {
     await run({ pipePath, calls, connections: () => connections });
   } finally {
+    await writeFile(path.join(evidence, 'requests.json'), JSON.stringify({ calls, connections }, null, 2));
     for (const socket of sockets) socket.destroy();
     await new Promise<void>(resolve => server.close(() => resolve()));
   }

@@ -36,6 +36,12 @@ def clean_strip(image, count):
     transparent = rgba.getchannel("A").histogram()[0]
     key = None if transparent > width * height * 0.01 else detect_background(rgba)
     pixels = list(pixel_data(rgba))
+    if key is None:
+        # Repeated tall body edges can resemble a grid. Existing RGBA alpha is
+        # authoritative: do not erase visible columns/rows on that assumption.
+        rgba.putdata([(r, g, b, a) if a > 16 else (0, 0, 0, 0) for r, g, b, a in pixels])
+        return rgba, {"background_rgb": None, "removed_horizontal_lines": [],
+                      "removed_vertical_lines": [], "line_removal_policy": "preserve-existing-alpha"}
     near = [alpha <= 16 or (key is not None and sum((rgb - bg) ** 2 for rgb, bg in zip((r, g, b), key)) <= 40 ** 2)
             for r, g, b, alpha in pixels]
     foreground = [not value for value in near]

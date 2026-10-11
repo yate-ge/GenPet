@@ -51,6 +51,11 @@ LOOK_CARDINALS = [
     ("270", "left"),
 ]
 
+LOOK_HALVES = [
+    ("look-right-upper", ["000", "022.5", "045", "067.5", "090"]),
+    ("look-right-lower", ["112.5", "135", "157.5", "180"]),
+]
+
 STATE_PROMPTS = {
     "idle": "Calm low-distraction resting loop: subtle breathing, tiny blink, slight head/body bob, and only quiet persona-preserving motion.",
     "running-right": "Dragging-right loop: show directional movement to the right through body and limb poses only.",
@@ -124,7 +129,7 @@ NON_DERIVABLE_STATES = {
 
 PET_SAFE_STYLE = (
     "Pet-safe sprite: compact full-body mascot, readable in a 192x208 cell, "
-    "distinct readable construction, optional or absent facial features, stable materials, and crisp edges "
+    "cute approachable living construction, facial features with at least eyes after hatching, stable materials, and crisp edges "
     "for chroma-key extraction."
 )
 
@@ -134,8 +139,8 @@ STYLE_PRESETS = {
         "reference images, then keep that exact style consistent across every row."
     ),
     "pixel": (
-        "Pixel-art-adjacent digital mascot with a chunky silhouette, simple dark "
-        "outline, limited palette, flat cel shading, and visible stepped edges."
+        "Cute cartoon pixel sprite with a compact readable silhouette, simplified and appropriately "
+        "exaggerated forms, a few clear color blocks, and crisp stepped edges. No realistic anatomical texture."
     ),
     "plush": (
         "Soft plush toy mascot with rounded stitched forms, fuzzy fabric feel, "
@@ -394,7 +399,9 @@ def create_layout_guides(run_dir: Path) -> list[dict[str, object]]:
     cardinal_guide = create_layout_guide(
         guide_dir / "look-cardinals.png", "look-cardinals", len(LOOK_CARDINALS)
     )
-    return [*standard_guides, *look_guides, cardinal_guide]
+    half_guides = [create_layout_guide(guide_dir / f"{state}.png", state, len(directions))
+                   for state, directions in LOOK_HALVES]
+    return [*standard_guides, *look_guides, cardinal_guide, *half_guides]
 
 
 def parse_hex_color(value: str) -> tuple[int, int, int]:
@@ -516,9 +523,14 @@ def base_pet_prompt(args: argparse.Namespace) -> str:
     brand_block = f"\nBrand inspiration: {brand_line}\n" if brand_line else "\n"
     chroma_key = args.chroma_key["hex"]
     chroma_name = args.chroma_key["name"]
+    egg = getattr(args, "egg", False) or getattr(args, "stage", "") == "egg"
+    boundary = ("A literal complete conventional egg shell with a familiar egg shape. Individual clues belong in shell colors, textures and patterns. No object replacement, abstract structure, eyes, face, cracks or exposed creature."
+                if egg else "At a glance this is a cute, approachable living companion with facial features, at least eyes. It may come from an animal, plant, object or imagined being; keep its distinctive grounded design. Nothing unsettling or unpleasant. A hatchling visibly looks undeveloped, not a scaled-down adult. Do not impose a universal head/body ratio.")
     return f"""Create one clean full-body reference sprite for Codex pet {args.display_name}.
 
 Pet identity: {pet_notes}.
+Target life stage: {"egg" if egg else getattr(args, "stage", "hatchling")}.
+Product boundary: {boundary}
 Style: {style_contract}
 {brand_block}
 Place a single centered pose on a perfectly flat pure {chroma_name} {chroma_key} chroma-key background. Keep the full pet visible, compact, readable at 192x208, and easy to animate. Preserve approved reference identity cues. No scenery, text, borders, checkerboard transparency, shadows, glows, detached effects, or extra props. Keep {chroma_key} and close colors out of the pet, props, highlights, and effects."""
@@ -531,7 +543,8 @@ def row_prompt(args: argparse.Namespace, state: str, row: int, frames: int, purp
     chroma_name = args.chroma_key["name"]
     state_prompt = STATE_PROMPTS[state]
     state_requirements = "\n".join(f"- {line}" for line in STATE_REQUIREMENTS[state])
-    return f"""Create one horizontal animation strip for Codex pet `{args.pet_id}`, state `{state}`.
+    label = "WORKING / FOCUSED ACTIVITY (native slot id running)" if state == "running" else state
+    return f"""Create one horizontal animation strip for Codex pet `{args.pet_id}`, state `{label}`.
 
 Use the attached canonical base for identity. Use the attached layout guide only for slot count, spacing, centering, and padding; do not draw the guide.
 
@@ -557,7 +570,8 @@ def retry_row_prompt(
     chroma_name = args.chroma_key["name"]
     state_prompt = STATE_PROMPTS[state]
     state_requirements = "\n".join(f"- {line}" for line in STATE_REQUIREMENTS[state])
-    return f"""Create Codex pet row `{state}` for `{args.pet_id}`: exactly {frames} full-body frames in one horizontal strip on flat pure {chroma_name} {chroma_key}.
+    label = "WORKING / FOCUSED ACTIVITY (native slot id running)" if state == "running" else state
+    return f"""Create Codex pet row `{label}` for `{args.pet_id}`: exactly {frames} full-body frames in one horizontal strip on flat pure {chroma_name} {chroma_key}.
 
 Use the attached canonical base for identity and the layout guide only for spacing. Same pet in every frame: {pet_notes}. Preserve silhouette, face, palette, material, proportions, markings, and props.
 
@@ -793,7 +807,7 @@ do not try to represent the native character actions. Minor motion differences a
 BACKGROUND_CONTRACT = """Use a uniform solid background clearly distinct from every pet/prop color. Any suitable color is acceptable; no exact hex code is required. No gradients, texture, scenery or shadows. Separate frames with empty background only: NO separator lines, grid lines, boxes, borders or guide marks. The layout guide is spacing metadata, never artwork to copy."""
 
 
-def make_parallel_jobs(run_dir, copied_refs):
+def make_parallel_jobs(run_dir, copied_refs, mirror_look=True):
     jobs = [job for job in make_jobs(run_dir, copied_refs) if job["id"] != "look-cardinals"]
     for job in jobs[1:]:
         job["depends_on"] = ["base"]
@@ -803,6 +817,23 @@ def make_parallel_jobs(run_dir, copied_refs):
         job["derivation_policy"] = {"may_derive": False, "reason": "independent AI row based on canonical base"}
         for name in ("mirror_policy", "look_mechanics_file", "retry_prompt_file"):
             job.pop(name, None)
+        job["max_redraws"] = 2
+        job["requires_visual_review"] = False
+    if mirror_look:
+        jobs = [job for job in jobs if job["id"] not in ("look-row-9", "look-row-10")]
+        for state, directions in LOOK_HALVES:
+            jobs.append({"id": state, "kind": "look-half-strip", "status": "pending",
+                         "prompt_file": f"prompts/rows/{state}.md", "output_path": f"decoded/{state}.png",
+                         "depends_on": ["base"], "parallelizable_after": ["base"],
+                         "input_images": [{"path": CANONICAL_BASE_PATH, "role": "canonical identity reference"},
+                                          {"path": f"{LAYOUT_GUIDE_DIR}/{state}.png", "role": f"{len(directions)} invisible fixed viewports; spacing only"}],
+                         "generation_skill": "$imagegen", "frames": len(directions), "directions": directions,
+                         "requires_grounded_generation": True, "allow_prompt_only_generation": False,
+                         "requires_visual_review": False, "max_redraws": 2,
+                         "derivation_policy": {"may_derive": False, "reason": "AI draws one side; opposite-side poses mirror individual frames without reversing time"}})
+    for job in jobs:
+        job.setdefault("max_redraws", 2)
+        job.setdefault("requires_visual_review", job["id"] == "base")
     return jobs
 
 
@@ -813,17 +844,18 @@ MOTION_SEQUENCES = {
     "waving": "A continuous friendly greeting expressed through the existing design, with a clear rise and return of the gesture. No required hands or arms.",
     "jumping": "One small rise from the resting baseline, apex, descent and soft return, using this individual's own movement. Preserve scale and actual vertical motion; no required legs or body posture.",
     "failed": "One subdued reaction and recovery expressed through this individual's own existing construction, without adding facial features or new symbols.",
-    "waiting": "One patient anticipation loop that fits this individual's existing design; a small progressive motion and return without replacing its identity.",
-    "running": "One focused activity loop expressed through this individual's own existing construction, without requiring a hand, chin, face or task prop.",
+    "waiting": "One patient anticipation loop that fits this individual's existing design; a small progressive motion and return without replacing its identity. Keep the resting support and body height stable; do not make the whole body hop or become airborne. Use existing expressive parts rather than inventing feet or limbs.",
+    "running": "One focused work/processing activity loop expressed through this individual's own existing construction. Keep its body base anchored and show visible attentive activity rather than locomotion. No new task prop or required limb menu.",
     "review": "One attentive inspection loop expressed through existing features or relationships, with continuous motion and recovery. No required eyes or arms.",
 }
 
 
 def parallel_row_prompt(args, state, count, action):
     motion = state in MOTION_SEQUENCES
-    contract = ("These are consecutive time samples of ONE continuous cyclic action, NOT alternative poses, expression stickers or a storyboard. Read left-to-right in time. Adjacent frames differ only by a small motion increment; the last frame transitions naturally into the first. Include visible motion, not identical copies. Fixed camera, body orientation and ground line. Keep the same props present in every frame; never introduce or swap props, symbols or detached effects. Use only this individual's existing construction; facial features and limbs are optional, never add them to satisfy an action name."
-                if motion else "These are ordered screen-space attention samples. Use whatever existing features or relationships this individual has to indicate each target, including a design with no face, eyes, head or limbs. Keep character identity, apparent body size and ground position consistent. Neighboring directions must form a continuous arc, including the transition to the other look row. Preserve this individual's construction; do not add eyes or facial features to express direction.")
-    return f"""Generate {state}: exactly {count} full-body {'animation frames of one continuous action' if motion else 'gaze samples'} in one horizontal strip.
+    contract = ("These are consecutive time samples of ONE continuous cyclic action, NOT alternative poses, expression stickers or a storyboard. Read left-to-right in time. Adjacent frames differ only by a small motion increment; the last frame transitions naturally into the first. Include visible motion, not identical copies. Fixed camera, body orientation and ground line. Keep the same props present in every frame; never introduce or swap props, symbols or detached effects. Preserve the existing eyes and cute living construction; express the action through this individual's own features without imposing a shared limb menu."
+                if motion else "These are ordered screen-space attention samples. Preserve the existing eyes, face and this individual's distinctive construction. Keep the body anchored and shift gaze naturally toward each target. Never rotate the whole sprite to imitate gaze. Make the cardinal readings unmistakable through the existing expressive parts: 000 up, 090 right, 180 down, 270 left; diagonal attention stays in its named screen quadrant. A neutral front-looking pose cannot stand in for left or right attention. Neighboring directions must form a continuous arc with consistent apparent body size and ground position.")
+    label = "WORKING / FOCUSED ACTIVITY (native slot id running)" if state == "running" else state
+    return f"""Generate {label}: exactly {count} full-body {'animation frames of one continuous action' if motion else 'gaze samples'} in one horizontal strip.
 Use only the canonical base for character identity, proportions, palette, markings and props.
 Keep apparent scale consistent across the row. Keep the ground baseline fixed; jumping intentionally
 changes body height above it. Move the pose inside its viewport, never resize or recenter individual poses.
@@ -1037,12 +1069,16 @@ def main() -> None:
         help="Display label. Defaults to the pet name.",
     )
     parser.add_argument("--description", default="")
+    parser.add_argument("--request-id", default="", help="Actual pending appearance request ID; retained for acceptance checks")
     parser.add_argument("--reference", action="append", default=[])
     parser.add_argument("--output-dir", default="")
     parser.add_argument("--pet-notes", default="")
     parser.add_argument("--early-look", action="store_true",
                         help="Start directions after base and idle; use extracted idle frames for scale and baseline.")
     parser.add_argument("--parallel", action="store_true", help="GenPet: base then all eleven rows independently.")
+    parser.add_argument("--stage", choices=("egg", "hatchling", "juvenile", "adult"), default="hatchling")
+    parser.add_argument("--no-mirror-look", metavar="DESIGN_REASON", default="",
+                        help="Generate both look sides independently when mirroring would change this particular design.")
     parser.add_argument("--egg", action="store_true",
                         help="Unhatched GenPet: base plus three AI shell loops; no separate character actions or look poses.")
     parser.add_argument(
@@ -1080,6 +1116,10 @@ def main() -> None:
     )
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
+    if args.stage == "egg":
+        args.egg = True
+    if args.no_mirror_look and not args.no_mirror_look.strip():
+        parser.error("--no-mirror-look requires a concrete design reason")
 
     raw_reference_paths = [Path(raw_path).expanduser().resolve() for raw_path in args.reference]
     raw_brand_discovery_path = (
@@ -1153,6 +1193,7 @@ def main() -> None:
 
     request = {
         "pet_id": args.pet_id,
+        "request_id": args.request_id,
         "display_name": args.display_name,
         "description": args.description,
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -1178,6 +1219,9 @@ def main() -> None:
         "references": copied_refs,
         "chroma_key": args.chroma_key,
         "pet_notes": args.pet_notes,
+        "stage": "egg" if args.egg else args.stage,
+        "mirror_look": not bool(args.no_mirror_look),
+        "mirror_reason": args.no_mirror_look or "Mirror opposite-side directions only while this accepted design preserves its identity under reflection.",
         "style_preset": args.style_preset,
         "style_notes": args.style_notes,
         "style_contract": args.style_contract,
@@ -1246,18 +1290,23 @@ def main() -> None:
         else:
             for state, _row, count, _purpose in ROWS:
                 write_text(row_prompt_dir / f"{state}.md", parallel_row_prompt(args, state, count, STATE_PROMPTS[state]))
-            for state, _row, directions, _purpose in LOOK_ROWS:
+            look_specs = [(state, directions) for state, _row, directions, _purpose in LOOK_ROWS] if args.no_mirror_look else LOOK_HALVES
+            for state, directions in look_specs:
                 action = "Look directions in this exact left-to-right order: " + ", ".join(directions)
                 action += ". Angles run clockwise in screen coordinates: 0 up, 90 viewer-right, 180 down, 270 viewer-left. Express direction through this individual's own existing features and preserve its identity and scale. This row is independent; do not wait for any other row or cardinal image."
-                write_text(row_prompt_dir / f"{state}.md", parallel_row_prompt(args, state, 8, action))
+                write_text(row_prompt_dir / f"{state}.md", parallel_row_prompt(args, state, len(directions), action))
     jobs = {
-        "schema_version": 1,
+        "schema_version": 2 if args.egg or args.parallel else 1,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "run_dir": str(run_dir),
         "primary_generation_skill": "$imagegen",
         "workflow_profile": "genpet-egg-three" if args.egg else "genpet-parallel" if args.parallel else "genpet-early-look" if args.early_look else "standard",
-        "source_review_required": bool(args.egg or args.parallel),
-        "jobs": make_egg_jobs(run_dir, copied_refs) if args.egg else make_parallel_jobs(run_dir, copied_refs) if args.parallel else make_jobs(run_dir, copied_refs, args.early_look),
+        "review_policy": ["base", "final"] if args.egg or args.parallel else [],
+        "source_review_required": False,
+        "mirror_look": not bool(args.no_mirror_look) if args.parallel else False,
+        "mirror_reason": args.no_mirror_look,
+        "max_redraws": 2,
+        "jobs": make_egg_jobs(run_dir, copied_refs) if args.egg else make_parallel_jobs(run_dir, copied_refs, not bool(args.no_mirror_look)) if args.parallel else make_jobs(run_dir, copied_refs, args.early_look),
     }
     (run_dir / "imagegen-jobs.json").write_text(json.dumps(jobs, indent=2) + "\n", encoding="utf-8")
 

@@ -5,20 +5,11 @@ import { execFileSync } from 'node:child_process';
 const source = path.resolve(import.meta.dirname, '..');
 const { version } = JSON.parse(await readFile(path.join(source, 'package.json'), 'utf8'));
 await mkdir(path.join(source, 'output'), { recursive: true });
-const archive = path.join(source, 'output', `genpet-${version}.zip`);
-await rm(archive, { force: true });
+const archive = path.join(source, 'output', `genpet-${version}-${Date.now()}.zip`);
+
 execFileSync(
   'zip',
-  [
-    '-qr',
-    archive,
-    '.agents/plugins/marketplace.json',
-    'plugins/genpet',
-    'plugins/genpet-dots',
-    '-x',
-    '*.DS_Store',
-    '*__pycache__*',
-  ],
+  ['-qr', archive, '.agents/plugins/marketplace.json', 'plugins/genpet', '-x', '*.DS_Store', '*__pycache__*'],
   { cwd: source },
 );
 console.log(archive);

@@ -1,8 +1,9 @@
-/** Periodic story checks. The Agent's scheduler asks `due`; a trigger ID makes each period run once. */
+/** Periodic story checks and growth deadlines, with stable triggers for safe retries. */
 import { text, type State } from './model.js';
 import type { Store } from './store.js';
+import { growth } from './growth.js';
 
-/** The host runs a check this often; a growth ceiling is therefore met at most one interval late. */
+/** Ordinary stories use this interval; the host must also wake for earlier growth deadlines. */
 export const CHECK_INTERVAL = 5 * 3_600_000;
 
 /**
@@ -15,15 +16,47 @@ export function dueStory(
   timezone = state.schedule?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
 ) {
   const period = state.pet ? Math.floor((now - state.pet.adoptedAt) / CHECK_INTERVAL) : 0;
-  const triggerId = period >= 1 ? `period:${period}` : null;
-  const stopped = isStopped(state);
+  const growing = growth(state, now);
+  const special = growing?.special;
+  const deadlineAt = growing?.advanceBy ?? (special ? ('endBy' in special ? special.endBy : special.enterBy) : null);
+  const deadline = deadlineAt === null ? null : Date.parse(deadlineAt);
+  const growthTrigger =
+    growing?.required && state.pet ? `growth:${state.pet.id}:${growing.stage}:${growing.required}:${deadline}` : null;
+  const triggerId = growthTrigger ?? (period >= 1 ? `period:${period}` : null);
+  const stopped =
+    isStopped(state) ||
+    state.handoff?.status === 'exported' ||
+    state.needsImport === true ||
+    state.growthClock?.pausedAt !== undefined;
+  const completed = !!triggerId && state.stories.some(story => story.triggerId === triggerId);
+  // A deadline story also covers its ordinary period, without marking a future period complete.
+  const periodCovered =
+    !growthTrigger &&
+    !!state.pet &&
+    state.stories.some(
+      story =>
+        story.petId === state.pet!.id &&
+        story.triggerId.startsWith('growth:') &&
+        Math.floor((story.at - state.pet!.adoptedAt) / CHECK_INTERVAL) === period,
+    );
+  const due = !stopped && !!triggerId && !completed && !periodCovered;
+  const nextPeriod = state.pet ? state.pet.adoptedAt + (Math.max(0, period) + 1) * CHECK_INTERVAL : null;
+  const nextCheck =
+    stopped || nextPeriod === null
+      ? null
+      : due
+        ? now
+        : Math.min(nextPeriod, deadline !== null && deadline > now ? deadline : Infinity);
   return {
     timezone,
     intervalHours: CHECK_INTERVAL / 3_600_000,
     triggerId,
     stopped,
-    due: !stopped && !!triggerId && !state.stories.some(story => story.triggerId === triggerId),
+    due,
     pending: state.pending?.id ?? null,
+    growthRequired: growing?.required ?? null,
+    growthDeadlineAt: deadlineAt,
+    nextCheckAt: nextCheck === null ? null : iso(nextCheck),
   };
 }
 
@@ -74,11 +107,14 @@ export async function setSchedule(store: Store, timezone: string, reference: str
 export async function stopSchedule(store: Store) {
   return store.transaction(state => {
     const previous = state.schedule;
-    if (isStopped(state)) return { stopped: true, stoppedAt: previous!.stoppedAt, previousReference: null };
+    if (isStopped(state))
+      return { stopped: true, stoppedAt: previous!.stoppedAt, previousReference: previous?.reference ?? null };
     state.schedule = {
+      ...previous,
       timezone: previous?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
       stoppedAt: Date.now(),
     };
+    delete state.schedule.resumedAt;
     return { stopped: true, stoppedAt: state.schedule.stoppedAt, previousReference: previous?.reference ?? null };
   });
 }

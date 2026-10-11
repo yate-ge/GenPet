@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { findCodex } from './codex-bin.mjs';
 
 const name = process.argv[2] || 'genpet';
-if (!['genpet', 'genpet-dots'].includes(name)) throw new Error('Choose genpet or genpet-dots');
+if (!['genpet'].includes(name)) throw new Error('Choose genpet');
 const root = await realpath(path.resolve(import.meta.dirname, '..'));
 const catalog = JSON.parse(await readFile(path.join(root, '.agents/plugins/marketplace.json'), 'utf8'));
 const marketplace = catalog.name;

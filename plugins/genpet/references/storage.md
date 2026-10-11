@@ -1,33 +1,47 @@
-# Records
+# v3 记录与兼容
 
-Default roots: `~/.genpet/desktop` and `~/.genpet/dots`, within each host's own environment. `GENPET_DATA_DIR` overrides the shared base, not the host namespace. Do not move the Dots pet into the user's desktop record.
+记录按 Pet ID 分目录，由运行时管理路径和原子写入；GENPET_DATA_DIR 指向测试/当前环境的根目录。每只 Pet 保存自己的 state.json、故事、chats、steps 和 assets，另有注册记录保存上次激活 ID、绑定与主环境。读 status --full 查看实际路径和记录，不手改注册表或 Pet 文件。
 
-`state.json` holds the current pet, stories, assets, pending operation, optional conversation notes (`chats`: brief records of what the user told the pet, never the pet's replies) and optional actual schedule reference. Pending operations and completed stories may contain `steps`: append-only generation results with a step ID, unit name, time, input references and an open result object. These are internal artifacts under the existing continuation/history records, not another copy of all user data. Existing v2 records without steps remain readable. Each pet's files live in `pets/PET_ID/assets/`. An explicit reset saves the full previous record to `backups/` and creates a new pet identity while transferring the existing host surface, so it does not add another Avatar entry.
+Pet 分三块：
 
-The persisted contents are identity/binding, open genes/acquisition, current phase/state (including any adult special form), the open home description, story/change history, reusable assets, and operation/continuation. User data is read as needed; store only the relevant brief facts and decision basis. There is no fixed profile, activity taxonomy, item catalog or face schema. Growth uses only the pace ceilings in `src/growth.ts`, computed from story history rather than a stored clock.
+```text
+id、name、naming、adoptedAt、revision、binding
+soul   { genes, personality, acquisition }
+memory { text, updatedAt, storyId }
+state  { stage, description, appearanceId, storyId, updatedAt, home, special }
+```
 
-The genes unit's `designBasis` is saved within its internal step, and the open `genes` text carries the same basis, so later stories can use the persisted genes alone. Read existing records and old steps without rewriting their origin; missing historical design grounds remain unknown.
+soul 在领养完成后不可变，旧宠物缺项可依据已有资料补一次；读取、安装和插件升级不生成设计，不推进年龄。memory 只在成功 finish-story 时按计划重写，没有值得记的事就省略。state 在完成时更新。每个完成故事的 memory 重写仅算一次经历，增长由历史与激活时间算，不给用户数字。
 
-Plan JSON fields (content is chosen by Agent):
+StoryPlan 的内容由各单元形成：
 
 ```json
 {
-  "text": "The pet story, to be expressed with completed images",
-  "basis": "Brief real user context and reason for this state or evolution",
-  "state": "Open description of the story's resulting pet state",
+  "text": "这一次的宠物经历草案",
+  "reason": "采用的真实资料、memory 与变化的简短来由",
+  "contextRefs": ["fact:actual-source"],
+  "state": "完成后当前状态的完整描述",
   "stage": "egg",
-  "genes": "Initialization only: self-contained genes text from the genes unit",
-  "place": "Initialization only: where the egg was acquired",
-  "connection": "Initialization only: why the encounter matters to the user",
-  "personality": "An open description of character, how it relates to the user, state expression and brief creative grounds",
-  "home": "After hatching, when changed: the complete home description from the home unit (location, zones, items), referring to saved media IDs for items kept there",
-  "special": "Adults: the special form after this story, or null when an active form ends",
-  "appearance": {"description": "Appearance implied by this story"}
+  "genes": "仅新领养或缺项补全：自包含设计",
+  "designReason": "仅新领养设计：具体来源与各结构来由",
+  "place": "领养旅程得到蛋的地点",
+  "connection": "旅程和真实用户输入的联系",
+  "personality": "性格、拟声词与基本说话习惯",
+  "memory": "确有值得记的事才填写：完整简短重写",
+  "home": "孵化或变化时：完整家的描述",
+  "appearance": {"description": "故事决定的形象", "reuseArtId": "已有合适图时才填"},
+  "mediaIds": ["本故事实际采用的已接受媒体ID"]
 }
 ```
 
-For later stories, omit genes/place/connection and reuse the persisted personality. Story/state judgments and source references stay in the existing generation steps and brief basis; no new story classifier is required. Stage may stay unchanged or advance one stage. Omit `home` when it is unchanged (story unit `home: null`). Set `special` from the evolution unit: its text while in a form, `null` only to end an active form, omitted otherwise. A due `growth.required` change must be in the plan. Stage changes and entering or leaving a special form need an appearance. Omit appearance when no other Avatar change is needed; add `appearance.reuseArtId` to select a saved compatible appearance. `mediaIds` can reuse existing story pictures/artifacts.
+示例只展示字段，按此次实际情况省略不适用项。后续不带 genes/place/connection/personality 重写 soul；home/memory 省略时保持原样。special 为描述表示进入/延续，null 表示结束当前形态，未改变就省略。阶段一次最多前进一格；成长、特殊形态进出都要有效形象。contextRefs 引用已保存的 context 或用户资料，纯文字需真实用户相关引用。
 
-Personality and naming fields are additive. Old v2 records remain readable without being rewritten; an existing name is preserved. Old saved pending plans can finish as saved. A pet lacking personality can supply it in a new story plan and receives it only on successful completion. Later plans cannot replace it. New initialization requires a personality. `name-pet` and `name-asked` act on an explicit Pet ID; see [naming](naming.md).
+步骤和素材都是内部原始结果。source 记录图的实际生成与引用来源；旧 basis、designBasis、provenance、evidenceIds、carrier、image-review 读取时规范成新名，但历史出处不伪造。v2 的平铺字段归入三块，原有名字、ID、绑定、历史与图保留；v1 按 migrate-legacy 的实际格式与图迁入。只读发现旧记录先报告，经用户确认导入才作为当前 Pet，旧 ~/.genpet/dots 遗留不自动读写或混入新 Pet。
 
-Legacy v1 data is not automatically aged, reset or modified. Read the old record and its actual identity images; write a small design file with `genes`, `place`, `connection` reflecting that existing individual, keeping missing origins explicit. `migrate-legacy ABSOLUTE_V1_FILE ABSOLUTE_DESIGN_FILE` preserves the old ID, phase, image files and native binding, backs up the source record and discards time-based growth rules. Missing old images remain missing, not substitutes. Generate any missing/currently required v2 artwork through a new story. If the user explicitly requests a new pet instead, use reset; do not adopt around an existing legacy companion.
+## 新增、替换、清理与移交
+
+新增创建独立 Pet ID、目录、绑定和 cloud ID；替换先备份旧目录，让新 Pet 身份接手原条目与 cloud ID。两种含义先说明并确认。默认保留云 Pet，只有用户点名的条目可删；清理把记录移入备份，报告留下的位置，失败重试沿用相同操作 ID。
+
+一篇故事绑定开始时的 Pet ID，切换选中项不搬它的目录。跨环境转移搬这只 Pet 的完整记录与素材，保持 cloud ID，停旧环境故事写入，验证新环境导入后再开启；既有旧备份保留以便恢复。禁止两个环境同时写入，具体移交见 dots.md。
+
+开发和测试输入、报告、图片、候选、快照和运行输出全部保留并上传用户 Google Drive；不要提交这些产物，仓库只保留 docs/evidence/README.md 摘要索引。

@@ -6,11 +6,12 @@ import path from 'node:path';
 import { codexHome } from '../../config.js';
 import { encodeFrame, readFrames } from './frames.js';
 
-export interface IpcRefreshEvidence {
+export interface IpcRefreshResult {
   socketPath: string;
   handshakeConfirmed: true;
   relayConfirmed: true;
-  hostRefreshRequested: true;
+  hostRefreshRequested: boolean;
+  queryKeys: string[][];
 }
 
 export interface RefreshOutcome {
@@ -18,7 +19,7 @@ export interface RefreshOutcome {
   refreshRequested: boolean;
   displayStatus: 'unconfirmed';
   strategy: 'ipc-query-invalidate' | 'none';
-  ipc?: IpcRefreshEvidence;
+  ipc?: IpcRefreshResult;
   expectedSpriteSha256: string;
   notice: string;
   errors?: string[];
@@ -29,9 +30,11 @@ export interface RefreshOptions {
   /** Override for isolated tests; null disables IPC. */
   ipcSocketPath?: string | null;
   timeoutMs?: number;
+  /** A migrated Pet reloads cloud resources instead of its obsolete local atlas. */
+  cloudId?: string;
 }
 
-const INVALIDATE = { queryKey: ['custom-avatars'], reset: false };
+export const CLOUD_PET_QUERY = ['cloud-pets', 'list'];
 
 export function desktopIpcPath(): string {
   return process.platform === 'win32' ? '\\\\.\\pipe\\codex-ipc' : path.join(codexHome(), 'ipc', 'ipc.sock');
@@ -51,11 +54,15 @@ export async function refreshNativePet(options: RefreshOptions): Promise<Refresh
     .digest('hex');
   const useIpc =
     options.ipcSocketPath !== null &&
-    (typeof options.ipcSocketPath === 'string' || isLiveDestination(path.dirname(options.expectedSpritePath)));
+    (typeof options.ipcSocketPath === 'string' ||
+      (options.cloudId !== undefined && process.env.GENPET_SKIP_NATIVE_REFRESH !== '1') ||
+      isLiveDestination(path.dirname(options.expectedSpritePath)));
   const errors: string[] = [];
   if (useIpc) {
     try {
-      const ipc = await refreshViaIpc(options.ipcSocketPath ?? undefined, options.timeoutMs ?? 2000);
+      const ipc = await refreshViaIpc(options.ipcSocketPath ?? undefined, options.timeoutMs ?? 2000, [
+        options.cloudId ? CLOUD_PET_QUERY : ['custom-avatars'],
+      ]);
       return {
         automaticRefresh: true,
         refreshRequested: true,
@@ -91,10 +98,38 @@ interface Client {
 }
 
 /**
- * Two short-lived router clients: one broadcasts `query-cache-invalidate` for custom avatars,
+ * Two short-lived router clients: one broadcasts `query-cache-invalidate` for Pet resources,
  * the other observes the relay. No server, background process or app code is involved.
  */
-export async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2000): Promise<IpcRefreshEvidence> {
+export async function refreshViaIpc(
+  socketPath = desktopIpcPath(),
+  timeoutMs = 2000,
+  queryKeys: string[][] = [['custom-avatars']],
+): Promise<IpcRefreshResult> {
+  return relayInvalidations(socketPath, timeoutMs, queryKeys, false);
+}
+
+/** Diagnose the channel with a broadcast delivered only to our temporary observer, never the app. */
+export async function probeIpc(socketPath = desktopIpcPath(), timeoutMs = 2000): Promise<IpcRefreshResult> {
+  return relayInvalidations(socketPath, timeoutMs, [['custom-avatars']], true);
+}
+
+async function relayInvalidations(
+  socketPath: string,
+  timeoutMs: number,
+  queryKeys: string[][],
+  observerOnly: boolean,
+): Promise<IpcRefreshResult> {
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw Error('IPC timeout must be positive');
+  if (
+    !queryKeys.length ||
+    queryKeys.some(
+      key =>
+        JSON.stringify(key) !== JSON.stringify(['custom-avatars']) &&
+        JSON.stringify(key) !== JSON.stringify(CLOUD_PET_QUERY),
+    )
+  )
+    throw Error('Only known Pet resource query keys may be refreshed');
   await assertPrivateSocket(socketPath);
   const sockets = new Set<net.Socket>();
   const waiting = new Set<(error: Error) => void>();
@@ -152,30 +187,39 @@ export async function refreshViaIpc(socketPath = desktopIpcPath(), timeoutMs = 2
   try {
     const observer = await connect();
     const sender = await connect();
-    await new Promise<void>((resolve, reject) => {
-      if (failure) return reject(failure);
-      waiting.add(reject);
-      observer.onMessage(message => {
-        if (
-          message.type === 'broadcast' &&
-          message.method === 'query-cache-invalidate' &&
-          message.version === 0 &&
-          message.sourceClientId === sender.id &&
-          JSON.stringify(message.params) === JSON.stringify(INVALIDATE)
-        ) {
-          waiting.delete(reject);
-          resolve();
-        }
+    for (const queryKey of queryKeys)
+      await new Promise<void>((resolve, reject) => {
+        const invalidate = { queryKey, reset: false };
+        if (failure) return reject(failure);
+        waiting.add(reject);
+        observer.onMessage(message => {
+          if (
+            message.type === 'broadcast' &&
+            message.method === 'query-cache-invalidate' &&
+            message.version === 0 &&
+            message.sourceClientId === sender.id &&
+            JSON.stringify(message.params) === JSON.stringify(invalidate)
+          ) {
+            waiting.delete(reject);
+            resolve();
+          }
+        });
+        sender.send({
+          type: 'broadcast',
+          method: 'query-cache-invalidate',
+          version: 0,
+          sourceClientId: sender.id,
+          params: invalidate,
+          ...(observerOnly ? { targetClientIds: [observer.id] } : {}),
+        });
       });
-      sender.send({
-        type: 'broadcast',
-        method: 'query-cache-invalidate',
-        version: 0,
-        sourceClientId: sender.id,
-        params: INVALIDATE,
-      });
-    });
-    return { socketPath, handshakeConfirmed: true, relayConfirmed: true, hostRefreshRequested: true };
+    return {
+      socketPath,
+      handshakeConfirmed: true,
+      relayConfirmed: true,
+      hostRefreshRequested: !observerOnly,
+      queryKeys,
+    };
   } finally {
     clearTimeout(deadline);
     for (const socket of sockets) {

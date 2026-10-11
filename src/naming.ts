@@ -3,19 +3,21 @@ import { identifier, text, type Pet, type State } from './model.js';
 import type { Store } from './store.js';
 
 export function namingDue(state: State): boolean {
-  return !state.pending && !!state.pet && state.pet.stage !== 'egg' && state.pet.naming?.status === 'unasked';
+  return !state.pending && !!state.pet && state.pet.state.stage !== 'egg' && state.pet.naming?.status === 'unasked';
 }
-function target(state: State, petId: string): Pet {
+function target(state: State, petId: string, allowPending = false): Pet {
   identifier(petId, 'petId');
   if (!state.pet || state.pet.id !== petId) throw new Error('Naming reply belongs to another or missing pet');
-  if (state.pending) throw new Error('Finish the unfinished story before naming this pet');
+  if (state.pending && !allowPending) throw new Error('Finish the unfinished story before naming this pet');
   return state.pet;
 }
 /** Call after delivering the naming question; a read or a failed hatch cannot mark it asked. */
 export async function markNameAsked(store: Store, petId: string) {
   return store.transaction(state => {
-    const pet = target(state, petId);
-    if (!namingDue(state)) return { petId, asked: false, status: pet.naming?.status ?? 'named' };
+    // A delivery receipt can arrive after another story starts; it changes no name or revision.
+    const pet = target(state, petId, true);
+    if (pet.state.stage === 'egg' || pet.naming?.status !== 'unasked')
+      return { petId, asked: false, status: pet.naming?.status ?? 'named' };
     pet.naming = { status: 'asked', askedAt: Date.now() };
     return { petId, asked: true, status: pet.naming.status };
   });

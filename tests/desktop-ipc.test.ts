@@ -2,18 +2,26 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import net from 'node:net';
 import { randomUUID } from 'node:crypto';
-import { mkdtemp, writeFile, rm, chmod } from 'node:fs/promises';
-import { homedir, tmpdir } from 'node:os';
+import { writeFile, chmod } from 'node:fs/promises';
+import { homedir } from 'node:os';
 import path from 'node:path';
-import { desktopIpcPath, refreshViaIpc, refreshNativePet } from '../src/hosts/desktop/refresh.js';
+import {
+  CLOUD_PET_QUERY,
+  desktopIpcPath,
+  probeIpc,
+  refreshViaIpc,
+  refreshNativePet,
+} from '../src/hosts/desktop/refresh.js';
+import { hostTestDirectory } from './host-fixtures.js';
 
-async function fixture(mode = 'relay') {
-  const dir = await mkdtemp(path.join(tmpdir(), 'gp-ipc-'));
+async function fixture(mode = 'relay', expectedQueries = [['custom-avatars']]) {
+  const dir = await hostTestDirectory('ipc');
   const socketPath =
     process.platform === 'win32' ? `\\\\.\\pipe\\genpet-test-${randomUUID()}` : path.join(dir, 'ipc.sock');
   const clients = new Map<net.Socket, string>();
   let next = 0;
   let broadcasts = 0;
+  const requests: any[] = [];
   const server = net.createServer(socket => {
     clients.set(socket, '');
     socket.on('error', () => {});
@@ -46,6 +54,7 @@ async function fixture(mode = 'relay') {
         const len = buffer.readUInt32LE(0);
         if (buffer.length < len + 4) return;
         const m = JSON.parse(buffer.subarray(4, len + 4).toString());
+        requests.push(m);
         buffer = buffer.subarray(len + 4);
         if (m.method === 'initialize') {
           const id = String(++next);
@@ -59,9 +68,12 @@ async function fixture(mode = 'relay') {
           });
         } else if (m.type === 'broadcast') {
           broadcasts++;
-          assert.deepEqual(m.params, { queryKey: ['custom-avatars'], reset: false });
+          assert.ok(
+            expectedQueries.some(queryKey => JSON.stringify(m.params) === JSON.stringify({ queryKey, reset: false })),
+          );
           for (const peer of clients.keys())
-            if (peer !== socket) send(peer, { ...m, sourceClientId: clients.get(socket) });
+            if (peer !== socket && (!m.targetClientIds || m.targetClientIds.includes(clients.get(peer))))
+              send(peer, { ...m, sourceClientId: clients.get(socket) });
         }
       }
     });
@@ -73,10 +85,11 @@ async function fixture(mode = 'relay') {
     get broadcasts() {
       return broadcasts;
     },
+    requests,
     close: async () => {
       for (const s of clients.keys()) s.destroy();
       await new Promise<void>(r => server.close(() => r()));
-      await rm(dir, { recursive: true, force: true });
+      await writeFile(path.join(dir, 'requests.json'), JSON.stringify(requests, null, 2));
     },
   };
 }
@@ -88,6 +101,51 @@ test('desktop IPC address follows the host platform', () => {
       ? '\\\\.\\pipe\\codex-ipc'
       : path.join(process.env.CODEX_HOME || path.join(homedir(), '.codex'), 'ipc', 'ipc.sock'),
   );
+});
+
+test('read-only IPC diagnosis targets only its temporary observer and never refreshes the host', async () => {
+  const f = await fixture();
+  try {
+    const result = await probeIpc(f.socketPath);
+    assert.equal(result.relayConfirmed, true);
+    assert.equal(result.hostRefreshRequested, false);
+    const broadcast = f.requests.find(request => request.type === 'broadcast');
+    assert.deepEqual(broadcast.targetClientIds, ['1']);
+  } finally {
+    await f.close();
+  }
+});
+
+test('migrated cloud Pet refresh invalidates cloud list and its by-ID resource prefix', async () => {
+  const f = await fixture('relay', [CLOUD_PET_QUERY]);
+  try {
+    const sprite = path.join(f.dir, 'sprite.webp');
+    await writeFile(sprite, 'synthetic-fixture');
+    const result = await refreshNativePet({
+      expectedSpritePath: sprite,
+      cloudId: 'pet_fixture',
+      ipcSocketPath: f.socketPath,
+    });
+    assert.equal(result.refreshRequested, true);
+    assert.deepEqual(result.ipc!.queryKeys, [['cloud-pets', 'list']]);
+    assert.equal(result.displayStatus, 'unconfirmed');
+    assert.equal(
+      f.requests.some(request => request.params?.queryKey?.[0] === 'custom-avatars'),
+      false,
+    );
+  } finally {
+    await f.close();
+  }
+});
+
+test('IPC rejects unknown cache keys without sending a broadcast', async () => {
+  const f = await fixture();
+  try {
+    await assert.rejects(refreshViaIpc(f.socketPath, 1000, [['unrelated-cache']]), /known Pet resource/);
+    assert.equal(f.broadcasts, 0);
+  } finally {
+    await f.close();
+  }
 });
 
 test('IPC refresh handles fragmented frames and broadcasts only custom-avatar invalidation', async () => {

@@ -1,6 +1,7 @@
+import { retainFixture as rm } from './evidence.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, readdir, mkdir, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { Store } from '../src/store.js';
@@ -31,16 +32,13 @@ test('request freshness and durable media prevent stale or temporary-file instal
     await initialization(store);
     const file = path.join(root, 'art.png');
     await image(file, true);
-    await assert.rejects(
-      () => acceptArt(store, { requestId: 'wrong', file, kind: 'atlas', provenance: 'Test' }),
-      /Stale/,
-    );
+    await assert.rejects(() => acceptArt(store, { requestId: 'wrong', file, kind: 'atlas', source: 'Test' }), /Stale/);
     const request = artRequest(await store.peek())!,
       input = {
         requestId: request.id,
         file,
         kind: 'atlas' as const,
-        provenance: 'Synthetic native validation fixture',
+        source: 'Synthetic native validation fixture',
       };
     const art = await acceptArt(store, input);
     assert.equal((await acceptArt(store, input)).id, art.id);
@@ -77,6 +75,8 @@ test('active and inactive updates retain target ID and never change selection; a
     old = process.env.CODEX_HOME;
   process.env.CODEX_HOME = path.join(root, 'codex');
   try {
+    await mkdir(process.env.CODEX_HOME, { recursive: true });
+    await writeFile(path.join(process.env.CODEX_HOME, '.codex-global-state.json'), '{}');
     const op = await initialization(store),
       file = path.join(root, 'atlas.png');
     await image(file, true);
@@ -84,7 +84,7 @@ test('active and inactive updates retain target ID and never change selection; a
       requestId: artRequest(await store.peek())!.id,
       file,
       kind: 'atlas',
-      provenance: 'Synthetic publish fixture',
+      source: 'Synthetic publish fixture',
     });
     const petId = (await store.peek()).pet!.id;
     const refresh = async () => ({
@@ -111,14 +111,15 @@ test('active and inactive updates retain target ID and never change selection; a
     // An undeliverable refresh is recorded honestly and no longer blocks the story forever.
     assert.equal(failed.refreshRequested, false);
     assert.equal(failed.refreshUnavailable, true);
-    assert.match(failed.notice!, /next loads Pets/);
+    assert.match(failed.notice!, /host next reads/);
     assert.equal(failed.error, undefined);
     await finishStory(store, op);
     const next = (await beginStory(store, 'story:reuse')).pending!.id,
       art = (await store.peek()).art[0];
     await planStory(store, next, {
       text: 'A new quiet story.',
-      basis: 'Same state fits',
+      reason: 'Same state fits',
+      contextRefs: ['fixture:synthetic-context'],
       state: 'Quiet',
       appearance: { description: 'Same appearance', reuseArtId: art.id },
     });

@@ -18,6 +18,8 @@
 
 ---
 
+The 0.10.0 development branch is undergoing the full [implementation and acceptance plan](docs/evidence/README.md). It has not been publicly released; the marketplace release remains 0.9.4.
+
 A Codex desktop pet normally keeps the same look forever. GenPet gives it a life: your pet starts as an egg made just for you, hatches into a creature nobody else has, and grows up through its own stories. Every time it changes, the new look shows up on your desktop.
 
 You don't need to feed it or click on it. Every few hours it goes off and lives a little: it explores, collects things, changes its outfit, and comes back with a story for you.
@@ -27,9 +29,9 @@ You don't need to feed it or click on it. Every few hours it goes off and lives 
 - 🥚 **An egg that's only yours.** Every pet begins with a story of how you found its egg. The shell's colors and patterns hint at what's inside, but you only find out when it hatches.
 - 🌱 **It really grows up.** Egg → hatchling → juvenile → adult, and as an adult it sometimes slips into a surprising special form for a while. Each stage gets brand-new artwork.
 - 🎨 **No two pets alike.** There's no fixed species list. Each pet is designed from its own adoption story, and stays recognizably itself from stage to stage.
-- 📖 **New stories on their own.** Your pet checks in every 5 hours. When something worth telling happens, you get a story: where it went, what it found, what changed.
+- 📖 **Something at every check.** While Codex is running, a check every 5 hours brings a new look, a story item, a home change or a short thought.
 - 💌 **Little gifts from its world.** Postcards with stamps, selfies, things it brought back, short comics, and its home, which changes as it lives there.
-- 🗣️ **Talk to it.** Use `/genpet` or just call it by name. An egg can only wobble, a hatchling only makes sounds, and older pets answer in their own voice.
+- 🗣️ **Talk to it.** Use `/genpet-chat`. An egg can only wobble, a hatchling only makes sounds, and older pets answer in their own voice.
 - 🧩 **Open and hackable.** The rules, prompts and generation steps are plain files you can read, edit and swap to build your own kind of pet.
 
 ## Watch it grow
@@ -68,7 +70,7 @@ Or ask Codex to do it for you:
 /genpet-start
 ```
 
-Codex asks you to confirm, then tells you how you found your egg and draws it.
+Codex explains the data it uses and asks you to confirm. You then make choices through a short journey that ends with an egg.
 
 **3. Show it on your desktop.** In Codex's pet settings, pick the new pet (listed as `genpet-xxxxxx`). GenPet doesn't change your current pet without asking.
 
@@ -79,9 +81,9 @@ Codex asks you to confirm, then tells you how you found your egg and draws it.
 | Command | What it does |
 | --- | --- |
 | `/genpet-start` | Adopt an egg, or carry on with your pet, and turn on its 5-hour check-ins |
-| `/genpet` | Talk to your pet (you can also just call it by name) |
-| `/genpet-name` | Name or rename your pet |
-| `/genpet-stop` | Let your pet rest: no new stories until `/genpet-start`. It will notice how long it was away. |
+| `/genpet` | Check on your pet, name it, diagnose a problem or request an action |
+| `/genpet-chat` | Talk to your pet |
+| `/genpet-stop` | Pause scheduled checks until `/genpet-start`; records and manual stories remain available |
 
 <details>
 <summary>Testing shortcuts</summary>
@@ -115,9 +117,9 @@ flowchart LR
 
 ## Your data and our principles
 
-- **Stays on your computer.** Your pet's records and artwork are saved locally in `~/.genpet/desktop`.
+- **Records follow the main environment.** Desktop records and source artwork live under `~/.genpet/desktop/pets/<id>/`. The accepted sprite sheet and Pet brief are uploaded to the same cloud Pet for cross-device use.
 - **Never makes things up about you.** Your pet's world is imaginary, but it won't invent what you did, felt or said.
-- **Uses only what Codex can already see.** That means your current conversation and what you tell your pet. Nothing is uploaded anywhere else by GenPet.
+- **Uses readable context after consent.** Codex memories, journey choices and Pet conversations inform design and stories. Necessary summaries and source references are saved; sensitive and private details are excluded.
 - **No screen control.** GenPet updates your pet through Codex's own pet features and never takes over your mouse or screen.
 
 ## Roadmap

@@ -1,0 +1,19 @@
+# PetDesigner
+
+Read ../../../prompts/appearance.md, product design sections in meta.md, and ../../../references/desktop.md or ../../../references/dots.md for the actual environment. This subskill designs the Pet's appearance, uses accepted art, and coordinates real generation.
+
+Use immutable genes, current stage, story change, saved accepted art and actual host requirements. Reuse a compatible saved form/outfit by art ID; a new outfit redraws the whole set while preserving the same-stage body. Stage growth develops it, special form changes the body temporarily, exit reuses the original adult form.
+
+A visual request describes the actual compact silhouette, color blocks, structures, stage development and visible story change, with references from this Pet only. First hatch uses shell clues without treating an egg as the adult body. The source and all major traits have clear design reasons.
+
+Preserve body identity, not a frozen pose. Let the story's current activity shape posture, gaze, weight and contact with clothes or objects; a new state should look like the Pet is wearing, carrying or using something, rather than the same neutral portrait with an item pasted on. Keep movement natural for its actual organs and stage, with readable support and no invented limbs.
+
+Image jobs belong in a subagent so source/candidate/preview images stay internal. Review the base through ImageReviewer, then generate independent animation/direction jobs in parallel using the helper's actual manifest. Scripts do deterministic extraction, normalization, background and assembly. Mirror directions only if the individual's asymmetric structures remain correct; otherwise render the affected directions independently.
+
+Give one image coordinator the accepted request, target Pet/cloud ID, operation ID and run directory. After the base gate, dispatch independent ready jobs together across available subagents; each owns a disjoint batch and the coordinator can generate a batch too. Workers save only their own sources and receipts; the coordinator alone merges the shared manifest, assembles, handles bounded repair and writes Pet/host results. Activate the independent ImageReviewer for the base and final gates. Avoid row-by-row parent handoffs and waiting for one independent batch before starting another. When host tools are available, the coordinator saves accepted art, updates that same target and verifies stored artwork before returning final paths and receipts. Keep the selected Pet unchanged. Testing archives follow the actual update and story completion.
+
+Keep image-worker briefs scoped to the accepted request, body/stage constraints and relevant references; do not replay full reports and history for each asset. Prepare independent prompts together, group ready tool calls and actual image reads when provider limits allow, and save a separate source and receipt for every call. Dependent edits use the actually reviewed current image.
+
+Use the helper's retry limit, change method after a repeated visual error, and fill failed cells with an accepted correct base pose when appropriate. Inspect the complete set once at actual size and preserve the limitations. Save base and atlas with actual source metadata; update the same target ID and require stored-art readback.
+
+A prepared accepted next-stage base/set can be used at the deadline if still correct for this Pet. Missing/unusable base art is an unfinished visual requirement; preserve the operation and evidence, not an accepted old-stage substitute. The twenty-minute goal needs timed real runs from preparation through stored-art readback and completion, not only parallel plans. Retain every generated candidate and log, including rejected ones.

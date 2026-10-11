@@ -93,7 +93,7 @@ def fit_to_cell(image: Image.Image) -> Image.Image:
     if scale != 1.0:
         sprite = sprite.resize(
             (max(1, round(sprite.width * scale)), max(1, round(sprite.height * scale))),
-            Image.Resampling.LANCZOS,
+            Image.Resampling.NEAREST,
         )
     left = (CELL_WIDTH - sprite.width) // 2
     top = (CELL_HEIGHT - sprite.height) // 2
@@ -243,7 +243,7 @@ def component_frame_groups(
     return groups
 
 
-def register_frames(images, origins=None, jump_reference=None):
+def register_frames(images, origins=None, jump_reference=None, allow_overflow=False):
     """One affine transform for the entire row; preserve temporal x/y offsets."""
     origins = origins or [(0, 0)] * len(images)
     boxes = [(bbox[0] + x, bbox[1] + y, bbox[2] + x, bbox[3] + y)
@@ -268,10 +268,12 @@ def register_frames(images, origins=None, jump_reference=None):
         target_top = round(reference[3] - (anchor[3] - top) * scale)
     size = (max(1, round(width * scale)), max(1, round(height * scale)))
     if jump_reference is not None:
-        overflow = {"left": max(0, 2 - target_left),
-                    "right": max(0, target_left + size[0] - (CELL_WIDTH - 2)),
-                    "top": max(0, 2 - target_top),
-                    "bottom": max(0, target_top + size[1] - (CELL_HEIGHT - 2))}
+        # Reject actual cropping. A complete pose one pixel from an edge is valid;
+        # an arbitrary extra inset must not trigger another image-generation round.
+        overflow = {"left": max(0, -target_left),
+                    "right": max(0, target_left + size[0] - CELL_WIDTH),
+                    "top": max(0, -target_top),
+                    "bottom": max(0, target_top + size[1] - CELL_HEIGHT)}
         fixes = []
         if overflow["left"] or overflow["right"]:
             fixes.append("align poses horizontally within equal slots and preserve the idle-matching compact grounded width")
@@ -279,33 +281,62 @@ def register_frames(images, origins=None, jump_reference=None):
             fixes.append("reduce upward excursion while preserving body size")
         if overflow["bottom"]:
             fixes.append("keep landing feet at the initial ground baseline without downward drift")
-        if fixes:
+        if fixes and not allow_overflow:
             details = ", ".join(f"{edge}={pixels}px" for edge, pixels in overflow.items() if pixels)
             raise ValueError(f"Jump does not fit at idle size ({details}). Regenerate only jumping: "
                              + "; ".join(fixes) + ". Do not shrink idle or the jump body.")
+    offset = (overflow["left"], overflow["top"]) if jump_reference is not None and allow_overflow else (0, 0)
+    canvas = (CELL_WIDTH + offset[0] + overflow["right"], CELL_HEIGHT + offset[1] + overflow["bottom"]) if jump_reference is not None and allow_overflow else (CELL_WIDTH, CELL_HEIGHT)
     frames = []
     for image, (x, y) in zip(images, origins):
         viewport = Image.new("RGBA", (width, height))
         viewport.alpha_composite(image, (x - left, y - top))
         if viewport.size != size:
-            viewport = viewport.resize(size, Image.Resampling.LANCZOS)
-        target = Image.new("RGBA", (CELL_WIDTH, CELL_HEIGHT))
+            viewport = viewport.resize(size, Image.Resampling.NEAREST)
+        target = Image.new("RGBA", canvas)
         position = ((CELL_WIDTH - size[0]) // 2, (CELL_HEIGHT - size[1]) // 2)
         if jump_reference is not None:
-            position = (target_left, target_top)
+            position = (target_left + offset[0], target_top + offset[1])
         target.alpha_composite(viewport, position)
+        target.info["registration_offset"] = offset
         frames.append(target)
     return frames
 
 
-def extract_component_frames(strip: Image.Image, frame_count: int, jump_reference=None) -> list[Image.Image] | None:
+def fit_registered_frames(images, offsets=None):
+    """One common affine for all registered poses, including idle and neutral; never fit a pose alone."""
+    offsets = offsets or [(0, 0)] * len(images)
+    if len(offsets) != len(images):
+        raise ValueError("Every registered pose needs its canvas origin")
+    bounds = [(b[0] - x, b[1] - y, b[2] - x, b[3] - y)
+              for image, (x, y) in zip(images, offsets) if (b := image.getbbox())]
+    if not bounds:
+        raise ValueError("Shared registration needs visible artwork")
+    box = (min(b[0] for b in bounds), min(b[1] for b in bounds), max(b[2] for b in bounds), max(b[3] for b in bounds))
+    required = box[0] < 0 or box[1] < 0 or box[2] > CELL_WIDTH or box[3] > CELL_HEIGHT
+    if not required:
+        return images, {"method": "shared-atlas-affine", "required": False, "bounds": box, "scale": 1.0, "translation": [0, 0]}
+    width, height = box[2] - box[0], box[3] - box[1]
+    scale = min((CELL_WIDTH - 10) / width, (CELL_HEIGHT - 10) / height, 1.0)
+    translation = ((CELL_WIDTH - width * scale) / 2 - box[0] * scale,
+                   (CELL_HEIGHT - height * scale) / 2 - box[1] * scale)
+    fitted = [image.transform((CELL_WIDTH, CELL_HEIGHT), Image.Transform.AFFINE,
+                             (1 / scale, 0, x - translation[0] / scale,
+                              0, 1 / scale, y - translation[1] / scale), Image.Resampling.NEAREST)
+              for image, (x, y) in zip(images, offsets)]
+    return fitted, {"method": "shared-atlas-affine", "required": True, "bounds": box,
+                    "scale": scale, "translation": translation,
+                    "note": "All ordinary actions, gaze poses and neutral use this same affine; relative jump lift and body proportions remain intact. This is geometry support, not semantic acceptance."}
+
+
+def extract_component_frames(strip: Image.Image, frame_count: int, jump_reference=None, allow_overflow=False) -> list[Image.Image] | None:
     groups = component_frame_groups(strip, frame_count)
     if groups is None:
         return None
     images = [component_group_image(strip, group, padding=0) for group in groups]
     origins = [(component_bounds(group)[0] - round(i * strip.width / frame_count), component_bounds(group)[1])
                for i, group in enumerate(groups)]
-    return register_frames(images, origins, jump_reference)
+    return register_frames(images, origins, jump_reference, allow_overflow)
 
 
 def component_bounds(components: list[dict[str, object]]) -> tuple[int, int, int, int]:
@@ -334,10 +365,13 @@ def extract_state(
     threshold: float,
     method: str,
     jump_reference=None,
+    allow_overflow=False,
 ) -> dict[str, object]:
     if jump_reference is not None and state != "jumping":
         raise ValueError("Idle-reference registration is only supported for jumping")
-    frame_count = 8 if state in ("look-row-9", "look-row-10") else ROW_FRAME_COUNTS[state]
+    frame_count = {"look-row-9": 8, "look-row-10": 8, "look-right-upper": 5, "look-right-lower": 4, "base": 1}.get(state)
+    if frame_count is None:
+        frame_count = ROW_FRAME_COUNTS[state]
     with Image.open(strip_path) as opened:
         strip, cleanup = clean_strip(opened, frame_count)
 
@@ -355,13 +389,13 @@ def extract_state(
         split = any(strip.getchannel("A").crop((x, 0, x + 1, strip.height)).getbbox() for x in cuts)
         used_method = "slots"
         if split or not usable_frames(crops) or (frames is not None and not usable_frames(frames)):
-            alternate = extract_component_frames(strip, frame_count, jump_reference)
+            alternate = extract_component_frames(strip, frame_count, jump_reference, allow_overflow)
             if alternate is not None and usable_frames(alternate):
                 frames, used_method = alternate, "components"
         elif jump_reference is not None:
-            frames = register_frames(crops, jump_reference=jump_reference)
+            frames = register_frames(crops, jump_reference=jump_reference, allow_overflow=allow_overflow)
     if method == "components":
-        frames = extract_component_frames(strip, frame_count, jump_reference)
+        frames = extract_component_frames(strip, frame_count, jump_reference, allow_overflow)
         if frames is None and method == "components":
             raise SystemExit(f"could not find {frame_count} sprite components in {strip_path}")
         if frames is not None:
@@ -377,6 +411,7 @@ def extract_state(
 
     if not usable_frames(frames):
         raise ValueError(f"Missing visible frames after grid/component extraction: {strip_path}")
+    registration_offset = frames[0].info.get("registration_offset", (0, 0))
     # Despill at native resolution with this source's detected background, not a
     # single key applied to the whole atlas. Already transparent inputs are untouched.
     cleanup["despill"] = []
@@ -405,6 +440,7 @@ def extract_state(
         outputs.append(str(output))
     return {"state": state, "frames": outputs, "method": used_method,
             "registration": "idle-referenced-jump" if jump_reference is not None else "shared-row-transform",
+            "registration_offset": registration_offset,
             "cleanup": cleanup}
 
 

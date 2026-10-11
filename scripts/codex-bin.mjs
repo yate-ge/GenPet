@@ -3,22 +3,43 @@
  * instead of `spawn ENOENT`; an explicit CODEX_BIN is never replaced by another binary.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync, statSync } from 'node:fs';
+import path from 'node:path';
 
 /** Subcommands the install flow needs; a Codex without them cannot be used for the check. */
 const REQUIRED = [
   ['plugin', 'marketplace', 'add', '--help'],
   ['plugin', 'add', '--help'],
 ];
-/** Where desktop apps bundle their own CLI (macOS). Tried only when `codex` on PATH is unusable. */
+/** Desktop app CLI locations, tried only when the PATH CLI is unusable. */
 export const BUNDLED = [
   '/Applications/Codex.app/Contents/Resources/codex-cli/bin/codex',
   '/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex',
 ];
 
+function bundledPaths(env) {
+  if (process.platform !== 'win32' || !env.LOCALAPPDATA) return BUNDLED;
+  const directory = path.join(env.LOCALAPPDATA, 'OpenAI', 'Codex', 'bin');
+  try {
+    return readdirSync(directory, { withFileTypes: true })
+      .filter(entry => entry.isDirectory())
+      .map(entry => path.join(directory, entry.name, 'codex.exe'))
+      .filter(existsSync)
+      .sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs);
+  } catch {
+    return [];
+  }
+}
+
 function probe(bin, env) {
   const run = args =>
-    execFileSync(bin, args, { encoding: 'utf8', env, timeout: 20_000, stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+    execFileSync(bin, args, {
+      encoding: 'utf8',
+      env,
+      timeout: 20_000,
+      windowsHide: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }).trim();
   let version;
   try {
     version = run(['--version']);
@@ -39,7 +60,7 @@ function probe(bin, env) {
 }
 
 /** @returns {{ bin: string, version: string, source: string, note?: string }} */
-export function findCodex(env = process.env, bundled = BUNDLED) {
+export function findCodex(env = process.env, bundled = bundledPaths(env)) {
   const tried = [];
   const attempt = (source, bin) => {
     const result = probe(bin, env);

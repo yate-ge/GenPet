@@ -1,13 +1,11 @@
-# User naming
+# 名字
 
-Product behavior lives in `prompts/meta.md` under 用户命名. Naming changes the saved display name, not the unique Pet ID, genes, personality, artwork or past stories.
+规则见 ../prompts/meta.md「用户命名」。名字属于身份的可变显示信息，name-pet 不改 ID、soul、图、成长或历史。
 
-After `finish-story`, read `story-output` or `status`. `naming.due` / `namingDue` becomes true only when the completed pet is no longer an egg and its naming status is unasked. A saved hatch plan, unfinished host update or read-only status cannot trigger it.
+完成孵化后读取 naming.due/namingDue。呈现实际新样子与家，在消息末尾请用户自由起名一次，不给候选。实际送出问题后 `name-asked PET_ID --pet PET_ID`；未送出不记为已问。保存提问时 Pet ID，用户回答由 /genpet 接住，`name-pet QUESTION_PET_ID USER_NAME --pet QUESTION_PET_ID` 使用该 ID；若已被替换，说明问题指向原 Pet，不把答复套给新 Pet。
 
-Present the actual hatch story and accepted visual. Ask one short free-text naming question with `request_user_input_async` when available, without suggested names. Otherwise ask the same concise question in the story reply. After the question is actually delivered, call `name-asked PET_ID`. Keep the question's Pet ID for its reply. No answer leaves asked status and does not block stories or cause repeated prompts. Do not mark a question delivered when its tool failed.
+用户暂时不取名或没有回复，故事继续，之后不催问。之后明确说「改名叫 X」直接保存自己的名字；没提供名字只问一句。待完成故事存在时先完成或按原指示解决，不为命名再开故事；同名重试幂等。
 
-For an explicit user name, call `name-pet QUESTION_PET_ID USER_NAME`, quoting the name as one shell argument. A reply for a reset/replaced pet is rejected; do not silently apply it to the new pet. If the user prefers to decide later, nothing more is saved: the asked status already stops repeated invitations. `/genpet-name` can name or rename the existing individual at any time; read status, ask only if a name was not supplied, and save only the user's own answer. This entry does not adopt or generate a story.
+保存名字后取 companion-brief，给同一真实 cloud ID 同步最新简介并回读，不按名字查找或新建云 Pet。若同步暂时失败，保留这个已保存的名字和失败证据，下次同步最新简介。
 
-Naming is serialized with stories: if an operation is unfinished, complete/resume it before applying the reply. A same-name retry is idempotent. Existing records without a naming field retain their original name and are not automatically invited again. An explicit reset creates a new, unasked individual.
-
-Later stories and art/host requests carry the saved name. The name is for talking with the user (stories, replies, questions). Desktop publication does not use it: the Codex Pet list shows the unique ID in short form (`genpet-xxxxxx`, `desktopLabel`) as displayName, so naming and renaming never need a republish and never change the entry. Existing entries get the ID label the next time their appearance is published. Dots updates receive name.
+旧记录原有名字保留，不因升级重新邀请。宠物列表条目可继续用运行时的唯一标签 genpet-xxxxxx，名字用于故事、对话与简介；不得按名字定位云 Pet。

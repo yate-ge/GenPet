@@ -1,8 +1,8 @@
 ---
 name: genpet-reset
-description: Create a new egg and identity only when the user explicitly requests /genpet-reset or a new pet, preserving a backup and the existing host surface.
+description: Replace the current GenPet after an explicit confirmed choice, backing up its records and letting the new Pet reuse its host entry and cloud ID.
 ---
 
 # genpet-reset
 
-Before resetting, ask the user one short confirmation, in the pet's world and following `prompts/output.md`, that the current pet will be said goodbye to and a new egg will take its place, and continue only after a clear yes; the original request alone is not that confirmation. Read status; finish pending work or resolve it with the user's actual instruction. An unfinished initialization (for example an egg that cannot be drawn) can be abandoned by the reset itself. Call `reset OPERATION_ID` with a stable ID and follow [the initialization workflow](../../references/workflow.md) for its returned pending operation. The previous record is backed up; the bound host surface is transferred to the new identity. Retry the same operation instead of resetting again. Conversation follows `prompts/output.md`. Never reset during installation, scheduled work or artwork recovery.
+Follow [the main skill](../genpet/SKILL.md) intake. Explain the concrete replacement: old records are backed up and a new identity takes over the same host Pet/cloud ID; adding another instead creates its own entry. Get the user's choice if not already explicit and confirmed, then use reset/new-pet --replace with a stable operation. Resume that same operation, never reset again to repair artwork. Follow the existing data notice/consent and GeneDesigner journey, complete the egg and task. Cloud Pets are retained unless the user specifically names one to delete.

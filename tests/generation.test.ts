@@ -1,6 +1,7 @@
+import { retainFixture as rm } from './evidence.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, writeFile, access } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, access } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -9,11 +10,16 @@ import { createPet } from '../src/model.js';
 import { requestId } from '../src/appearance.js';
 import { beginStory, planStory, finishStory } from '../src/lifecycle.js';
 import { unitRequest, validateUnitResult, recordStep } from '../src/generation.js';
-import { initialPlan } from './fixtures.js';
+import { initialPlan, journeyReady } from './fixtures.js';
 
 const context = {
   inputRefs: ['fixture:sparse'],
-  result: { facts: [], unknowns: ['Only an adoption request was provided.'] },
+  result: {
+    facts: [],
+    traits: [],
+    unknowns: ['Only an adoption request was provided.'],
+    read: { status: 'unavailable', source: 'synthetic fixture' },
+  },
 };
 test('a unit request requires its fixed upstream inputs and captures that exact request', () => {
   const fixture = {
@@ -21,6 +27,7 @@ test('a unit request requires its fixed upstream inputs and captures that exact 
     inputs: {
       context: { facts: [], unknowns: ['No profile available'] },
       encounter: { place: 'A place in the pet world' },
+      random: { seed: 'fixture', sourceType: 'natural' },
     },
   };
   const first = unitRequest('genes', fixture);
@@ -38,7 +45,7 @@ test('contract checks allow open design and extra fields while rejecting missing
   const genes = {
     inputRefs: [],
     result: {
-      designBasis:
+      designReason:
         'A garden snail lends its soft body and feelers to an encounter about returning to an unfinished drawing; the body leaves a curling trace as a visual interpretation of retained sketch lines.',
       genes:
         'Inspired by a garden snail and the adoption story beside an unfinished drawing: a faceless soft-bodied creature with two tactile feelers and a curling body trace; these traits develop while its original body relationships persist.',
@@ -51,11 +58,11 @@ test('contract checks allow open design and extra fields while rejecting missing
     () => validateUnitResult('genes', { inputRefs: [], result: { genes: 'Just a new color' } }),
     /eggAppearance/,
   );
-  const { designBasis, ...withoutBasis } = genes.result;
-  assert.throws(() => validateUnitResult('genes', { inputRefs: [], result: withoutBasis }), /designBasis/);
+  const { designReason, ...withoutBasis } = genes.result;
+  assert.throws(() => validateUnitResult('genes', { inputRefs: [], result: withoutBasis }), /designReason/);
   assert.throws(
-    () => validateUnitResult('genes', { ...genes, result: { ...genes.result, designBasis: ' ' } }),
-    /designBasis/,
+    () => validateUnitResult('genes', { ...genes, result: { ...genes.result, designReason: ' ' } }),
+    /designReason/,
   );
   assert.throws(
     () => validateUnitResult('context', { ...context, result: { facts: 'Not an array', unknowns: [] } }),
@@ -68,20 +75,22 @@ test('contract checks allow open design and extra fields while rejecting missing
         result: {
           stage: 'ancient',
           state: 'Resting',
-          basis: 'Test',
+          reason: 'Test',
+          contextRefs: ['fixture:synthetic-context'],
           special: null,
           visibleState: null,
+          memory: null,
         },
       }),
     /Invalid evolution.stage/,
   );
   assert.throws(
     () =>
-      validateUnitResult('image-review', {
+      validateUnitResult('ImageReviewer', {
         inputRefs: [],
         result: { file: '/fixture.png', verdict: 'maybe', observations: [], repair: null },
       }),
-    /Invalid image-review.verdict/,
+    /Invalid ImageReviewer.verdict/,
   );
   assert.deepEqual(
     validateUnitResult('appearance', { inputRefs: [], result: { appearance: null, visuals: [] } }).result,
@@ -90,40 +99,43 @@ test('contract checks allow open design and extra fields while rejecting missing
 });
 test('home and carrier units: a text-only story and an unchanged home are valid, and their prompts carry the designer rules', () => {
   assert.deepEqual(
-    validateUnitResult('carrier', { inputRefs: [], result: { reason: 'Nothing new to hand over.', carrier: null } })
-      .result,
-    { reason: 'Nothing new to hand over.', carrier: null },
+    validateUnitResult('story-item', {
+      inputRefs: [],
+      result: { reason: 'Nothing new to hand over.', contextRefs: ['fixture:synthetic-context'], item: null },
+    }).result,
+    { reason: 'Nothing new to hand over.', contextRefs: ['fixture:synthetic-context'], item: null },
   );
-  assert.throws(() => validateUnitResult('carrier', { inputRefs: [], result: { carrier: null } }), /carrier.reason/);
+  assert.throws(() => validateUnitResult('story-item', { inputRefs: [], result: { item: null } }), /story-item.reason/);
   assert.deepEqual(validateUnitResult('home', { inputRefs: [], result: { home: null, visual: null } }).result, {
     home: null,
     visual: null,
   });
   const inputs = { context: {}, pet: {}, story: {}, savedArt: [] };
-  for (const unit of ['carrier', 'home']) {
+  for (const unit of ['story-item', 'home']) {
     const request = unitRequest(unit, { inputs });
-    assert.match(request.prompt, /何时配图|家的设计/);
+    assert.match(request.prompt, /故事物件|家/);
     assert.match(request.prompt, /mustShow|必须出现的特征/);
   }
   assert.throws(() => unitRequest('home', { inputs: { context: {} } }), /Missing home input/);
 });
 test('step retries deduplicate, revisions remain observable, and logging cannot mutate the saved plan or advance a pet', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-step-')),
-    store = new Store(root, 'dots');
+    store = new Store(root, 'cloud');
   try {
     const operation = (await beginStory(store, 'unit:logging')).pending!.id;
+    await journeyReady(store, operation);
     await planStory(store, operation, initialPlan);
     const before = await store.peek(),
       hash = requestId(before);
     const first = await recordStep(store, operation, 'context', context);
     const reordered = await recordStep(store, operation, 'context', {
-      result: { unknowns: context.result.unknowns, facts: [] },
+      result: { read: context.result.read, unknowns: context.result.unknowns, traits: [], facts: [] },
       inputRefs: context.inputRefs,
     });
     assert.equal(reordered.id, first.id);
     const revised = await recordStep(store, operation, 'context', {
       ...context,
-      result: { facts: [], unknowns: ['Another explicit unknown.'] },
+      result: { ...context.result, unknowns: ['Another explicit unknown.'] },
     });
     assert.notEqual(revised.id, first.id);
     const after = await store.peek();
@@ -136,7 +148,7 @@ test('step retries deduplicate, revisions remain observable, and logging cannot 
     await assert.rejects(() => recordStep(store, 'another-operation', 'context', context), /another or missing story/);
     await assert.rejects(
       () => recordStep(store, operation, 'context', { ...context, result: { facts: [] } }),
-      /unknowns/,
+      /traits|unknowns/,
     );
     assert.equal(await readFile(store.file, 'utf8'), saved);
   } finally {
@@ -145,19 +157,33 @@ test('step retries deduplicate, revisions remain observable, and logging cannot 
 });
 test('completed stories keep their unit artifacts and accept an internal output result without changing story text', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-completed-step-')),
-    store = new Store(root, 'dots');
+    store = new Store(root, 'cloud');
   try {
     await store.transaction(state => {
       state.pet = createPet();
-      state.pet.genes = 'Existing individual';
+      state.pet.soul.genes = 'Existing individual';
     });
     const operation = (await beginStory(store, 'unit:completed')).pending!.id;
     await planStory(store, operation, {
       text: 'The same pet listened to its familiar echoes.',
-      basis: 'A test-only story',
+      reason: 'A test-only story',
+      contextRefs: ['fixture:synthetic-context'],
       state: 'Listening',
     });
-    const first = await recordStep(store, operation, 'context', context),
+    const first = await recordStep(store, operation, 'context', {
+        ...context,
+        inputRefs: ['fixture:synthetic-context'],
+        result: {
+          ...context.result,
+          facts: [
+            {
+              id: 'fixture:user-greeting',
+              text: 'The synthetic user greeted this companion.',
+              source: 'fixture:synthetic-context',
+            },
+          ],
+        },
+      }),
       story = await finishStory(store, operation);
     assert.equal(story.steps![0].id, first.id);
     const pet = (await store.peek()).pet;
@@ -196,14 +222,15 @@ test('CLI unit request and contract verification are read-only and story output 
     const store = new Store(data, 'desktop');
     await store.transaction(state => {
       state.pet = createPet();
-      state.pet.genes = 'Test genes';
+      state.pet.soul.genes = 'Test genes';
       state.stories.push({
         id: 'completed-test',
         triggerId: 'unit:output',
         petId: state.pet.id,
         at: 0,
         text: 'A story only.',
-        basis: 'Internal basis',
+        reason: 'Internal reason',
+        contextRefs: ['fixture:synthetic-context'],
         stage: 'egg',
         state: 'Resting',
         mediaIds: [],
@@ -213,7 +240,7 @@ test('CLI unit request and contract verification are read-only and story output 
     const visible = call('story-output', 'completed-test');
     assert.equal(visible.text, 'A story only.');
     assert.equal('steps' in visible, false);
-    assert.equal('basis' in visible, false);
+    assert.equal('reason' in visible, false);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

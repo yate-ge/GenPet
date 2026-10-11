@@ -1,6 +1,7 @@
+import { retainFixture as rm } from './evidence.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, access, readdir, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, access, readdir, writeFile } from 'node:fs/promises';
 import { PNG } from 'pngjs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -10,19 +11,20 @@ import { growth } from '../src/growth.js';
 import { recordHostResult } from '../src/hosts/result.js';
 import { dueStory, setSchedule, stopSchedule, timeSense } from '../src/schedule.js';
 import { artRequest, acceptArt } from '../src/art.js';
-import { bindAvatar } from '../src/hosts/dots.js';
+import { bindCloud as bindAvatar } from '../src/hosts/cloud.js';
 import { createPet } from '../src/model.js';
-import { initialPlan, initialization, image, hostDone } from './fixtures.js';
+import { journeyReady, initialPlan, initialization, image, hostDone } from './fixtures.js';
 test('identity is persisted once, reads do not age it, and competing triggers cannot create another pet', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-story-'));
   const store = new Store(root);
   try {
     const first = await beginStory(store, 'manual:first');
     const before = await readFile(store.file, 'utf8');
-    assert.equal((await store.peek()).pet!.stage, 'egg');
+    assert.equal((await store.peek()).pet!.state.stage, 'egg');
     assert.equal(await readFile(store.file, 'utf8'), before);
     assert.equal((await beginStory(new Store(root), 'manual:first')).pet!.id, first.pet!.id);
-    await assert.rejects(() => beginStory(store, 'manual:second'), /Unfinished/);
+    await assert.rejects(() => beginStory(store, 'manual:second', { forceGrowth: true }), /Unfinished/);
+    await journeyReady(store, first.pending!.id);
     await planStory(store, first.pending!.id, initialPlan);
     await assert.rejects(
       () => planStory(store, first.pending!.id, { ...initialPlan, genes: 'Different random pet' }),
@@ -36,16 +38,16 @@ test('identity is persisted once, reads do not age it, and competing triggers ca
 });
 test('saved state art is reusable across stories; completion and retries preserve genes and story count', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-reuse-')),
-    store = new Store(root, 'dots');
+    store = new Store(root, 'cloud');
   try {
     const op = await initialization(store),
       file = path.join(root, 'avatar.png');
-    await image(file);
+    await image(file, true);
     const art = await acceptArt(store, {
       requestId: artRequest(await store.peek())!.id,
       file,
-      kind: 'avatar',
-      provenance: 'Synthetic fixture, not generated Pet art',
+      kind: 'atlas',
+      source: 'Synthetic fixture, not generated Pet art',
     });
     await hostDone(store, op);
     await finishStory(store, op);
@@ -55,7 +57,8 @@ test('saved state art is reusable across stories; completion and retries preserv
     const next = (await beginStory(store, 'manual:later')).pending!.id;
     await planStory(store, next, {
       text: 'The folded echo returned to its familiar resting layers.',
-      basis: 'Fits the existing state',
+      reason: 'Fits the existing state',
+      contextRefs: ['fixture:synthetic-context'],
       state: 'Resting layers',
       appearance: { description: 'Reuse the same folded state', reuseArtId: art.id },
     });
@@ -64,7 +67,7 @@ test('saved state art is reusable across stories; completion and retries preserv
     await finishStory(store, next);
     const s = await store.peek();
     assert.equal(s.pet!.id, identity.id);
-    assert.equal(s.pet!.genes, initialPlan.genes);
+    assert.equal(s.pet!.soul.genes, initialPlan.genes);
     assert.equal(s.art.length, 1);
     assert.equal(s.stories.length, 2);
     assert.equal(s.pet!.state.appearanceId, art.id);
@@ -75,25 +78,26 @@ test('saved state art is reusable across stories; completion and retries preserv
 });
 test('host failure leaves current stage intact and active refresh is required before completion', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-host-gate-')),
-    store = new Store(root, 'dots');
+    store = new Store(root, 'cloud');
   try {
     const op = await initialization(store),
       file = path.join(root, 'avatar.png');
-    await image(file);
+    await image(file, true);
     const firstArt = await acceptArt(store, {
       requestId: artRequest(await store.peek())!.id,
       file,
-      kind: 'avatar',
-      provenance: 'Synthetic host gate fixture',
+      kind: 'atlas',
+      source: 'Synthetic host gate fixture',
     });
-    await bindAvatar(store, 'dots-owner');
+    await bindAvatar(store, 'pet_testowner');
     const petId = (await store.peek()).pet!.id,
       result = {
         petId,
         operationId: op,
         appearanceId: firstArt.id,
-        avatarId: 'dots-owner',
+        avatarId: 'pet_testowner',
         updated: true,
+        storedArtworkVerified: null,
         active: true,
         refreshRequested: false,
         displayStatus: 'unconfirmed' as const,
@@ -108,30 +112,40 @@ test('host failure leaves current stage intact and active refresh is required be
     );
     await assert.rejects(() => recordHostResult(store, op, { ...result, displayStatus: 'confirmed' }), /evidence/);
     await recordHostResult(store, op, { ...result, refreshRequested: true });
+    await hostDone(store, op);
     await finishStory(store, op);
-    const next = (await beginStory(store, 'work:changed')).pending!.id;
+    const next = (await beginStory(store, 'work:changed', { forceGrowth: true })).pending!.id;
     await planStory(store, next, {
       text: 'New work made its folded layers unfold.',
-      basis: 'Agent observed a meaningful change in recent work',
+      reason: 'Agent observed a meaningful change in recent work',
+      contextRefs: ['fixture:synthetic-context'],
       state: 'First unfolding',
       stage: 'hatchling',
       appearance: { description: 'Develop the same layered resonance' },
     });
     await assert.rejects(() => finishStory(store, next), /artwork is unfinished/);
-    assert.equal((await store.peek()).pet!.stage, 'egg');
+    assert.equal((await store.peek()).pet!.state.stage, 'egg');
     const nextArt = await acceptArt(store, {
       requestId: artRequest(await store.peek())!.id,
       file,
-      kind: 'avatar',
-      provenance: 'Synthetic evolution fixture',
+      kind: 'atlas',
+      source: 'Synthetic evolution fixture',
     });
     await recordHostResult(store, next, { ...result, operationId: next, appearanceId: nextArt.id, active: false });
+    await hostDone(store, next);
     await finishStory(store, next);
-    assert.equal((await store.peek()).pet!.stage, 'hatchling');
-    assert.equal((await store.peek()).pet!.genes, initialPlan.genes);
+    assert.equal((await store.peek()).pet!.state.stage, 'hatchling');
+    assert.equal((await store.peek()).pet!.soul.genes, initialPlan.genes);
     const last = (await beginStory(store, 'manual:third')).pending!.id;
     await assert.rejects(
-      () => planStory(store, last, { text: 'Reverse', basis: 'Invalid', state: 'Egg', stage: 'egg' }),
+      () =>
+        planStory(store, last, {
+          text: 'Reverse',
+          reason: 'Invalid',
+          contextRefs: ['fixture:synthetic-context'],
+          state: 'Egg',
+          stage: 'egg',
+        }),
       /reverse/,
     );
   } finally {
@@ -142,8 +156,8 @@ test('story checks run every five hours from adoption, coalesce missed checks an
   const adopted = Date.parse('2026-10-02T00:00:00Z'),
     HOUR = 3600000;
   const s = {
-    version: 2 as const,
-    host: 'dots' as const,
+    version: 3 as const,
+    host: 'cloud' as const,
     pet: createPet('Test', adopted),
     stories: [],
     art: [],
@@ -164,7 +178,8 @@ test('story checks run every five hours from adoption, coalesce missed checks an
         petId: 'test',
         at: 0,
         text: 'Story',
-        basis: 'Test',
+        reason: 'Test',
+        contextRefs: ['fixture:synthetic-context'],
         stage: 'egg' as const,
         state: 'Rest',
         mediaIds: [],
@@ -175,7 +190,7 @@ test('story checks run every five hours from adoption, coalesce missed checks an
 });
 test('a stopped check is remembered, no longer due, and resumes with the gap known to the next story', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-stop-')),
-    store = new Store(root, 'dots');
+    store = new Store(root, 'cloud');
   try {
     const first = await beginStory(store, 'manual:adopt');
     assert.equal(first.status === 'pending' && first.time!.hoursSinceLastStory < 1, true);
@@ -186,7 +201,7 @@ test('a stopped check is remembered, no longer due, and resumes with the gap kno
     assert.equal(stopped.previousReference, 'automation:pet');
     assert.equal((await stopSchedule(store)).stoppedAt, stopped.stoppedAt); // idempotent
     let state = await store.peek();
-    assert.equal(state.schedule!.reference, undefined);
+    assert.equal(state.schedule!.reference, 'automation:pet');
     const later = adopted + 30 * 3600000;
     assert.equal(dueStory(state, later).due, false);
     assert.equal(dueStory(state, later).stopped, true);
@@ -209,7 +224,8 @@ test('a stopped check is remembered, no longer due, and resumes with the gap kno
       petId: 'p',
       at: later,
       text: 'x',
-      basis: 'x',
+      reason: 'x',
+      contextRefs: ['fixture:synthetic-context'],
       stage: 'egg',
       state: 'x',
       mediaIds: [],
@@ -221,42 +237,44 @@ test('a stopped check is remembered, no longer due, and resumes with the gap kno
 });
 test('replacement artwork invalidates an earlier host confirmation for the same story', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-stale-display-')),
-    store = new Store(root, 'dots');
+    store = new Store(root, 'cloud');
   try {
     const op = await initialization(store),
       file = path.join(root, 'avatar.png');
-    await image(file);
+    await image(file, true);
     const request = artRequest(await store.peek())!.id;
     const first = await acceptArt(store, {
       requestId: request,
       file,
-      kind: 'avatar',
-      provenance: 'Synthetic old appearance',
+      kind: 'atlas',
+      source: 'Synthetic old appearance',
     });
-    await bindAvatar(store, 'dots-owner');
+    await bindAvatar(store, 'pet_testowner');
     const result = {
       petId: (await store.peek()).pet!.id,
       operationId: op,
       appearanceId: first.id,
-      avatarId: 'dots-owner',
+      avatarId: 'pet_testowner',
       updated: true,
+      storedArtworkVerified: null,
       active: true,
       refreshRequested: true,
       displayStatus: 'unconfirmed' as const,
     };
     await recordHostResult(store, op, result);
     const replacement = PNG.sync.read(await readFile(file));
-    replacement.data[(8 * 32 + 8) * 4] = 60;
+    replacement.data[(8 * replacement.width + 8) * 4] = 60;
     await writeFile(file, PNG.sync.write(replacement));
     const second = await acceptArt(store, {
       requestId: request,
       file,
-      kind: 'avatar',
-      provenance: 'Synthetic revised appearance',
+      kind: 'atlas',
+      source: 'Synthetic revised appearance',
     });
     assert.notEqual(first.id, second.id);
     await assert.rejects(() => finishStory(store, op), /unfinished/);
     await recordHostResult(store, op, { ...result, appearanceId: second.id });
+    await hostDone(store, op);
     await finishStory(store, op);
     assert.equal((await store.peek()).pet!.state.appearanceId, second.id);
   } finally {
@@ -265,21 +283,20 @@ test('replacement artwork invalidates an earlier host confirmation for the same 
 });
 test('an explicit reset changes identity once, preserving the bound surface, schedule and previous archive', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-reset-')),
-    store = new Store(root, 'dots');
+    store = new Store(root, 'cloud');
   try {
     const op = await initialization(store),
       file = path.join(root, 'avatar.png');
-    await image(file);
+    await image(file, true);
     await acceptArt(store, {
       requestId: artRequest(await store.peek())!.id,
       file,
-      kind: 'avatar',
-      provenance: 'Synthetic reset fixture',
+      kind: 'atlas',
+      source: 'Synthetic reset fixture',
     });
     await hostDone(store, op);
     await finishStory(store, op);
     await store.transaction(state => {
-      state.pet!.binding = { host: 'dots', avatarId: 'same-surface' };
       state.schedule = {
         timezone: 'Asia/Taipei',
         reference: 'test-only-task',
@@ -292,8 +309,8 @@ test('an explicit reset changes identity once, preserving the bound surface, sch
     assert.deepEqual(JSON.parse(await readFile(reset.backup!, 'utf8')), previous);
     const next = await store.peek();
     assert.notEqual(next.pet!.id, previous.pet!.id);
-    assert.equal(next.pet!.genes, null);
-    assert.equal(next.pet!.stage, 'egg');
+    assert.equal(next.pet!.soul.genes, null);
+    assert.equal(next.pet!.state.stage, 'egg');
     assert.deepEqual(next.pet!.binding, previous.pet!.binding);
     assert.deepEqual(next.schedule, previous.schedule);
     assert.equal(next.legacy, undefined);
@@ -308,21 +325,21 @@ test('an explicit reset changes identity once, preserving the bound surface, sch
 });
 test('growth ceilings make the next story advance one stage, and adults enter and leave special forms', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-growth-')),
-    store = new Store(root, 'dots');
+    store = new Store(root, 'cloud');
   const ago = (ms: number) => Date.now() - ms,
     HOUR = 3_600_000,
     DAY = 24 * HOUR;
-  const story = { text: 'A new day.', basis: 'Test', state: 'Calm' };
+  const story = { text: 'A new day.', reason: 'Test', contextRefs: ['fixture:synthetic-context'], state: 'Calm' };
   const look = { appearance: { description: 'Planned appearance' } };
   try {
     const op = await initialization(store),
       file = path.join(root, 'avatar.png');
-    await image(file);
+    await image(file, true);
     await acceptArt(store, {
       requestId: artRequest(await store.peek())!.id,
       file,
-      kind: 'avatar',
-      provenance: 'Fixture',
+      kind: 'atlas',
+      source: 'Fixture',
     });
     await hostDone(store, op);
     await finishStory(store, op);
@@ -332,13 +349,13 @@ test('growth ceilings make the next story advance one stage, and adults enter an
     assert.equal(growth(await store.peek())!.required, null);
     await assert.rejects(() => planStory(store, next, { ...story, home: 'A nest' }), /home begins after hatching/);
     await assert.rejects(() => planStory(store, next, { ...story, stage: 'juvenile', ...look }), /at most one stage/);
-    await store.transaction(state => void (state.pet!.adoptedAt = ago(6 * HOUR))); // The egg counts from adoption.
+    await store.transaction(state => void (state.growthClock!.stageSince = ago(6 * HOUR))); // The egg counts from adoption.
     assert.equal(growth(await store.peek())!.required, 'advance');
     await assert.rejects(() => planStory(store, next, story), /Growth is due: this story advances to hatchling/);
     await planStory(store, next, { ...story, stage: 'hatchling', home: 'A moss nest', ...look });
     await cancelStory(store, next);
 
-    await store.transaction(state => void (state.pet!.stage = 'adult'));
+    await store.transaction(state => void (state.pet!.state.stage = 'adult'));
     assert.equal(growth(await store.peek())!.required, null); // An adult first has its own interval.
     await store.transaction(state => void (state.pet!.adoptedAt = ago(8 * DAY))); // No adult story: adoption time.
     assert.equal(growth(await store.peek())!.required, 'enter-special');
@@ -350,7 +367,7 @@ test('growth ceilings make the next story advance one stage, and adults enter an
     await cancelStory(store, next);
 
     await store.transaction(state => {
-      state.pet!.special = { description: 'Shadowed', since: ago(3 * DAY), storyId: 'test' };
+      state.pet!.state.special = { description: 'Shadowed', since: ago(3 * DAY), storyId: 'test' };
     });
     assert.equal(growth(await store.peek())!.required, 'end-special');
     next = await begin('manual:return');
@@ -359,7 +376,7 @@ test('growth ceilings make the next story advance one stage, and adults enter an
     await cancelStory(store, next);
 
     await store.transaction(state => {
-      state.pet!.special = { description: 'Shadowed', since: ago(3 * DAY), storyId: 'test', endedAt: ago(HOUR) };
+      state.pet!.state.special = { description: 'Shadowed', since: ago(3 * DAY), storyId: 'test', endedAt: ago(HOUR) };
     });
     assert.equal(growth(await store.peek())!.required, null);
   } finally {
@@ -386,30 +403,35 @@ test('an unfinished initialization that cannot be completed can be abandoned by 
 });
 test('a visible state change gives the Avatar a variant without changing the stage, and a later story reuses a saved look', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-variant-')),
-    store = new Store(root, 'dots');
-  const story = { text: 'It found a rain hat.', basis: 'Test', state: 'Wearing a rain hat' };
+    store = new Store(root, 'cloud');
+  const story = {
+    text: 'It found a rain hat.',
+    reason: 'Test',
+    contextRefs: ['fixture:synthetic-context'],
+    state: 'Wearing a rain hat',
+  };
   const file = path.join(root, 'avatar.png');
   try {
-    await image(file);
+    await image(file, true);
     const draw = async (operationId: string) => {
       await acceptArt(store, {
         requestId: artRequest(await store.peek())!.id,
         file,
-        kind: 'avatar',
-        provenance: 'Fixture',
+        kind: 'atlas',
+        source: 'Fixture',
       });
       await hostDone(store, operationId);
       return finishStory(store, operationId);
     };
     await draw(await initialization(store));
-    let op = (await beginStory(store, 'manual:hatch')).pending!.id;
+    let op = (await beginStory(store, 'manual:hatch', { forceGrowth: true })).pending!.id;
     await planStory(store, op, { ...story, stage: 'hatchling', appearance: { description: 'Plain hatchling' } });
     const plain = (await draw(op)).appearanceId!;
     op = (await beginStory(store, 'manual:hat')).pending!.id;
     await planStory(store, op, { ...story, appearance: { description: 'The same hatchling wearing a rain hat' } });
     const hat = (await draw(op)).appearanceId!;
     let state = await store.peek();
-    assert.equal(state.pet!.stage, 'hatchling');
+    assert.equal(state.pet!.state.stage, 'hatchling');
     assert.equal(state.pet!.state.appearanceId, hat);
     assert.notEqual(hat, plain);
     op = (await beginStory(store, 'manual:plain-again')).pending!.id;
@@ -422,7 +444,7 @@ test('a visible state change gives the Avatar a variant without changing the sta
     await finishStory(store, op);
     state = await store.peek();
     assert.equal(state.pet!.state.appearanceId, plain);
-    assert.equal(state.art.filter(art => art.kind === 'avatar').length, 3); // egg, plain, hat: nothing was redrawn
+    assert.equal(state.art.filter(art => art.kind === 'atlas').length, 3); // egg, plain, hat: nothing was redrawn
   } finally {
     await rm(root, { recursive: true, force: true });
   }

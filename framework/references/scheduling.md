@@ -1,17 +1,33 @@
-# Story triggers
+# 定时内容
 
-The host checks every 5 hours (`CHECK_INTERVAL` in `src/schedule.ts`). Create the host task with a true 5-hour interval (for example an interval or RRULE `FREQ=HOURLY;INTERVAL=5`), not a cron like `0 */5 * * *`, which restarts at midnight and leaves a 4-hour gap: periods would then get two runs or none, and a growth ceiling could be met nearly two intervals late. Each check triggers a new-story judgment, with no fixed topics, outfits or evolution schedule. The Node runtime has no background timer. Periods are counted from the pet's adoption, so the first check falls 5 hours after adoption, which is the egg's own ceiling. A growth ceiling is therefore met at most one interval late; the story of the first check at or after a ceiling carries its change.
+产品规则见 ../prompts/meta.md「故事节奏」「成长节奏」「时间感」「图片展示」。运行时提供 due、growth 和稳定 triggerId，宿主负责真正调度，Node 没有私有后台定时器。
 
-After start completes, inspect the host's existing task for this pet/framework and reuse or update it. Use the host's scheduling tool rather than writing a private cron or launch service. Record its actual reference with `schedule TIMEZONE REFERENCE`. The timezone is only context for the story (the user's local time of day), particularly when Dots' computer is in a different timezone; periods do not depend on it. Do not create a second task just because the plugin is reinstalled or the process restarts.
+## 建立和停止
 
-On a scheduled run: read status, resume any pending operation; otherwise `due` and use its returned trigger ID with the shared story workflow. It returns the current period, coalescing missed periods; do not replay a backlog. A check does not have to produce a story (see meta.md 故事节奏). Open the story with `begin-story` as usual, since it also returns `growth` and `time`; if, after reading the context, nothing is worth telling and `growth.required` is null, close the operation with `cancel-story OPERATION_ID` (allowed because there is no plan yet) and send no message. Never leave the operation open to skip: the next check would have to resume it, which turns a skip into a late story.
+start 的首篇领养完成或恢复现有 Pet 后，查看宿主已经有的 GenPet 任务并复用/更新，同一环境唯一激活 Pet 共用一个任务。普通内容间隔五小时，使用宿主支持的 interval 或相应调度工具；不要用午夜重置的小时 cron 代替稳定间隔。保存真实引用 `schedule TIMEZONE REFERENCE`。
 
-`begin-story` and `status` return `time`: when the last story was, how many hours ago, and (only if the user stopped the check after it) when it was stopped and resumed. The Agent feeds it to the context unit as a user-usage fact, so a pet that went unvisited (machine off, task stopped, user away) can notice the gap; the cause is never guessed.
+再读取 `due` 的 `nextCheckAt` 和 `growthDeadlineAt`。阶段开始、特殊形态进入/结束、激活恢复和每篇完成后重读它们，使用宿主已证实支持的指定时刻唤醒能力安排更早的截止检查。成长截止触发采用独立稳定 ID；不要替换成当前 `period:`，即使这一普通周期已完成仍要完成截止变化。截止故事也覆盖其完成时的普通周期，不额外发同一周期的普通故事。
 
-`/genpet-stop` removes the host's scheduled task and runs `schedule-stop`, which keeps the stop time (`status.schedule.stoppedAt`) and makes `due` return `due: false`. The pet and its history stay; manual `/genpet-story` still works. `/genpet-start` sets the task up again, and `schedule` records the resume time. A completed trigger remains completed on retry. Check for pending work before a Dots proactive story so simultaneous events do not create competing changes.
+只有五小时 recurrence 不能保证未对齐的七天/两天截止。核验宿主可用参数与实际下一次运行时间后再安排；不猜 `nextRunAt`、单次 RRULE 或其他未证实字段。不能按需要唤醒时保存这一实际限制，主入口恢复时仍检查 `due`，不能把返回时间当作已经建立任务。Agent 根据实际生成耗时提前准备合适的下一阶段素材，已有正确素材到期直接复用；准确唤醒也不等于图像、上传与显示已按时完成。
 
-Dots also decides whether its own proactive context warrants a story, within the same product rules. Use a stable event ID and the same persistence/host workflow. Direct pet chat happens only when the user starts it with /genpet or by addressing the pet; the Agent never initiates a conversation. Each completed story is text plus its chosen images/artifacts; a run with nothing worth telling sends no message at all (see `prompts/output.md`). Never expose execution reports in the user's conversation.
+名字简短如 GenPet，可见说明只写面向用户的用途；执行步骤放在这份后台说明与主 skill。只将定时任务所在对话名设置为 GenPet，使用当前 app-tools 的会话命名工具；不改其他聊天。宿主自动改名和错过任务补跑需实测，不能只靠提示词宣称可靠。
 
-## Unfinished stories
+stop 只停/暂停 status.schedule.reference 对应的这一个任务，再 `schedule-stop`。Pet、历史、素材和未完成工作保留，手动 story 仍可用；start 恢复任务与记录，不重新领养。明确停止授权不重复询问。
 
-Only one story may be unfinished, so a pending one that can never finish would silently stop every later story. A pending story that was started only minutes ago (`time.pendingHours` near 0) is most likely another run (for example a Dots proactive event) still working on it: leave it alone and end this run quietly, rather than resuming it in parallel, which duplicates artwork and messages. A scheduled run otherwise resumes an unfinished story first (saved plan, accepted art and host result are reused), and this is also the first thing to try after a failed run. If resuming fails again and it has been unfinished for longer than a check interval (`time.pendingHours` against `time.checkIntervalHours`), the Agent may abandon it with `cancel-story OPERATION_ID` and start the current trigger instead. Judge the cause first: a host that is only temporarily unavailable is better waited out than cancelled, and a change the story carried (growth, special form) is re-planned by the next story because its `growth.required` still applies. Accepted art stays in the pet's saved art and can be reused. A story with a saved plan can be cancelled; an unfinished initialization can only be resumed or explicitly reset by the user, never during scheduled work. Keep what happened in the internal record (output.md), and tell the user nothing unless the pet has something to tell, in the pet's own world.
+## 每次运行
+
+1. 只读解析宿主选中项到 Pet ID，按 runtime 的激活路由处理。非 GenPet 或读不到选中项采用上次激活 Pet 并保留选择；无 Pet 则不自动领养。
+2. 检查 pending 和真实作业是否还活跃。先续接确定可续接的工作，仍在跑的作业等待/退出这一重复触发，不能并发生成。
+3. 无 pending 时 `due`，用它的 triggerId 开故事，优先处理已到期成长。错过多段普通内容只合并最近一次，不补一串旧故事；同一触发完成后不重复。`nextCheckAt` 只是下一次应检查的时刻，实际任务结果另行验证。
+4. 正常这次先真正读取 context，再形成故事与可见内容，按 workflow.md。没有新事实也继续已有线头或自己的活动，不走空白取消分支；纯文字对应真实用户 context 且最多连续两次。
+5. 完成后记录实际结果并重读 `due`，更新真实任务的下一次唤醒。用 output 只呈现宠物内容；换装可无消息，不输出「检查完成」、进度或固定台词。阶段到期按 growth 完成相应变化，命名最多一次。
+
+电脑开着且 Codex 运行时检查。开机后的过期任务如何补跑，先核验宿主；若宿主不支持立即补跑，保存实际限制并使用主入口恢复时的 due 检查。当天至少一次可见变化需要真实宿主记录证明，协议测试不能支持这个结论。
+
+## 中断与重试
+
+同一个 operation、候选、种子、已接受图和上传目标继续。不是依据 pending 年龄就判断任务停止；检查实际作业/句柄，短暂读取失败再查原作业，不重复启动。没有活跃作业才恢复未完成步骤。
+
+暂时无法上传云图时保留补交工作。已经上传且回读一致与尚未上传分别处理，不把未上传工作标记完成。失败图、原始输出和旧图留存；确需取消时保留全部产物，下一次仍承担已到期成长。初始化只能续接或由用户明确替换，定时失败不重新领养。
+
+Dots 默认消费桌面完成的内容，不以自己的主动事件另开故事。切换主环境时明确停旧任务、移交记录后再开新任务；跨环境连续性见 dots.md。
