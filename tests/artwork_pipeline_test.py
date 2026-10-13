@@ -271,6 +271,27 @@ class ArtworkPipelineTests(unittest.TestCase):
             self.assertEqual(source.read_bytes(),before)
             self.assertEqual(len(report['frames']),8)
 
+    def test_isolated_background_residue_does_not_shrink_slot_row(self):
+        # Desktop e2e 2026-10-12: one leftover pixel in a slot corner stretched that
+        # slot's bounds and the shared row transform shrank and lifted every pose.
+        def strip(residue):
+            image=Image.new('RGB',(8*270,720),(246,5,246));draw=ImageDraw.Draw(image)
+            for i in range(8):
+                draw.ellipse((i*270+20,245,i*270+250,530),fill=(90,170,110),outline='black',width=4)
+                draw.ellipse((i*270+150,330,i*270+170,350),fill='white')  # enclosed eye detail stays
+            if residue: image.putpixel((0,719),(30,30,30))
+            return image
+        frames={}
+        for residue in (False,True):
+            source=self.run/'decoded'/f'running-right-residue-{residue}.png';strip(residue).save(source)
+            report=extract_state(source,'running-right',self.run/f'frames-residue-{residue}',(255,0,255),96,'auto')
+            self.assertEqual(report['method'],'slots')
+            frames[residue]=[Path(f).read_bytes() for f in report['frames']]
+        self.assertEqual(frames[True],frames[False])
+        with Image.open(self.run/'frames-residue-True/running-right/00.png') as first:
+            box=first.getbbox()
+            self.assertGreater(box[3]-box[1],150)
+
     def test_single_long_outline_near_slot_boundary_is_not_a_divider(self):
         image=Image.new('RGBA',(800,200))
         draw=ImageDraw.Draw(image)

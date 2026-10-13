@@ -348,8 +348,33 @@ def component_bounds(components: list[dict[str, object]]) -> tuple[int, int, int
     )
 
 
+def without_specks(crop: Image.Image) -> Image.Image:
+    """Drop isolated background residue with the same noise floor the component path ignores.
+
+    One stray pixel in a slot corner otherwise stretches that slot's bounds, and the
+    shared row transform then shrinks and lifts every pose in the row.
+    """
+    components = connected_components(crop)
+    if not components:
+        return crop
+    noise_threshold = max(12, max(component["area"] for component in components) * 0.002)
+    specks = [component for component in components if component["area"] < noise_threshold]
+    if not specks:
+        return crop
+    cleaned = crop.copy()
+    pixels = cleaned.load()
+    for component in specks:
+        for pixel_index in component["pixels"]:
+            pixels[pixel_index % crop.width, pixel_index // crop.width] = (0, 0, 0, 0)
+    return cleaned
+
+
+def clean_slot_crops(strip: Image.Image, frame_count: int) -> list[Image.Image]:
+    return [without_specks(crop) for crop in slot_crops(strip, frame_count)]
+
+
 def extract_slot_frames(strip: Image.Image, frame_count: int, jump_reference=None) -> list[Image.Image]:
-    return register_frames(slot_crops(strip, frame_count), jump_reference=jump_reference)
+    return register_frames(clean_slot_crops(strip, frame_count), jump_reference=jump_reference)
 
 
 def extract_stable_slot_frames(strip: Image.Image, frame_count: int, jump_reference=None) -> list[Image.Image]:
@@ -381,7 +406,7 @@ def extract_state(
     frames = None
     used_method = method
     if method == "auto":
-        crops = slot_crops(strip, frame_count)
+        crops = clean_slot_crops(strip, frame_count)
         frames = register_frames(crops) if jump_reference is None else None
         # Prefer the declared grid. Uneven layouts fall back deterministically to
         # components only when a slot is empty or a cut intersects visible artwork.

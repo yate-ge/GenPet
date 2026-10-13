@@ -16,7 +16,7 @@
 
 ## 领养
 
-先完成环境检查和用户选择，再给首次资料说明，明确同意后才读取或分配旅程。使用稳定触发 ID（manual:UUID），`begin-story TRIGGER_ID` 返回 operation、Pet ID、journey 与要求。按 initialization.md 和 GeneDesigner 完成逐轮旅程与设计；先用不带 userInput 的 journey-step 保存待答场景和选项，收到真实选择后再保存该轮，结束时 complete 为 true。只展示选项不计一轮，用户离开后从原待答场景继续。
+先完成环境检查和用户选择，再给首次资料说明，明确同意后才读取或分配旅程。使用稳定触发 ID（manual:UUID），`begin-story TRIGGER_ID` 返回 operation、Pet ID、journey 与要求。按 ../prompts/initialization.md 和 GeneDesigner 完成逐轮旅程与设计；先用不带 userInput 的 journey-step 保存待答场景和选项，收到真实选择后再保存该轮，结束时 complete 为 true。只展示选项不计一轮，用户离开后从原待答场景继续。
 
 没有明确选择不替用户回答。中断继续保存步骤。已经在养时 start 恢复现有 Pet 与任务；reset 的明确替换确认让新身份接手原 Pet 条目/cloud ID，新养一只另建。重试同一 operation。
 

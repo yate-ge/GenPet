@@ -1,8 +1,16 @@
 # GenPet 开发与验收摘要
 
-市场主干版本为 `0.10.0`。原始报告、图片、请求及测试数据保留在本地 `output/` 和 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet，安装验收仅在隔离 CODEX_HOME 中执行。
+市场主干版本为 `0.10.1`。原始报告、图片、请求及测试数据保留在本地 `output/` 和 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet，安装验收仅在隔离 CODEX_HOME 中执行。
 
 [成果汇报 PDF](https://drive.google.com/file/d/13oSP60mjBLSoC6R1xSrA9HYetCxodSng/view) · [Word](https://docs.google.com/document/d/1WP0MAtJONsqVWJNEyP7JhSVXjJ4is6Bx/edit) · [成果目录](https://drive.google.com/drive/folders/11WW2UEENWFibU8VG2jzycz_arD-6-tCF)
+
+## 2026-10-13 0.10.1 抽帧修复与新测试轮
+
+- 10-12 桌面重装 E2E 的默认抽帧缺陷已修：按格提取前去掉每格孤立残点（阈值同 components 已忽略的噪点），一个角落残留像素不再把整行缩小悬空。新增合成回归，修复前失败、修复后通过；未加参数或配置。
+- 用该轮保留负例复核：右跑帧高约115→189/208，其余7行逐字节不变；整个孵化目录副本（仅撤回同源图的失败记录）走正常处理，生成 atlas 与上一轮手动恢复并独立接受的 atlas 11行解码 RGBA 全同。这是开发方工程试跑，不替代真实流程验收。
+- `workflow.md` 失效引用改为 `../prompts/initialization.md`；`meta.md`/`output.md` 补充：宠物不做用户行为的缩小版、不以复述用户开头，避免重复主题与句式；孵化家的布局交给图；失败先说没做成什么。只改措辞，未加阈值。
+- `verify:release` 通过（Node 151项：149通过、2项macOS跳过、0失败；隔离安装0.10.1、86文件哈希一致），Python 管线测试25/25通过。
+- [修复证据](https://drive.google.com/drive/folders/1ZHt1ZSjPFLfVZrOJ9up89DjXohmn37Pm) · [0.10.1 测试轮方案与结果目录](https://drive.google.com/drive/folders/1CsGg2WtJE6xA3AvYeJKJmm3kubzuGuwI)：R0安装、R1抽帧与孵化耗时、R2宿主能力表、R3真实定时、R4人工目视显示、R5多资料多样性、R6文案回归、R7真实资料领养；R2后三项、R3、R4、R7需用户授权。
 
 ## 2026-10-11 同步 main
 
