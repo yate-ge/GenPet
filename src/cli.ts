@@ -35,6 +35,10 @@ async function jsonFile(file: string) {
 }
 
 const shared: Record<string, Command> = {
+  help: {
+    usage: 'help | --help',
+    run: async () => ({ commands: Object.values(commands).map(command => command.usage) }),
+  },
   status: {
     usage: 'status [--full]',
     run: async ([flag], store) => {
@@ -131,8 +135,14 @@ const shared: Record<string, Command> = {
   },
   'accept-art': {
     usage: 'accept-art REQUEST_ID FILE portrait|atlas|story|artifact SOURCE [DESCRIPTION]',
-    run: ([requestId, file, kind, source, description], store) =>
-      acceptArt(store, { requestId, file, kind: kind as ArtKind, source, description }),
+    run: (args, store) => {
+      if (args.length < 4 || args.length > 5)
+        throw new Error(
+          'Usage: accept-art REQUEST_ID FILE portrait|atlas|story|artifact SOURCE [DESCRIPTION]; REQUEST_ID is art-request.id',
+        );
+      const [requestId, file, kind, source, description] = args;
+      return acceptArt(store, { requestId, file, kind: kind as ArtKind, source, description });
+    },
   },
   'host-result': {
     usage: 'host-result OPERATION_ID RESULT_JSON',
@@ -211,7 +221,8 @@ const petIndex = argv.indexOf('--pet');
 const petId = petIndex >= 0 ? argv.splice(petIndex, 2)[1] : undefined;
 let store = new Store(undefined, host, petId);
 const commands = { ...shared, ...hostFor(store.host).commands };
-const [name, ...args] = argv;
+const [rawName, ...args] = argv;
+const name = rawName === '--help' ? 'help' : rawName;
 try {
   if (
     [

@@ -4937,7 +4937,10 @@ async function validateImage(file, kind) {
   return meta;
 }
 async function acceptArt(store2, input) {
-  if (!path10.isAbsolute(input.file)) throw new Error("Artifact file must be an absolute local path");
+  if (typeof input.requestId !== "string" || !input.requestId.trim())
+    throw new Error("accept-art REQUEST_ID must be a non-empty string from art-request.id");
+  if (typeof input.file !== "string" || !path10.isAbsolute(input.file))
+    throw new Error("Artifact file must be an absolute local path");
   if (!artKinds.includes(input.kind)) throw new Error("Unknown artifact kind");
   if (!input.source?.trim()) throw new Error("Record generation and validation source");
   await validateImage(input.file, input.kind);
@@ -6822,6 +6825,8 @@ async function callHelper(script, args2, runDir, python, preparing = false) {
 async function pipelinePrepare(input) {
   if (!input.notes?.trim() || !input.petName?.trim())
     throw new Error("Pipeline needs the actual Pet name and appearance notes");
+  if (Object.hasOwn(input, "requestId") && (typeof input.requestId !== "string" || !input.requestId.trim()))
+    throw new Error("pipeline-prepare requestId must be a non-empty string from art-request.id");
   const args2 = [
     input.stage === "egg" ? "--egg" : "--parallel",
     "--stage",
@@ -6878,6 +6883,10 @@ async function jsonFile(file) {
   return JSON.parse(await readFile13(file, "utf8"));
 }
 var shared = {
+  help: {
+    usage: "help | --help",
+    run: async () => ({ commands: Object.values(commands).map((command) => command.usage) })
+  },
   status: {
     usage: "status [--full]",
     run: async ([flag], store2) => {
@@ -6967,7 +6976,14 @@ var shared = {
   },
   "accept-art": {
     usage: "accept-art REQUEST_ID FILE portrait|atlas|story|artifact SOURCE [DESCRIPTION]",
-    run: ([requestId2, file, kind, source, description], store2) => acceptArt(store2, { requestId: requestId2, file, kind, source, description })
+    run: (args2, store2) => {
+      if (args2.length < 4 || args2.length > 5)
+        throw new Error(
+          "Usage: accept-art REQUEST_ID FILE portrait|atlas|story|artifact SOURCE [DESCRIPTION]; REQUEST_ID is art-request.id"
+        );
+      const [requestId2, file, kind, source, description] = args2;
+      return acceptArt(store2, { requestId: requestId2, file, kind, source, description });
+    }
   },
   "host-result": {
     usage: "host-result OPERATION_ID RESULT_JSON",
@@ -7045,7 +7061,8 @@ var petIndex = argv.indexOf("--pet");
 var petId = petIndex >= 0 ? argv.splice(petIndex, 2)[1] : void 0;
 var store = new Store(void 0, host, petId);
 var commands = { ...shared, ...hostFor(store.host).commands };
-var [name, ...args] = argv;
+var [rawName, ...args] = argv;
+var name = rawName === "--help" ? "help" : rawName;
 try {
   if ([
     "plan-story",

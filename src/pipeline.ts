@@ -104,6 +104,8 @@ async function callHelper(script: string, args: string[], runDir: string, python
 export async function pipelinePrepare(input: PipelineInput) {
   if (!input.notes?.trim() || !input.petName?.trim())
     throw new Error('Pipeline needs the actual Pet name and appearance notes');
+  if (Object.hasOwn(input, 'requestId') && (typeof input.requestId !== 'string' || !input.requestId.trim()))
+    throw new Error('pipeline-prepare requestId must be a non-empty string from art-request.id');
   const args = [
     input.stage === 'egg' ? '--egg' : '--parallel',
     '--stage',

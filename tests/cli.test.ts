@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Store } from '../src/store.js';
@@ -100,6 +100,22 @@ async function routingPets(home: string, savedCloudId?: string) {
   await store.selectPet((await a.peek()).pet!.id);
   return { a, b };
 }
+
+test('accept-art reports a missing request ID before reading shifted file arguments or writing state', async () => {
+  await withCli('', async (cli, home) => {
+    const data = path.join(path.dirname(home), 'data');
+    const missingImage = path.join(home, 'must-not-be-read.webp');
+    const before = await readdir(data);
+    const shifted = await cli('accept-art', missingImage, 'atlas', 'Synthetic fixture');
+    assert.equal(shifted.code, 1);
+    assert.match(shifted.stderr, /accept-art REQUEST_ID/);
+    assert.match(shifted.stderr, /art-request\.id/);
+    const empty = await cli('accept-art', '', missingImage, 'atlas', 'Synthetic fixture');
+    assert.equal(empty.code, 1);
+    assert.match(empty.stderr, /REQUEST_ID.*art-request\.id/);
+    assert.deepEqual(await readdir(data), before);
+  });
+});
 
 test('mapped host selection routes a custom-only B story without changing A or an explicitly pinned target', async () => {
   await withAppTools(
@@ -362,6 +378,22 @@ test('switch-pet rejects extra arguments and unknown flags without host calls', 
       }
       assert.equal(host.connections(), 0);
       assert.deepEqual(host.calls, []);
+    }),
+  );
+});
+
+test('global help is successful, read-only and requires no host connection', async () => {
+  await withHost(async host =>
+    withCli(host.pipePath, async (cli, home) => {
+      const data = path.join(path.dirname(home), 'data');
+      const before = await readdir(data);
+      for (const flag of ['help', '--help']) {
+        const result = output(await cli(flag)) as { commands: string[] };
+        assert.ok(result.commands.includes('art-request'));
+        assert.ok(result.commands.some(usage => usage.startsWith('accept-art REQUEST_ID')));
+      }
+      assert.equal(host.connections(), 0);
+      assert.deepEqual(await readdir(data), before);
     }),
   );
 });

@@ -10,7 +10,10 @@ export async function retainFixture(file: string, options?: { recursive?: boolea
     throw error;
   });
   if (!info) return;
-  const root = path.resolve('output', 'implementation-20261011', 'retained-fixtures');
+  const root = path.resolve(
+    process.env.GENPET_TEST_EVIDENCE_DIR || path.join('output', 'implementation-20261011'),
+    'retained-fixtures',
+  );
   if (source === root || source.startsWith(root + path.sep))
     throw new Error('Retained test evidence must not be removed');
   const destination = path.join(root, `${path.basename(source)}-${randomUUID()}`);

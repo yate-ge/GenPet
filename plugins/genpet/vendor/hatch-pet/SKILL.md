@@ -5,7 +5,7 @@ description: Create, repair, validate, visually QA, and package Codex-compatible
 
 # Hatch Pet
 
-For GenPet repository runs, use [GENPET.md](GENPET.md) and the current desktop reference first. They define the approved parallel jobs, optional framewise mirroring, two visual review gates, bounded redraws and accepted-baseline fallback. The upstream sequential/cardinal/per-source-review workflow below remains for historical comparison; new GenPet runs use `--parallel` or `--egg` and Codex's built-in imagegen tool.
+For GenPet repository runs, use [GENPET.md](GENPET.md) and the current desktop reference first. They define the approved parallel jobs, optional framewise mirroring, two visual review gates, bounded redraws and accepted-baseline fallback. The upstream sequential/cardinal/per-source-review workflow below remains for historical comparison; new GenPet runs use `--parallel` or `--egg` and Codex's built-in imagegen tool. Do not apply the upstream literal action/gaze requirements, effect bans or reviewer templates below as GenPet artistic gates. Use GenPet's ImageReviewer and actual stage/body: an egg cannot walk or see; equivalent expression and neutral look reuse are valid. Preserve real host compatibility and visual quality, not exhaustive upstream compliance.
 
 ## Overview
 

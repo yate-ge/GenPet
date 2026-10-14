@@ -1,17 +1,20 @@
 """Engineering fixtures only; retain every run for the user's Drive evidence bundle."""
 import json
+import os
 import sys
 import tempfile
 import subprocess
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 PIPELINE = ROOT / "plugins/genpet/vendor/hatch-pet/scripts"
 sys.path.insert(0, str(PIPELINE))
-from prepare_pet_run import make_jobs, make_egg_jobs, make_parallel_jobs, create_layout_guides
+from prepare_pet_run import (make_jobs, make_egg_jobs, make_parallel_jobs, create_layout_guides,
+                             parallel_row_prompt, egg_row_prompt, MOTION_SEQUENCES)
 from process_pet_run import process, read_json, write_json, compose_egg, record_review, record_failure, mirrored_look_frames
 from compose_atlas import ROW_SPECS
 from prepare_strip import clean_strip
@@ -20,7 +23,8 @@ from extract_strip_frames import extract_state, register_frames, extract_compone
 
 class ArtworkPipelineTests(unittest.TestCase):
     def setUp(self):
-        parent = ROOT / "output/implementation-20261011/pipeline/test-data"
+        parent = Path(os.environ.get("GENPET_TEST_EVIDENCE_DIR",
+                                     ROOT / "output/implementation-20261011/pipeline/test-data")) / "artwork-pipeline"
         parent.mkdir(parents=True, exist_ok=True)
         self.run = Path(tempfile.mkdtemp(prefix="artwork-", dir=parent)).resolve()
         for directory in ("decoded", "qa", "references"):
@@ -433,6 +437,11 @@ class ArtworkPipelineTests(unittest.TestCase):
             self.assertEqual(manifest["review_policy"],["base","final"])
             if flag == "--egg":
                 self.assertEqual([j["id"] for j in manifest["jobs"]], ["base", "egg-calm", "egg-stir", "egg-settle"])
+                for state in ("egg-calm", "egg-stir", "egg-settle"):
+                    prompt = (directory / f"prompts/rows/{state}.md").read_text(encoding="utf-8")
+                    self.assertIn("Native slot names do not require walking or gaze", prompt)
+                    self.assertIn("Neutral look reuse is valid", prompt)
+                self.assertFalse((directory / "prompts/look-cardinals.md").exists())
                 self.base(directory)
                 self.assertEqual(process(directory)["review_jobs"], ["base"])
                 reviewed = subprocess.run([sys.executable, str(PIPELINE / "process_pet_run.py"),
@@ -450,6 +459,31 @@ class ArtworkPipelineTests(unittest.TestCase):
                 self.assertTrue(working.startswith('Generate WORKING / FOCUSED ACTIVITY (native slot id running):'))
                 self.assertNotIn('Generate running:',working)
                 self.assertIn('running',{job['id'] for job in manifest['jobs']})
+                self.assertIn('Body/stage capability takes precedence over literal state names', working)
+                self.assertIn('Small expressive effects are optional', working)
+                self.assertIn('no clipping or overlap', working)
+                self.assertNotIn('never introduce or swap props, symbols or detached effects', working)
+                look = (directory / 'prompts/rows/look-right-upper.md').read_text(encoding='utf-8')
+                self.assertIn('compatible neutral reuse is valid', look)
+
+    def test_parallel_prompts_allow_equivalence_without_losing_identity_or_layout(self):
+        args = SimpleNamespace(stage="hatchling", chroma_key={"hex": "#FF00FF"},
+                               pet_notes="A synthetic undeveloped companion, not visual acceptance evidence.")
+        for state in (*MOTION_SEQUENCES, "look-row-9", "look-row-10"):
+            with self.subTest(state=state):
+                prompt = parallel_row_prompt(args, state, 8, "Ordered screen-space slots where applicable.")
+                self.assertIn("Stage: hatchling", prompt)
+                self.assertIn("use equivalent expression", prompt)
+                self.assertIn("canonical base for character identity", prompt)
+                self.assertIn("no clipping or overlap", prompt)
+                self.assertIn("never resize or recenter individual poses", prompt)
+                self.assertNotIn("never introduce or swap props, symbols or detached effects", prompt)
+                (self.run / f"{state}-prompt.txt").write_text(prompt, encoding="utf-8")
+        self.assertIn("otherwise use a supported pulse", MOTION_SEQUENCES["jumping"])
+        self.assertIn("otherwise equivalent supported body motion", MOTION_SEQUENCES["running-right"])
+        egg = egg_row_prompt(args, "egg-calm")
+        self.assertIn("No eyes, face, mouth, limbs", egg)
+        self.assertIn("do not require walking or gaze", egg)
 
     def test_egg_atlas_uses_exact_ai_frames_without_gaze_or_synthesized_motion(self):
         rows = {}
@@ -497,6 +531,12 @@ class ArtworkPipelineTests(unittest.TestCase):
         self.assertEqual(validation["errors"], [])
         self.assertEqual(len(result["source_complete"]), 4)
         self.assertEqual(process(self.run)["executed"], [])
+        # Legal reuse is not permission to package blank required shell frames.
+        Image.new("RGBA", (8 * 192, 208)).save(self.run / "decoded/egg-stir.png")
+        broken = process(self.run)
+        self.assertFalse(broken["ok"])
+        self.assertIsNone(broken["atlas"])
+        self.assertTrue(broken["blockers"])
 
     def test_complete_atlas_resume_and_structural_failure(self):
         self.manifest()

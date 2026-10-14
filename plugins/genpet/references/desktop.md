@@ -8,7 +8,9 @@
 
 宿主要求是透明 v2 atlas：1536×2288，8×11 格，每格 192×208；九种动作行有效格数 6、8、8、4、5、8、6、6、6，最后两行为十六方向。未用格透明，r0c6 是中性参考。格式检查不能证明可爱、阶段、动画或故事。
 
-通过 workspace dependencies 找到 Python，读取实际 helper --help 与运行 manifest。用当前 appearance 请求、真实参考和绝对 run 路径调用 prepare_pet_run.py；蛋用 --egg，其余按当前并行模式。不要覆盖原 run，重试使用它已经保存的工作。
+槽位名称不等于角色必须完成的字面动作。按 GenPet 的身体、阶段与故事表达状态，官方制作 skill 的全部艺术要求不作逐条验收标准。蛋不能走或看：--egg 的壳动作与中性方向格复用合法，不做步态/跳跃/十六目光检查。孵化后按已有器官与能力判断自然反馈，允许等价表达与非关键细节差异，但仍检查实质动画缺陷、身份/阶段和宿主可用性。
+
+通过 workspace dependencies 找到 Python，读取实际 helper --help 与运行 manifest。`art-request` 的请求键是 `.id`、宿主格式是 `.contract`；将 `.id` 原样作为 `pipeline-prepare` 输入的 `requestId` 及 `accept-art` 第一个位置参数，先检查非空，不读取并不存在的 `.requestId`。用当前 appearance 请求、真实参考和绝对 run 路径调用 prepare_pet_run.py；蛋用 --egg，其余按当前并行模式。不要覆盖原 run，重试使用它已经保存的工作。
 
 基准图先实际看图并记录接受。基准通过后九种动作和方向独立并行生成，按 manifest 的真实 job IDs，不额外串行生成方向参考。方向可只生成一侧、由处理代码镜像；不对称身体必须核查关键部件，镜像破坏身份时给那组单独生成，不能盲目翻转。
 

@@ -54,7 +54,10 @@ export async function acceptArt(
   store: Store,
   input: { requestId: string; file: string; kind: ArtKind; source: string; description?: string },
 ) {
-  if (!path.isAbsolute(input.file)) throw new Error('Artifact file must be an absolute local path');
+  if (typeof input.requestId !== 'string' || !input.requestId.trim())
+    throw new Error('accept-art REQUEST_ID must be a non-empty string from art-request.id');
+  if (typeof input.file !== 'string' || !path.isAbsolute(input.file))
+    throw new Error('Artifact file must be an absolute local path');
   if (!artKinds.includes(input.kind)) throw new Error('Unknown artifact kind');
   if (!input.source?.trim()) throw new Error('Record generation and validation source');
   await validateImage(input.file, input.kind);

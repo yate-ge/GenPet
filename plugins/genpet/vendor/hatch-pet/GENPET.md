@@ -11,7 +11,9 @@ prepare_pet_run.py --parallel --stage hatchling --pet-name NAME --pet-notes ACTU
 prepare_pet_run.py --egg --stage egg --pet-name NAME --pet-notes ACTUAL_SHELL_DESIGN --style-preset pixel --request-id ACTUAL_REQUEST_ID --output-dir ABSOLUTE_NEW_RUN
 ```
 
-Preserve the run. Copy each real generated output to its manifest `output_path`; keep its original tool output and source references too. Base art is one literal conventional egg or a cute cartoon pixel living companion with eyes. A hatchling visibly looks undeveloped. Detailed attributes remain the actual Pet design; no shared body or organ menu is imposed.
+The GenPet CLI's art-request result uses `.id` for the request and `.contract` for host format. Set pipeline-prepare's `requestId` and accept-art's first positional argument to that exact nonempty `.id`; do not read a nonexistent `.requestId` property.
+
+Preserve the run. Copy each real generated output to its manifest `output_path`; keep the supplied original path/hash, small timing metadata and feasible original tool output. Do not serialize large base64 returns into executable code or shell arguments. A denied payload must not be chunked or resent through another API; preserve the denial and mark unavailable raw capture partial/unknown. Authorized copying of the tool's supplied PNG is not a reason to regenerate or reconstruct a fake raw response. Base art is one literal conventional egg or a cute cartoon pixel living companion with eyes. A hatchling visibly looks undeveloped. Detailed attributes remain the actual Pet design; no shared body or organ menu is imposed.
 
 For a hatched Pet the new schema-2 manifest contains twelve jobs:
 
@@ -34,7 +36,9 @@ process_pet_run.py --run-dir ABSOLUTE_RUN --previews
 process_pet_run.py --run-dir ABSOLUTE_RUN --record-review final --verdict pass --note ACTUAL_VISUAL_OBSERVATION
 ```
 
-Only base and final assembled artwork are visual review gates. Ordinary source rows are decoded and processed, with no separate visual review per source. Inspect the final contact sheet and motion previews at actual Pet size. A recorded pass and valid JSON do not prove cute appearance, identity, developmental stage or motion semantics; retain the actual image review evidence.
+Only base and final assembled artwork are visual review gates. Ordinary source rows are decoded and processed, with no separate visual review per source.
+
+Production skill rules are a reference, not GenPet's exhaustive artistic acceptance checklist. Apply GenPet's product goals and this individual's stage/body/story. Native slot names do not mandate literal actions: eggs cannot walk or see, so calm/stir/settle reuse and neutral look cells are valid, not failed gait/jump/gaze. Other bodies may use equivalent expression without invented abilities. Judge meaningful feedback where applicable; minor angle, background-marking, material or tasteful effect differences do not automatically require redraws. Self-authored request/mustShow details are not all hard gates. Reject real boundary, identity/stage, key-story or usability defects with the applicable requirement, visible evidence and impact. Keep actual host format, transparency, complete frames, stable registration and stored-art verification; neither a pass claim nor schema validity proves visual quality. Inspect the final contact sheet and motion previews at actual Pet size. A recorded pass and valid JSON do not prove cute appearance, identity, developmental stage or motion semantics; retain the actual image review evidence.
 
 `candidate_atlas` is a structurally valid image awaiting final visual review. `atlas` and `portrait` are returned only after a recorded final pass matches the exact encoded atlas and source fingerprints. Replacing the base invalidates old row references; replacing any source invalidates final acceptance. Final GIFs include ordinary animations, the sixteen looks, idle-to-jump and idle-to-look transitions.
 

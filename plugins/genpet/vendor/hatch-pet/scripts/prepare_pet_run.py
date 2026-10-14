@@ -801,7 +801,8 @@ The Pet has NOT been born. No eyes, face, mouth, limbs, ears, cracks, exposed cr
 reviewing, waving, gaze following, jumping, shadows or detached effects. Express only physical shell motion.
 Style and identity: {args.pet_notes}
 This is one of three AI-generated egg loops. Its frames will be reused in native state slots;
-do not try to represent the native character actions. Minor motion differences are acceptable when usable."""
+Native slot names do not require walking or gaze: this egg has neither ability. Neutral look reuse is valid.
+Do not try to represent the native character actions. Minor motion differences are acceptable when usable."""
 
 
 BACKGROUND_CONTRACT = """Use a uniform solid background clearly distinct from every pet/prop color. Any suitable color is acceptable; no exact hex code is required. No gradients, texture, scenery or shadows. Separate frames with empty background only: NO separator lines, grid lines, boxes, borders or guide marks. The layout guide is spacing metadata, never artwork to copy."""
@@ -839,11 +840,11 @@ def make_parallel_jobs(run_dir, copied_refs, mirror_look=True):
 
 MOTION_SEQUENCES = {
     "idle": "A quiet resting loop using this individual's own small changes; breathing or blinking only if those features exist.",
-    "running-right": "A continuous in-place rightward movement cycle using this individual's own locomotion. Keep its directional reading consistent; do not invent feet.",
-    "running-left": "A continuous in-place leftward movement cycle using this individual's own locomotion. Keep its directional reading consistent; do not invent feet.",
+    "running-right": "A continuous rightward movement cycle if this individual can locomote; otherwise equivalent supported body motion. Keep applicable orientation coherent; do not invent feet or abilities.",
+    "running-left": "A continuous leftward movement cycle if this individual can locomote; otherwise equivalent supported body motion. Keep applicable orientation coherent; do not invent feet or abilities.",
     "waving": "A continuous friendly greeting expressed through the existing design, with a clear rise and return of the gesture. No required hands or arms.",
-    "jumping": "One small rise from the resting baseline, apex, descent and soft return, using this individual's own movement. Preserve scale and actual vertical motion; no required legs or body posture.",
-    "failed": "One subdued reaction and recovery expressed through this individual's own existing construction, without adding facial features or new symbols.",
+    "jumping": "If this body/stage can jump, show anticipation, a small lift, apex and soft return; otherwise use a supported pulse and recovery. Preserve scale and natural support; no invented abilities.",
+    "failed": "One subdued reaction and recovery expressed through this individual's own existing construction, without adding facial features.",
     "waiting": "One patient anticipation loop that fits this individual's existing design; a small progressive motion and return without replacing its identity. Keep the resting support and body height stable; do not make the whole body hop or become airborne. Use existing expressive parts rather than inventing feet or limbs.",
     "running": "One focused work/processing activity loop expressed through this individual's own existing construction. Keep its body base anchored and show visible attentive activity rather than locomotion. No new task prop or required limb menu.",
     "review": "One attentive inspection loop expressed through existing features or relationships, with continuous motion and recovery. No required eyes or arms.",
@@ -852,13 +853,15 @@ MOTION_SEQUENCES = {
 
 def parallel_row_prompt(args, state, count, action):
     motion = state in MOTION_SEQUENCES
-    contract = ("These are consecutive time samples of ONE continuous cyclic action, NOT alternative poses, expression stickers or a storyboard. Read left-to-right in time. Adjacent frames differ only by a small motion increment; the last frame transitions naturally into the first. Include visible motion, not identical copies. Fixed camera, body orientation and ground line. Keep the same props present in every frame; never introduce or swap props, symbols or detached effects. Preserve the existing eyes and cute living construction; express the action through this individual's own features without imposing a shared limb menu."
-                if motion else "These are ordered screen-space attention samples. Preserve the existing eyes, face and this individual's distinctive construction. Keep the body anchored and shift gaze naturally toward each target. Never rotate the whole sprite to imitate gaze. Make the cardinal readings unmistakable through the existing expressive parts: 000 up, 090 right, 180 down, 270 left; diagonal attention stays in its named screen quadrant. A neutral front-looking pose cannot stand in for left or right attention. Neighboring directions must form a continuous arc with consistent apparent body size and ground position.")
+    contract = ("These are consecutive time samples of ONE continuous cyclic action, NOT alternative poses, expression stickers or a storyboard. Read left-to-right in time. Adjacent frames differ only by a small motion increment; the last frame transitions naturally into the first. Include visible motion, not identical copies. Keep the same actual props and anatomy across frames. Small expressive effects are optional when readable and do not disturb extraction, registration or the character. Preserve this individual's cute living construction; express the action through its own features without imposing a shared limb menu."
+                if motion else "These are ordered screen-space state slots. Where this body can express attention/orientation, make the main directions readable through its existing features: 000 up, 090 right, 180 down, 270 left. Keep neighboring poses coherent, with stable apparent scale and support; do not chase exact intermediate angles or use artificial sprite warping to fake gaze. If the body/stage has no directional response, compatible neutral reuse is valid; do not invent eyes, organs or abilities to satisfy labels.")
     label = "WORKING / FOCUSED ACTIVITY (native slot id running)" if state == "running" else state
     return f"""Generate {label}: exactly {count} full-body {'animation frames of one continuous action' if motion else 'gaze samples'} in one horizontal strip.
 Use only the canonical base for character identity, proportions, palette, markings and props.
-Keep apparent scale consistent across the row. Keep the ground baseline fixed; jumping intentionally
-changes body height above it. Move the pose inside its viewport, never resize or recenter individual poses.
+Stage: {args.stage}. Body/stage capability takes precedence over literal state names; use equivalent expression
+when a named action is unavailable. Preserve this individual's undeveloped traits when young, without freezing its pose.
+Keep apparent scale and natural support consistent across the row; a real jump intentionally changes body height.
+Move the pose inside its viewport, never resize or recenter individual poses.
 Use identical fixed viewports in invisible equal-width slots,
 with generous padding and no clipping or overlap. Preserve the native pixel-art style.
 {contract}
@@ -1293,7 +1296,7 @@ def main() -> None:
             look_specs = [(state, directions) for state, _row, directions, _purpose in LOOK_ROWS] if args.no_mirror_look else LOOK_HALVES
             for state, directions in look_specs:
                 action = "Look directions in this exact left-to-right order: " + ", ".join(directions)
-                action += ". Angles run clockwise in screen coordinates: 0 up, 90 viewer-right, 180 down, 270 viewer-left. Express direction through this individual's own existing features and preserve its identity and scale. This row is independent; do not wait for any other row or cardinal image."
+                action += ". Slots run clockwise in screen coordinates: 0 up, 90 viewer-right, 180 down, 270 viewer-left. Express direction where this individual's body/stage permits; otherwise preserve compatible neutral poses. Keep identity and scale. This row is independent; do not wait for any other row or cardinal image."
                 write_text(row_prompt_dir / f"{state}.md", parallel_row_prompt(args, state, len(directions), action))
     jobs = {
         "schema_version": 2 if args.egg or args.parallel else 1,
