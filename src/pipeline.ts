@@ -9,6 +9,8 @@ import { pluginRoot } from './config.js';
 import type { Stage } from './model.js';
 
 const execute = promisify(execFile);
+/** Stays under the caller's usual one-minute tool limit; a stopped run resumes from its cached steps. */
+const HELPER_TIMEOUT_MS = 55000;
 const helperDirectory = () => path.join(pluginRoot(), 'vendor', 'hatch-pet', 'scripts');
 export interface PipelineInput {
   runDir: string;
@@ -55,6 +57,18 @@ export async function pipelineRuntime(python?: string) {
   };
 }
 
+/** Map a failed helper call; a timeout kill leaves empty output, so say so instead of guessing. */
+export function helperFailure(
+  error: Error & { stdout?: string; stderr?: string; code?: number | string | null; killed?: boolean },
+) {
+  return {
+    stdout: error.stdout ?? '',
+    stderr: error.stderr || error.message,
+    exitCode: error.code ?? 1,
+    timedOut: Boolean(error.killed),
+  };
+}
+
 async function callHelper(script: string, args: string[], runDir: string, python?: string, preparing = false) {
   if (!path.isAbsolute(runDir)) throw new Error('Pipeline runDir must be an absolute local path');
   const runtime = await pipelineRuntime(python);
@@ -64,10 +78,11 @@ async function callHelper(script: string, args: string[], runDir: string, python
     return { ok: false, runtime, run_dir: runDir, error: 'Installed deterministic image helper is missing' };
   let stdout = '',
     stderr = '',
-    exitCode = 0;
+    exitCode: number | string = 0,
+    timedOut = false;
   try {
     const output = await execute(runtime.python, [helper, ...args], {
-      timeout: 55000,
+      timeout: HELPER_TIMEOUT_MS,
       maxBuffer: 16 * 1024 * 1024,
       windowsHide: true,
       env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1', PYTHONUTF8: '1' },
@@ -75,17 +90,14 @@ async function callHelper(script: string, args: string[], runDir: string, python
     stdout = output.stdout;
     stderr = output.stderr;
   } catch (error) {
-    const output = error as Error & { stdout?: string; stderr?: string; code?: number };
-    stdout = output.stdout ?? '';
-    stderr = output.stderr ?? output.message;
-    exitCode = output.code ?? 1;
+    ({ stdout, stderr, exitCode, timedOut } = helperFailure(error as Error));
   }
   const reportFile =
     preparing && !existsSync(path.join(runDir, 'imagegen-jobs.json'))
       ? `${runDir}.prepare-${randomUUID()}.json`
       : path.join(runDir, 'qa', 'wrapper-runs', `${script.replace('.py', '')}-${Date.now()}-${randomUUID()}.json`);
   await mkdir(path.dirname(reportFile), { recursive: true });
-  await writeFile(reportFile, JSON.stringify({ runtime, helper, args, stdout, stderr, exitCode }, null, 2), {
+  await writeFile(reportFile, JSON.stringify({ runtime, helper, args, stdout, stderr, exitCode, timedOut }, null, 2), {
     flag: 'wx',
   });
   try {
@@ -96,7 +108,12 @@ async function callHelper(script: string, args: string[], runDir: string, python
       runtime,
       reportFile,
       run_dir: runDir,
-      error: stderr.trim() || 'Image helper did not return a structured result',
+      ...(timedOut
+        ? {
+            timedOut: true,
+            error: `Image helper stopped after ${HELPER_TIMEOUT_MS / 1000} s; run the same command again to resume from its cached steps`,
+          }
+        : { error: stderr.trim() || 'Image helper did not return a structured result' }),
     };
   }
 }

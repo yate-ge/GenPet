@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { pipelinePrepare, pipelineRuntime, type PipelineInput } from '../src/pipeline.js';
+import { helperFailure, pipelinePrepare, pipelineRuntime, type PipelineInput } from '../src/pipeline.js';
 import { retainFixture } from './evidence.js';
 
 test('an explicitly missing prepare request ID is rejected before creating a run', async t => {
@@ -47,4 +47,23 @@ test('the actual helper accepts a Unicode Pet name using a separate stable inter
   assert.equal(request.pet_id, 'genpet-unicode-request');
   assert.equal(request.display_name, '余弯');
   assert.ok(jobs.jobs.length > 0);
+});
+
+test('a helper killed by its time budget is reported as a resumable timeout, not an empty failure', () => {
+  const killed = Object.assign(new Error('Command failed: python process_pet_run.py'), {
+    stdout: '',
+    stderr: '',
+    code: null,
+    killed: true,
+    signal: 'SIGTERM',
+  });
+  assert.deepEqual(helperFailure(killed), {
+    stdout: '',
+    stderr: 'Command failed: python process_pet_run.py',
+    exitCode: 1,
+    timedOut: true,
+  });
+  const crashed = Object.assign(new Error('Command failed'), { stdout: '', stderr: 'Traceback', code: 2 });
+  assert.equal(helperFailure(crashed).timedOut, false);
+  assert.equal(helperFailure(crashed).stderr, 'Traceback');
 });

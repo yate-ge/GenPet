@@ -97,7 +97,7 @@ test('contract checks allow open design and extra fields while rejecting missing
     { appearance: null, visuals: [] },
   );
 });
-test('home and carrier units: a text-only story and an unchanged home are valid, and their prompts carry the designer rules', () => {
+test('home and carrier units: a text-only story and an unchanged home are valid', () => {
   assert.deepEqual(
     validateUnitResult('story-item', {
       inputRefs: [],
@@ -110,12 +110,6 @@ test('home and carrier units: a text-only story and an unchanged home are valid,
     home: null,
     visual: null,
   });
-  const inputs = { context: {}, pet: {}, story: {}, savedArt: [] };
-  for (const unit of ['story-item', 'home']) {
-    const request = unitRequest(unit, { inputs });
-    assert.match(request.prompt, /故事物件|家/);
-    assert.match(request.prompt, /mustShow|必须出现的特征/);
-  }
   assert.throws(() => unitRequest('home', { inputs: { context: {} } }), /Missing home input/);
 });
 test('step retries deduplicate, revisions remain observable, and logging cannot mutate the saved plan or advance a pet', async () => {

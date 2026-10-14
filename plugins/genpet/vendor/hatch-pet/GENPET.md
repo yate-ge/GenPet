@@ -1,6 +1,6 @@
 # GenPet image pipeline
 
-Upstream: OpenAI's curated Hatch Pet skill copied on 2026-09-24, commit `5e99b5b`, Apache-2.0. This vendored copy has GenPet changes; use this document and `framework/references/desktop.md` for current runs. Old standard/cardinal workflows remain for reading historical runs and comparison.
+Upstream: OpenAI's curated Hatch Pet skill copied on 2026-09-24, commit `5e99b5b`, Apache-2.0. This vendored copy has GenPet changes; use this document and `framework/references/desktop.md` for current runs. The upstream workflow text, QA references and the unused direction-QA, blind-review, running-left derivation and frame-inspection scripts were removed.
 
 Generation uses Codex's built-in imagegen tool. Python and Pillow perform deterministic extraction, shared registration, background removal, framewise mirroring, assembly and previews. They never invent a Pet, create a cloud Pet or update selection. No API key is needed. `src/pipeline.ts` locates the shipped helpers and probes the actual Python/Pillow runtime; the Agent may pass the Python path returned by host workspace dependencies.
 
@@ -11,9 +11,9 @@ prepare_pet_run.py --parallel --stage hatchling --pet-name NAME --pet-notes ACTU
 prepare_pet_run.py --egg --stage egg --pet-name NAME --pet-notes ACTUAL_SHELL_DESIGN --style-preset pixel --request-id ACTUAL_REQUEST_ID --output-dir ABSOLUTE_NEW_RUN
 ```
 
-The GenPet CLI's art-request result uses `.id` for the request and `.contract` for host format. Set pipeline-prepare's `requestId` and accept-art's first positional argument to that exact nonempty `.id`; do not read a nonexistent `.requestId` property.
+Pass the art-request `.id` as pipeline-prepare's `requestId`.
 
-Preserve the run. Copy each real generated output to its manifest `output_path`; keep the supplied original path/hash, small timing metadata and feasible original tool output. Do not serialize large base64 returns into executable code or shell arguments. A denied payload must not be chunked or resent through another API; preserve the denial and mark unavailable raw capture partial/unknown. Authorized copying of the tool's supplied PNG is not a reason to regenerate or reconstruct a fake raw response. Base art is one literal conventional egg or a cute cartoon pixel living companion with eyes. A hatchling visibly looks undeveloped. Detailed attributes remain the actual Pet design; no shared body or organ menu is imposed.
+Preserve the run. Copy each real generated output to its manifest `output_path` and keep its original path and hash. Base art is one literal conventional egg or a cute cartoon pixel living companion with eyes. A hatchling visibly looks undeveloped. Detailed attributes remain the actual Pet design; no shared body or organ menu is imposed.
 
 For a hatched Pet the new schema-2 manifest contains twelve jobs:
 
