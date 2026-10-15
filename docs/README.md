@@ -18,9 +18,6 @@
 | --- | --- |
 | [工程设计与待决问题](ENGINEERING.zh-CN.md) | 测试里发现的问题和当时的背景、宿主接入、持久记录与宠物编号。每个问题现在的解决方向见开发计划 |
 | [开发与验收摘要](evidence/README.md) | 当前缺陷修复、故事/形象补测、20分钟结果和未验收宿主范围；原始数据、图片与完整报告放 Google Drive |
-| [桌面端自动刷新模块](DESKTOP-REFRESH.zh-CN.md) | 历史刷新设计及当前边界；存图回读与屏幕显示分别验证 |
-| [原生 Pet 兼容格式](NATIVE-CONTRACT.md) | 桌面原生 Pet 的 V2 图集格式与核对方式 |
-| [0.5.0 本地开发版验证](NEW_VERSION_VALIDATION.zh-CN.md) | 0.5.0 那一轮的验证入口和工程检查。安装脚本引用这个路径，所以留在原位 |
 
 ## 安装和研究背景
 
@@ -43,8 +40,12 @@
 
 ## 归档（不再维护）
 
+过时的文档移进 `archive/<版本>/`，`docs/` 只放当前有效的文档。
+
+- [v0.10](archive/v0.10/RELEASE-0.10.2.zh-CN.md)：0.10.2 的版本记录。
+- [v0.9](archive/v0.9/DESKTOP-REFRESH.zh-CN.md)：0.9.3 时期的桌面端自动刷新模块记录；当前做法见 `plugins/genpet/skills/genpet/host/desktop.md`。
 - [plan-2026-10](archive/plan-2026-10/EARLY_DRAFTS.zh-CN.md)：开发计划 2026-10-08 到 2026-10-10 的早期草案，已被开发计划取代。
 - [v0.6](archive/v0.6/COMPANION_0_6.zh-CN.md)：0.6.0 命名、用户联系与性格那一轮的实现记录。
-- [v0.5](archive/v0.5/PRODUCT_DESIGN.zh-CN.md)：0.5.0 时期的产品设计，围绕 Dots 版本来写；文件开头列出了已经改变的内容。
-- [design-drafts](archive/design-drafts/)：0.5.0 开发早期的提示词草案，已并入 `framework/prompts` 并冻结。
-- [v0.4](archive/v0.4/)：0.5.0 重构前的机制、方案、项目状态、验证与演示。其中的 `roundling` 家族、固定天数成长以及 `adopt`、`advance` 等命令已移除。
+- [v0.5](archive/v0.5/PRODUCT_DESIGN.zh-CN.md)：0.5.0 时期的产品设计，围绕 Dots 版本来写；文件开头列出了已经改变的内容。同目录还有 [0.5.0 本地开发版验证](archive/v0.5/NEW_VERSION_VALIDATION.zh-CN.md)。
+- [design-drafts](archive/design-drafts/)：0.5.0 开发早期的提示词草案，已并入当时的 `framework/prompts`（现在在 `plugins/genpet/skills/genpet/`）并冻结。
+- [v0.4](archive/v0.4/)：0.5.0 重构前的机制、方案、项目状态、验证与演示，以及 2026-09-24 按当时宿主核对的 [原生 Pet 兼容格式](archive/v0.4/NATIVE-CONTRACT.md)。其中的 `roundling` 家族、固定天数成长以及 `adopt`、`advance` 等命令已移除。

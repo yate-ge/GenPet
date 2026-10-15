@@ -184,10 +184,10 @@ The files behind each part:
 | Core | `model.ts` | Saved data types and small validators. |
 | | `store.ts` | Read without side effects (`peek`), locked `transaction`, atomic writes. |
 | | `pending.ts`, `appearance.ts` | Pending reads, request IDs and artwork resolution without a host dependency. |
-| Everyday and transfer | `journey.ts`, `variety.ts`, `handoff.ts` | Journey recovery, seeded source/candidate choices, complete directory transfer and one writer. |
+| Everyday | `journey.ts`, `variety.ts` | Journey recovery and seeded source/candidate choices. |
 | Image support | `pipeline.ts`, `vendor/hatch-pet/` | Python discovery, parallel jobs after the base, directional mirrors, deterministic processing, bounded repairs and the final-image gate. |
 | Support | `config.ts`, `image.ts`, `migration.ts` | Paths and prompt files; pure-JS PNG/WebP reading; explicit import of v1 desktop records. |
-| Debugger | `debugger.ts`, `debugger-server.ts`, `inventory.ts` | Optional local developer console for this machine's GenPet records: stories, homes, saved atlases with action preview and debug appearance display; other host Pets in a secondary list; records are never changed. |
+| Debugger | `debugger/` | Optional local developer console for this machine's GenPet records: stories, homes, saved atlases with action preview and debug appearance display; other host Pets in a secondary list; records are never changed. |
 
 **Import rule.** `cli` → Story and Everyday features → Host adapters → Core; imports follow this direction only. Files stay in the flat layout; the groups describe the import rule.
 
@@ -204,7 +204,7 @@ The former dots/lifecycle and publish/art cycles are removed. Pending reads live
   backups/              full record before a reset or a legacy import
 ```
 
-Records live in the main environment. `GENPET_DATA_DIR` sets the root, with desktop/cloud subdirectories. A complete transfer includes records, units, chats, artwork and pause timing; the source stops writing, and the target verifies the transfer chain before taking ownership. Writes are locked and atomic; units live in separate files. Legacy records are discovered read-only and imported after confirmation. Fields are described in `plugins/genpet/skills/genpet/host/storage.md`.
+Records live in the main environment. `GENPET_DATA_DIR` sets the root, with desktop/cloud subdirectories. Moving a Pet's main environment to the other host is shelved (never validated on a real host); a record exported by an earlier version stays read-only. Writes are locked and atomic; units live in separate files. Legacy records are discovered read-only and imported after confirmation. Fields are described in `plugins/genpet/skills/genpet/host/storage.md`.
 
 The v3 `pet` has identity and three blocks. A story commits shared memory and current state; naming changes only the name:
 
@@ -254,7 +254,7 @@ Each rule is written once, in the place the table names; other files point to it
 | Same-ID cloud updates and actual artwork fingerprints | Implemented; actual V1–V4 stored RGBA and brief readbacks match | Dots own-avatar linkage |
 | Parallel images, mirrors, bounded repairs and two reviews | Implemented; new B travel set 17m42s and D mechanic set 13m24s, including 9 actions/16 directions, review, same-ID update and pixels/brief readback, no prior-art fallback | Current target20minutes; a few results are not a universal guarantee |
 | Diagnosis, same-identity repair and read-only debugger | Implemented; isolated browser reads preserve records | Actual G host conditions |
-| Pet brief, complete transfer, one writer and stale-transfer rejection | Implemented; isolated protocol tests pass | New Dots sessions and actual cross-end scheduling/readback |
+| Pet brief and one writer | Implemented; isolated protocol tests pass. Main-environment transfer shelved on 2026-10-15 | New Dots sessions and actual cross-end scheduling/readback |
 | Persistent Dots voice, setup and proactive exchange | Same-session stage/state replies and reported shared-rule readback observed | New-session and cross-environment work deferred at user's request |
 | One plugin, generated copies, version and install integrity | Separate genpet-dots removed;latest isolated0.10.0/86hash release gate passed | Actual menu and public release not yet performed |
 

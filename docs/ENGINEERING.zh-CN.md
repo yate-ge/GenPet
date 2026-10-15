@@ -1,6 +1,6 @@
 # GenPet 工程设计与待决问题
 
-产品目标和各模块的设计原则见 [开发计划](DEVELOPMENT_PLAN.zh-CN.md)，运行规则见 [meta.md](../plugins/genpet/skills/genpet/rules.md)。本文记录测试里发现的工程问题、0.5.0 开发版的实现与验证边界。下文各节保留问题当时的背景；每个问题现在的解决方向以开发计划为准。当前验证入口与测试记录见 [新版验证说明](NEW_VERSION_VALIDATION.zh-CN.md)。
+产品目标和各模块的设计原则见 [开发计划](DEVELOPMENT_PLAN.zh-CN.md)，运行规则见 [meta.md](../plugins/genpet/skills/genpet/rules.md)。本文记录测试里发现的工程问题、0.5.0 开发版的实现与验证边界。下文各节保留问题当时的背景；每个问题现在的解决方向以开发计划为准。当前验证入口与测试记录见 [新版验证说明](archive/v0.5/NEW_VERSION_VALIDATION.zh-CN.md)。
 
 ## 待决问题状态
 
@@ -332,4 +332,4 @@ Dots 官方说明其主体在云端运行，并拥有自己的电脑与浏览器
 
 两个安装包为 `plugins/genpet-dots`（主要版本）和 `plugins/genpet`（普通 Pet）。`framework/prompts`、`framework/references` 为共享可修改来源，构建时复制到各包；安装后的 Agent 读取本包文件。运行时保存六类数据，并将生成决策留给 Agent。
 
-本轮执行代码单元检查与 subagent 的静态形象／故事生成单元验证。按照用户要求，不执行动画生成或真实宿主端到端验证，也不通过本轮开发操作真实宠物或调度。2026-10-02 跨设备交付前，完整 release gate 已在隔离环境通过；这不证明实际生成效果或宿主显示。用户验证入口与当前测试记录见 [新版验证说明](NEW_VERSION_VALIDATION.zh-CN.md)。
+本轮执行代码单元检查与 subagent 的静态形象／故事生成单元验证。按照用户要求，不执行动画生成或真实宿主端到端验证，也不通过本轮开发操作真实宠物或调度。2026-10-02 跨设备交付前，完整 release gate 已在隔离环境通过；这不证明实际生成效果或宿主显示。用户验证入口与当前测试记录见 [新版验证说明](archive/v0.5/NEW_VERSION_VALIDATION.zh-CN.md)。

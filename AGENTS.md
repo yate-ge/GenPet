@@ -18,6 +18,7 @@
 - A new unit goes into its owning role's folder with an entry, including `file`, in `host/units.json`. A new slash command is a thin `plugins/genpet/skills/<command>/SKILL.md` that links into `skills/genpet/`.
 - Development and test procedures, test cases and evidence handling belong in `tests/agent/` and `docs/`, never in runtime files.
 - When moving or renaming a runtime file, update every link to it and check that all relative links in `plugins/genpet/skills/` resolve.
+- `docs/` holds only current documents. Move an outdated one to `docs/archive/<version>/`, fix its relative links and every link to it, and list it in the archive section of `docs/README.md`.
 
 # GenPet framework design rules
 

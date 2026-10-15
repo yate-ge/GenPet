@@ -1,8 +1,8 @@
 # 桌面端自动刷新模块（记录，待测试）
 
-记录日期：2026-10-04。代码版本 0.9.3（未发布）。本文只描述现状和待测清单，**尚未在真实 Codex 桌面端做过端到端验证**；2026-09-27 的 [IPC 实验](research/NATIVE_IPC_RESEARCH.zh-CN.md) 与 [切换实验](research/native-pet-live-switch.md) 对应的宿主版本见各文件开头，宿主升级后需重新核对。
+记录日期：2026-10-04。代码版本 0.9.3（未发布）。本文只描述现状和待测清单，**尚未在真实 Codex 桌面端做过端到端验证**；2026-09-27 的 [IPC 实验](../../research/NATIVE_IPC_RESEARCH.zh-CN.md) 与 [切换实验](../../research/native-pet-live-switch.md) 对应的宿主版本见各文件开头，宿主升级后需重新核对。
 
-2026-10-11 更新：下文保留原实验设计；当前实现先查本地到云端映射，映射条目更新实际 cloud ID 并刷新云端资源。新 `host-result` 不接受 `displayStatus: confirmed`，历史结果仅保留读取兼容；存图像素、选中状态和刷新送达都不证明屏幕里的实际图片。最新真实更新及未验收项见[证据索引](evidence/README.md)。
+2026-10-11 更新：下文保留原实验设计；当前实现先查本地到云端映射，映射条目更新实际 cloud ID 并刷新云端资源。新 `host-result` 不接受 `displayStatus: confirmed`，历史结果仅保留读取兼容；存图像素、选中状态和刷新送达都不证明屏幕里的实际图片。最新真实更新及未验收项见[证据索引](../../evidence/README.md)。
 
 ## 作用
 
