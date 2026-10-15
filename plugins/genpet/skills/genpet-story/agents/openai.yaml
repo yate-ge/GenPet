@@ -1,6 +1,6 @@
 interface:
   display_name: "genpet-story"
-  short_description: "马上看到宠物的新故事，或它的新换装、物件与家的变化"
+  short_description: "马上看到宠物的新故事，或它的新样子、物件与家的变化"
   default_prompt: "使用 $genpet-story 给我的宠物来一次新故事。"
 policy:
   allow_implicit_invocation: false

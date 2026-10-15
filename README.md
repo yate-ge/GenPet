@@ -27,7 +27,7 @@ You don't need to feed it or click on it. Every few hours it goes off and lives 
 ## Highlights
 
 - 🥚 **An egg that's only yours.** Every pet begins with a story of how you found its egg. The shell's colors and patterns hint at what's inside, but you only find out when it hatches.
-- 🌱 **It really grows up.** Egg → hatchling → juvenile → adult, and as an adult it sometimes slips into a surprising special form for a while. Each stage gets brand-new artwork.
+- 🌱 **It really grows up.** Egg → hatchling → juvenile → adult, and as an adult it occasionally transforms: a surprising, out-of-this-world change that wears off after a couple of days. Each stage gets brand-new artwork.
 - 🎨 **No two pets alike.** There's no fixed species list. Each pet is designed from its own adoption story, and stays recognizably itself from stage to stage.
 - 📖 **Something at every check.** While Codex is running, a check every 5 hours brings a new look, a story item, a home change or a short thought.
 - 💌 **Little gifts from its world.** Postcards with stamps, selfies, things it brought back, short comics, and its home, which changes as it lives there.
@@ -37,7 +37,7 @@ You don't need to feed it or click on it. Every few hours it goes off and lives 
 ## Watch it grow
 
 <p align="center">
-  <img src="docs/assets/growth.webp" alt="Five GenPets, each shown as egg, hatchling, juvenile, adult and special form" width="720">
+  <img src="docs/assets/growth.webp" alt="Five GenPets, each shown as egg, hatchling, juvenile, adult and transformation" width="720">
 </p>
 <p align="center"><sub>Egg → Hatchling → Juvenile → Adult → Special form. Five pets from our test runs, each with its own design.</sub></p>
 
@@ -91,7 +91,7 @@ Codex explains the data it uses and asks you to confirm. You then make choices t
 | Command | What it does |
 | --- | --- |
 | `/genpet-story` | Get a new story right now |
-| `/genpet-grow` | Skip ahead to the next stage (or a special form for adults) |
+| `/genpet-grow` | Skip ahead to the next stage (an adult transforms, or changes back if transformed; asks first) |
 | `/genpet-reset` | Say goodbye and adopt a new egg (the old record is backed up) |
 | `/genpet-switch` | List or switch the Codex desktop pet |
 | `/genpet-debugger` | Open a local page to browse your pet's records |
@@ -110,7 +110,7 @@ flowchart LR
   F --> B
 ```
 
-- **Stories drive every change.** A pet never changes "just because". Each story decides whether it gets a new mood or outfit, grows to the next stage, or enters a special form.
+- **Stories drive every change.** A pet never changes "just because". Each story decides whether it gets a new mood or outfit, grows to the next stage, or transforms.
 - **Growth has a pace.** Your pet can grow early when there's enough to show for it. If not, it still grows on time: an egg hatches within 5 hours, and the hatchling and juvenile stages each last up to a week.
 - **One pet, one identity.** Its design, personality, home and history are saved together, so every new look is still the same pet.
 - **Built on Codex.** The Codex Agent writes the stories and draws the art with its built-in image generation. GenPet handles the records, the artwork files and the desktop pet update.

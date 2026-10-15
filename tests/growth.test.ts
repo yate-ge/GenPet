@@ -6,7 +6,7 @@ import {
   stageAdvance,
   ensureGrowthClock,
   STAGE_CEILING,
-  SPECIAL_INTERVAL,
+  SPECIAL_COOLDOWN,
   SPECIAL_DURATION,
 } from '../src/growth.js';
 import { createPet, fresh, type Stage, type State } from '../src/model.js';
@@ -136,10 +136,11 @@ test('inactive time pauses stage and special ceilings while offline active time 
   clock.pausedAt = resumed + hour;
   assert.equal(growth(state, resumed + 20 * day)!.required, null);
 });
-test('special form boundaries and recovery reset the next interval, including prior pause baselines', () => {
+test('a special form is never forced in, ends within two days and is available again a week later', () => {
   const state = fixture('adult');
-  assert.equal(growth(state, START + SPECIAL_INTERVAL - 1)!.required, null);
-  assert.equal(growth(state, START + SPECIAL_INTERVAL)!.required, 'enter-special');
+  const day = 24 * 3600000;
+  assert.equal(growth(state, START + 30 * day)!.required, null);
+  assert.deepEqual(growth(state, START + 30 * day)!.special, { active: false, available: true, availableFrom: null });
   ensureGrowthClock(state);
   state.pet!.state.special = { description: 'Lantern glow', since: START + 1000, storyId: 'form' };
   stageAdvance(state, START + 1000);
@@ -148,6 +149,7 @@ test('special form boundaries and recovery reset the next interval, including pr
   const endedAt = START + SPECIAL_DURATION + 2000;
   state.pet!.state.special.endedAt = endedAt;
   stageAdvance(state, endedAt);
-  assert.equal(growth(state, endedAt + SPECIAL_INTERVAL - 1)!.required, null);
-  assert.equal(growth(state, endedAt + SPECIAL_INTERVAL)!.required, 'enter-special');
+  assert.equal(growth(state, endedAt + SPECIAL_COOLDOWN - 1)!.special!.available, false);
+  assert.equal(growth(state, endedAt + SPECIAL_COOLDOWN)!.special!.available, true);
+  assert.equal(growth(state, endedAt + 30 * day)!.required, null);
 });

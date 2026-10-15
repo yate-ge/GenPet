@@ -356,29 +356,50 @@ test('growth ceilings make the next story advance one stage, and adults enter an
     await cancelStory(store, next);
 
     await store.transaction(state => void (state.pet!.state.stage = 'adult'));
-    assert.equal(growth(await store.peek())!.required, null); // An adult first has its own interval.
-    await store.transaction(state => void (state.pet!.adoptedAt = ago(8 * DAY))); // No adult story: adoption time.
-    assert.equal(growth(await store.peek())!.required, 'enter-special');
+    await store.transaction(state => void (state.pet!.adoptedAt = ago(30 * DAY)));
+    assert.equal(growth(await store.peek())!.required, null); // Nothing forces a special form in.
     next = await begin('manual:adult');
-    await assert.rejects(() => planStory(store, next, story), /special form is due/);
-    await assert.rejects(() => planStory(store, next, { ...story, special: 'Shadowed' }), /requires an appearance/);
+    await assert.rejects(() => planStory(store, next, { ...story, special: 'Lantern glow' }), /requires an appearance/);
     await assert.rejects(() => planStory(store, next, { ...story, special: null }), /no special form to end/);
-    await planStory(store, next, { ...story, special: 'Shadowed after long nights', ...look });
+    await planStory(store, next, story);
+    await cancelStory(store, next);
+    next = await begin('manual:adult-special');
+    await planStory(store, next, { ...story, special: 'Lantern glow after a week of lantern making', ...look });
     await cancelStory(store, next);
 
     await store.transaction(state => {
-      state.pet!.state.special = { description: 'Shadowed', since: ago(3 * DAY), storyId: 'test' };
+      state.pet!.state.special = { description: 'Lantern glow', since: ago(3 * DAY), storyId: 'test' };
     });
     assert.equal(growth(await store.peek())!.required, 'end-special');
     next = await begin('manual:return');
-    await assert.rejects(() => planStory(store, next, { ...story, special: 'Still shadowed' }), /due to end/);
+    await assert.rejects(() => planStory(store, next, { ...story, special: 'Still glowing' }), /due to end/);
     await planStory(store, next, { ...story, special: null, ...look });
     await cancelStory(store, next);
 
     await store.transaction(state => {
-      state.pet!.state.special = { description: 'Shadowed', since: ago(3 * DAY), storyId: 'test', endedAt: ago(HOUR) };
+      state.pet!.state.special = {
+        description: 'Lantern glow',
+        since: ago(3 * DAY),
+        storyId: 'test',
+        endedAt: ago(HOUR),
+      };
     });
     assert.equal(growth(await store.peek())!.required, null);
+    next = await begin('manual:too-soon');
+    await assert.rejects(() => planStory(store, next, { ...story, special: 'Cloud wings', ...look }), /a week since/);
+    await cancelStory(store, next);
+    // An explicit grow may enter one sooner, and must change the form one way or the other.
+    next = (await beginStory(store, 'manual:grow-adult', { forceGrowth: true })).pending!.id;
+    await assert.rejects(() => planStory(store, next, story), /lets an adult enter a special form/);
+    await planStory(store, next, { ...story, special: 'Cloud wings', ...look });
+    await cancelStory(store, next);
+    await store.transaction(state => {
+      state.pet!.state.special = { description: 'Cloud wings', since: ago(HOUR), storyId: 'test' };
+    });
+    next = (await beginStory(store, 'manual:grow-back', { forceGrowth: true })).pending!.id;
+    await assert.rejects(() => planStory(store, next, story), /ends the current special form/);
+    await planStory(store, next, { ...story, special: null, ...look });
+    await cancelStory(store, next);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

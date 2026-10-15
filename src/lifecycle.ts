@@ -93,6 +93,14 @@ function validatePlan(state: State, input: StoryPlan): StoryPlan {
   } else if (input.special !== undefined) {
     plan.special = text(input.special, 'special form');
     if (pet.state.stage !== 'adult') throw new Error('Special forms begin in adulthood');
+    const special = growth(state)?.special;
+    if (!specialActive && !state.pending?.forceGrowth && special && 'available' in special && !special.available)
+      throw new Error(`A special form needs a week since the last one ended; available from ${special.availableFrom}`);
+  }
+  if (state.pending?.forceGrowth && pet.state.stage === 'adult') {
+    if (specialActive && plan.special !== null) throw new Error('An explicit grow ends the current special form');
+    if (!specialActive && typeof plan.special !== 'string')
+      throw new Error('An explicit grow lets an adult enter a special form');
   }
   if (input.personality !== undefined) {
     plan.personality = text(input.personality, 'personality');
@@ -124,8 +132,6 @@ function validatePlan(state: State, input: StoryPlan): StoryPlan {
   const required = growth(state)?.required;
   if (required === 'advance' && plan.stage === pet.state.stage)
     throw new Error(`Growth is due: this story advances to ${stages[stages.indexOf(pet.state.stage) + 1]}`);
-  if (required === 'enter-special' && typeof plan.special !== 'string')
-    throw new Error('A special form is due: this story enters one');
   if (required === 'end-special' && plan.special !== null)
     throw new Error('The special form is due to end in this story');
   if (plan.appearance?.reuseArtId) appearanceFor(state, plan.stage!, plan.appearance.reuseArtId);

@@ -29,7 +29,9 @@ for (let group = 1; group <= 5; group++) {
     try {
       const commit = async (trigger: string, plan: StoryPlan, failHost = false) => {
         const before = (await store.peek()).pet;
-        const begun = await beginStory(store, trigger, { forceGrowth: group === 1 }),
+        // Group 1 forces each stage change; a forced grow in adulthood always changes the special form.
+        const forceGrowth = group === 1 && !!before && !!plan.stage && plan.stage !== before.state.stage;
+        const begun = await beginStory(store, trigger, { forceGrowth }),
           op = begun.pending!.id;
         assert.equal((await beginStory(store, trigger)).pending!.id, op);
         if (begun.pending!.mode === 'initialization') await journeyReady(store, op);
@@ -138,8 +140,9 @@ for (let group = 1; group <= 5; group++) {
       const recovered = (await store.peek()).pet!;
       assert.equal(recovered.state.appearanceId, adultArt);
       assert.equal(recovered.state.special!.endedAt, now);
-      assert.equal(growth(await store.peek(), now + 7 * DAY - 1)!.required, null);
-      assert.equal(growth(await store.peek(), now + 7 * DAY)!.required, 'enter-special');
+      assert.equal(growth(await store.peek(), now + 7 * DAY - 1)!.special!.available, false);
+      assert.equal(growth(await store.peek(), now + 7 * DAY)!.special!.available, true);
+      assert.equal(growth(await store.peek(), now + 7 * DAY)!.required, null);
       now += 7 * DAY;
       await commit(`group:${group}:special-again`, {
         ...plain,

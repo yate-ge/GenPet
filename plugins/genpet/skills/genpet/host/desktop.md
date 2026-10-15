@@ -8,7 +8,7 @@
 
 宿主要求是透明 v2 atlas：1536×2288，8×11 格，每格 192×208；九种动作行有效格数 6、8、8、4、5、8、6、6、6，最后两行为十六方向。未用格透明，r0c6 是中性参考。格式检查不能证明可爱、阶段、动画或故事。
 
-槽位名称不等于角色必须完成的字面动作，按 ../rules.md「字面蛋」「检查顺序」表达和审核；--egg 的壳动作与中性方向格复用合法。
+槽位名称不等于角色必须完成的字面动作，按 ../rules.md「字面蛋」「检查顺序」「动作表达」表达和审核；--egg 的壳动作与中性方向格复用合法。
 
 通过 workspace dependencies 找到 Python，读取运行 manifest。`art-request` 的 `.id` 作为 `pipeline-prepare` 的 `requestId` 及 `accept-art` 第一个参数，`.contract` 是宿主格式。用当前 appearance 请求、真实参考和绝对 run 路径调用 prepare_pet_run.py；蛋用 --egg，其余按当前并行模式。不要覆盖原 run，重试使用它已经保存的工作。
 

@@ -43,7 +43,7 @@ async function action(body) {
 }
 
 const STAGES = { egg: '蛋', hatchling: '幼年', juvenile: '少年', adult: '成年' };
-const KINDS = { all: '全部', grow: '成长', appearance: '换装', home: '家', item: '物件', text: '纯文字' };
+const KINDS = { all: '全部', grow: '成长', appearance: '日常', home: '家', item: '物件', text: '纯文字' };
 const time = ms => (ms ? new Date(ms).toLocaleString() : '—');
 const stageBadge = stage => h(`span.badge.stage-${stage}`, STAGES[stage] ?? stage ?? '未知');
 const query = () => `?host=${encodeURIComponent(current.host)}&pet=${encodeURIComponent(current.id)}`;
@@ -233,7 +233,7 @@ function hero(state, shown) {
         pet.name,
         ' ',
         stageBadge(pet.state.stage),
-        pet.state.special ? h('span.badge.special', '特殊形态') : null,
+        pet.state.special ? h('span.badge.special', '幻化') : null,
       ),
       h('p.mono.muted', pet.id, ' ', copy(pet.id)),
       h(

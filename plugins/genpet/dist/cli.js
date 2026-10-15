@@ -5010,7 +5010,7 @@ import { randomUUID as randomUUID8 } from "node:crypto";
 var HOUR = 36e5;
 var DAY = 24 * HOUR;
 var STAGE_CEILING = { egg: 5 * HOUR, hatchling: 7 * DAY, juvenile: 7 * DAY };
-var SPECIAL_INTERVAL = 7 * DAY;
+var SPECIAL_COOLDOWN = 7 * DAY;
 var SPECIAL_DURATION = 2 * DAY;
 var EXPERIENCES_TO_GROW = 5;
 var iso = (time) => new Date(time).toISOString();
@@ -5089,16 +5089,21 @@ function growth(state, now = Date.now()) {
   let special = null;
   if (pet.state.stage === "adult") {
     const active = !!pet.state.special && pet.state.special.endedAt === void 0;
-    const start = active ? pet.state.special.since : Math.max(since, pet.state.special?.endedAt ?? 0);
     const specialPause = Math.max(0, paused - clock.specialPausedMs);
-    const due = start + (active ? SPECIAL_DURATION : SPECIAL_INTERVAL) + specialPause;
-    if (now >= due) required = active ? "end-special" : "enter-special";
-    special = {
-      active,
-      ...active ? { description: pet.state.special.description } : {},
-      since: iso(start),
-      ...active ? { endBy: iso(due) } : { enterBy: iso(due) }
-    };
+    if (active) {
+      const due = pet.state.special.since + SPECIAL_DURATION + specialPause;
+      if (now >= due) required = "end-special";
+      special = {
+        active,
+        description: pet.state.special.description,
+        since: iso(pet.state.special.since),
+        endBy: iso(due)
+      };
+    } else {
+      const endedAt = pet.state.special?.endedAt;
+      const from = endedAt === void 0 ? null : endedAt + SPECIAL_COOLDOWN + specialPause;
+      special = { active, available: from === null || now >= from, availableFrom: from === null ? null : iso(from) };
+    }
   }
   const experiences = clock.stage === pet.state.stage ? clock.experiences : 0;
   return {
@@ -6090,7 +6095,7 @@ function dueStory(state, now = Date.now(), timezone = state.schedule?.timezone ?
   const period = state.pet ? Math.floor((now - state.pet.adoptedAt) / CHECK_INTERVAL) : 0;
   const growing = growth(state, now);
   const special = growing?.special;
-  const deadlineAt = growing?.advanceBy ?? (special ? "endBy" in special ? special.endBy : special.enterBy : null);
+  const deadlineAt = growing?.advanceBy ?? (special && "endBy" in special ? special.endBy : null);
   const deadline = deadlineAt === null ? null : Date.parse(deadlineAt);
   const growthTrigger = growing?.required && state.pet ? `growth:${state.pet.id}:${growing.stage}:${growing.required}:${deadline}` : null;
   const triggerId = growthTrigger ?? (period >= 1 ? `period:${period}` : null);
@@ -6327,6 +6332,14 @@ function validatePlan(state, input) {
   } else if (input.special !== void 0) {
     plan.special = text(input.special, "special form");
     if (pet.state.stage !== "adult") throw new Error("Special forms begin in adulthood");
+    const special = growth(state)?.special;
+    if (!specialActive && !state.pending?.forceGrowth && special && "available" in special && !special.available)
+      throw new Error(`A special form needs a week since the last one ended; available from ${special.availableFrom}`);
+  }
+  if (state.pending?.forceGrowth && pet.state.stage === "adult") {
+    if (specialActive && plan.special !== null) throw new Error("An explicit grow ends the current special form");
+    if (!specialActive && typeof plan.special !== "string")
+      throw new Error("An explicit grow lets an adult enter a special form");
   }
   if (input.personality !== void 0) {
     plan.personality = text(input.personality, "personality");
@@ -6356,8 +6369,6 @@ function validatePlan(state, input) {
   const required = growth(state)?.required;
   if (required === "advance" && plan.stage === pet.state.stage)
     throw new Error(`Growth is due: this story advances to ${stages[stages.indexOf(pet.state.stage) + 1]}`);
-  if (required === "enter-special" && typeof plan.special !== "string")
-    throw new Error("A special form is due: this story enters one");
   if (required === "end-special" && plan.special !== null)
     throw new Error("The special form is due to end in this story");
   if (plan.appearance?.reuseArtId) appearanceFor(state, plan.stage, plan.appearance.reuseArtId);

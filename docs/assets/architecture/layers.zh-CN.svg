@@ -125,7 +125,7 @@
   <text class="grp" x="70" y="521">PetDesigner</text>
   <text class="rel" x="303" y="521" text-anchor="end" fill="#5B6657">每次换形象</text>
   <text class="sub" x="70" y="539" fill="#1F2A1C">宠物长什么样</text>
-  <text class="sub" x="70" y="555">蛋、各阶段、换装、特殊形态</text>
+  <text class="sub" x="70" y="555">蛋、各阶段、日常、幻化</text>
   <rect x="323" y="502" width="257" height="62" rx="6" fill="#F4F7FC" stroke="#C5D3EA"/>
   <text class="grp" x="335" y="521">HomeDesigner</text>
   <text class="rel" x="568" y="521" text-anchor="end" fill="#5B6657">家有变化时</text>

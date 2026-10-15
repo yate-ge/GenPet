@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | GeneDesigner | context（共用）、encounter、genes、personality | 领养；旧 Pet 缺项的一次补全 |
 | StoryDesigner | context（共用）、story、evolution、story-item、chat、output | 新故事、宠物对话与最终表达 |
-| PetDesigner | appearance | 新形象、成长、换装、特殊形态与复用 |
+| PetDesigner | appearance | 新形象、成长、日常、幻化与复用 |
 | HomeDesigner | home | 孵化建立家，或故事改变家 |
 | ImageReviewer | ImageReviewer | 实际基准图和整套图审核 |
 
@@ -22,7 +22,7 @@
 | personality | context、旅程、genes | 性格与拟声词/说话习惯 | 行动差异、真实特质来源、之后关系留给 memory |
 | story | context、pet、growth、time、recentContent、random | 经历、factIds、状态/图像/家/memory 意图 | 候选符合观察到的情境、一眼看得懂、被养着的 Pet、候选选择、每次内容、真实联系 |
 | evolution | context、pet、growth、story | stage、state、reason、special、visibleState、memory | 五次经历与上限、状态和身体变化、值得记的重写 |
-| appearance | genes、story、change、savedArt、hostRequirements | appearance 或 null、visuals | 同一身体、阶段、整套换装、真实复用 |
+| appearance | genes、story、change、savedArt、hostRequirements | appearance 或 null、visuals | 同一身体、阶段、整套日常样子与动作槽位、真实复用 |
 | home | context、pet、story、savedArt | 家或 null、全景请求或 null | 能住的整体、物件延续、孵化全景 |
 | story-item | context、pet、story、savedArt | reason、item 或 null | 物件形式、视觉目的、原样文字 |
 | chat | pet、message | text、note 或 null | 阶段、个性与 memory，状态不变 |

@@ -37,7 +37,6 @@ for (const [stage, change, hours] of [
   ['egg', 'advance', 9],
   ['hatchling', 'advance', 172],
   ['juvenile', 'advance', 172],
-  ['adult', 'enter-special', 172],
 ] as const) {
   test(`${stage}: a nonaligned growth deadline bypasses a completed ordinary period`, () => {
     const state = fixture(stage);
@@ -57,7 +56,7 @@ for (const [stage, change, hours] of [
   });
 }
 
-test('a special-form end and a later reentry have distinct stable triggers', () => {
+test('a special-form end has a stable trigger and nothing forces a later reentry', () => {
   const state = fixture('adult');
   state.pet!.state.special = { description: 'Synthetic form', since: START + 4 * HOUR, storyId: 'form-1' };
   stageAdvance(state, START + 4 * HOUR);
@@ -70,9 +69,9 @@ test('a special-form end and a later reentry have distinct stable triggers', () 
   assert.equal(dueStory(state, deadline).due, false);
   state.pet!.state.special!.endedAt = deadline;
   stageAdvance(state, deadline);
-  const later = dueStory(state, deadline + 7 * 24 * HOUR);
-  assert.equal(later.growthRequired, 'enter-special');
-  assert.notEqual(later.triggerId, due.triggerId);
+  const later = dueStory(state, deadline + 30 * 24 * HOUR);
+  assert.equal(later.growthRequired, null);
+  assert.ok(later.triggerId!.startsWith('period:'));
 });
 
 test('deadline completion covers that ordinary period, and only that period', () => {

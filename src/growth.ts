@@ -4,10 +4,11 @@ import { stages, text, identifier, type GrowthClock, type Stage, type State } fr
 const HOUR = 3_600_000,
   DAY = 24 * HOUR;
 export const STAGE_CEILING: Partial<Record<Stage, number>> = { egg: 5 * HOUR, hatchling: 7 * DAY, juvenile: 7 * DAY };
-export const SPECIAL_INTERVAL = 7 * DAY;
+/** A transformation (the `special` form) is never forced in; it lasts at most two days, a week apart. */
+export const SPECIAL_COOLDOWN = 7 * DAY;
 export const SPECIAL_DURATION = 2 * DAY;
 export const EXPERIENCES_TO_GROW = 5;
-export type GrowthChange = 'advance' | 'enter-special' | 'end-special';
+export type GrowthChange = 'advance' | 'end-special';
 const iso = (time: number) => new Date(time).toISOString();
 
 function stageOrigin(state: State): number {
@@ -97,16 +98,21 @@ export function growth(state: State, now = Date.now()) {
   let special = null;
   if (pet.state.stage === 'adult') {
     const active = !!pet.state.special && pet.state.special.endedAt === undefined;
-    const start = active ? pet.state.special!.since : Math.max(since, pet.state.special?.endedAt ?? 0);
     const specialPause = Math.max(0, paused - clock.specialPausedMs);
-    const due = start + (active ? SPECIAL_DURATION : SPECIAL_INTERVAL) + specialPause;
-    if (now >= due) required = active ? 'end-special' : 'enter-special';
-    special = {
-      active,
-      ...(active ? { description: pet.state.special!.description } : {}),
-      since: iso(start),
-      ...(active ? { endBy: iso(due) } : { enterBy: iso(due) }),
-    };
+    if (active) {
+      const due = pet.state.special!.since + SPECIAL_DURATION + specialPause;
+      if (now >= due) required = 'end-special';
+      special = {
+        active,
+        description: pet.state.special!.description,
+        since: iso(pet.state.special!.since),
+        endBy: iso(due),
+      };
+    } else {
+      const endedAt = pet.state.special?.endedAt;
+      const from = endedAt === undefined ? null : endedAt + SPECIAL_COOLDOWN + specialPause;
+      special = { active, available: from === null || now >= from, availableFrom: from === null ? null : iso(from) };
+    }
   }
   const experiences = clock.stage === pet.state.stage ? clock.experiences : 0;
   return {

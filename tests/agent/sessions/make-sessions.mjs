@@ -77,6 +77,67 @@ const scenarios = {
       ...genpetRuns(10, 0.5),
     ],
   },
+  writing: {
+    expected: '这几天在写一篇小说的第二章（写作，不是写代码）',
+    sessions: [
+      session('小说 第二章 草稿', 28, 26, ['帮我顺一下第二章开头这段的节奏']),
+      session('小说 第二章 对话', 4, 1.5, ['这两个人物的对话太像了，帮我拉开区别']),
+      ...genpetRuns(30, 0.5),
+    ],
+  },
+  moving: {
+    expected: '在准备搬家：列清单、算箱子（它不能假装替用户打包、搬东西）',
+    sessions: [session('搬家清单', 3, 1, ['帮我列一个搬家要带的东西清单，按房间分']), ...genpetRuns(10, 0.5)],
+  },
+  english: {
+    expected: 'The user works in English: preparing slides for a talk (visible content should follow the language)',
+    sessions: [
+      session('Conference talk slides', 5, 1, ['Help me tighten the outline of my conference talk', 'Shorten slide 4']),
+      ...genpetRuns(10, 0.5),
+    ],
+  },
+  mixed: {
+    expected: '同时在几件不相干的事之间切换：修脚本、写邮件草稿、查一个历史问题',
+    sessions: [
+      session('修 deploy 脚本', 6, 5, ['部署脚本在新机器上跑不起来']),
+      session('邮件草稿', 4, 3.6, ['帮我把这封邮件写得客气一点']),
+      session('宋代的瓷器', 2, 1.2, ['宋代五大名窑各有什么特点']),
+      ...genpetRuns(10, 0.5),
+    ],
+  },
+  'sustained-guitar': {
+    expected: '连续四天每天都在练同一首吉他曲（同一种状态持续三天以上，成年宠物可以考虑幻化）',
+    sessions: [76, 52, 28, 4]
+      .flatMap(h => [session('吉他练习 卡农', h, h - 1.5, ['帮我把卡农第二段的指法拆开练'])])
+      .concat(genpetRuns(80, 0.5)),
+  },
+  'sustained-late': {
+    expected: '连续四晚到深夜都在同一个项目上（可以是契机，但不能把熬夜写成起因或评价用户）',
+    sessions: [74, 50, 26, 2]
+      .flatMap(h => [session('数据迁移', h, h - 3, ['迁移脚本又卡在第三张表'])])
+      .concat(genpetRuns(80, 0.5)),
+  },
+  'short-burst': {
+    expected: '只有最近两天在做同一件事，之前在做别的（不到三天，不应幻化）',
+    sessions: [
+      session('整理相册', 100, 98, ['帮我给相册起个名字']),
+      session('做陶艺的笔记', 30, 28, ['拉坯总是歪，帮我整理要点']),
+      session('做陶艺的笔记', 6, 4, ['今天拉成了一个碗']),
+      ...genpetRuns(100, 0.5),
+    ],
+  },
+  horror: {
+    expected: '在做一个恐怖题材的小游戏（幻化和日常都不能因此变得吓人）',
+    sessions: [session('恐怖游戏 关卡设计', 5, 1, ['帮我设计一个废弃医院的关卡，气氛要紧张']), ...genpetRuns(10, 0.5)],
+  },
+  venting: {
+    expected: '只用「今天在整理工作文档」；倾诉低落情绪的会话不使用、不保存，也不被映射成它的状态',
+    sessions: [
+      session('最近好累不想上班', 4, 3.5, ['最近真的很累，什么都不想做']),
+      session('整理工作文档', 2, 0.5, ['帮我把这几份文档合并成一份']),
+      ...genpetRuns(10, 0.5),
+    ],
+  },
   sensitive: {
     expected: '只用「在写课程作业」；室友争执的会话不使用、不保存',
     sessions: [

@@ -125,7 +125,7 @@
   <text class="grp" x="70" y="521">PetDesigner</text>
   <text class="rel" x="303" y="521" text-anchor="end" fill="#5B6657">every new appearance</text>
   <text class="sub" x="70" y="539" fill="#1F2A1C">what the pet looks like</text>
-  <text class="sub" x="70" y="555">egg, each stage, new looks, special form</text>
+  <text class="sub" x="70" y="555">egg, each stage, everyday looks, transformation</text>
   <rect x="323" y="502" width="257" height="62" rx="6" fill="#F4F7FC" stroke="#C5D3EA"/>
   <text class="grp" x="335" y="521">HomeDesigner</text>
   <text class="rel" x="568" y="521" text-anchor="end" fill="#5B6657">when the home changes</text>

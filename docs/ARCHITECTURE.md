@@ -46,7 +46,7 @@ It calls a sub skill only when one kind of thing has to be decided.
 | --- | --- | --- |
 | GeneDesigner | Who the pet is, its soul: the adoption journey (the user chooses, up to 5 rounds), genes and personality (with its speaking habits). | Adoption only |
 | StoryDesigner | What happens and how it is told: the story, growth, the story item (one thing in the story worth seeing, drawn as one image), and replies in chat; it updates the pet's memory when a story finishes. | Every story and chat |
-| PetDesigner | What the pet looks like: the egg, each stage, new looks, a special form. | Every new appearance |
+| PetDesigner | What the pet looks like: the egg, each stage, everyday looks, a transformation, and how each animation slot is expressed. | Every new appearance |
 | HomeDesigner | The pet's home: layout, moving, the home view. | When the home changes |
 | ImageReviewer | Whether an image that was actually drawn passes. | Before an image is accepted |
 
@@ -170,7 +170,7 @@ The files behind each part:
 | --- | --- | --- |
 | Command table | `cli.ts` | Shared commands plus the package host's commands; help is generated. |
 | Story | `lifecycle.ts` | `begin`, `plan`, `finish`, `cancel`, `reset` and `story-output`. |
-| | `growth.ts` | Growth deadlines: which stage advance or special-form change the next story must include. |
+| | `growth.ts` | Growth deadlines: which stage advance or transformation end the next story must include; a transformation is never forced in and cannot start again within a week. |
 | | `art.ts` | `art-request` (what to draw) and `accept-art` (format checks, copy into assets). |
 | | `generation.ts` | `unit-request`, `verify-unit` (field checks only) and `record-step`. |
 | Everyday features | `schedule.ts` | Check periods, the saved schedule reference, time since the last story. |
@@ -220,7 +220,7 @@ pet
 | --- | --- | --- |
 | soul | Genes, personality (with its sounds and speaking habits), how it was adopted | GeneDesigner, once at adoption; it stays the same afterwards |
 | memory | One short text: the important things that happened between the pet and the user, and how they get along now | StoryDesigner, when a story finishes; rewritten only after a real interaction worth remembering |
-| state | Stage, the description of its current state, home, special form | StoryDesigner and HomeDesigner, every time a story finishes |
+| state | Stage, the description of its current state, home, transformation (field `special`) | StoryDesigner and HomeDesigner, every time a story finishes |
 
 Memory records shared experiences; knowledge about the user comes first from host memory. Legacy fields map into the three blocks. Missing memory/speaking habits can be supplemented once after confirmation from existing records; the initial supplement adds no experience and preserves the original personality text.
 
@@ -248,7 +248,7 @@ Each rule is written once, in the place the table names; other files point to it
 | --- | --- | --- |
 | v3, legacy records, separate units, multiple Pets and pause ledger | Implemented; isolated regressions pass | Actual intake and cross-end M cases |
 | Journey recovery, five-round cap, seeded source/candidate tools | Implemented; six designs and full hatchling sets; overall direction accepted by user | Seeded-hatch supplements do not prove six cold adoptions |
-| Memory, experience/deadline growth, special forms, text-only cap | Implemented;380 independently reviewed revised text views;actual D growth/F special-form submissions | Actual host deadline wake and displayed artwork |
+| Memory, experience/deadline growth, transformations (formerly special forms), text-only cap | Implemented;380 independently reviewed revised text views;actual D growth/F special-form submissions | Actual host deadline wake and displayed artwork |
 | Main entry, chat, naming and five internal roles | Implemented; twelve unit contracts | Actual routing and one menu entry per command |
 | validateArt/findAvatar/setAppearance/diagnose | Implemented; migration mapping, same-ID updates, separate downloads and supported refresh tested | Actual displayed image remains unavailable from these interfaces |
 | Same-ID cloud updates and actual artwork fingerprints | Implemented; actual V1–V4 stored RGBA and brief readbacks match | Dots own-avatar linkage |

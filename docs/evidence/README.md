@@ -4,6 +4,12 @@
 
 [成果汇报 PDF](https://drive.google.com/file/d/13oSP60mjBLSoC6R1xSrA9HYetCxodSng/view) · [Word](https://docs.google.com/document/d/1WP0MAtJONsqVWJNEyP7JhSVXjJ4is6Bx/edit) · [成果目录](https://drive.google.com/drive/folders/11WW2UEENWFibU8VG2jzycz_arD-6-tCF)
 
+## 2026-10-15 日常、幻化与动作表达（0.10.12，本地，未提交）
+
+- 「特殊形态」改为「幻化」：成年后一次超越自然的变身，有幻化对象，和自己的身份核心结合；契机是用户连续三天以上保持同一种状态（Agent 判断），不评价用户，有安全护栏。代码取消「成年一周内必须进入」，保留最多两天，新增结束后一周内不能再进入；`/genpet-grow` 在成年时必须进入或结束幻化，执行前和用户确认。字段沿用 `special`。
+- 「换装」改为「日常」，包括穿戴和它此刻的状态；动作改为按触发槽位表达，不要求字面动作，PetDesigner 设计、ImageReviewer 按槽位回应审核。
+- rules.md、单元、命令、AGENTS.md、开发计划、架构文档与图、四种语言 README、领养之后的内容案例（案例 E 改为火羽幻化、睡觉那条写明动作）、测试用例（新增 S28、S29，改 S8、S13、S23、V3、V4、E4，共 89 条）和 0.10.12 测试计划同步。Node 测试按新时间规则更新。没有真实运行和生图。
+
 ## 2026-10-15 对话名称与过程文字（0.10.12，本地，未提交）
 
 - 过程文字的来源：只读查看本机 Codex 会话记录，「我会用 genpet-switch 技能……」「I'm using the GenPet debugger skill……」都是 Agent 运行时自己发的 `commentary` 消息，不是定时任务提示词写出来的。`output.md`「文字边界」规定运行中不发中间消息，主 skill 开头先说这一条。只看了消息类型和开头几个字，没有保存会话内容。

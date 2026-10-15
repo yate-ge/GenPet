@@ -34,7 +34,7 @@ StoryPlan 的内容由各单元形成：
 }
 ```
 
-示例只展示字段，按此次实际情况省略不适用项。后续不带 genes/place/connection/personality 重写 soul；home/memory 省略时保持原样。special 为描述表示进入/延续，null 表示结束当前形态，未改变就省略。阶段一次最多前进一格；成长、特殊形态进出都要有效形象。contextRefs 引用已保存的 context 或用户资料，纯文字需真实用户相关引用。
+示例只展示字段，按此次实际情况省略不适用项。后续不带 genes/place/connection/personality 重写 soul；home/memory 省略时保持原样。special 记录幻化：为描述表示进入/延续，null 表示结束，未改变就省略；进入时距上次结束不足一周会被拒绝，明确 grow 除外。阶段一次最多前进一格；成长、幻化进出都要有效形象。contextRefs 引用已保存的 context 或用户资料，纯文字需真实用户相关引用。
 
 步骤和素材都是内部原始结果。source 记录图的实际生成与引用来源；旧 basis、designBasis、provenance、evidenceIds、carrier、image-review 读取时规范成新名，但历史出处不伪造。v2 的平铺字段归入三块，原有名字、ID、绑定、历史与图保留；v1 按 migrate-legacy 的实际格式与图迁入。只读发现旧记录先报告，经用户确认导入才作为当前 Pet，旧 ~/.genpet/dots 遗留不自动读写或混入新 Pet。
 

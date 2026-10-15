@@ -18,7 +18,7 @@ export function dueStory(
   const period = state.pet ? Math.floor((now - state.pet.adoptedAt) / CHECK_INTERVAL) : 0;
   const growing = growth(state, now);
   const special = growing?.special;
-  const deadlineAt = growing?.advanceBy ?? (special ? ('endBy' in special ? special.endBy : special.enterBy) : null);
+  const deadlineAt = growing?.advanceBy ?? (special && 'endBy' in special ? special.endBy! : null);
   const deadline = deadlineAt === null ? null : Date.parse(deadlineAt);
   const growthTrigger =
     growing?.required && state.pet ? `growth:${state.pet.id}:${growing.stage}:${growing.required}:${deadline}` : null;
