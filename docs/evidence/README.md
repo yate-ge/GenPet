@@ -1,8 +1,15 @@
 # GenPet 开发与验收摘要
 
-主干交付版本为 `0.10.3`；推送不会自动升级用户已安装的插件。原始报告、图片、请求及测试数据保留在本地 `output/` 和 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet，安装验收仅在隔离 CODEX_HOME 中执行。
+主干交付版本为 `0.10.4`；推送不会自动升级用户已安装的插件。原始报告、图片、请求及测试数据保留在本地 `output/` 和 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet，安装验收仅在隔离 CODEX_HOME 中执行。
 
 [成果汇报 PDF](https://drive.google.com/file/d/13oSP60mjBLSoC6R1xSrA9HYetCxodSng/view) · [Word](https://docs.google.com/document/d/1WP0MAtJONsqVWJNEyP7JhSVXjJ4is6Bx/edit) · [成果目录](https://drive.google.com/drive/folders/11WW2UEENWFibU8VG2jzycz_arD-6-tCF)
+
+## 2026-10-15 0.10.4 并行提取与子命令帮助
+
+- 根因：0.10.2修正后幼体首次处理在第12行提取时被55秒预算终止。测试机每行提取约4.5–5.4秒且串行，完整幼体约62秒，每次必然超时，并非偶发。
+- `process_pet_run.py`把独立行放进多进程并行提取，hatched jumping等idle完成后再做，缓存/归档/失败与补帧仍由主进程记录；无法开子进程时退回逐个执行。用同一份真实幼体素材在Mac 12核对照：串行30.349秒→并行10.623秒，168张输出解码RGBA全同。Windows测试机并行耗时未实测。
+- `COMMAND --help`返回该命令usage，不再把`--help`当参数解析；自带帮助的switch-pet不变。新增回归，修复前失败、修复后通过。
+- `verify:release`通过（Node156项155通过、1项Windows跳过；隔离安装0.10.4、74文件一致），Python管线25/25。本机Codex探测：`codex exec`可真实生图（1张冒烟49秒）并开子代理，但没有Pet宿主工具，云Pet更新闭环需桌面App线程。证据：`G:/我的云端硬盘/GenPet/开发档案/处理并行与子命令帮助 0.10.4 2026-10-15/`。已提交推送主干。
 
 ## 2026-10-14 0.10.3 精简与子代理交接
 

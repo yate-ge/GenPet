@@ -224,25 +224,6 @@ const commands = { ...shared, ...hostFor(store.host).commands };
 const [rawName, ...args] = argv;
 const name = rawName === '--help' ? 'help' : rawName;
 try {
-  if (
-    [
-      'plan-story',
-      'finish-story',
-      'cancel-story',
-      'host-result',
-      'record-step',
-      'journey-step',
-      'random-source',
-      'random-choice',
-      'story-output',
-    ].includes(name) &&
-    args[0]
-  )
-    store = await store.forOperation(args[0]);
-  else if (!petId && ['begin-story', 'due', 'name-pet', 'name-asked', 'note-chat', 'reset', 'new-pet'].includes(name)) {
-    const selected = await hostFor(store.host).selectedAvatar?.();
-    await store.resolveActive(selected?.available ? selected.id : undefined);
-  }
   const command = commands[name];
   if (!command)
     throw new Error(
@@ -250,7 +231,34 @@ try {
         .map(command => `  ${command.usage}`)
         .join('\n')}`,
     );
-  console.log(JSON.stringify(await command.run(args, store), null, 2));
+  // `COMMAND --help` prints that command's usage instead of parsing --help as an argument.
+  if (args[0] === '--help' && !command.usage.includes('--help')) {
+    console.log(JSON.stringify({ usage: command.usage }, null, 2));
+  } else {
+    if (
+      [
+        'plan-story',
+        'finish-story',
+        'cancel-story',
+        'host-result',
+        'record-step',
+        'journey-step',
+        'random-source',
+        'random-choice',
+        'story-output',
+      ].includes(name) &&
+      args[0]
+    )
+      store = await store.forOperation(args[0]);
+    else if (
+      !petId &&
+      ['begin-story', 'due', 'name-pet', 'name-asked', 'note-chat', 'reset', 'new-pet'].includes(name)
+    ) {
+      const selected = await hostFor(store.host).selectedAvatar?.();
+      await store.resolveActive(selected?.available ? selected.id : undefined);
+    }
+    console.log(JSON.stringify(await command.run(args, store), null, 2));
+  }
 } catch (error) {
   console.error((error as Error).message);
   process.exitCode = 1;

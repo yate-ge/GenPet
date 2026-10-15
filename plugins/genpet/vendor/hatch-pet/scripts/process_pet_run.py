@@ -6,11 +6,13 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
 import time
 import uuid
+from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -207,30 +209,71 @@ class Processor:
         self.reused = []
         self.blockers = []
 
-    def step(self, name, inputs, outputs, action, settings=None):
+    def cached(self, name, inputs, outputs, settings):
         signature = {"inputs": {str(p): digest(p) for p in inputs},
                      "code": self.code, "settings": settings}
         previous = self.cache.get(name, {})
-        if (previous.get("signature") == signature and all(p.is_file() for p in outputs)
-                and previous.get("outputs") == {str(p): digest(p) for p in outputs}):
+        reusable = (previous.get("signature") == signature and all(p.is_file() for p in outputs)
+                    and previous.get("outputs") == {str(p): digest(p) for p in outputs})
+        if reusable:
             self.reused.append(name)
-            return True
-        started = time.monotonic()
-        try:
+        else:
             for output in outputs:
                 archive_source(self.run, output, f"processed-{name}-{output.stem}")
-            action()
+        return signature, reusable
+
+    def record(self, name, signature, outputs, started, error=None):
+        if error is None:
             self.cache[name] = {"signature": signature,
                                 "outputs": {str(p): digest(p) for p in outputs}}
             self.executed.append({"step": name, "seconds": round(time.monotonic() - started, 3)})
-            write_json(self.cache_path, self.cache)
-            return True
-        except (OSError, ValueError, RuntimeError, SystemExit) as error:
+        else:
             self.cache.pop(name, None)
-            write_json(self.cache_path, self.cache)
             self.blockers.append({"step": name, "error": str(error),
                                   "action": "Inspect source/extraction and logs; do not automatically regenerate."})
-            return False
+        write_json(self.cache_path, self.cache)
+        return error is None
+
+    def step(self, name, inputs, outputs, action, settings=None):
+        signature, reusable = self.cached(name, inputs, outputs, settings)
+        if reusable:
+            return True
+        started = time.monotonic()
+        try:
+            action()
+        except STEP_ERRORS as error:
+            return self.record(name, signature, outputs, started, error)
+        return self.record(name, signature, outputs, started)
+
+    def steps(self, specs):
+        """Run independent CPU-bound steps in worker processes; each is cached and recorded like step()."""
+        todo = []
+        for name, inputs, outputs, function, args, settings in specs:
+            signature, reusable = self.cached(name, inputs, outputs, settings)
+            if not reusable:
+                todo.append((name, signature, outputs, function, args))
+        started = time.monotonic()
+        errors = {}
+        try:
+            with ProcessPoolExecutor(max_workers=max(1, min(len(todo), os.cpu_count() or 1))) as pool:
+                futures = [(item, pool.submit(item[3], *item[4])) for item in todo]
+                for item, future in futures:
+                    try:
+                        future.result()
+                    except STEP_ERRORS as error:
+                        errors[item[0]] = error
+        except (OSError, NotImplementedError):
+            # No usable worker processes here; run the same steps one by one.
+            errors = {}
+            for name, _signature, _outputs, function, args in todo:
+                try:
+                    function(*args)
+                except STEP_ERRORS as error:
+                    errors[name] = error
+        results = {name: True for name, *_ in specs}
+        for name, signature, outputs, _function, _args in todo:
+            results[name] = self.record(name, signature, outputs, started, errors.get(name))
+        return results
 
     def command(self, name, *args):
         result = subprocess.run([sys.executable, str(SCRIPTS / name), *map(str, args)],
@@ -240,6 +283,21 @@ class Processor:
         log.write_text(result.stdout + result.stderr, encoding="utf-8")
         if result.returncode:
             raise RuntimeError(f"{name} failed ({result.returncode}); see {log}")
+
+
+STEP_ERRORS = (OSError, ValueError, RuntimeError, SystemExit)
+
+
+def extract_row(source, extract_name, frames_root, key, reference_file, jump, copies, report):
+    reference = None
+    if reference_file:
+        with Image.open(reference_file) as opened:
+            reference = opened.convert("RGBA")
+    result = extract_state(source, extract_name, frames_root, parse_hex_color(key), 96, "auto", reference, jump)
+    for generated, target in zip(result["frames"], copies):
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(generated, target)
+    write_json(report, result)
 
 
 def idle_reference(frames, output):
@@ -558,42 +616,45 @@ def process_optimized(run, previews=False):
         specs = list(dict.fromkeys(specs)) if egg else [(state, count) for state, _row, count in ROW_SPECS]
         if not egg:
             specs += [(name, len(job.get("directions", [])) or 8) for name, job in jobs.items() if name.startswith("look-")]
-        for state, count in specs:
-            job = jobs[state]
-            if job["status"] == "fallback":
+        def extraction(state, count):
+            source = run / jobs[state]["output_path"]
+            frames = [run / "frames" / state / f"{index:02d}.png" for index in range(count)]
+            report = run / "qa" / f"extraction-{state}.json"
+            idle = rows.get("idle", [base_frame])[0] if state == "jumping" and not egg else None
+            args = (source, "running-right" if egg else state, run / "qa/egg-frames" / state if egg else run / "frames",
+                    key, idle, state == "jumping" and not egg, frames if egg else [], report)
+            return (f"extract-{state}", [source, *([idle] if idle else [])], [*frames, report], extract_row, args, key), frames
+
+        def settle(state, count, ok, frames):
+            if ok:
+                rows[state] = frames
+                return
+            failure = record_failure(run, state, next(b["error"] for b in reversed(processor.blockers) if b["step"] == f"extract-{state}"),
+                                     "Actual saved source failed deterministic extraction")
+            available.discard(state)
+            if failure["bounded_fallback"]:
+                job = next(item for item in read_json(run / "imagegen-jobs.json")["jobs"] if item["id"] == state)
+                processor.blockers = [b for b in processor.blockers if b["step"] != f"extract-{state}"]
                 frames, limitation = fallback_row(processor, job, base_frame, count, key)
                 if frames:
                     rows[state] = frames
                     limitations.append(limitation)
-                continue
-            source = run / job["output_path"]
-            frames = [run / "frames" / state / f"{index:02d}.png" for index in range(count)]
-            report = run / "qa" / f"extraction-{state}.json"
-            idle = rows.get("idle", [base_frame])[0] if state == "jumping" else None
-            def extract(source=source, state=state, report=report, idle=idle):
-                reference = None
-                if idle:
-                    with Image.open(idle) as opened:
-                        reference = opened.convert("RGBA")
-                extract_name = "running-right" if egg else state
-                result = extract_state(source, extract_name, run / "qa/egg-frames" / state if egg else run / "frames", parse_hex_color(key), 96, "auto", reference, state == "jumping" and not egg)
-                if egg:
-                    for index, generated in enumerate(result["frames"]):
-                        frames[index].parent.mkdir(parents=True, exist_ok=True)
-                        shutil.copyfile(generated, frames[index])
-                write_json(report, result)
-            if processor.step(f"extract-{state}", [source, *([idle] if idle else [])], [*frames, report], extract, key):
-                rows[state] = frames
-            else:
-                failure = record_failure(run, state, processor.blockers[-1]["error"], "Actual saved source failed deterministic extraction")
-                available.discard(state)
-                if failure["bounded_fallback"]:
-                    job = next(item for item in read_json(run / "imagegen-jobs.json")["jobs"] if item["id"] == state)
-                    processor.blockers.pop()
-                    frames, limitation = fallback_row(processor, job, base_frame, count, key)
+
+        # Rows are independent except the hatched jump, which is measured against the finished idle row.
+        for wave in ([spec for spec in specs if egg or spec[0] != "jumping"], [spec for spec in specs if not egg and spec[0] == "jumping"]):
+            batch = {}
+            for state, count in wave:
+                if jobs[state]["status"] == "fallback":
+                    frames, limitation = fallback_row(processor, jobs[state], base_frame, count, key)
                     if frames:
                         rows[state] = frames
                         limitations.append(limitation)
+                else:
+                    batch[state] = (count, *extraction(state, count))
+            results = processor.steps([spec for _count, spec, _frames in batch.values()])
+            for state, (count, spec, frames) in batch.items():
+                settle(state, count, results[spec[0]], frames)
+        rows = {state: rows[state] for state, _count in specs if state in rows}
         if len(rows) == len(specs) and not processor.blockers:
             if not egg:
                 original_rows = rows

@@ -7073,29 +7073,33 @@ var commands = { ...shared, ...hostFor(store.host).commands };
 var [rawName, ...args] = argv;
 var name = rawName === "--help" ? "help" : rawName;
 try {
-  if ([
-    "plan-story",
-    "finish-story",
-    "cancel-story",
-    "host-result",
-    "record-step",
-    "journey-step",
-    "random-source",
-    "random-choice",
-    "story-output"
-  ].includes(name) && args[0])
-    store = await store.forOperation(args[0]);
-  else if (!petId && ["begin-story", "due", "name-pet", "name-asked", "note-chat", "reset", "new-pet"].includes(name)) {
-    const selected = await hostFor(store.host).selectedAvatar?.();
-    await store.resolveActive(selected?.available ? selected.id : void 0);
-  }
   const command = commands[name];
   if (!command)
     throw new Error(
       `Commands:
 ${Object.values(commands).map((command2) => `  ${command2.usage}`).join("\n")}`
     );
-  console.log(JSON.stringify(await command.run(args, store), null, 2));
+  if (args[0] === "--help" && !command.usage.includes("--help")) {
+    console.log(JSON.stringify({ usage: command.usage }, null, 2));
+  } else {
+    if ([
+      "plan-story",
+      "finish-story",
+      "cancel-story",
+      "host-result",
+      "record-step",
+      "journey-step",
+      "random-source",
+      "random-choice",
+      "story-output"
+    ].includes(name) && args[0])
+      store = await store.forOperation(args[0]);
+    else if (!petId && ["begin-story", "due", "name-pet", "name-asked", "note-chat", "reset", "new-pet"].includes(name)) {
+      const selected = await hostFor(store.host).selectedAvatar?.();
+      await store.resolveActive(selected?.available ? selected.id : void 0);
+    }
+    console.log(JSON.stringify(await command.run(args, store), null, 2));
+  }
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;

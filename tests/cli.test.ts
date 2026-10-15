@@ -398,6 +398,21 @@ test('global help is successful, read-only and requires no host connection', asy
   );
 });
 
+test('command --help prints that usage without parsing --help as an argument or writing records', async () => {
+  await withHost(async host =>
+    withCli(host.pipePath, async (cli, home) => {
+      const data = path.join(path.dirname(home), 'data');
+      const before = await readdir(data);
+      for (const name of ['pipeline-prepare', 'finish-story', 'begin-story']) {
+        const result = output(await cli(name, '--help')) as { usage: string };
+        assert.ok(result.usage.startsWith(name), result.usage);
+      }
+      assert.equal(host.connections(), 0);
+      assert.deepEqual(await readdir(data), before);
+    }),
+  );
+});
+
 test('switch-pet help works without a host connection', async () => {
   await withHost(async host =>
     withCli(host.pipePath, async cli => {
