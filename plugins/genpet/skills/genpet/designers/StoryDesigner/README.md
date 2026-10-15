@@ -4,8 +4,8 @@ Use for an authorized or scheduled story, /genpet-chat and the final presentatio
 
 ## A story
 
-1. Bind the operation to the starting Pet ID and add `--pet PET_ID` to later calls. Read soul, memory, state, growth and time, call recent-content, then obtain context through ../../context/README.md. A forced grow uses `begin-story TRIGGER_ID --grow` after pending work is resolved.
-2. Form distinctly different, grounded candidates and save `{purpose:"story", candidates:[{id,description,contextRefs,outputs?}]}`; outputs lists the proposed appearance/home/item. `random-choice` selects; keep the seed, candidates and selection on resume. The type follows from the completed results.
+1. Bind the operation to the starting Pet ID and add `--pet PET_ID` to later calls. Read soul, memory, state, growth and time, call recent-content, then obtain context through ../../context/README.md, including the user's current situation from recent sessions (or decide not to observe this time). A forced grow uses `begin-story TRIGGER_ID --grow` after pending work is resolved.
+2. Form grounded candidates that fit the observed situation and differ clearly; how the Pet responds to that situation follows ../../rules.md「故事节奏」. Save `{purpose:"story", candidates:[{id,description,contextRefs,outputs?}]}`; outputs lists the proposed appearance/home/item. `random-choice` selects; keep the seed, candidates and selection on resume. The type follows from the completed results.
 3. Run story, then evolution, as separate results. Pass the appearance to [PetDesigner](../PetDesigner/README.md) and the home to [HomeDesigner](../HomeDesigner/README.md) only when needed; run story-item for the story's particular object.
 4. Build and save one plan, then continue artwork and host work without rerolling content. finish-story commits state, memory and history together; output reads the actual saved media and completed facts.
 
