@@ -144,8 +144,8 @@ GenPet 分为三层，大多数改动只涉及其中一层：
 
 | 层 | 位置 | 决定什么 |
 | --- | --- | --- |
-| 产品规则 | [`framework/prompts/meta.md`](framework/prompts/meta.md) | 宠物、蛋、故事和家必须是什么样（规则的唯一来源） |
-| 生成 | [`framework/prompts/`](framework/prompts/) | 每个步骤一份提示词：领养、设计、故事、形象、家…… |
+| 产品规则 | [`framework/skills/genpet/rules.md`](framework/skills/genpet/rules.md) | 宠物、蛋、故事和家必须是什么样（规则的唯一来源） |
+| 生成 | [`framework/skills/genpet/`](framework/skills/genpet/) | 每个步骤一份提示词：领养、设计、故事、形象、家…… |
 | 工程 | [`src/`](src/) | 身份、保存、重试、图像文件和桌面更新 |
 
 先看 [架构说明](docs/ARCHITECTURE.zh-CN.md)，再看 [贡献指南](CONTRIBUTING.md) 和 [文档索引](docs/README.md)。开发需要 Node.js 22+：`npm ci && npm run verify:fast`。

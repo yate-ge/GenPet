@@ -2183,21 +2183,24 @@ function packageHost() {
 }
 var dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), ".genpet");
 var codexHome = () => process.env.CODEX_HOME || path.join(homedir(), ".codex");
-function readPromptFile(fileName) {
+function readSkillFile(relative) {
   const candidates = [
-    path.resolve(here, "..", "framework", "prompts", fileName),
-    path.join(pluginRoot(), "prompts", fileName)
+    path.resolve(here, "..", "framework", "skills", "genpet", relative),
+    path.join(pluginRoot(), "skills", "genpet", relative)
   ];
   const file = candidates.find(existsSync);
-  if (!file) throw new Error(`Missing prompt file: ${fileName}`);
+  if (!file) throw new Error(`Missing skill file: ${relative}`);
   return readFileSync(file, "utf8");
+}
+function readUnits() {
+  return JSON.parse(readSkillFile("host/units.json")).units;
 }
 function readPrompt(name2) {
   if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(name2)) throw new Error("Invalid prompt module");
-  return readPromptFile(`${name2}.md`);
-}
-function readUnits() {
-  return JSON.parse(readPromptFile("units.json")).units;
+  if (name2 === "meta") return readSkillFile("rules.md");
+  const unit = readUnits()[name2];
+  if (!unit) throw new Error(`Unknown prompt module: ${name2}`);
+  return readSkillFile(unit.file);
 }
 
 // src/hosts/desktop/atlas.ts

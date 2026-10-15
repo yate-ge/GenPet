@@ -1,6 +1,6 @@
 # GenPet image pipeline
 
-Upstream: OpenAI's curated Hatch Pet skill copied on 2026-09-24, commit `5e99b5b`, Apache-2.0. This vendored copy has GenPet changes; use this document and `framework/references/desktop.md` for current runs. The upstream workflow text, QA references and the unused direction-QA, blind-review, running-left derivation and frame-inspection scripts were removed.
+Upstream: OpenAI's curated Hatch Pet skill copied on 2026-09-24, commit `5e99b5b`, Apache-2.0. This vendored copy has GenPet changes; use this document and `framework/skills/genpet/host/desktop.md` for current runs. The upstream workflow text, QA references and the unused direction-QA, blind-review, running-left derivation and frame-inspection scripts were removed.
 
 Generation uses Codex's built-in imagegen tool. Python and Pillow perform deterministic extraction, shared registration, background removal, framewise mirroring, assembly and previews. They never invent a Pet, create a cloud Pet or update selection. No API key is needed. `src/pipeline.ts` locates the shipped helpers and probes the actual Python/Pillow runtime; the Agent may pass the Python path returned by host workspace dependencies.
 

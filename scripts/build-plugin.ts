@@ -1,6 +1,6 @@
 /**
  * Build the desktop plugin package from the shared framework.
- * Copied into each package: framework/{prompts,references,debugger-web} and every framework/skills/* skill.
+ * Copied into each package: framework/debugger-web and every framework/skills/* skill (genpet holds rules, units and flows).
  * Kept per package: manifest, assets/icon.png, config/host.json, README, host-only skills, scripts/verify-install.mjs.
  * Generated: dist/ (bundled runtime) and package.json.
  */
@@ -20,8 +20,9 @@ for (const name of ['genpet']) {
   for (const required of ['README.md', 'config/host.json', 'scripts/verify-install.mjs'])
     await access(path.join(target, required));
 
-  for (const folder of ['prompts', 'references', 'debugger-web'])
-    await replace(path.join(framework, folder), target, folder);
+  await replace(path.join(framework, 'debugger-web'), target, 'debugger-web');
+  // Rules, units and flows moved into skills/genpet; drop the former top-level copies.
+  for (const folder of ['prompts', 'references']) await rm(path.join(target, folder), { recursive: true, force: true });
   const sharedNames = new Set(await readdir(path.join(framework, 'skills')));
   for (const skill of await readdir(path.join(target, 'skills')))
     if (skill !== 'genpet-switch' && skill !== 'genpet-debugger' && !sharedNames.has(skill))

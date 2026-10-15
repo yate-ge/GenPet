@@ -1,0 +1,193 @@
+{
+  "version": 3,
+  "units": {
+    "context": {
+      "file": "context/context.md",
+      "designer": "shared",
+      "inputs": [
+        "availableContext"
+      ],
+      "result": {
+        "facts": "array",
+        "traits": "array",
+        "unknowns": "array",
+        "read": "object"
+      }
+    },
+    "encounter": {
+      "file": "designers/GeneDesigner/encounter.md",
+      "designer": "GeneDesigner",
+      "inputs": [
+        "context",
+        "journey"
+      ],
+      "result": {
+        "text": "string",
+        "place": "string",
+        "connection": "string",
+        "factIds": "array",
+        "journey": "object"
+      }
+    },
+    "genes": {
+      "file": "designers/GeneDesigner/genes.md",
+      "designer": "GeneDesigner",
+      "inputs": [
+        "context",
+        "encounter",
+        "random"
+      ],
+      "result": {
+        "genes": "string",
+        "eggAppearance": "string",
+        "designReason": "string"
+      }
+    },
+    "personality": {
+      "file": "designers/GeneDesigner/personality.md",
+      "designer": "GeneDesigner",
+      "inputs": [
+        "context",
+        "encounter",
+        "genes"
+      ],
+      "result": {
+        "personality": "string"
+      }
+    },
+    "story": {
+      "file": "designers/StoryDesigner/story.md",
+      "designer": "StoryDesigner",
+      "inputs": [
+        "context",
+        "pet",
+        "growth",
+        "recentContent",
+        "random"
+      ],
+      "result": {
+        "text": "string",
+        "connection": "string",
+        "factIds": "array",
+        "stateIntent": "string",
+        "visualIntent": "string",
+        "homeIntent": "nullable-string",
+        "memoryIntent": "nullable-string"
+      }
+    },
+    "evolution": {
+      "file": "designers/StoryDesigner/evolution.md",
+      "designer": "StoryDesigner",
+      "inputs": [
+        "context",
+        "pet",
+        "growth",
+        "story"
+      ],
+      "result": {
+        "stage": "string",
+        "state": "string",
+        "reason": "string",
+        "special": "nullable-string",
+        "visibleState": "nullable-string",
+        "memory": "nullable-string"
+      },
+      "choices": {
+        "stage": [
+          "egg",
+          "hatchling",
+          "juvenile",
+          "adult"
+        ]
+      }
+    },
+    "appearance": {
+      "file": "designers/PetDesigner/appearance.md",
+      "designer": "PetDesigner",
+      "inputs": [
+        "genes",
+        "story",
+        "change",
+        "savedArt",
+        "hostRequirements"
+      ],
+      "result": {
+        "appearance": "nullable-object",
+        "visuals": "array"
+      }
+    },
+    "home": {
+      "file": "designers/HomeDesigner/home.md",
+      "designer": "HomeDesigner",
+      "inputs": [
+        "context",
+        "pet",
+        "story",
+        "savedArt"
+      ],
+      "result": {
+        "home": "nullable-string",
+        "visual": "nullable-object"
+      }
+    },
+    "story-item": {
+      "file": "designers/StoryDesigner/story-item.md",
+      "designer": "StoryDesigner",
+      "inputs": [
+        "context",
+        "pet",
+        "story",
+        "savedArt"
+      ],
+      "result": {
+        "reason": "string",
+        "item": "nullable-object"
+      }
+    },
+    "chat": {
+      "file": "designers/StoryDesigner/chat.md",
+      "designer": "StoryDesigner",
+      "inputs": [
+        "pet",
+        "message"
+      ],
+      "result": {
+        "text": "string",
+        "note": "nullable-string"
+      }
+    },
+    "ImageReviewer": {
+      "file": "designers/ImageReviewer/review.md",
+      "designer": "ImageReviewer",
+      "inputs": [
+        "visual",
+        "actualFile"
+      ],
+      "result": {
+        "file": "string",
+        "verdict": "string",
+        "observations": "array",
+        "repair": "nullable-string"
+      },
+      "choices": {
+        "verdict": [
+          "accept",
+          "repair"
+        ]
+      }
+    },
+    "output": {
+      "file": "output.md",
+      "designer": "StoryDesigner",
+      "inputs": [
+        "story",
+        "completed",
+        "availableMedia"
+      ],
+      "result": {
+        "text": "nullable-string",
+        "mediaRefs": "array"
+      }
+    }
+  }
+}

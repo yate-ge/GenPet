@@ -144,8 +144,8 @@ GenPet は 3 つの層でできていて、ほとんどの変更はそのうち 
 
 | 層 | 場所 | 決めること |
 | --- | --- | --- |
-| プロダクトのルール | [`framework/prompts/meta.md`](framework/prompts/meta.md) | ペット、タマゴ、物語、家がどうあるべきか（ルールの唯一の出どころ） |
-| 生成 | [`framework/prompts/`](framework/prompts/) | 手順ごとに 1 つのプロンプト：お迎え、デザイン、物語、姿、家… |
+| プロダクトのルール | [`framework/skills/genpet/rules.md`](framework/skills/genpet/rules.md) | ペット、タマゴ、物語、家がどうあるべきか（ルールの唯一の出どころ） |
+| 生成 | [`framework/skills/genpet/`](framework/skills/genpet/) | 手順ごとに 1 つのプロンプト：お迎え、デザイン、物語、姿、家… |
 | エンジニアリング | [`src/`](src/) | アイデンティティ、保存、再試行、画像ファイル、デスクトップの更新 |
 
 まずは [アーキテクチャの概要](docs/ARCHITECTURE.md)、次に [コントリビューションガイド](CONTRIBUTING.md) と [ドキュメント一覧](docs/README.md) をご覧ください。開発には Node.js 22 以降が必要です：`npm ci && npm run verify:fast`。

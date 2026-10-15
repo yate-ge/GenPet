@@ -144,8 +144,8 @@ GenPet has three layers, and most changes touch only one of them:
 
 | Layer | Where | What it decides |
 | --- | --- | --- |
-| Product rules | [`framework/prompts/meta.md`](framework/prompts/meta.md) | What a pet, egg, story and home must be (the single source of rules) |
-| Generation | [`framework/prompts/`](framework/prompts/) | One prompt per step: adoption, design, story, artwork, home… |
+| Product rules | [`framework/skills/genpet/rules.md`](framework/skills/genpet/rules.md) | What a pet, egg, story and home must be (the single source of rules) |
+| Generation | [`framework/skills/genpet/`](framework/skills/genpet/) | One prompt per step: adoption, design, story, artwork, home… |
 | Engineering | [`src/`](src/) | Identity, saving, retries, artwork files and desktop updates |
 
 Start with the [architecture overview](docs/ARCHITECTURE.md), then see [contributing](CONTRIBUTING.md) and the [docs index](docs/README.md). Development needs Node.js 22+: `npm ci && npm run verify:fast`.

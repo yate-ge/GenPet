@@ -11,4 +11,4 @@ An app-tools write needs the actual current turn ID. When the CLI returns `selec
 
 The local catalog does not list every cloud-only Pet. For those, read the host's actual `list_pets` result and use its existing selection API for the exact owned cloud ID, then independently read selection through the API and `switch-pet --current`. Do not pass an unlisted cloud ID to the local CLI or guess IDs from names. If the available host cannot select it, report that limitation and the one manual selection step using its actual unique label. A selection readback is not proof of the displayed artwork.
 
-Switch only when the user requests it. Selection changes are separate from updating the bound GenPet target; appearance updates preserve selection. Never reset records or use Computer Use. This entry is desktop-only. Follow `prompts/output.md` for conversation content.
+Switch only when the user requests it. Selection changes are separate from updating the bound GenPet target; appearance updates preserve selection. Never reset records or use Computer Use. This entry is desktop-only. Follow `skills/genpet/output.md` for conversation content.

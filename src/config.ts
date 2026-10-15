@@ -24,24 +24,21 @@ export function packageHost(): Host {
 export const dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), '.genpet');
 export const codexHome = () => process.env.CODEX_HOME || path.join(homedir(), '.codex');
 
-/** Source runs read the editable framework/; installed bundles read their own copy. */
-function readPromptFile(fileName: string) {
+/** The genpet skill holds rules, units and flows: framework/ in source runs, the installed copy otherwise. */
+function readSkillFile(relative: string) {
   const candidates = [
-    path.resolve(here, '..', 'framework', 'prompts', fileName),
-    path.join(pluginRoot(), 'prompts', fileName),
+    path.resolve(here, '..', 'framework', 'skills', 'genpet', relative),
+    path.join(pluginRoot(), 'skills', 'genpet', relative),
   ];
   const file = candidates.find(existsSync);
-  if (!file) throw new Error(`Missing prompt file: ${fileName}`);
+  if (!file) throw new Error(`Missing skill file: ${relative}`);
   return readFileSync(file, 'utf8');
 }
 
-export function readPrompt(name: string) {
-  if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(name)) throw new Error('Invalid prompt module');
-  return readPromptFile(`${name}.md`);
-}
-
 export interface UnitDefinition {
-  /** The role that owns the unit (documentation; see framework/references/generation-units.md). */
+  /** Unit prompt inside the genpet skill, next to the role that owns it. */
+  file: string;
+  /** The role that owns the unit (documentation; see host/units.md). */
   designer?: string;
   inputs: string[];
   result: Record<string, 'string' | 'array' | 'object' | 'nullable-string' | 'nullable-object'>;
@@ -49,5 +46,14 @@ export interface UnitDefinition {
 }
 
 export function readUnits(): Record<string, UnitDefinition> {
-  return JSON.parse(readPromptFile('units.json')).units;
+  return JSON.parse(readSkillFile('host/units.json')).units;
+}
+
+/** `meta` is the product rules; every other module is a unit named in units.json. */
+export function readPrompt(name: string) {
+  if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(name)) throw new Error('Invalid prompt module');
+  if (name === 'meta') return readSkillFile('rules.md');
+  const unit = readUnits()[name];
+  if (!unit) throw new Error(`Unknown prompt module: ${name}`);
+  return readSkillFile(unit.file);
 }

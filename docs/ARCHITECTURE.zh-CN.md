@@ -71,7 +71,7 @@
 
 `context` 两边共用：领养时给 GeneDesigner 提供用户特质，之后给 StoryDesigner 提供用户活动。
 
-内部角色文档在 `framework/skills/genpet/references/`，单元提示在 `framework/prompts/`。各规则的位置见[每条规则写在哪里](#每条规则写在哪里)。
+Agent 读的内容都在 `framework/skills/genpet/`：`rules.md`（产品规则）、`output.md`、`context/`（读取用户资料）、`designers/<角色>/`（各角色说明和它负责的单元）、`flows/`（领养、每篇故事、命名、定时）和 `host/`（桌面、Dots、存储与单元格式）。各规则的位置见[每条规则写在哪里](#每条规则写在哪里)。
 
 ## 一次故事的完整流程
 
@@ -204,7 +204,7 @@ Dots 的功能照常。蛋的阶段 Dots 和原来一样，只换了形象；幼
   backups/              重置或导入旧记录之前的完整备份
 ```
 
-记录保存在主环境；`GENPET_DATA_DIR` 改根目录，宿主子目录为 desktop/cloud。完整移交包含记录、步骤、对话、图和暂停计时；旧端冻结写入，目标校验 transfer 链再接管。每次修改加锁并原子提交，单元结果已分文件保存。旧记录只读发现，确认后显式导入。各字段见 `framework/references/storage.md`。
+记录保存在主环境；`GENPET_DATA_DIR` 改根目录，宿主子目录为 desktop/cloud。完整移交包含记录、步骤、对话、图和暂停计时；旧端冻结写入，目标校验 transfer 链再接管。每次修改加锁并原子提交，单元结果已分文件保存。旧记录只读发现，确认后显式导入。各字段见 `framework/skills/genpet/host/storage.md`。
 
 v3 的 `pet` 分成身份和三块；故事完成时提交相处记忆与当前状态，命名只改名字。
 
@@ -230,11 +230,11 @@ memory 记的是共同经历；对用户的了解优先读宿主记忆。旧记�
 
 | 规则 | 写在哪里 |
 | --- | --- |
-| 宠物、蛋、故事和 Avatar 必须是什么；故事多久来一次；用户怎样出现在故事里 | `framework/prompts/meta.md` |
+| 宠物、蛋、故事和 Avatar 必须是什么；故事多久来一次；用户怎样出现在故事里 | `framework/skills/genpet/rules.md` |
 | 一个单元的输入、结果和检查点 | 这个单元的提示词，以及它在 `units.json` 里的条目 |
-| 步骤的顺序，以及该执行哪条命令 | `framework/references/workflow.md` |
-| 宿主能做什么，以及它的格式 | `framework/references/desktop.md`、`dots.md` |
-| 用户能看到什么 | `framework/prompts/output.md` |
+| 步骤的顺序，以及该执行哪条命令 | `framework/skills/genpet/flows/` |
+| 宿主能做什么，以及它的格式 | `framework/skills/genpet/host/desktop.md`、`dots.md` |
+| 用户能看到什么 | `framework/skills/genpet/output.md` |
 | 一条命令什么时候适用，是否需要用户确认 | 对应的 skill，其余内容只链接到上面的文件 |
 | 由代码保证的规则：身份、pending、阶段、经历与期限、绑定、纯文字最多连续两次 | `src/` |
 

@@ -1,6 +1,6 @@
 # GenPet 文档索引
 
-运行时的产品规则只有一个来源：[framework/prompts/meta.md](../framework/prompts/meta.md)。各单元提示词在 [framework/prompts](../framework/prompts/)，运行约定与宿主接入说明在 [framework/references](../framework/references/)。
+运行时的产品规则只有一个来源：[framework/skills/genpet/rules.md](../framework/skills/genpet/rules.md)。各角色和它负责的单元提示词在 [designers/](../framework/skills/genpet/designers/)，流程在 [flows/](../framework/skills/genpet/flows/)，宿主接入与存储在 [host/](../framework/skills/genpet/host/)。
 
 ## 开发从这里读起
 

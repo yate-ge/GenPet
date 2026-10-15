@@ -73,8 +73,9 @@ for (const relative of [
   'dist/cli.js',
   'dist/webp_dec.wasm',
   'skills/genpet-story/SKILL.md',
-  'prompts/meta.md',
-  'references/workflow.md',
+  'skills/genpet/rules.md',
+  'skills/genpet/host/units.json',
+  'skills/genpet/flows/stories.md',
   'vendor/hatch-pet/SKILL.md',
 ]) {
   assert.ok(await exists(path.join(plugin, relative)), `Missing from plugin: ${relative}`);
@@ -85,6 +86,8 @@ for (const relative of [
   'assets/examples',
   'assets/pets',
   'src',
+  'prompts',
+  'references',
   'tests',
   'node_modules',
   'scripts/package.ts',

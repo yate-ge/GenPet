@@ -71,7 +71,7 @@ Sub skills are roles the same Agent plays in turn. They are called in two orders
 
 `context` serves both: at adoption it gives GeneDesigner the user's traits, and afterwards it gives StoryDesigner the user's activity.
 
-Internal role documents live in `framework/skills/genpet/references/`; unit prompts live in `framework/prompts/`. See [Where each rule is written](#where-each-rule-is-written).
+Everything the Agent reads lives in `framework/skills/genpet/`: `rules.md` (product rules), `output.md`, `context/` (reading user context), `designers/<Role>/` (each role's README and the units it owns), `flows/` (adoption, each story, naming, scheduling) and `host/` (desktop, Dots, storage and unit contracts). See [Where each rule is written](#where-each-rule-is-written).
 
 ## One story, end to end
 
@@ -204,7 +204,7 @@ The former dots/lifecycle and publish/art cycles are removed. Pending reads live
   backups/              full record before a reset or a legacy import
 ```
 
-Records live in the main environment. `GENPET_DATA_DIR` sets the root, with desktop/cloud subdirectories. A complete transfer includes records, units, chats, artwork and pause timing; the source stops writing, and the target verifies the transfer chain before taking ownership. Writes are locked and atomic; units live in separate files. Legacy records are discovered read-only and imported after confirmation. Fields are described in `framework/references/storage.md`.
+Records live in the main environment. `GENPET_DATA_DIR` sets the root, with desktop/cloud subdirectories. A complete transfer includes records, units, chats, artwork and pause timing; the source stops writing, and the target verifies the transfer chain before taking ownership. Writes are locked and atomic; units live in separate files. Legacy records are discovered read-only and imported after confirmation. Fields are described in `framework/skills/genpet/host/storage.md`.
 
 The v3 `pet` has identity and three blocks. A story commits shared memory and current state; naming changes only the name:
 
@@ -230,11 +230,11 @@ Each GenPet has its own directory, artwork and binding. Readable host selection 
 
 | Kind of rule | Written in |
 | --- | --- |
-| What a pet, egg, story and Avatar must be; how often stories come; how the user appears in them | `framework/prompts/meta.md` |
+| What a pet, egg, story and Avatar must be; how often stories come; how the user appears in them | `framework/skills/genpet/rules.md` |
 | One unit's inputs, result and review points | That unit's prompt and its entry in `units.json` |
-| The order of steps and which command to run | `framework/references/workflow.md` |
-| What a host can do and its formats | `framework/references/desktop.md`, `dots.md` |
-| What the user sees | `framework/prompts/output.md` |
+| The order of steps and which command to run | `framework/skills/genpet/flows/` |
+| What a host can do and its formats | `framework/skills/genpet/host/desktop.md`, `dots.md` |
+| What the user sees | `framework/skills/genpet/output.md` |
 | When a command applies and whether it needs the user's confirmation | The skill, which otherwise only links to the files above |
 | Code guarantees: identity, pending, stage/experience/deadline growth, binding and two consecutive text-only stories at most | `src/` |
 
