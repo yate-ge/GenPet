@@ -1,8 +1,17 @@
 # GenPet 开发与验收摘要
 
-主干交付版本为 `0.10.6`；推送不会自动升级用户已安装的插件。原始报告、图片、请求及测试数据保留在本地 `output/` 和 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet，安装验收仅在隔离 CODEX_HOME 中执行。
+主干交付版本为 `0.10.7`；推送不会自动升级用户已安装的插件。原始报告、图片、请求及测试数据保留在本地 `output/` 和 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet，安装验收仅在隔离 CODEX_HOME 中执行。
 
 [成果汇报 PDF](https://drive.google.com/file/d/13oSP60mjBLSoC6R1xSrA9HYetCxodSng/view) · [Word](https://docs.google.com/document/d/1WP0MAtJONsqVWJNEyP7JhSVXjJ4is6Bx/edit) · [成果目录](https://drive.google.com/drive/folders/11WW2UEENWFibU8VG2jzycz_arD-6-tCF)
+
+## 2026-10-15 0.10.5–0.10.7 调试器列出本机所有宠物与切换；git 历史清理
+
+- 0.10.5：调试器列出本机所有 Pet，来源包括内置目录、`~/.codex/pets`、宿主云端缓存（`cloud-pet-artwork-cache`）、迁移映射，以及 `~/.genpet` 的 desktop/cloud 记录。每只分为本机宿主 GenPet（本机有完整记录）、GenPet、非 GenPet、未知。本机不缓存云端宠物名称，所以 `debugger --host-pets FILE` 会保存 Agent 拿到的 `list_pets` 结果，debugger 技能也同步说明。本机实测：内置 9 只，云端 13 只；有宿主列表后，按名称判定 GenPet 10 只、非 GenPet 12 只，本机宿主 GenPet 0 只（没有 `~/.genpet`）。
+- 页面空白：重装删除了 0.10.4 目录，但 0.10.4 的调试器进程还在运行，而且它先发出 200 头再读文件，所以返回空页面。修复是先读文件再发头；启动器发现 `pluginRoot` 不同的调试器时，先停掉再重启。这项修复随另一个会话的 0.10.6 提交一起进了主干。
+- 0.10.7 恢复切换：0.4.0（2026-09-28，Windows 实测）用 app-tools `write_settings` 加上自己生成的 turnId 写入 `selected-avatar-id`。v3（10-11）加了“必须有进行中轮次”的限制，但没有留下实测记录。只读查看 ChatGPT.app（codex-cli 0.162.0-alpha.17.2）后确认：MCP 路径不检查轮次是否进行中，`selected-avatar-id` 是 agent read-write，不需要审批；桌面 IPC 没有设置方法。页面显示宿主当前选中的宠物，每行有切换按钮，只改宿主的选择、不改记录，画面保持未确认。从 Codex 启动时，启动器会替换没有 app-tools 连接的调试器。本机 Mac 尚未实际点过切换（macOS 可能另有进程身份校验）。
+- 0.10.5 和 0.10.7 的 `verify:release` 都通过（Node 158 项：156 通过、2 跳过；隔离安装 74 个文件一致）。本机 Codex 已从市场 `08f9a95` 安装 0.10.7，`verify-install` 74 个文件一致。
+- git 历史清理：原历史 147 MB，克隆需 59 秒，超过 Codex 插件市场 30 秒的限制（7 次刷新有 6 次超时）。用 filter-branch 从所有提交中去掉 `docs/evidence/`（`README.md` 除外）、`tmp/`、`assets/examples`、`assets/pets`，改写了 `main`、`codex/full-implementation` 和 `v0.1.1`。135 个提交逐一比对：只有这些路径不同，作者、时间和说明不变，`main` 的目录树不变。用 `--force-with-lease` 推送。现在 `.git` 5.6 MB，克隆后共 11 MB，耗时 3.6 秒。
+- 完整原始历史（含 PR 引用）打包在 `G:/我的云端硬盘/GenPet/开发档案/git历史备份 2026-10-15/`。改写后提交哈希全变了：本日志更早小节记的旧哈希要到这个备份里查；其他旧克隆需要重新克隆或 `reset --hard origin/main`，不要从旧克隆推送。GitHub 的 `refs/pull/1–4`（09-25 已合并）仍指向含早期示例图片的旧提交（不含证据），默认克隆不会下载；要彻底删除需联系 GitHub 支持。
 
 ## 2026-10-15 生图并发实测（本机 Codex exec）与 0.10.6 分工调整
 
