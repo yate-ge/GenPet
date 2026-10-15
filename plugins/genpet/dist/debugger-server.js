@@ -4920,6 +4920,7 @@ async function switchPet(args) {
   return selectPet(entry.id);
 }
 var SELECTED_KEY = "selected-avatar-id";
+var hasAppTools = () => Boolean(process.env.CODEX_APP_TOOLS_PIPE_PATH?.trim() && process.env.CODEX_THREAD_ID?.trim());
 function appToolsConnection(options) {
   const pick = (key2, env) => (Object.hasOwn(options, key2) ? options[key2] : env)?.trim();
   const pipePath = pick("pipePath", process.env.CODEX_APP_TOOLS_PIPE_PATH);
@@ -4943,8 +4944,6 @@ function projectSelection(value) {
 async function callSettings(options, petId) {
   const { pipePath, threadId, timeoutMs } = appToolsConnection(options);
   const turnId = (Object.hasOwn(options, "turnId") ? options.turnId : process.env.CODEX_TURN_ID)?.trim();
-  if (petId !== void 0 && !turnId)
-    throw new Error("The current active turn ID is unavailable; use the host select_pet tool for known pets.");
   const id = 1;
   const request = {
     jsonrpc: "2.0",
@@ -4957,8 +4956,8 @@ async function callSettings(options, petId) {
       callerSource: "codex",
       threadId,
       callId: `mcp-call-${randomUUID3()}`,
-      // The host checks the active turn on writes; a fabricated ID cannot authorize a write.
-      turnId: turnId ?? `mcp-turn-${randomUUID3()}`
+      // Outside a turn (the debugger) this follows the bundled app-tools MCP's own fallback metadata, as in 0.4.0.
+      turnId: turnId || `mcp-turn-${randomUUID3()}`
     }
   };
   return new Promise((resolve, reject) => {
@@ -5814,7 +5813,13 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
       if (req.headers.origin && req.headers.origin !== `http://${host}`) return json({ error: "Origin rejected" }, 403);
       const url = new URL(req.url || "/", "http://" + host);
       if (req.method === "GET" && url.pathname === "/api/health")
-        return json({ service: "genpet-debugger", root: store.root, pluginRoot: pluginRoot() });
+        return json({
+          service: "genpet-debugger",
+          root: store.root,
+          pluginRoot: pluginRoot(),
+          appTools: hasAppTools()
+        });
+      if (req.method === "GET" && url.pathname === "/api/selection") return json(await readSelectedPet());
       if (req.method === "GET" && url.pathname === "/api/state")
         return json({ state: await target(url).peek(), token });
       if (req.method === "GET" && url.pathname === "/api/pets") return json(await store.listPets());
@@ -5837,6 +5842,14 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
           server.close();
           server.closeIdleConnections();
           return;
+        }
+        if (input.action === "switch-pet") {
+          if (store.host !== "desktop") throw new Error("Only the desktop host can switch its Pet here");
+          const known = (await readInventory(store.base)).pets.some(
+            (pet) => pet.id === input.petId && pet.sources.some((source) => source !== "record")
+          );
+          if (!known) throw new Error("Unknown host Pet ID");
+          return json({ ok: true, result: await selectPet(input.petId) });
         }
         return json({ error: "Use the story workflow to change pet records" }, 400);
       }

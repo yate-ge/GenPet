@@ -3,6 +3,7 @@ import path from 'node:path';
 /** `debugger`: start (or reuse) the optional local record viewer for this package's data. */
 import { dataRoot, packageHost, pluginRoot } from './config.js';
 import { Store } from './store.js';
+import { hasAppTools } from './hosts/desktop/switch.js';
 export async function launchDebugger(
   port = Number(process.env.GENPET_PORT || (packageHost() === 'cloud' ? 47832 : 47831)),
 ) {
@@ -20,8 +21,9 @@ export async function launchDebugger(
     const value = await response.json().catch(() => null);
     if (value?.service !== 'genpet-debugger' || value.root !== root)
       throw new Error('Debugger port belongs to another service or data directory');
-    if (value.pluginRoot === pluginRoot()) return true;
-    // A debugger left running by an earlier plugin version serves files that an upgrade may have removed.
+    if (value.pluginRoot === pluginRoot() && (value.appTools || !hasAppTools())) return true;
+    // Replace a debugger from an earlier plugin version (its files may be gone after an upgrade) or one
+    // started without the Codex app-tools connection that switching needs.
     const { token } = await (await fetch(url + '/api/state')).json();
     await fetch(url + '/api/action', {
       method: 'POST',

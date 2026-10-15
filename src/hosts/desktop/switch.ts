@@ -178,6 +178,10 @@ export async function switchPet(args: string[]) {
 
 const SELECTED_KEY = 'selected-avatar-id';
 
+/** Whether this process inherited a Codex session's app-tools connection. */
+export const hasAppTools = () =>
+  Boolean(process.env.CODEX_APP_TOOLS_PIPE_PATH?.trim() && process.env.CODEX_THREAD_ID?.trim());
+
 function appToolsConnection(options: AppToolsOptions) {
   const pick = (key: 'pipePath' | 'threadId', env: string | undefined) =>
     (Object.hasOwn(options, key) ? options[key] : env)?.trim();
@@ -208,8 +212,6 @@ function projectSelection(value: unknown): Selection {
 async function callSettings(options: AppToolsOptions, petId?: string): Promise<Selection> {
   const { pipePath, threadId, timeoutMs } = appToolsConnection(options);
   const turnId = (Object.hasOwn(options, 'turnId') ? options.turnId : process.env.CODEX_TURN_ID)?.trim();
-  if (petId !== undefined && !turnId)
-    throw new Error('The current active turn ID is unavailable; use the host select_pet tool for known pets.');
   const id = 1;
   const request = {
     jsonrpc: '2.0',
@@ -222,8 +224,8 @@ async function callSettings(options: AppToolsOptions, petId?: string): Promise<S
       callerSource: 'codex',
       threadId,
       callId: `mcp-call-${randomUUID()}`,
-      // The host checks the active turn on writes; a fabricated ID cannot authorize a write.
-      turnId: turnId ?? `mcp-turn-${randomUUID()}`,
+      // Outside a turn (the debugger) this follows the bundled app-tools MCP's own fallback metadata, as in 0.4.0.
+      turnId: turnId || `mcp-turn-${randomUUID()}`,
     },
   };
   return new Promise((resolve, reject) => {

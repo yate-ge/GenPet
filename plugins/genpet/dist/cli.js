@@ -4081,6 +4081,7 @@ async function switchPet(args2) {
   return selectPet(entry.id);
 }
 var SELECTED_KEY = "selected-avatar-id";
+var hasAppTools = () => Boolean(process.env.CODEX_APP_TOOLS_PIPE_PATH?.trim() && process.env.CODEX_THREAD_ID?.trim());
 function appToolsConnection(options) {
   const pick = (key2, env) => (Object.hasOwn(options, key2) ? options[key2] : env)?.trim();
   const pipePath = pick("pipePath", process.env.CODEX_APP_TOOLS_PIPE_PATH);
@@ -4104,8 +4105,6 @@ function projectSelection(value) {
 async function callSettings(options, petId2) {
   const { pipePath, threadId, timeoutMs } = appToolsConnection(options);
   const turnId = (Object.hasOwn(options, "turnId") ? options.turnId : process.env.CODEX_TURN_ID)?.trim();
-  if (petId2 !== void 0 && !turnId)
-    throw new Error("The current active turn ID is unavailable; use the host select_pet tool for known pets.");
   const id = 1;
   const request = {
     jsonrpc: "2.0",
@@ -4118,8 +4117,8 @@ async function callSettings(options, petId2) {
       callerSource: "codex",
       threadId,
       callId: `mcp-call-${randomUUID()}`,
-      // The host checks the active turn on writes; a fabricated ID cannot authorize a write.
-      turnId: turnId ?? `mcp-turn-${randomUUID()}`
+      // Outside a turn (the debugger) this follows the bundled app-tools MCP's own fallback metadata, as in 0.4.0.
+      turnId: turnId || `mcp-turn-${randomUUID()}`
     }
   };
   return new Promise((resolve, reject) => {
@@ -5986,7 +5985,7 @@ async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageH
     const value = await response.json().catch(() => null);
     if (value?.service !== "genpet-debugger" || value.root !== root)
       throw new Error("Debugger port belongs to another service or data directory");
-    if (value.pluginRoot === pluginRoot()) return true;
+    if (value.pluginRoot === pluginRoot() && (value.appTools || !hasAppTools())) return true;
     const { token } = await (await fetch(url + "/api/state")).json();
     await fetch(url + "/api/action", {
       method: "POST",

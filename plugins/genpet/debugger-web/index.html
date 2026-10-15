@@ -9,7 +9,7 @@
   <body>
     <header>
       <h1>GenPet 记录调试器</h1>
-      <p>只读查看本机所有宠物，以及 GenPet 记录、未完成故事和素材。</p>
+      <p>查看本机所有宠物、GenPet 记录、未完成故事和素材。唯一的操作是切换宿主选中的宠物，不改宠物记录。</p>
       <label for="pet">查看宠物</label>
       <select id="pet">
         <option value="">当前记录</option>
@@ -22,10 +22,13 @@
       <section>
         <h2>本机所有宠物</h2>
         <p id="inventory-note"></p>
+        <p id="selection"></p>
+        <p id="switch-result" role="status"></p>
         <div class="table">
           <table>
             <thead>
               <tr>
+                <th>宿主选择</th>
                 <th>类别</th>
                 <th>名称</th>
                 <th>宿主 ID</th>

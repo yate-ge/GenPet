@@ -23,11 +23,34 @@ const cell = text => {
   td.textContent = text;
   return td;
 };
-function showInventory(inventory) {
+async function switchPet(petId) {
+  el('error').textContent = '';
+  el('switch-result').textContent = `正在切换到 ${petId}…`;
+  try {
+    const response = await fetch('/api/action', {
+      method: 'POST',
+      headers: { 'X-GenPet-Token': token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'switch-pet', petId }),
+    });
+    const value = await response.json();
+    if (!response.ok) throw new Error(value.error || '切换失败。');
+    el('switch-result').textContent =
+      `宿主已选中 ${value.result.effectiveSelectedPetId}（已读回确认；桌面画面未验证）。`;
+  } catch (error) {
+    el('switch-result').textContent = '';
+    el('error').textContent = `切换失败：${error.message}`;
+  }
+  load();
+}
+function showInventory(inventory, selection) {
   const list = inventory.hostList
     ? `宿主列表读取于 ${inventory.hostList.savedAt}（${inventory.hostList.pets} 只）`
     : '没有宿主列表：云端宠物名称不在本机缓存里，未知的云端宠物需要 Agent 用 list_pets 结果重新打开调试器';
+  const selected = selection.available ? selection.effectiveSelectedPetId : null;
   el('inventory-note').textContent = `共 ${inventory.pets.length} 只。${list}。`;
+  el('selection').textContent = selection.available
+    ? `宿主当前选中：${selected ?? '无'}`
+    : `读不到宿主当前选中的宠物，切换也不可用：${selection.reason}（请在 Codex 对话里用 /genpet-debugger 打开）`;
   el('inventory').replaceChildren(
     ...inventory.pets.map(pet => {
       const records = cell('');
@@ -40,8 +63,17 @@ function showInventory(inventory) {
         });
         records.append(button);
       }
+      const actions = cell(pet.id === selected ? '当前选中' : '');
+      if (pet.id !== selected && pet.sources.some(source => source !== 'record')) {
+        const button = document.createElement('button');
+        button.textContent = '切换';
+        button.disabled = !selection.available;
+        button.addEventListener('click', () => switchPet(pet.id));
+        actions.append(button);
+      }
       const row = document.createElement('tr');
       row.append(
+        actions,
         cell(category(pet)),
         cell(pet.name ?? '（本机没有名称）'),
         cell(pet.localId ? `${pet.id}\n${pet.localId}` : pet.id),
@@ -57,8 +89,8 @@ async function load() {
   el('error').textContent = '';
   try {
     const selected = el('pet').value;
-    const inventory = await get('/api/inventory');
-    showInventory(inventory);
+    const [inventory, selection] = await Promise.all([get('/api/inventory'), get('/api/selection')]);
+    showInventory(inventory, selection);
     el('pet').replaceChildren(new Option('当前记录', ''));
     for (const pet of inventory.pets)
       for (const record of pet.records)

@@ -10,6 +10,7 @@ import { beginStory } from '../src/lifecycle.js';
 import { startServer } from '../src/debugger-server.js';
 import { readInventory, saveHostPets } from '../src/inventory.js';
 import { hostTestDirectory } from './host-fixtures.js';
+import { frame, settingsResponse, withAppTools } from './fake-app-tools.js';
 test('debugger is read-only, rejects cross-origin actions and stops', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-debugger-')),
     store = new Store(root);
@@ -109,4 +110,51 @@ test('debugger inventory lists every local Pet and marks GenPets and records hos
     server.close();
     server.closeAllConnections();
   }
+});
+
+test('debugger switches only the host selection to a listed Pet and leaves records unchanged', async () => {
+  const base = await hostTestDirectory('switch-data'),
+    home = await hostTestDirectory('switch-home');
+  await writeFile(path.join(home, '.codex-global-state.json'), JSON.stringify({ 'electron-persisted-atom-state': {} }));
+  const store = new Store(base);
+  await beginStory(store, 'init');
+  const before = await readFile(store.file, 'utf8');
+  let selected = 'codex';
+  await withAppTools(
+    (request, socket) => {
+      if (request.params?.tool === 'write_settings')
+        selected = request.params.arguments.settings!['selected-avatar-id'] as string;
+      socket.write(frame(settingsResponse(request.id, selected)));
+    },
+    async ({ pipePath, calls }) => {
+      const env = { CODEX_HOME: home, CODEX_APP_TOOLS_PIPE_PATH: pipePath, CODEX_THREAD_ID: 'isolated-thread' };
+      const previous = Object.fromEntries(Object.keys(env).map(key => [key, process.env[key]]));
+      Object.assign(process.env, env);
+      const server = await startServer(0, base),
+        url = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
+      try {
+        assert.equal((await (await fetch(url + '/api/health')).json()).appTools, true);
+        assert.equal((await (await fetch(url + '/api/selection')).json()).effectiveSelectedPetId, 'codex');
+        const { token } = await (await fetch(url + '/api/state')).json();
+        const action = (petId: string) =>
+          fetch(url + '/api/action', {
+            method: 'POST',
+            headers: { 'X-GenPet-Token': token },
+            body: JSON.stringify({ action: 'switch-pet', petId }),
+          });
+        assert.equal((await action('pet_unlisted')).status, 400);
+        assert.ok(calls.every(call => call.params?.tool === 'read_settings'));
+        const switched = await (await action('dewey')).json();
+        assert.equal(switched.result.effectiveSelectedPetId, 'dewey');
+        assert.equal(switched.result.visualVerified, false);
+        assert.equal(await readFile(store.file, 'utf8'), before);
+      } finally {
+        for (const [key, value] of Object.entries(previous))
+          if (value === undefined) delete process.env[key];
+          else process.env[key] = value;
+        server.close();
+        server.closeAllConnections();
+      }
+    },
+  );
 });
