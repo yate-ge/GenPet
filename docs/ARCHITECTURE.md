@@ -231,14 +231,16 @@ Each GenPet has its own directory, artwork and binding. Readable host selection 
 | Kind of rule | Written in |
 | --- | --- |
 | What a pet, egg, story and Avatar must be; how often stories come; how the user appears in them | `plugins/genpet/skills/genpet/rules.md` |
-| One unit's inputs, result and review points | That unit's prompt and its entry in `units.json` |
+| When a role works, which units it runs in what order, where results go | `plugins/genpet/skills/genpet/designers/<Role>/README.md` |
+| One unit's inputs, result and review points | That unit's prompt in its role folder and its entry in `plugins/genpet/skills/genpet/host/units.json` |
+| How user context is read | `plugins/genpet/skills/genpet/context/` |
 | The order of steps and which command to run | `plugins/genpet/skills/genpet/flows/` |
 | What a host can do and its formats | `plugins/genpet/skills/genpet/host/desktop.md`, `dots.md` |
 | What the user sees | `plugins/genpet/skills/genpet/output.md` |
 | When a command applies and whether it needs the user's confirmation | The skill, which otherwise only links to the files above |
 | Code guarantees: identity, pending, stage/experience/deadline growth, binding and two consecutive text-only stories at most | `src/` |
 
-Product boundaries live in meta.md; roles and execution documents refer to them. Contract validation does not replace semantic or visual review.
+Each rule is written once, in the place the table names; other files point to its section instead of restating it. The directory conventions are in AGENTS.md "GenPet repository layout". Contract validation does not replace semantic or visual review.
 
 ## Implementation status
 
@@ -274,8 +276,8 @@ How the release is delivered. The marketplace clones this repository in full und
 
 ## Extending
 
-- **Change a product rule**: edit `meta.md`. Only touch a unit prompt if its review points depend on that rule.
-- **Add or change a generation unit**: edit its prompt and its entry in `units.json` together. `unit-request` and `verify-unit` pick it up.
+- **Change a product rule**: edit `rules.md`. Only touch a unit prompt if its review points depend on that rule.
+- **Add or change a generation unit**: keep its prompt in the owning role's folder and update its entry, including `file`, in `host/units.json`. `unit-request` and `verify-unit` pick it up.
 - **Add a host**: write an adapter that implements the host interface and adds its own commands. Register it in `hosts/index.ts`, add `config/host.json` and a plugin directory, add the package name to `scripts/build-plugin.ts`, and write its reference with what you tested the host can do.
 - **Add a command**: add an entry to the command table in `cli.ts`, or to the host adapter's `commands` if only one host needs it. Keep the logic in the feature module.
 - **Change a skill**: edit `plugins/genpet/skills/` directly; it is the only copy.

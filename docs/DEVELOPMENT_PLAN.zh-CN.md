@@ -1060,8 +1060,8 @@ Dots 变成这只宠物后怎样说话，原则是 Dots 的功能照常：
 | 待做 | `provenance` | `source` | `src/model.ts` 的 `ArtRecord`；`accept-art` 的参数；`workflow.md`、`desktop.md` |
 | 待做 | envelope | result file（结果文件） | `generation-units.md`、`workflow.md`，只是文字 |
 | 待做 | `image-review` 单元、「图像检查」 | ImageReviewer，与四个 Designer 的命名对齐 | `units.json` 的单元名、`image-review.md` 文件名、`generation-units.md`、`workflow.md`；旧记录里的 `unit: "image-review"` 读取时要兼容 |
-| 待做 | 提示词层的文件组织：7 个薄 skill 共用流程文档，12 个单元提示词 | 2026-10-11 确认：照架构文档改成一个主 skill、几个子 skill 和参考文档。按最佳实践做，结构清楚，能和架构设计一一对上。具体拆法由开发的人定 | `framework/skills/`、`framework/prompts/`、`framework/references/`、`scripts/build-plugin.ts` |
-| 待做 | `framework/` 里提示词和参考文档的措辞 | 与 `docs/` 统一：用户资料、格式、这只宠物、产品规则 | `framework/prompts/`、`framework/references/`、`framework/skills/` |
+| 已改 | 提示词层的文件组织：7 个薄 skill 共用流程文档，12 个单元提示词 | 2026-10-15 完成：去掉 `framework/` 这层复制，只保留 `plugins/genpet/`；Agent 读的内容按负责者放在 `skills/genpet/`：`rules.md`、`output.md`、`context/`、`designers/<角色>/`（说明 + 它负责的单元）、`flows/`、`host/`。每条规则只写一处，约定写进 AGENTS.md「GenPet repository layout」 | `plugins/genpet/skills/`、`src/config.ts`、`scripts/build-plugin.ts` |
+| 待做 | 提示词和参考文档的措辞 | 与 `docs/` 统一：用户资料、格式、这只宠物、产品规则 | `plugins/genpet/skills/` |
 | 待做 | `pet` 里平铺的字段 | 分成 `soul`、`memory`、`state` 三块，记录版本升到 3 | `src/model.ts`、`lifecycle.ts`、`status.ts`、`storage.md`、`units.json`；见「宠物记录的结构」 |
 | 不改 | `docs/evidence/` 目录名 | 2026-10-11 确认保留现在的名字。产出放到 Google Drive 之后，这里只剩一个索引文件 | 目录本身、`AGENTS.md`、`.gitignore`、引用它的文档；需要先决定是否改路径 |
 | 已改 | `README.zh-CN.md` 的「每个个体」 | 「每只宠物」（2026-10-11，四种语言的 README 同一句一起改了） | 中文 README，以及日文、韩文对应句子 |

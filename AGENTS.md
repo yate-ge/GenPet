@@ -10,6 +10,15 @@
 - Do not reset, adopt, age or regenerate a user's Pet as part of installation verification. Use an isolated CODEX_HOME for release tests. New chats load updated skills and tools; do not promise an active chat has discarded its old instructions.
 - For "log and git push" in this project, keep the log in this repository. Do not read or modify Obsidian or its Daily Note unless the user explicitly includes that vault in the task.
 
+# GenPet repository layout
+
+- `plugins/genpet/` is the only copy of the plugin. Edit its skills, debugger page, manifest, host config and README in place. `npm run build:plugin` generates only `plugins/genpet/dist/` and `plugins/genpet/package.json`; never edit those by hand. Do not recreate `framework/` or top-level `prompts/` or `references/` copies.
+- Everything the Agent reads at runtime lives in `plugins/genpet/skills/genpet/`, organized by owner: `rules.md` is the only source of product rules; `output.md` governs what the user sees; `context/` holds how user context is read (README) and the context unit; `designers/<Role>/` holds the role's README and the unit prompts it owns; `flows/` holds end-to-end procedures (README for shared conventions, adoption, stories with image coordination, naming, scheduling); `host/` holds host formats and capabilities, storage and the unit contracts (`units.json` records each unit's file, inputs and results).
+- Write each rule once, in the file that owns it, and point to its section elsewhere (for example `../../rules.md「成长节奏」`) instead of restating it. A role README says only when the role runs, which units it uses in what order and where results go; a unit says what it produces, its own judgment guidance and its checkpoints.
+- A new unit goes into its owning role's folder with an entry, including `file`, in `host/units.json`. A new slash command is a thin `plugins/genpet/skills/<command>/SKILL.md` that links into `skills/genpet/`.
+- Development and test procedures, test cases and evidence handling belong in `tests/agent/` and `docs/`, never in runtime files.
+- When moving or renaming a runtime file, update every link to it and check that all relative links in `plugins/genpet/skills/` resolve.
+
 # GenPet framework design rules
 
 - GenPet must not invoke or depend on Computer Use for Pet selection, visibility, appearance updates or verification. Use the existing host APIs, app-tools, IPC and plugin runtime. Keep display confirmation unknown when the available interfaces cannot verify it; do not substitute a refresh request or selection readback for proof of the displayed image.

@@ -231,14 +231,16 @@ memory 记的是共同经历；对用户的了解优先读宿主记忆。旧记�
 | 规则 | 写在哪里 |
 | --- | --- |
 | 宠物、蛋、故事和 Avatar 必须是什么；故事多久来一次；用户怎样出现在故事里 | `plugins/genpet/skills/genpet/rules.md` |
-| 一个单元的输入、结果和检查点 | 这个单元的提示词，以及它在 `units.json` 里的条目 |
+| 一个角色什么时候工作、按什么顺序跑哪些单元、结果交给谁 | `plugins/genpet/skills/genpet/designers/<角色>/README.md` |
+| 一个单元的输入、结果和检查点 | 角色文件夹里这个单元的提示词，以及它在 `plugins/genpet/skills/genpet/host/units.json` 里的条目 |
+| 怎样读取用户资料 | `plugins/genpet/skills/genpet/context/` |
 | 步骤的顺序，以及该执行哪条命令 | `plugins/genpet/skills/genpet/flows/` |
 | 宿主能做什么，以及它的格式 | `plugins/genpet/skills/genpet/host/desktop.md`、`dots.md` |
 | 用户能看到什么 | `plugins/genpet/skills/genpet/output.md` |
 | 一条命令什么时候适用，是否需要用户确认 | 对应的 skill，其余内容只链接到上面的文件 |
 | 由代码保证的规则：身份、pending、阶段、经历与期限、绑定、纯文字最多连续两次 | `src/` |
 
-产品边界集中在 meta.md，角色和执行文档按需引用；合同校验不替代语义或视觉审核。
+每条规则只写在上表对应的一处，其他文件指向它所在的小节，不再复述；目录约定见 AGENTS.md「GenPet repository layout」。合同校验不替代语义或视觉审核。
 
 ## 实现状态
 
@@ -274,8 +276,8 @@ memory 记的是共同经历；对用户的了解优先读宿主记忆。旧记�
 
 ## 扩展方式
 
-- **改一条产品规则**：改 `meta.md`。只有当某个单元的检查点依赖这条规则时，才去改那个单元的提示词。
-- **新增或修改生成单元**：同时改它的提示词和 `units.json` 里的条目。`unit-request` 和 `verify-unit` 会自动识别。
+- **改一条产品规则**：改 `rules.md`。只有当某个单元的检查点依赖这条规则时，才去改那个单元的提示词。
+- **新增或修改生成单元**：提示词放在负责它的角色文件夹里，同时改 `host/units.json` 里的条目（含 `file`）。`unit-request` 和 `verify-unit` 会自动识别。
 - **新增宿主**：写一个实现宿主接口的适配器，并加上它自己的命令。在 `hosts/index.ts` 里登记，增加 `config/host.json` 和一个插件目录，把包名加到 `scripts/build-plugin.ts`，并把实测到的宿主能力写成它的参考文档。
 - **新增命令**：在 `cli.ts` 的命令表里加一项；只有一个宿主需要时，加到那个适配器的 `commands` 里。逻辑留在功能模块里。
 - **修改 skill**：直接改 `plugins/genpet/skills/`，这是唯一的一份。
