@@ -18,7 +18,7 @@ const list = () => JSON.parse(run(['plugin', 'marketplace', 'list', '--json'])).
 const previous = list().find((entry: { name: string }) => entry.name === marketplace);
 if (previous && (await realpath(previous.root)) !== root) {
   throw new Error(
-    `Marketplace ${marketplace} already uses ${previous.root}. This command installs the local checkout; use docs/NEW_VERSION_VALIDATION.zh-CN.md or explicitly configure the intended source first.`,
+    `Marketplace ${marketplace} already uses ${previous.root}. This command installs the local checkout; remove that marketplace first (codex plugin marketplace remove genpet), and add the GitHub source back after testing.`,
   );
 }
 run(['plugin', 'marketplace', 'add', root, '--json']);

@@ -16,10 +16,10 @@ async function manifest(home: string, folder: string, id: string, data: unknown)
   await writeFile(path.join(directory, folder === 'pets' ? 'pet.json' : 'avatar.json'), JSON.stringify(data));
 }
 
-test('an empty Codex home lists the builtin pets without creating files', () =>
+test('an empty Codex home lists no local pets and creates no files', () =>
   withHome(async home => {
     const result = await listPets(home);
-    assert.equal(result.pets.filter(pet => pet.source === 'builtin').length, 9);
+    assert.deepEqual(result.pets, []);
     assert.equal(result.errors, undefined);
     assert.deepEqual(await readdir(home), []);
   }));
@@ -57,10 +57,10 @@ test('one broken manifest is reported without hiding valid entries', () =>
     assert.equal(result.errors?.length, 3);
   }));
 
-test('a failed local directory read is reported without losing the builtin catalog', () =>
+test('a failed local directory read is reported instead of failing the catalog', () =>
   withHome(async home => {
     await writeFile(path.join(home, 'pets'), 'not a directory');
     const result = await listPets(home);
-    assert.equal(result.pets.length, 9);
+    assert.deepEqual(result.pets, []);
     assert.ok(result.errors?.some(error => error.startsWith('pets:')));
   }));

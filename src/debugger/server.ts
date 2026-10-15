@@ -3,17 +3,17 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
-import { Store } from './store.js';
-import { growth } from './growth.js';
-import type { Host } from './model.js';
-import { storyOutputs } from './variety.js';
-import { packageHost, pluginRoot } from './config.js';
-import { hostFor } from './hosts/index.js';
+import { Store } from '../store.js';
+import { growth } from '../growth.js';
+import type { Host } from '../model.js';
+import { storyOutputs } from '../variety.js';
+import { packageHost, pluginRoot } from '../config.js';
+import { hostFor } from '../hosts/index.js';
 import { readInventory } from './inventory.js';
-import { ATLAS, actions } from './hosts/desktop/atlas.js';
-import { previewAppearance } from './hosts/desktop/preview.js';
-import { CLOUD_PET_QUERY, refreshViaIpc } from './hosts/desktop/refresh.js';
-import { repairAppearance } from './hosts/repair.js';
+import { ATLAS, actions } from '../hosts/desktop/atlas.js';
+import { previewAppearance } from '../hosts/desktop/preview.js';
+import { CLOUD_PET_QUERY, refreshViaIpc } from '../hosts/desktop/refresh.js';
+import { repairAppearance } from '../hosts/repair.js';
 /** Explicitly launched, local GenPet inspection. Appearance actions change only the host entry; records never change. */
 export async function startServer(port = Number(process.env.GENPET_PORT || 47831), root?: string) {
   const store = new Store(root, packageHost()),

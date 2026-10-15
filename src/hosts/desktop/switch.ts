@@ -13,28 +13,15 @@ import { readMigrationMap } from './mapping.js';
 export interface PetEntry {
   id: string;
   displayName: string;
-  source: 'builtin' | 'local' | 'cloud';
+  source: 'local' | 'cloud';
   localId?: string;
   genpetId?: string;
 }
 
-// Static catalog verified in Codex 26.924.2738.0; it does not include account-specific cloud pets.
-const BUILTIN_PETS: PetEntry[] = [
-  ['codex', 'Codex'],
-  ['dewey', 'Dewey'],
-  ['fireball', 'Fireball'],
-  ['hoots', 'Hoots'],
-  ['rocky', 'Rocky'],
-  ['seedy', 'Seedy'],
-  ['stacky', 'Stacky'],
-  ['bsod', 'BSOD'],
-  ['null-signal', 'Null Signal'],
-].map(([id, displayName]) => ({ id, displayName, source: 'builtin' }));
-
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-/** Builtins and local entries, resolving migrated aliases to the current account's cloud IDs. */
+/** Local entries, resolving migrated aliases to the current account's cloud IDs. Builtin and cloud Pets come from the host's list_pets. */
 export async function listPets(home = codexHome()): Promise<{ pets: PetEntry[]; errors?: string[] }> {
   const errors: string[] = [];
   const local = new Map<string, PetEntry>();
@@ -83,7 +70,7 @@ export async function listPets(home = codexHome()): Promise<{ pets: PetEntry[]; 
     }
   }
   const sorted = [...local.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
-  return { pets: [...BUILTIN_PETS.map(pet => ({ ...pet })), ...sorted], ...(errors.length ? { errors } : {}) };
+  return { pets: sorted, ...(errors.length ? { errors } : {}) };
 }
 
 export interface AppToolsOptions {
@@ -143,7 +130,7 @@ export async function switchPet(args: string[]) {
   if (args.length > 1) throw new Error(SWITCH_USAGE);
   const target = args[0] ?? '--current';
   if (target === '--help')
-    return { usage: SWITCH_USAGE, examples: ['switch-pet --list', 'switch-pet --current', 'switch-pet dewey'] };
+    return { usage: SWITCH_USAGE, examples: ['switch-pet --list', 'switch-pet --current', 'switch-pet custom:my-pet'] };
   if (target === '--current') {
     const current = await readSelectedPet();
     if (!current.available) throw new Error(current.reason);
@@ -153,6 +140,10 @@ export async function switchPet(args: string[]) {
   const catalog = await listPets();
   if (target === '--list') return catalog;
   const entry = catalog.pets.find(pet => pet.id === target || pet.localId === target);
+  if (!entry && !target.startsWith('custom:'))
+    throw new Error(
+      `${target} is not a local Pet entry. Select builtin and cloud Pets with the host list_pets and select_pet tools.`,
+    );
   if (!entry) throw new Error(`Unknown pet ID: ${target}. Use switch-pet --list.`);
   appToolsConnection({});
   if (!process.env.CODEX_TURN_ID?.trim())

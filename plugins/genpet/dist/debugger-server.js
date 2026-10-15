@@ -2123,7 +2123,7 @@ var require_png = __commonJS({
   }
 });
 
-// src/debugger-server.ts
+// src/debugger/server.ts
 import http from "node:http";
 import { readFile as readFile12 } from "node:fs/promises";
 import path13 from "node:path";
@@ -2994,71 +2994,6 @@ var Store = class _Store {
         return this.readPet(id, registry);
       }
       const state = await prepareImport(this, file, options, now);
-      await this.persist(state, registry, void 0, now);
-      return this.readPet(id, registry);
-    });
-  }
-  /** Publish a checked handoff under one lock, replacing the old host's activity facts with the incoming clock. */
-  async installTransfer(input, now = Date.now()) {
-    const state = structuredClone(input);
-    this.validate(state);
-    if (!state.pet || state.handoff?.status !== "imported" || state.handoff.target !== this.host)
-      throw new Error("Install a validated transfer for this main environment");
-    const id = identifier(state.pet.id, "transferred petId");
-    return this.locked(async () => {
-      const registry = await this.registry();
-      const existing = await this.readPet(id, registry, true, true);
-      if (existing.pet) {
-        if (existing.handoff?.status === "imported" && existing.handoff.id === state.handoff.id) {
-          if (existing.handoff.activityTransferId !== void 0 && registry.pets.find((pet) => pet.id === id)?.transferId !== existing.handoff.activityTransferId) {
-            const clock2 = ensureGrowthClock(existing);
-            const recovered = {
-              id,
-              pausedMs: clock2.pausedMs,
-              transferId: existing.handoff.activityTransferId,
-              ...clock2.pausedAt !== void 0 ? { pausedAt: clock2.pausedAt } : {},
-              ...clock2.lastActivatedAt !== void 0 ? { lastActivatedAt: clock2.lastActivatedAt } : {},
-              ...clock2.lastInactiveAt !== void 0 ? { lastInactiveAt: clock2.lastInactiveAt } : {}
-            };
-            const index = registry.pets.findIndex((pet) => pet.id === id);
-            if (index < 0) registry.pets.push(recovered);
-            else registry.pets[index] = recovered;
-          }
-          this.activate(registry, id, now);
-          await atomicJson(this.registryFile, registry);
-          this.selectedId = id;
-          if (this.pinnedId !== void 0) this.pinnedId = id;
-          return this.readPet(id, registry);
-        }
-        if (existing.handoff?.status !== "exported") throw new Error("The destination Pet is already writable");
-        if (state.handoff.previousTransferId !== existing.handoff.id)
-          throw new Error("This transfer does not follow the destination ownership receipt");
-      }
-      const clock = ensureGrowthClock(state);
-      if (!Number.isFinite(clock.pausedMs) || clock.pausedMs < 0 || clock.pausedAt !== void 0 && !Number.isFinite(clock.pausedAt))
-        throw new Error("Invalid transferred activation clock");
-      const entry = {
-        id,
-        pausedMs: clock.pausedMs,
-        transferId: state.handoff.id,
-        ...clock.pausedAt !== void 0 ? { pausedAt: clock.pausedAt } : {},
-        ...clock.lastActivatedAt !== void 0 ? { lastActivatedAt: clock.lastActivatedAt } : {},
-        ...clock.lastInactiveAt !== void 0 ? { lastInactiveAt: clock.lastInactiveAt } : {}
-      };
-      const previousIndex = registry.pets.findIndex((pet) => pet.id === id);
-      if (previousIndex < 0) registry.pets.push(entry);
-      else registry.pets[previousIndex] = entry;
-      this.activate(registry, id, now);
-      clock.pausedMs = entry.pausedMs;
-      delete clock.pausedAt;
-      if (entry.lastActivatedAt !== void 0) clock.lastActivatedAt = entry.lastActivatedAt;
-      if (entry.lastInactiveAt !== void 0) clock.lastInactiveAt = entry.lastInactiveAt;
-      if (state.replacesPetId && state.replacesPetId !== id) {
-        const replaced = registry.pets.find((pet) => pet.id === state.replacesPetId);
-        if (replaced) replaced.archived ??= { at: now, replacesPetId: id };
-      }
-      await this.validateBindingUniqueness(state, registry);
-      state.handoff.activityTransferId = state.handoff.id;
       await this.persist(state, registry, void 0, now);
       return this.readPet(id, registry);
     });
@@ -4841,17 +4776,6 @@ function readFrames(maxBytes, onMessage, onError) {
 }
 
 // src/hosts/desktop/switch.ts
-var BUILTIN_PETS = [
-  ["codex", "Codex"],
-  ["dewey", "Dewey"],
-  ["fireball", "Fireball"],
-  ["hoots", "Hoots"],
-  ["rocky", "Rocky"],
-  ["seedy", "Seedy"],
-  ["stacky", "Stacky"],
-  ["bsod", "BSOD"],
-  ["null-signal", "Null Signal"]
-].map(([id, displayName]) => ({ id, displayName, source: "builtin" }));
 var isRecord = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
 async function listPets(home = codexHome()) {
   const errors = [];
@@ -4901,7 +4825,7 @@ async function listPets(home = codexHome()) {
     }
   }
   const sorted = [...local.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
-  return { pets: [...BUILTIN_PETS.map((pet) => ({ ...pet })), ...sorted], ...errors.length ? { errors } : {} };
+  return { pets: sorted, ...errors.length ? { errors } : {} };
 }
 async function readSelectedPet(options = {}) {
   try {
@@ -4933,7 +4857,7 @@ async function switchPet(args) {
   if (args.length > 1) throw new Error(SWITCH_USAGE);
   const target = args[0] ?? "--current";
   if (target === "--help")
-    return { usage: SWITCH_USAGE, examples: ["switch-pet --list", "switch-pet --current", "switch-pet dewey"] };
+    return { usage: SWITCH_USAGE, examples: ["switch-pet --list", "switch-pet --current", "switch-pet custom:my-pet"] };
   if (target === "--current") {
     const current = await readSelectedPet();
     if (!current.available) throw new Error(current.reason);
@@ -4943,6 +4867,10 @@ async function switchPet(args) {
   const catalog = await listPets();
   if (target === "--list") return catalog;
   const entry = catalog.pets.find((pet) => pet.id === target || pet.localId === target);
+  if (!entry && !target.startsWith("custom:"))
+    throw new Error(
+      `${target} is not a local Pet entry. Select builtin and cloud Pets with the host list_pets and select_pet tools.`
+    );
   if (!entry) throw new Error(`Unknown pet ID: ${target}. Use switch-pet --list.`);
   appToolsConnection({});
   if (!process.env.CODEX_TURN_ID?.trim())
@@ -5707,7 +5635,7 @@ function hostFor(host) {
   return adapter;
 }
 
-// src/inventory.ts
+// src/debugger/inventory.ts
 import { mkdir as mkdir5, readFile as readFile11, rename as rename3, writeFile as writeFile4 } from "node:fs/promises";
 import path11 from "node:path";
 var hostPetsFile = (base) => path11.join(base, "debugger", "host-pets.json");
@@ -5752,9 +5680,8 @@ async function readInventory(base, home = codexHome()) {
   for (const pet of catalog.pets) {
     const row = at(pet.id);
     row.name = pet.displayName;
-    row.sources.push(pet.source === "builtin" ? "builtin" : "local");
+    row.sources.push("local");
     if (pet.localId) row.localId = pet.localId;
-    if (pet.source === "builtin") row.genpet = false;
     if (pet.genpetId) row.evidence.push(`\u672C\u5730\u6E05\u5355 genpetId=${pet.genpetId}`);
   }
   for (const id of cloud2.ids) at(id).sources.push("cloud-cache");
@@ -5765,8 +5692,7 @@ async function readInventory(base, home = codexHome()) {
     row.evidence.push(...hostEvidence(pet));
   }
   for (const pet of catalog.pets)
-    if (pet.source !== "builtin" && pet.displayName.startsWith("genpet-"))
-      at(pet.id).evidence.push(`\u672C\u5730\u540D\u79F0 ${pet.displayName}`);
+    if (pet.displayName.startsWith("genpet-")) at(pet.id).evidence.push(`\u672C\u5730\u540D\u79F0 ${pet.displayName}`);
   for (const host of ["desktop", "cloud"]) {
     let pets;
     try {
@@ -5840,7 +5766,7 @@ async function previewAppearance(store, artId) {
   return { ...base, operation: "preview-local-pet", updated: true, ...local, refresh };
 }
 
-// src/debugger-server.ts
+// src/debugger/server.ts
 async function startServer(port = Number(process.env.GENPET_PORT || 47831), root) {
   const store = new Store(root, packageHost()), token = randomBytes(24).toString("hex");
   const target = (url) => {

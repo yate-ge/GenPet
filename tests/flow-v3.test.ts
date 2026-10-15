@@ -1,13 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { Store } from '../src/store.js';
 import { beginStory, finishStory, planStory } from '../src/lifecycle.js';
 import { journeyStep } from '../src/journey.js';
 import { chooseCandidate, chooseSource, sourceFromSeed, recentContent } from '../src/variety.js';
-import { exportPet, importPet } from '../src/handoff.js';
 import { journeyReady, initialPlan, image, hostDone } from './fixtures.js';
 import { acceptArt, artRequest } from '../src/art.js';
 import { recordStep } from '../src/generation.js';
@@ -361,54 +360,4 @@ test('an imported Pet without story history still permits only two consecutive t
   });
   await assert.rejects(() => finishStory(imported, op), /At most two/);
   assert.equal((await imported.peek()).stories.length, 2);
-});
-
-test('handoff transfers identity/art/units and prevents the source from writing more stories', async () => {
-  const { store, root } = await isolated();
-  const petId = await adopted(store, root);
-  const before = await store.peek();
-  const transfer = await exportPet(store, 'desktop', path.join(root, 'transfer'));
-  await assert.rejects(() => beginStory(store, 'wrong-main-environment'), /handed/);
-  const target = new Store(path.join(root, 'destination'), 'desktop');
-  const imported = await importPet(target, transfer.directory);
-  assert.equal(imported.petId, petId);
-  const after = await target.peek();
-  assert.deepEqual(after.pet!.soul, before.pet!.soul);
-  assert.deepEqual(after.pet!.memory, before.pet!.memory);
-  assert.equal(after.pet!.binding!.cloudId, before.pet!.binding!.cloudId);
-  assert.equal(after.stories.length, before.stories.length);
-  assert.deepEqual(await readFile(after.art[0].file), await readFile(before.art[0].file));
-  assert.equal((await importPet(target, transfer.directory)).duplicate, true);
-  const returnTransfer = await exportPet(target, 'cloud', path.join(root, 'return-transfer'));
-  await importPet(store, returnTransfer.directory);
-  assert.equal((await store.peek()).handoff!.status, 'imported');
-  await assert.rejects(() => importPet(target, transfer.directory), /Stale transfer/);
-  await assert.rejects(
-    () =>
-      target.transaction(state => {
-        state.pet!.name = 'Wrong writer';
-      }),
-    /handed|exported|write/i,
-  );
-});
-
-test('handoff rejects a receipt inconsistent with its exported ownership state before writing the destination', async () => {
-  const { store, root } = await isolated();
-  await adopted(store, root);
-  const transfer = await exportPet(store, 'desktop', path.join(root, 'valid-transfer'));
-  const manifest = JSON.parse(await readFile(path.join(transfer.directory, 'transfer.json'), 'utf8'));
-  const target = new Store(path.join(root, 'receipt-destination'), 'desktop');
-  const invalid = [
-    { transferId: 'handoff-unrelated-receipt' },
-    { source: 'unknown-host' },
-    { previousTransferId: 'handoff-unrelated-predecessor' },
-    { state: { ...manifest.state, host: 'desktop' } },
-  ];
-  for (let i = 0; i < invalid.length; i++) {
-    const directory = path.join(root, `invalid-receipt-${i}`);
-    await mkdir(directory);
-    await writeFile(path.join(directory, 'transfer.json'), JSON.stringify({ ...manifest, ...invalid[i] }, null, 2));
-    await assert.rejects(() => importPet(target, directory), /Invalid or mismatched/);
-    assert.equal((await target.peek()).pet, null);
-  }
 });

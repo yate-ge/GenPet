@@ -6,11 +6,11 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { codexHome } from './config.js';
-import type { Host } from './model.js';
-import { Store, type StoredPet } from './store.js';
-import { isCloudId, readCloudPetIds, readMigrationMap, type MigrationMap } from './hosts/desktop/mapping.js';
-import { listPets } from './hosts/desktop/switch.js';
+import { codexHome } from '../config.js';
+import type { Host } from '../model.js';
+import { Store, type StoredPet } from '../store.js';
+import { isCloudId, readCloudPetIds, readMigrationMap, type MigrationMap } from '../hosts/desktop/mapping.js';
+import { listPets } from '../hosts/desktop/switch.js';
 
 interface HostPet {
   id: string;
@@ -21,7 +21,7 @@ interface HostPet {
 export interface InventoryRow {
   id: string;
   name: string | null;
-  /** builtin, local (~/.codex/pets), cloud-cache (host artwork cache), host-list (saved list_pets), record */
+  /** local (~/.codex/pets), cloud-cache (host artwork cache), host-list (saved list_pets), record */
   sources: string[];
   localId?: string;
   /** null: nothing on this machine shows whether it is a GenPet. */
@@ -115,9 +115,8 @@ export async function readInventory(base: string, home = codexHome()) {
   for (const pet of catalog.pets) {
     const row = at(pet.id);
     row.name = pet.displayName;
-    row.sources.push(pet.source === 'builtin' ? 'builtin' : 'local');
+    row.sources.push('local');
     if (pet.localId) row.localId = pet.localId;
-    if (pet.source === 'builtin') row.genpet = false;
     if (pet.genpetId) row.evidence.push(`本地清单 genpetId=${pet.genpetId}`);
   }
   for (const id of cloud.ids) at(id).sources.push('cloud-cache');
@@ -128,8 +127,7 @@ export async function readInventory(base: string, home = codexHome()) {
     row.evidence.push(...hostEvidence(pet));
   }
   for (const pet of catalog.pets)
-    if (pet.source !== 'builtin' && pet.displayName.startsWith('genpet-'))
-      at(pet.id).evidence.push(`本地名称 ${pet.displayName}`);
+    if (pet.displayName.startsWith('genpet-')) at(pet.id).evidence.push(`本地名称 ${pet.displayName}`);
   for (const host of ['desktop', 'cloud'] as const) {
     let pets: StoredPet[];
     try {

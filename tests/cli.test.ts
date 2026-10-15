@@ -242,14 +242,13 @@ test('switch-pet current and default read only the live host pet fields', async 
   );
 });
 
-test('switch-pet list includes builtin and local pets without connecting to the host', async () => {
+test('switch-pet list includes only local pets and does not connect to the host', async () => {
   await withHost(async host =>
     withCli(host.pipePath, async cli => {
       const result = output(await cli('switch-pet', '--list')) as {
         pets: { id: string; displayName: string; source: string }[];
       };
-      assert.ok(result.pets.some(pet => pet.id === 'codex' && pet.source === 'builtin'));
-      assert.ok(result.pets.some(pet => pet.id === 'dewey' && pet.source === 'builtin'));
+      assert.ok(result.pets.every(pet => pet.source !== 'builtin' && pet.id !== 'dewey'));
       assert.ok(
         result.pets.some(
           pet => pet.id === 'custom:cli-companion' && pet.displayName === 'CLI Companion' && pet.source === 'local',
@@ -295,10 +294,10 @@ test('migrated entries and legacy alias requests select the current account clou
   );
 });
 
-test('switch-pet writes a known builtin or local ID then independently confirms it', async () => {
+test('switch-pet writes a local ID then independently confirms it', async () => {
   await withHost(async host =>
     withCli(host.pipePath, async cli => {
-      for (const petId of ['dewey', 'custom:cli-companion']) {
+      for (const petId of ['custom:cli-companion']) {
         assert.deepEqual(output(await cli('switch-pet', petId)), {
           selectedPetId: petId,
           effectiveSelectedPetId: petId,
@@ -310,18 +309,17 @@ test('switch-pet writes a known builtin or local ID then independently confirms 
       }
       assert.deepEqual(
         host.calls.map(call => call.params?.tool),
-        ['write_settings', 'read_settings', 'write_settings', 'read_settings'],
+        ['write_settings', 'read_settings'],
       );
-      assert.deepEqual(host.calls[0].params?.arguments, { settings: { 'selected-avatar-id': 'dewey' } });
-      assert.deepEqual(host.calls[2].params?.arguments, { settings: { 'selected-avatar-id': 'custom:cli-companion' } });
-      assert.equal(host.connections(), 4);
+      assert.deepEqual(host.calls[0].params?.arguments, { settings: { 'selected-avatar-id': 'custom:cli-companion' } });
+      assert.equal(host.connections(), 2);
     }),
   );
 });
 
 test('switch-pet missing pipe fails current and switch without changing config', async () => {
   await withCli('', async cli => {
-    for (const argument of ['--current', 'dewey']) {
+    for (const argument of ['--current', 'custom:cli-companion']) {
       const result = await cli('switch-pet', argument);
       assert.notEqual(result.code, 0);
       assert.equal(result.stdout, '');
@@ -330,23 +328,17 @@ test('switch-pet missing pipe fails current and switch without changing config',
   });
 });
 
-test('without the active turn the CLI hands a known builtin to the host tool instead of issuing a false write', async () => {
+test('builtin and cloud IDs are left to the host selection tools without a CLI write', async () => {
   await withHost(async host =>
-    withCli(
-      host.pipePath,
-      async cli => {
-        const result = output(await cli('switch-pet', 'dewey')) as {
-          selected: boolean;
-          targetId: string;
-          agentSteps: { tool?: string }[];
-        };
-        assert.equal(result.selected, false);
-        assert.equal(result.targetId, 'dewey');
-        assert.equal(result.agentSteps[0].tool, 'select_pet');
-        assert.equal(host.connections(), 0);
-      },
-      false,
-    ),
+    withCli(host.pipePath, async cli => {
+      for (const petId of ['dewey', 'pet_unlisted']) {
+        const result = await cli('switch-pet', petId);
+        assert.notEqual(result.code, 0);
+        assert.match(result.stderr, /host list_pets and select_pet/);
+      }
+      assert.equal(host.connections(), 0);
+      assert.deepEqual(host.calls, []);
+    }),
   );
 });
 

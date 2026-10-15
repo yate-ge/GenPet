@@ -1,8 +1,9 @@
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 /** `debugger`: start (or reuse) the optional local record viewer for this package's data. */
-import { dataRoot, packageHost, pluginRoot } from './config.js';
-import { Store } from './store.js';
+import { dataRoot, packageHost, pluginRoot } from '../config.js';
+import { Store } from '../store.js';
 export async function launchDebugger(
   port = Number(process.env.GENPET_PORT || (packageHost() === 'cloud' ? 47832 : 47831)),
 ) {
@@ -35,7 +36,10 @@ export async function launchDebugger(
     throw new Error('An earlier debugger is still running on this port');
   }
   if (await inspect()) return { url, reused: true };
-  const child = spawn(process.execPath, [path.join(import.meta.dirname, 'debugger-server.js')], {
+  // The plugin bundle ships dist/debugger-server.js beside cli.js; a plain tsc build keeps server.js beside this file.
+  const server = ['debugger-server.js', 'server.js'].map(name => path.join(import.meta.dirname, name)).find(existsSync);
+  if (!server) throw new Error('Debugger server file is missing');
+  const child = spawn(process.execPath, [server], {
     windowsHide: true,
     detached: true,
     stdio: 'ignore',

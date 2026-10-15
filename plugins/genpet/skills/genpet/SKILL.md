@@ -18,7 +18,7 @@ Route by the user's actual intent:
 | Talk to the Pet | Use /genpet-chat and its chat workflow; this is the sole conversation entry |
 | Missing, not displayed, load, list or switch | [Desktop diagnosis](host/desktop.md); inspect first and state the four actual results |
 | Stop scheduled checks | Stop the actual referenced task, then schedule-stop |
-| Dots setup or change main environment | [Dots](host/dots.md), test actual host capabilities first |
+| Dots setup | [Dots](host/dots.md), test actual host capabilities first; main-environment handoff is shelved |
 | Inspect raw records | Read-only debugger command; keep record unchanged |
 
 ## Environment intake

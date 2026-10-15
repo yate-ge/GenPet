@@ -7,8 +7,8 @@ import path from 'node:path';
 import { Store } from '../src/store.js';
 import { pluginRoot } from '../src/config.js';
 import { beginStory } from '../src/lifecycle.js';
-import { startServer } from '../src/debugger-server.js';
-import { readInventory, saveHostPets } from '../src/inventory.js';
+import { startServer } from '../src/debugger/server.js';
+import { readInventory, saveHostPets } from '../src/debugger/inventory.js';
 import { hostTestDirectory } from './host-fixtures.js';
 test('debugger is read-only, rejects cross-origin actions and stops', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-debugger-')),
@@ -104,7 +104,6 @@ test('debugger inventory lists every local Pet and marks GenPets and records hos
   assert.equal(byId.pet_other.genpet, false);
   assert.equal(byId['custom:plain'].genpet, false);
   assert.deepEqual([byId.pet_unnamed.genpet, byId.pet_unnamed.name], [null, null]);
-  assert.equal(byId.codex.genpet, false);
 
   const previousHome = process.env.CODEX_HOME;
   process.env.CODEX_HOME = home;

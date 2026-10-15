@@ -20,4 +20,4 @@
 
 /genpet 处理近况、名字、故障、初始化、替换和其他明确操作；/genpet-chat 才跑 chat 单元，必要时 `note-chat PET_ID NOTE`，不改 memory 或 state。用户说的话在下次 context 中作为一项资料。
 
-命名用 name-pet 对明确 Pet ID，见 naming.md。start 完成后设置普通五小时任务，并按 `due.nextCheckAt` 核验和安排更早的成长截止检查；每篇完成或激活恢复后重新安排，见 scheduling.md。stop 停该任务并 schedule-stop。Dots 保持同一个 cloud ID，主环境移交前停旧写入、验证记录后再开新任务，见 ../host/dots.md。安装、构建、发布和只读检查都不生成 Pet 或任务。
+命名用 name-pet 对明确 Pet ID，见 naming.md。start 完成后设置普通五小时任务，并按 `due.nextCheckAt` 核验和安排更早的成长截止检查；每篇完成或激活恢复后重新安排，见 scheduling.md。stop 停该任务并 schedule-stop。Dots 保持同一个 cloud ID，见 ../host/dots.md。安装、构建、发布和只读检查都不生成 Pet 或任务。

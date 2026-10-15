@@ -1,4 +1,4 @@
-/** Shared cloud Pet handoff. No separate Dots Avatar or image format is created. */
+/** The shared cloud Pet host. No separate Dots Avatar or image format is created. */
 import { text } from '../model.js';
 import type { Store } from '../store.js';
 import { ATLAS_CONTRACT } from './desktop/atlas.js';

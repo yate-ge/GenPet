@@ -20,15 +20,9 @@ Dots 是共享 cloud ID 的第二个环境，使用同一份已接受云图和�
 
 安装先走 Dots 真实支持的途径。如果插件目录只读/市场搜不到，使用已验证的简介和长期指令，不声称插件安装成功。一次设置后是否自动生效，要在新会话里确认后才能说。
 
-## 主环境移交
+## 主环境
 
-默认桌面写故事，Dots 消费已完成内容。用户明确要切换时：
-
-1. 确定这只 Pet ID、cloud ID、当前主环境、完整目录与记录 revision；先只读检查目标的上传/调度能力。
-2. 先完成进行中的故事；无法完成就保留 pending，暂不移交。停旧环境的实际任务并写入暂停/移交状态，保留旧完整备份，不能两个环境同时推进。
-3. `handoff-export cloud|desktop ABS_DESTINATION_DIR --pet PET_ID` 导出这只 Pet 整个目录与 transfer.json：soul、memory、state、历史、步骤、chat、图和绑定。目标用对应 --host 和 `handoff-import ABS_TRANSFER_DIR` 导入，核对 cloud ID、revision、故事数和素材实际文件。
-4. 确认旧端写入已停，目标按移交契约接管，启用目标任务并回读引用；中途失败保持旧端暂停、保存同一移交结果，不重新领养。回退恢复备份/同一记录，先停目标再开旧端。
-5. 再切回来按同样顺序，选中项保持用户原选择。同一时间只允许主环境写故事。
+默认桌面写故事，Dots 消费已完成内容。把一只 Pet 的完整记录从一端移交到另一端，还没有在真实宿主上验证过，现已暂时收起，不提供导出或导入命令。用户要求切换主环境时如实说明这一点；不手工搬运记录，也不在两边同时写故事。
 
 Dots 当主环境，用 `--host cloud --pet PET_ID set-appearance` 的请求清单给已有 pet_ ID 更新实际接受的 atlas；绑定缺失时确认同一 Pet 的云 ID 再 bind-cloud。目标 active 时请求即时资源刷新，active 读不到时尝试当前宿主实际支持的刷新，并保留未知；没有接口不能编造成功。保存真实 readbackFile 后 `host-result OPERATION_ID RESULT_FILE`，匹配后完成。失败保留 pending；可由桌面代上传同一目标图，但上传未发生前不能说自动生效。不得新建第二个云 Pet 或退回旧 Avatar 路线。
 

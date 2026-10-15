@@ -2125,9 +2125,9 @@ var require_png = __commonJS({
 });
 
 // src/cli.ts
-import { readFile as readFile14 } from "node:fs/promises";
-import path18 from "node:path";
-import { randomUUID as randomUUID13 } from "node:crypto";
+import { readFile as readFile13 } from "node:fs/promises";
+import path17 from "node:path";
+import { randomUUID as randomUUID12 } from "node:crypto";
 
 // src/art.ts
 import { mkdir as mkdir3, readFile as readFile9, rename as rename2, rm, stat as stat3, writeFile as writeFile3 } from "node:fs/promises";
@@ -2347,11 +2347,11 @@ var Module = (() => {
     var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
     var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions == "object" && typeof process.versions.node == "string";
     var scriptDirectory = "";
-    function locateFile(path19) {
+    function locateFile(path18) {
       if (Module2["locateFile"]) {
-        return Module2["locateFile"](path19, scriptDirectory);
+        return Module2["locateFile"](path18, scriptDirectory);
       }
-      return scriptDirectory + path19;
+      return scriptDirectory + path18;
     }
     var read_, readAsync, readBinary, setWindowTitle;
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -3959,17 +3959,6 @@ function readFrames(maxBytes, onMessage, onError) {
 }
 
 // src/hosts/desktop/switch.ts
-var BUILTIN_PETS = [
-  ["codex", "Codex"],
-  ["dewey", "Dewey"],
-  ["fireball", "Fireball"],
-  ["hoots", "Hoots"],
-  ["rocky", "Rocky"],
-  ["seedy", "Seedy"],
-  ["stacky", "Stacky"],
-  ["bsod", "BSOD"],
-  ["null-signal", "Null Signal"]
-].map(([id, displayName]) => ({ id, displayName, source: "builtin" }));
 var isRecord = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
 async function listPets(home = codexHome()) {
   const errors = [];
@@ -4019,7 +4008,7 @@ async function listPets(home = codexHome()) {
     }
   }
   const sorted = [...local.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
-  return { pets: [...BUILTIN_PETS.map((pet) => ({ ...pet })), ...sorted], ...errors.length ? { errors } : {} };
+  return { pets: sorted, ...errors.length ? { errors } : {} };
 }
 async function readSelectedPet(options = {}) {
   try {
@@ -4051,7 +4040,7 @@ async function switchPet(args2) {
   if (args2.length > 1) throw new Error(SWITCH_USAGE);
   const target2 = args2[0] ?? "--current";
   if (target2 === "--help")
-    return { usage: SWITCH_USAGE, examples: ["switch-pet --list", "switch-pet --current", "switch-pet dewey"] };
+    return { usage: SWITCH_USAGE, examples: ["switch-pet --list", "switch-pet --current", "switch-pet custom:my-pet"] };
   if (target2 === "--current") {
     const current = await readSelectedPet();
     if (!current.available) throw new Error(current.reason);
@@ -4061,6 +4050,10 @@ async function switchPet(args2) {
   const catalog = await listPets();
   if (target2 === "--list") return catalog;
   const entry = catalog.pets.find((pet) => pet.id === target2 || pet.localId === target2);
+  if (!entry && !target2.startsWith("custom:"))
+    throw new Error(
+      `${target2} is not a local Pet entry. Select builtin and cloud Pets with the host list_pets and select_pet tools.`
+    );
   if (!entry) throw new Error(`Unknown pet ID: ${target2}. Use switch-pet --list.`);
   appToolsConnection({});
   if (!process.env.CODEX_TURN_ID?.trim())
@@ -5003,8 +4996,9 @@ async function noteChat(store2, petId2, note) {
   });
 }
 
-// src/debugger.ts
+// src/debugger/launch.ts
 import { spawn } from "node:child_process";
+import { existsSync as existsSync3 } from "node:fs";
 import path13 from "node:path";
 
 // src/store.ts
@@ -5848,71 +5842,6 @@ var Store = class _Store {
       return this.readPet(id, registry);
     });
   }
-  /** Publish a checked handoff under one lock, replacing the old host's activity facts with the incoming clock. */
-  async installTransfer(input, now = Date.now()) {
-    const state = structuredClone(input);
-    this.validate(state);
-    if (!state.pet || state.handoff?.status !== "imported" || state.handoff.target !== this.host)
-      throw new Error("Install a validated transfer for this main environment");
-    const id = identifier(state.pet.id, "transferred petId");
-    return this.locked(async () => {
-      const registry = await this.registry();
-      const existing = await this.readPet(id, registry, true, true);
-      if (existing.pet) {
-        if (existing.handoff?.status === "imported" && existing.handoff.id === state.handoff.id) {
-          if (existing.handoff.activityTransferId !== void 0 && registry.pets.find((pet) => pet.id === id)?.transferId !== existing.handoff.activityTransferId) {
-            const clock2 = ensureGrowthClock(existing);
-            const recovered = {
-              id,
-              pausedMs: clock2.pausedMs,
-              transferId: existing.handoff.activityTransferId,
-              ...clock2.pausedAt !== void 0 ? { pausedAt: clock2.pausedAt } : {},
-              ...clock2.lastActivatedAt !== void 0 ? { lastActivatedAt: clock2.lastActivatedAt } : {},
-              ...clock2.lastInactiveAt !== void 0 ? { lastInactiveAt: clock2.lastInactiveAt } : {}
-            };
-            const index = registry.pets.findIndex((pet) => pet.id === id);
-            if (index < 0) registry.pets.push(recovered);
-            else registry.pets[index] = recovered;
-          }
-          this.activate(registry, id, now);
-          await atomicJson(this.registryFile, registry);
-          this.selectedId = id;
-          if (this.pinnedId !== void 0) this.pinnedId = id;
-          return this.readPet(id, registry);
-        }
-        if (existing.handoff?.status !== "exported") throw new Error("The destination Pet is already writable");
-        if (state.handoff.previousTransferId !== existing.handoff.id)
-          throw new Error("This transfer does not follow the destination ownership receipt");
-      }
-      const clock = ensureGrowthClock(state);
-      if (!Number.isFinite(clock.pausedMs) || clock.pausedMs < 0 || clock.pausedAt !== void 0 && !Number.isFinite(clock.pausedAt))
-        throw new Error("Invalid transferred activation clock");
-      const entry = {
-        id,
-        pausedMs: clock.pausedMs,
-        transferId: state.handoff.id,
-        ...clock.pausedAt !== void 0 ? { pausedAt: clock.pausedAt } : {},
-        ...clock.lastActivatedAt !== void 0 ? { lastActivatedAt: clock.lastActivatedAt } : {},
-        ...clock.lastInactiveAt !== void 0 ? { lastInactiveAt: clock.lastInactiveAt } : {}
-      };
-      const previousIndex = registry.pets.findIndex((pet) => pet.id === id);
-      if (previousIndex < 0) registry.pets.push(entry);
-      else registry.pets[previousIndex] = entry;
-      this.activate(registry, id, now);
-      clock.pausedMs = entry.pausedMs;
-      delete clock.pausedAt;
-      if (entry.lastActivatedAt !== void 0) clock.lastActivatedAt = entry.lastActivatedAt;
-      if (entry.lastInactiveAt !== void 0) clock.lastInactiveAt = entry.lastInactiveAt;
-      if (state.replacesPetId && state.replacesPetId !== id) {
-        const replaced = registry.pets.find((pet) => pet.id === state.replacesPetId);
-        if (replaced) replaced.archived ??= { at: now, replacesPetId: id };
-      }
-      await this.validateBindingUniqueness(state, registry);
-      state.handoff.activityTransferId = state.handoff.id;
-      await this.persist(state, registry, void 0, now);
-      return this.readPet(id, registry);
-    });
-  }
   /** The Agent supplies a source-backed upgrade summary or missing voice once, without a growth experience. */
   async supplementLegacy(options, now = Date.now()) {
     if (!options.confirmed) throw new Error("Legacy supplementation requires explicit user confirmation");
@@ -5971,7 +5900,7 @@ ${voice}`;
   }
 };
 
-// src/debugger.ts
+// src/debugger/launch.ts
 async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageHost() === "cloud" ? 47832 : 47831))) {
   if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("Invalid debugger port");
   const url = `http://127.0.0.1:${port}`, root = new Store(void 0, packageHost()).root;
@@ -5999,7 +5928,9 @@ async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageH
     throw new Error("An earlier debugger is still running on this port");
   }
   if (await inspect()) return { url, reused: true };
-  const child = spawn(process.execPath, [path13.join(import.meta.dirname, "debugger-server.js")], {
+  const server = ["debugger-server.js", "server.js"].map((name2) => path13.join(import.meta.dirname, name2)).find(existsSync3);
+  if (!server) throw new Error("Debugger server file is missing");
+  const child = spawn(process.execPath, [server], {
     windowsHide: true,
     detached: true,
     stdio: "ignore",
@@ -6019,7 +5950,7 @@ async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageH
   throw new Error("Debugger startup timed out");
 }
 
-// src/inventory.ts
+// src/debugger/inventory.ts
 import { mkdir as mkdir6, readFile as readFile12, rename as rename4, writeFile as writeFile5 } from "node:fs/promises";
 import path14 from "node:path";
 import { randomUUID as randomUUID9 } from "node:crypto";
@@ -6679,131 +6610,16 @@ async function journeyStep(store2, operationId, input) {
   });
 }
 
-// src/handoff.ts
-import { access as access3, cp, mkdir as mkdir7, readFile as readFile13 } from "node:fs/promises";
-import path16 from "node:path";
-import { randomUUID as randomUUID11 } from "node:crypto";
-async function exportPet(store2, target2, destination) {
-  if (target2 === store2.host || !["desktop", "cloud"].includes(target2))
-    throw new Error("Choose the other main environment");
-  if (!path16.isAbsolute(destination)) throw new Error("Transfer destination must be an absolute directory");
-  const before = await store2.peek();
-  if (!before.pet) throw new Error("No Pet to transfer");
-  if (before.pending) throw new Error("Finish the current story before handing off");
-  const owner = store2.forPet(before.pet.id);
-  const directory = path16.join(destination, before.pet.id);
-  const source = path16.join(store2.root, "pets", before.pet.id);
-  if (path16.resolve(directory).startsWith(path16.resolve(source) + path16.sep) || path16.resolve(directory) === path16.resolve(source))
-    throw new Error("Transfer destination must be outside the source Pet directory");
-  const transferId = before.handoff?.status === "exported" && before.handoff.target === target2 ? before.handoff.id : `handoff-${randomUUID11()}`;
-  const previousSchedule = before.schedule;
-  if (before.handoff?.status === "exported" && before.handoff.target !== target2)
-    throw new Error("This Pet already has an outstanding transfer to another environment");
-  if (before.handoff?.status !== "exported")
-    await owner.transaction((state) => {
-      if (state.pending) throw new Error("Finish the current story before handing off");
-      state.handoff = {
-        id: transferId,
-        target: target2,
-        status: "exported",
-        at: Date.now(),
-        ...state.handoff?.id ? { previousTransferId: state.handoff.id } : {}
-      };
-      state.schedule = { ...state.schedule, timezone: state.schedule?.timezone ?? "UTC", stoppedAt: Date.now() };
-      delete state.schedule.resumedAt;
-    });
-  await mkdir7(destination, { recursive: true });
-  await cp(source, directory, { recursive: true, force: false, errorOnExist: false });
-  const exported = await owner.peek();
-  await atomicJson(path16.join(directory, "transfer.json"), {
-    version: 1,
-    transferId,
-    petId: before.pet.id,
-    source: store2.host,
-    target: target2,
-    previousTransferId: exported.handoff?.previousTransferId,
-    state: exported
-  });
-  return {
-    transferId,
-    petId: before.pet.id,
-    directory,
-    previousSchedule,
-    steps: [
-      "Pause the previous host task by its saved reference.",
-      "Transfer this entire directory to the target.",
-      "Import it, then create the target host task."
-    ],
-    sourceStopped: true
-  };
-}
-async function importPet(store2, directory) {
-  if (!path16.isAbsolute(directory)) throw new Error("Transfer source must be an absolute directory");
-  const manifest = JSON.parse(await readFile13(path16.join(directory, "transfer.json"), "utf8"));
-  identifier(manifest.petId, "petId");
-  identifier(manifest.transferId, "transferId");
-  if (manifest.version !== 1 || !["desktop", "cloud"].includes(manifest.source) || manifest.target !== store2.host || manifest.source === store2.host || manifest.state.host !== manifest.source || manifest.state.pet?.id !== manifest.petId || manifest.state.handoff?.id !== manifest.transferId || manifest.state.handoff?.target !== manifest.target || manifest.state.handoff?.previousTransferId !== manifest.previousTransferId || manifest.state.handoff?.status !== "exported")
-    throw new Error("Invalid or mismatched Pet transfer");
-  const existing = await store2.forPet(manifest.petId).peek().catch(async (error) => {
-    if (error.code === "GENPET_RECORD_MISSING" && !error.registered) return fresh(store2.host);
-    if (error.code === "GENPET_TRANSFER_INCOMPLETE") {
-      const incoming = structuredClone(manifest.state);
-      incoming.host = store2.host;
-      incoming.handoff.status = "imported";
-      if (incoming.pet.binding) incoming.pet.binding.host = store2.host;
-      return store2.installTransfer(incoming);
-    }
-    throw error;
-  });
-  if (existing.handoff?.id === manifest.transferId && existing.handoff.status === "imported")
-    return { petId: manifest.petId, transferId: manifest.transferId, imported: true, duplicate: true };
-  if (existing.pet && existing.handoff?.status !== "exported")
-    throw new Error("The destination Pet is already writable; finish its handoff first");
-  if (existing.pet && existing.handoff?.id !== manifest.previousTransferId)
-    throw new Error("Stale transfer; its predecessor does not match the latest handoff");
-  const target2 = path16.join(store2.root, "pets", manifest.petId);
-  await mkdir7(target2, { recursive: true });
-  const sourceStateFile = path16.resolve(directory, "state.json");
-  await cp(directory, target2, {
-    recursive: true,
-    force: true,
-    filter: (source) => path16.resolve(source) !== sourceStateFile
-  });
-  const state = manifest.state;
-  state.host = store2.host;
-  state.handoff = {
-    id: manifest.transferId,
-    target: store2.host,
-    status: "imported",
-    at: Date.now(),
-    ...manifest.previousTransferId ? { previousTransferId: manifest.previousTransferId } : {}
-  };
-  if (state.pet.binding) state.pet.binding.host = store2.host;
-  for (const art of state.art) {
-    const local = path16.join(target2, "assets", path16.basename(art.file));
-    await access3(local);
-    art.file = local;
-  }
-  await store2.installTransfer(state);
-  return {
-    petId: manifest.petId,
-    transferId: manifest.transferId,
-    imported: true,
-    directory: target2,
-    schedule: "Create the new host task and save its reference before resuming."
-  };
-}
-
 // src/pipeline.ts
 import { execFile } from "node:child_process";
-import { existsSync as existsSync3 } from "node:fs";
-import { mkdir as mkdir8, writeFile as writeFile6 } from "node:fs/promises";
-import { randomUUID as randomUUID12 } from "node:crypto";
-import path17 from "node:path";
+import { existsSync as existsSync4 } from "node:fs";
+import { mkdir as mkdir7, writeFile as writeFile6 } from "node:fs/promises";
+import { randomUUID as randomUUID11 } from "node:crypto";
+import path16 from "node:path";
 import { promisify } from "node:util";
 var execute = promisify(execFile);
 var HELPER_TIMEOUT_MS = 55e3;
-var helperDirectory = () => path17.join(pluginRoot(), "vendor", "hatch-pet", "scripts");
+var helperDirectory = () => path16.join(pluginRoot(), "vendor", "hatch-pet", "scripts");
 async function pipelineRuntime(python) {
   const candidates = [
     ...new Set(
@@ -6838,11 +6654,11 @@ function helperFailure(error) {
   };
 }
 async function callHelper(script, args2, runDir, python, preparing = false) {
-  if (!path17.isAbsolute(runDir)) throw new Error("Pipeline runDir must be an absolute local path");
+  if (!path16.isAbsolute(runDir)) throw new Error("Pipeline runDir must be an absolute local path");
   const runtime = await pipelineRuntime(python);
   if (!runtime.available) return { ok: false, runtime, run_dir: runDir };
-  const helper = path17.join(runtime.helpers, script);
-  if (!existsSync3(helper))
+  const helper = path16.join(runtime.helpers, script);
+  if (!existsSync4(helper))
     return { ok: false, runtime, run_dir: runDir, error: "Installed deterministic image helper is missing" };
   let stdout = "", stderr = "", exitCode = 0, timedOut = false;
   try {
@@ -6857,8 +6673,8 @@ async function callHelper(script, args2, runDir, python, preparing = false) {
   } catch (error) {
     ({ stdout, stderr, exitCode, timedOut } = helperFailure(error));
   }
-  const reportFile = preparing && !existsSync3(path17.join(runDir, "imagegen-jobs.json")) ? `${runDir}.prepare-${randomUUID12()}.json` : path17.join(runDir, "qa", "wrapper-runs", `${script.replace(".py", "")}-${Date.now()}-${randomUUID12()}.json`);
-  await mkdir8(path17.dirname(reportFile), { recursive: true });
+  const reportFile = preparing && !existsSync4(path16.join(runDir, "imagegen-jobs.json")) ? `${runDir}.prepare-${randomUUID11()}.json` : path16.join(runDir, "qa", "wrapper-runs", `${script.replace(".py", "")}-${Date.now()}-${randomUUID11()}.json`);
+  await mkdir7(path16.dirname(reportFile), { recursive: true });
   await writeFile6(reportFile, JSON.stringify({ runtime, helper, args: args2, stdout, stderr, exitCode, timedOut }, null, 2), {
     flag: "wx"
   });
@@ -6900,7 +6716,7 @@ async function pipelinePrepare(input) {
   if (input.requestId) args2.push("--request-id", input.requestId);
   if (input.noMirrorLook) args2.push("--no-mirror-look", input.noMirrorLook);
   for (const reference of input.references ?? []) {
-    if (!path17.isAbsolute(reference)) throw new Error("Pipeline references must be absolute local paths");
+    if (!path16.isAbsolute(reference)) throw new Error("Pipeline references must be absolute local paths");
     args2.push("--reference", reference);
   }
   return callHelper("prepare_pet_run.py", args2, input.runDir, input.python, true);
@@ -6934,8 +6750,8 @@ async function pipelineProcess(runDir, options = {}) {
 
 // src/cli.ts
 async function jsonFile(file) {
-  if (!path18.isAbsolute(file ?? "")) throw new Error("JSON input requires an absolute file");
-  return JSON.parse(await readFile14(file, "utf8"));
+  if (!path17.isAbsolute(file ?? "")) throw new Error("JSON input requires an absolute file");
+  return JSON.parse(await readFile13(file, "utf8"));
 }
 var shared = {
   help: {
@@ -6960,7 +6776,7 @@ var shared = {
   // Story lifecycle
   "begin-story": {
     usage: "begin-story [TRIGGER_ID] [--grow]",
-    run: ([trigger, flag], store2) => beginStory(store2, trigger || `manual:${randomUUID13()}`, { forceGrowth: flag === "--grow" })
+    run: ([trigger, flag], store2) => beginStory(store2, trigger || `manual:${randomUUID12()}`, { forceGrowth: flag === "--grow" })
   },
   "journey-step": {
     usage: "journey-step OPERATION_ID STEP_JSON",
@@ -6985,7 +6801,7 @@ var shared = {
   "finish-story": { usage: "finish-story OPERATION_ID", run: ([id], store2) => finishStory(store2, id) },
   "cancel-story": { usage: "cancel-story OPERATION_ID", run: ([id], store2) => cancelStory(store2, id) },
   "story-output": { usage: "story-output [STORY_ID]", run: async ([id], store2) => storyOutput(await store2.peek(), id) },
-  reset: { usage: "reset [OPERATION_ID]", run: ([id], store2) => resetPet(store2, id || randomUUID13()) },
+  reset: { usage: "reset [OPERATION_ID]", run: ([id], store2) => resetPet(store2, id || randomUUID12()) },
   // Artwork and host updates
   "art-request": { usage: "art-request", run: async (_, store2) => artRequest(await store2.peek()) },
   "find-avatar": { usage: "find-avatar", run: async (_, store2) => hostFor(store2.host).findAvatar(await store2.peek()) },
@@ -7101,11 +6917,6 @@ var shared = {
   },
   "activate-pet": { usage: "activate-pet PET_ID", run: ([id], store2) => store2.selectPet(id) },
   "resolve-active": { usage: "resolve-active [HOST_AVATAR_ID]", run: ([id], store2) => store2.resolveActive(id ?? null) },
-  "handoff-export": {
-    usage: "handoff-export desktop|cloud DESTINATION_DIR",
-    run: ([host2, dir], store2) => exportPet(store2, host2, dir)
-  },
-  "handoff-import": { usage: "handoff-import TRANSFER_DIR", run: ([dir], store2) => importPet(store2, dir) },
   debugger: {
     usage: "debugger [--host-pets LIST_PETS_JSON]",
     run: async ([flag, file], store2) => {

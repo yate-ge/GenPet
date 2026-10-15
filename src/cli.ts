@@ -9,8 +9,8 @@ import { randomUUID } from 'node:crypto';
 import { acceptArt, artRequest } from './art.js';
 import { noteChat } from './chat.js';
 import { packageHost, readPrompt } from './config.js';
-import { launchDebugger } from './debugger.js';
-import { saveHostPets } from './inventory.js';
+import { launchDebugger } from './debugger/launch.js';
+import { saveHostPets } from './debugger/inventory.js';
 import { recordStep, unitRequest, validateUnitResult } from './generation.js';
 import { growth } from './growth.js';
 import { hostFor, type Command } from './hosts/index.js';
@@ -25,7 +25,6 @@ import { statusView } from './status.js';
 import { Store } from './store.js';
 import { journeyStep } from './journey.js';
 import { chooseCandidate, chooseSource, recentContent } from './variety.js';
-import { exportPet, importPet } from './handoff.js';
 import { pipelinePrepare, pipelineProcess, pipelineRuntime } from './pipeline.js';
 import { cloudBriefForPet } from './status.js';
 
@@ -206,11 +205,6 @@ const shared: Record<string, Command> = {
   },
   'activate-pet': { usage: 'activate-pet PET_ID', run: ([id], store) => store.selectPet(id) },
   'resolve-active': { usage: 'resolve-active [HOST_AVATAR_ID]', run: ([id], store) => store.resolveActive(id ?? null) },
-  'handoff-export': {
-    usage: 'handoff-export desktop|cloud DESTINATION_DIR',
-    run: ([host, dir], store) => exportPet(store, host as 'desktop' | 'cloud', dir),
-  },
-  'handoff-import': { usage: 'handoff-import TRANSFER_DIR', run: ([dir], store) => importPet(store, dir) },
   debugger: {
     usage: 'debugger [--host-pets LIST_PETS_JSON]',
     run: async ([flag, file], store) => {

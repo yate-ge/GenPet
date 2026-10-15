@@ -21,7 +21,7 @@ for (const name of ['genpet']) {
   await rm(path.join(target, 'dist'), { recursive: true, force: true });
   await mkdir(path.join(target, 'dist'), { recursive: true });
   await build({
-    entryPoints: { cli: 'src/cli.ts', 'debugger-server': 'src/debugger-server.ts' },
+    entryPoints: { cli: 'src/cli.ts', 'debugger-server': 'src/debugger/server.ts' },
     absWorkingDir: source,
     outdir: path.join(target, 'dist'),
     bundle: true,
