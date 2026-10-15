@@ -24,14 +24,10 @@ export function packageHost(): Host {
 export const dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), '.genpet');
 export const codexHome = () => process.env.CODEX_HOME || path.join(homedir(), '.codex');
 
-/** The genpet skill holds rules, units and flows: framework/ in source runs, the installed copy otherwise. */
+/** The genpet skill holds rules, units and flows; source runs and installs read the same plugin directory. */
 function readSkillFile(relative: string) {
-  const candidates = [
-    path.resolve(here, '..', 'framework', 'skills', 'genpet', relative),
-    path.join(pluginRoot(), 'skills', 'genpet', relative),
-  ];
-  const file = candidates.find(existsSync);
-  if (!file) throw new Error(`Missing skill file: ${relative}`);
+  const file = path.join(pluginRoot(), 'skills', 'genpet', relative);
+  if (!existsSync(file)) throw new Error(`Missing skill file: ${relative}`);
   return readFileSync(file, 'utf8');
 }
 

@@ -19,7 +19,7 @@ This is the target architecture agreed on 2026-10-10. Implementation of the 0.10
 | Layer | Where | Decides |
 | --- | --- | --- |
 | Host | Codex desktop (main environment by default), Dots (can become the main environment) | Provides the Agent and what it uses: user information, image generation, scheduling, the Pet Avatar. |
-| Prompt layer | `framework/` | What a pet, story, egg and Avatar must be, and how one story is made. Content stays open; the Agent decides it at runtime. |
+| Prompt layer | `plugins/genpet/skills/` | What a pet, story, egg and Avatar must be, and how one story is made. Content stays open; the Agent decides it at runtime. |
 | Runtime | `src/` | Identity, saved records, retries, artwork files and putting a new appearance on the Pet Avatar. |
 
 Inside the host, the Agent is the center. The user's commands and talk reach it through chat, and the scheduler triggers it for the 5-hour check while the computer is on. The Agent reads user information, draws with image generation, and puts new appearances on the Pet Avatar, which is what the user sees. The runtime reaches the Pet Avatar too, through the host interface.
@@ -71,7 +71,7 @@ Sub skills are roles the same Agent plays in turn. They are called in two orders
 
 `context` serves both: at adoption it gives GeneDesigner the user's traits, and afterwards it gives StoryDesigner the user's activity.
 
-Everything the Agent reads lives in `framework/skills/genpet/`: `rules.md` (product rules), `output.md`, `context/` (reading user context), `designers/<Role>/` (each role's README and the units it owns), `flows/` (adoption, each story, naming, scheduling) and `host/` (desktop, Dots, storage and unit contracts). See [Where each rule is written](#where-each-rule-is-written).
+Everything the Agent reads lives in `plugins/genpet/skills/genpet/`: `rules.md` (product rules), `output.md`, `context/` (reading user context), `designers/<Role>/` (each role's README and the units it owns), `flows/` (adoption, each story, naming, scheduling) and `host/` (desktop, Dots, storage and unit contracts). See [Where each rule is written](#where-each-rule-is-written).
 
 ## One story, end to end
 
@@ -204,7 +204,7 @@ The former dots/lifecycle and publish/art cycles are removed. Pending reads live
   backups/              full record before a reset or a legacy import
 ```
 
-Records live in the main environment. `GENPET_DATA_DIR` sets the root, with desktop/cloud subdirectories. A complete transfer includes records, units, chats, artwork and pause timing; the source stops writing, and the target verifies the transfer chain before taking ownership. Writes are locked and atomic; units live in separate files. Legacy records are discovered read-only and imported after confirmation. Fields are described in `framework/skills/genpet/host/storage.md`.
+Records live in the main environment. `GENPET_DATA_DIR` sets the root, with desktop/cloud subdirectories. A complete transfer includes records, units, chats, artwork and pause timing; the source stops writing, and the target verifies the transfer chain before taking ownership. Writes are locked and atomic; units live in separate files. Legacy records are discovered read-only and imported after confirmation. Fields are described in `plugins/genpet/skills/genpet/host/storage.md`.
 
 The v3 `pet` has identity and three blocks. A story commits shared memory and current state; naming changes only the name:
 
@@ -230,11 +230,11 @@ Each GenPet has its own directory, artwork and binding. Readable host selection 
 
 | Kind of rule | Written in |
 | --- | --- |
-| What a pet, egg, story and Avatar must be; how often stories come; how the user appears in them | `framework/skills/genpet/rules.md` |
+| What a pet, egg, story and Avatar must be; how often stories come; how the user appears in them | `plugins/genpet/skills/genpet/rules.md` |
 | One unit's inputs, result and review points | That unit's prompt and its entry in `units.json` |
-| The order of steps and which command to run | `framework/skills/genpet/flows/` |
-| What a host can do and its formats | `framework/skills/genpet/host/desktop.md`, `dots.md` |
-| What the user sees | `framework/skills/genpet/output.md` |
+| The order of steps and which command to run | `plugins/genpet/skills/genpet/flows/` |
+| What a host can do and its formats | `plugins/genpet/skills/genpet/host/desktop.md`, `dots.md` |
+| What the user sees | `plugins/genpet/skills/genpet/output.md` |
 | When a command applies and whether it needs the user's confirmation | The skill, which otherwise only links to the files above |
 | Code guarantees: identity, pending, stage/experience/deadline growth, binding and two consecutive text-only stories at most | `src/` |
 
@@ -278,11 +278,11 @@ How the release is delivered. The marketplace clones this repository in full und
 - **Add or change a generation unit**: edit its prompt and its entry in `units.json` together. `unit-request` and `verify-unit` pick it up.
 - **Add a host**: write an adapter that implements the host interface and adds its own commands. Register it in `hosts/index.ts`, add `config/host.json` and a plugin directory, add the package name to `scripts/build-plugin.ts`, and write its reference with what you tested the host can do.
 - **Add a command**: add an entry to the command table in `cli.ts`, or to the host adapter's `commands` if only one host needs it. Keep the logic in the feature module.
-- **Change a skill**: edit `framework/skills/` for shared skills. Host-only skills live in `plugins/<package>/skills/`.
+- **Change a skill**: edit `plugins/genpet/skills/` directly; it is the only copy.
 
 ## Packages
 
-`npm run build:plugin` copies `framework/{prompts,references,debugger-web,skills}` into the single `genpet` package and bundles `src/` into `dist/`. Edit the framework sources. The manifest, host config, README, host-only skills and install verifier are maintained in the package, along with the vendored image pipeline. Dots installation and persistent loading require actual host validation.
+`npm run build:plugin` bundles `src/` into `dist/` and writes the package's `package.json`. Everything else in `plugins/genpet/` (manifest, skills, debugger page, host config, README, install verifier and the vendored image pipeline) is edited in place. Dots installation and persistent loading require actual host validation.
 
 ## Checks
 

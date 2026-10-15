@@ -1,6 +1,0 @@
-interface:
-  display_name: "genpet-chat"
-  short_description: "按当前宠物的阶段、性格和共同记忆对话，不当场改变状态"
-  default_prompt: "使用 $genpet-chat 和我的宠物说话。"
-policy:
-  allow_implicit_invocation: false

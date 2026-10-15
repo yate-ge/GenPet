@@ -17,7 +17,7 @@
 | D1–D11 | 同 cloud ID、简介、Dots 持续风格与主环境 | 跨端实际回读、新会话、工作对照 |
 | M1–M8 | 环境检查、确认、清理、增养替换、多 Pet | 每只目录/云 ID、选择路由和中断恢复 |
 
-旧说明中的模块编号 M1–M8 已废弃；本文件 M 组指最新的初始化和多宠物用例。独立单元名见 framework/skills/genpet/host/units.json，使用 story-item 和 ImageReviewer；旧历史别名由读取兼容。
+旧说明中的模块编号 M1–M8 已废弃；本文件 M 组指最新的初始化和多宠物用例。独立单元名见 plugins/genpet/skills/genpet/host/units.json，使用 story-item 和 ImageReviewer；旧历史别名由读取兼容。
 
 ## 基本做法
 

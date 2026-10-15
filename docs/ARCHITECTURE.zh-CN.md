@@ -19,7 +19,7 @@
 | 层 | 位置 | 负责什么 |
 | --- | --- | --- |
 | 宿主 | Codex 桌面端（默认的主环境）、Dots（可切换为主环境） | 提供 Agent 和它用到的能力：用户资料、图像生成、定时任务、Pet Avatar。 |
-| 提示词层 | `framework/` | 规定宠物、故事、蛋和 Avatar 必须是什么，以及一次故事怎么生成。具体内容保持开放，由 Agent 在运行时决定。 |
+| 提示词层 | `plugins/genpet/skills/` | 规定宠物、故事、蛋和 Avatar 必须是什么，以及一次故事怎么生成。具体内容保持开放，由 Agent 在运行时决定。 |
 | 运行时 | `src/` | 身份、保存记录、重试、素材文件，以及把新形象换到 Pet Avatar 上。 |
 
 宿主内部以 Agent 为中心。用户的命令和对话通过对话框到达 Agent，定时任务在电脑开着时每 5 小时触发它检查一次。Agent 读取用户资料，用图像生成画图，并把新形象换到 Pet Avatar 上；Pet Avatar 就是用户看到的宠物。运行时也会通过宿主接口操作 Pet Avatar。
@@ -71,7 +71,7 @@
 
 `context` 两边共用：领养时给 GeneDesigner 提供用户特质，之后给 StoryDesigner 提供用户活动。
 
-Agent 读的内容都在 `framework/skills/genpet/`：`rules.md`（产品规则）、`output.md`、`context/`（读取用户资料）、`designers/<角色>/`（各角色说明和它负责的单元）、`flows/`（领养、每篇故事、命名、定时）和 `host/`（桌面、Dots、存储与单元格式）。各规则的位置见[每条规则写在哪里](#每条规则写在哪里)。
+Agent 读的内容都在 `plugins/genpet/skills/genpet/`：`rules.md`（产品规则）、`output.md`、`context/`（读取用户资料）、`designers/<角色>/`（各角色说明和它负责的单元）、`flows/`（领养、每篇故事、命名、定时）和 `host/`（桌面、Dots、存储与单元格式）。各规则的位置见[每条规则写在哪里](#每条规则写在哪里)。
 
 ## 一次故事的完整流程
 
@@ -204,7 +204,7 @@ Dots 的功能照常。蛋的阶段 Dots 和原来一样，只换了形象；幼
   backups/              重置或导入旧记录之前的完整备份
 ```
 
-记录保存在主环境；`GENPET_DATA_DIR` 改根目录，宿主子目录为 desktop/cloud。完整移交包含记录、步骤、对话、图和暂停计时；旧端冻结写入，目标校验 transfer 链再接管。每次修改加锁并原子提交，单元结果已分文件保存。旧记录只读发现，确认后显式导入。各字段见 `framework/skills/genpet/host/storage.md`。
+记录保存在主环境；`GENPET_DATA_DIR` 改根目录，宿主子目录为 desktop/cloud。完整移交包含记录、步骤、对话、图和暂停计时；旧端冻结写入，目标校验 transfer 链再接管。每次修改加锁并原子提交，单元结果已分文件保存。旧记录只读发现，确认后显式导入。各字段见 `plugins/genpet/skills/genpet/host/storage.md`。
 
 v3 的 `pet` 分成身份和三块；故事完成时提交相处记忆与当前状态，命名只改名字。
 
@@ -230,11 +230,11 @@ memory 记的是共同经历；对用户的了解优先读宿主记忆。旧记�
 
 | 规则 | 写在哪里 |
 | --- | --- |
-| 宠物、蛋、故事和 Avatar 必须是什么；故事多久来一次；用户怎样出现在故事里 | `framework/skills/genpet/rules.md` |
+| 宠物、蛋、故事和 Avatar 必须是什么；故事多久来一次；用户怎样出现在故事里 | `plugins/genpet/skills/genpet/rules.md` |
 | 一个单元的输入、结果和检查点 | 这个单元的提示词，以及它在 `units.json` 里的条目 |
-| 步骤的顺序，以及该执行哪条命令 | `framework/skills/genpet/flows/` |
-| 宿主能做什么，以及它的格式 | `framework/skills/genpet/host/desktop.md`、`dots.md` |
-| 用户能看到什么 | `framework/skills/genpet/output.md` |
+| 步骤的顺序，以及该执行哪条命令 | `plugins/genpet/skills/genpet/flows/` |
+| 宿主能做什么，以及它的格式 | `plugins/genpet/skills/genpet/host/desktop.md`、`dots.md` |
+| 用户能看到什么 | `plugins/genpet/skills/genpet/output.md` |
 | 一条命令什么时候适用，是否需要用户确认 | 对应的 skill，其余内容只链接到上面的文件 |
 | 由代码保证的规则：身份、pending、阶段、经历与期限、绑定、纯文字最多连续两次 | `src/` |
 
@@ -278,11 +278,11 @@ memory 记的是共同经历；对用户的了解优先读宿主记忆。旧记�
 - **新增或修改生成单元**：同时改它的提示词和 `units.json` 里的条目。`unit-request` 和 `verify-unit` 会自动识别。
 - **新增宿主**：写一个实现宿主接口的适配器，并加上它自己的命令。在 `hosts/index.ts` 里登记，增加 `config/host.json` 和一个插件目录，把包名加到 `scripts/build-plugin.ts`，并把实测到的宿主能力写成它的参考文档。
 - **新增命令**：在 `cli.ts` 的命令表里加一项；只有一个宿主需要时，加到那个适配器的 `commands` 里。逻辑留在功能模块里。
-- **修改 skill**：共用的 skill 改 `framework/skills/`。只属于某个宿主的 skill 在 `plugins/<package>/skills/`。
+- **修改 skill**：直接改 `plugins/genpet/skills/`，这是唯一的一份。
 
 ## 插件包
 
-`npm run build:plugin` 把 `framework/{prompts,references,debugger-web,skills}` 复制到唯一的 genpet 包，并把 src 打包到 dist。副本从源文件生成；包中手工维护 manifest、host 配置、README、宿主专有 skill 和安装校验脚本，另带 vendor 图像流水线。Dots 的安装和持续加载须由实际宿主验证。
+`npm run build:plugin` 把 src 打包到 dist，并生成包里的 package.json。`plugins/genpet/` 里其余内容（manifest、skills、调试页面、host 配置、README、安装校验脚本和 vendor 图像流水线）都直接在原处修改。Dots 的安装和持续加载须由实际宿主验证。
 
 ## 检查
 

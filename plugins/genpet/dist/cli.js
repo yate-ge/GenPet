@@ -2184,12 +2184,8 @@ function packageHost() {
 var dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), ".genpet");
 var codexHome = () => process.env.CODEX_HOME || path.join(homedir(), ".codex");
 function readSkillFile(relative) {
-  const candidates = [
-    path.resolve(here, "..", "framework", "skills", "genpet", relative),
-    path.join(pluginRoot(), "skills", "genpet", relative)
-  ];
-  const file = candidates.find(existsSync);
-  if (!file) throw new Error(`Missing skill file: ${relative}`);
+  const file = path.join(pluginRoot(), "skills", "genpet", relative);
+  if (!existsSync(file)) throw new Error(`Missing skill file: ${relative}`);
   return readFileSync(file, "utf8");
 }
 function readUnits() {

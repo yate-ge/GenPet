@@ -1,6 +1,0 @@
-interface:
-  display_name: "genpet-reset"
-  short_description: "确认后让新宠物接手原来的条目，旧记录完整保留在备份"
-  default_prompt: "使用 $genpet-reset 换一只宠物。"
-policy:
-  allow_implicit_invocation: false

@@ -144,8 +144,8 @@ GenPet은 세 개의 층으로 되어 있고, 대부분의 변경은 그중 하�
 
 | 층 | 위치 | 정하는 것 |
 | --- | --- | --- |
-| 제품 규칙 | [`framework/skills/genpet/rules.md`](framework/skills/genpet/rules.md) | 펫, 알, 이야기, 집이 어때야 하는지 (규칙의 유일한 출처) |
-| 생성 | [`framework/skills/genpet/`](framework/skills/genpet/) | 단계마다 하나의 프롬프트: 입양, 디자인, 이야기, 모습, 집… |
+| 제품 규칙 | [`plugins/genpet/skills/genpet/rules.md`](plugins/genpet/skills/genpet/rules.md) | 펫, 알, 이야기, 집이 어때야 하는지 (규칙의 유일한 출처) |
+| 생성 | [`plugins/genpet/skills/genpet/`](plugins/genpet/skills/genpet/) | 단계마다 하나의 프롬프트: 입양, 디자인, 이야기, 모습, 집… |
 | 엔지니어링 | [`src/`](src/) | 정체성, 저장, 재시도, 이미지 파일, 데스크톱 업데이트 |
 
 먼저 [아키텍처 개요](docs/ARCHITECTURE.md)를 보고, 이어서 [기여 가이드](CONTRIBUTING.md)와 [문서 목록](docs/README.md)을 확인하세요. 개발에는 Node.js 22 이상이 필요합니다: `npm ci && npm run verify:fast`.

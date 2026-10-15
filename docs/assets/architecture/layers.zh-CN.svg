@@ -91,7 +91,7 @@
   <!-- PROMPT LAYER -->
   <rect x="30" y="250" width="790" height="394" rx="10" fill="#EAF0FA" stroke="#9CB3DC"/>
   <text class="layer" x="48" y="275">提示词层</text>
-  <text class="where mono" x="114" y="275">framework/</text>
+  <text class="where mono" x="114" y="275">plugins/genpet/skills/</text>
   <text class="sub" x="802" y="275" text-anchor="end">规定宠物是什么、故事怎么生成；具体内容保持开放</text>
 
   <rect x="48" y="290" width="542" height="78" rx="8" fill="#FFFFFF" stroke="#9CB3DC" stroke-width="1.4"/>

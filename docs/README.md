@@ -1,6 +1,6 @@
 # GenPet 文档索引
 
-运行时的产品规则只有一个来源：[framework/skills/genpet/rules.md](../framework/skills/genpet/rules.md)。各角色和它负责的单元提示词在 [designers/](../framework/skills/genpet/designers/)，流程在 [flows/](../framework/skills/genpet/flows/)，宿主接入与存储在 [host/](../framework/skills/genpet/host/)。
+运行时的产品规则只有一个来源：[plugins/genpet/skills/genpet/rules.md](../plugins/genpet/skills/genpet/rules.md)。各角色和它负责的单元提示词在 [designers/](../plugins/genpet/skills/genpet/designers/)，流程在 [flows/](../plugins/genpet/skills/genpet/flows/)，宿主接入与存储在 [host/](../plugins/genpet/skills/genpet/host/)。
 
 ## 开发从这里读起
 

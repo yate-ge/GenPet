@@ -1,16 +1,14 @@
 /**
- * Build the desktop plugin package from the shared framework.
- * Copied into each package: framework/debugger-web and every framework/skills/* skill (genpet holds rules, units and flows).
- * Kept per package: manifest, assets/icon.png, config/host.json, README, host-only skills, scripts/verify-install.mjs.
+ * Build the desktop plugin package in place.
+ * plugins/genpet is the only copy of the skills, debugger page, manifest, host config and README; edit it directly.
  * Generated: dist/ (bundled runtime) and package.json.
  */
-import { access, cp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { access, cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { build } from 'esbuild';
 
 const source = path.resolve(import.meta.dirname, '..');
-const framework = path.join(source, 'framework');
 const pkg = JSON.parse(await readFile(path.join(source, 'package.json'), 'utf8'));
 
 for (const name of ['genpet']) {
@@ -19,16 +17,6 @@ for (const name of ['genpet']) {
   if (manifest.version !== pkg.version) throw new Error(`Version mismatch: ${name}`);
   for (const required of ['README.md', 'config/host.json', 'scripts/verify-install.mjs'])
     await access(path.join(target, required));
-
-  await replace(path.join(framework, 'debugger-web'), target, 'debugger-web');
-  // Rules, units and flows moved into skills/genpet; drop the former top-level copies.
-  for (const folder of ['prompts', 'references']) await rm(path.join(target, folder), { recursive: true, force: true });
-  const sharedNames = new Set(await readdir(path.join(framework, 'skills')));
-  for (const skill of await readdir(path.join(target, 'skills')))
-    if (skill !== 'genpet-switch' && skill !== 'genpet-debugger' && !sharedNames.has(skill))
-      await rm(path.join(target, 'skills', skill), { recursive: true, force: true });
-  for (const skill of await readdir(path.join(framework, 'skills')))
-    await replace(path.join(framework, 'skills', skill), target, path.join('skills', skill));
 
   await rm(path.join(target, 'dist'), { recursive: true, force: true });
   await mkdir(path.join(target, 'dist'), { recursive: true });
@@ -63,9 +51,4 @@ for (const name of ['genpet']) {
   };
   await writeFile(path.join(target, 'package.json'), JSON.stringify(generated, null, 2) + '\n');
   console.log(`Built ${name} v${pkg.version}`);
-}
-
-async function replace(from: string, target: string, relative: string) {
-  await rm(path.join(target, relative), { recursive: true, force: true });
-  await cp(from, path.join(target, relative), { recursive: true });
 }

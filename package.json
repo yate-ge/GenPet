@@ -19,8 +19,8 @@
     "verify:fast": "npm run check && npm run format:check && npm test",
     "verify:release": "node scripts/verify-release.mjs",
     "verify:version": "node scripts/verify-release-version.mjs",
-    "format": "prettier --write src tests scripts framework/debugger-web",
-    "format:check": "prettier --check src tests scripts framework/debugger-web"
+    "format": "prettier --write src tests scripts plugins/genpet/debugger-web",
+    "format:check": "prettier --check src tests scripts plugins/genpet/debugger-web"
   },
   "dependencies": {
     "@jsquash/webp": "^1.5.0",
