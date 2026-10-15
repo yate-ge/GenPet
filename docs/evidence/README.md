@@ -4,6 +4,12 @@
 
 [成果汇报 PDF](https://drive.google.com/file/d/13oSP60mjBLSoC6R1xSrA9HYetCxodSng/view) · [Word](https://docs.google.com/document/d/1WP0MAtJONsqVWJNEyP7JhSVXjJ4is6Bx/edit) · [成果目录](https://drive.google.com/drive/folders/11WW2UEENWFibU8VG2jzycz_arD-6-tCF)
 
+## 2026-10-15 对话名称与过程文字（0.10.12，本地，未提交）
+
+- 过程文字的来源：只读查看本机 Codex 会话记录，「我会用 genpet-switch 技能……」「I'm using the GenPet debugger skill……」都是 Agent 运行时自己发的 `commentary` 消息，不是定时任务提示词写出来的。`output.md`「文字边界」规定运行中不发中间消息，主 skill 开头先说这一条。只看了消息类型和开头几个字，没有保存会话内容。
+- 对话名称：只读查看 Codex 桌面 App 包，有 `set_thread_title`（参数 `title`，可选 `threadId`，省略时改调用它的对话）。`flows/scheduling.md` 改为建立任务时给任务所在对话设成 GenPet，之后只在名称被改掉时再设一次，不改其他对话。
+- 两项都只改了提示，没有在真实宿主上跑过；加入测试计划 R6（S10、S17）。开发计划、工程问题状态表、待办表、用例范围与条数按代码核对后更新。
+
 ## 2026-10-15 README banner 改版
 
 - 用 Codex CLI 按当前版本的 Pet 重画 banner。第一轮两张候选改成了排排站的阵容，用户认为旧图更好：有一个“世界”，不同 Pet 各自生活，带着各自的道具。第二轮沿用旧图的世界布局：左边乡间、蛋窝和石板路，中间是大树下的地洞小屋，右边依次是池塘、芦苇和海边灯塔。各 Pet 带着自己故事里的道具在各自的地方活动。
@@ -11,6 +17,14 @@
 - 替换 `docs/assets/banner.webp`：2172×724，约 498 KB（旧图约 488 KB）。四种语言的 README 都引用这个文件，替代文字仍然准确，未改。banner 属于仓库文件；候选图和 Codex 过程文件只留在本机临时目录，不进仓库。
 - 推送后 GitHub 返回的已是新图（哈希一致），但同名 URL 被缓存，用户仍看到旧图。文件改名为 `docs/assets/banner-world.webp`，四种语言的 README 同步改引用。
 - 原来在旧历史的本地 main 上改的。远端历史清理后，本地 main 先留了备份分支 `backup/pre-rewrite-main-20261015`，再对齐 `origin/main`，然后提交新图。
+
+## 2026-10-15 测试前开发任务（0.10.12，本地）
+
+- `story-output` 增加 `name`（宠物名字，未起名时为 null），output 单元输入同步；新增回归测试。`tests/agent/README` 的 T/S 组补上合成会话、情境与 S24–S26；开发计划补齐「故事模块的开发目标」「定时故事」问题表和 10-15 开发记录；领养案例「知音」改为按自己的方式回应；新增 `tests/agent/sessions/make-sessions.mjs` 生成七组虚构会话（在忙、节点、平常、开着没用、关了再开、名称看不出主题、敏感名称），预期观察只打印给审核者。测试计划见 `tests/agent/TEST_PLAN_0.10.12.zh-CN.md`。
+
+## 2026-10-15 故事候选改为平均随机（0.10.12，本地）
+
+- 按「Agent 能处理的交给 Agent、规则引导、硬规则兜底」：候选都符合观察到的情境优先方向，Agent 对照最近内容让做法和主题变化；`random-choice` 在候选里平均选，不再按类型最近出现的间隔加权（旧权重最高 11:1，用户连续在忙时反而避开换装）。兜底不变：至少两个候选、至少一个看得见、纯文字需用户相关引用且最多连续两次、种子保存可重试。AGENTS.md、rules.md、flows/stories.md、开发计划同步；原加权测试换成平均选择和纯文字兜底两条测试。
 
 ## 2026-10-15 0.10.12 故事设计原则修订（本地，未提交）
 

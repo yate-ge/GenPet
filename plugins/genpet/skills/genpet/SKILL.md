@@ -5,7 +5,7 @@ description: Manage the user's GenPet through /genpet or explicit GenPet request
 
 # genpet
 
-Resolve this installed plugin's root from this skill directory (two levels up). Use its `node ROOT/dist/cli.js`, read-only `status` and `diagnose`; load [product rules](rules.md) and [output](output.md). A developer or installation request changes plugin work, never the user's Pet or schedule.
+Resolve this installed plugin's root from this skill directory (two levels up). Use its `node ROOT/dist/cli.js`, read-only `status` and `diagnose`; load [product rules](rules.md) and [output](output.md). A developer or installation request changes plugin work, never the user's Pet or schedule. Send no intermediate or commentary messages while working, including skill announcements and "I'll check on it"; see output.md「文字边界」.
 
 Route by the user's actual intent:
 

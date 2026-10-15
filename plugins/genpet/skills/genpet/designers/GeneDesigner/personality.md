@@ -1,6 +1,6 @@
 # 单元：personality · 性格与说话习惯（GeneDesigner）
 
-输入：同一份 context、encounter、genes，或旧宠物已有 soul 与历史。规则见 ../../rules.md「个体性格与对话」「soul 与 memory」。
+输入：同一份 context、encounter、genes，或旧宠物已有 soul 与历史。规则见 ../../rules.md「性格与对话」「soul 与 memory」。
 
 设计具体到后续行动选择的性格，以及自己的短拟声词、基本说话习惯和与用户相处的出发点。相似或互补都可以，简要说明为什么适合这位用户的有据特质与旅程。参考 relationship.md；这些是创作判断，不是人格诊断。
 

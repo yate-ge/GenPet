@@ -4,7 +4,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { Store } from '../src/store.js';
-import { beginStory, finishStory, planStory } from '../src/lifecycle.js';
+import { beginStory, finishStory, planStory, storyOutput } from '../src/lifecycle.js';
 import { journeyStep } from '../src/journey.js';
 import { chooseCandidate, chooseSource, sourceFromSeed, recentContent } from '../src/variety.js';
 import { journeyReady, initialPlan, image, hostDone } from './fixtures.js';
@@ -12,6 +12,7 @@ import { acceptArt, artRequest } from '../src/art.js';
 import { recordStep } from '../src/generation.js';
 import { growth } from '../src/growth.js';
 import { dueStory } from '../src/schedule.js';
+import { namePet } from '../src/naming.js';
 
 async function isolated() {
   const root = path.resolve('output/implementation-20261011/flow-tests', randomUUID());
@@ -216,7 +217,15 @@ test('a made-up context reference cannot complete a text-only story', async () =
   assert.equal((await store.peek()).stories.length, 1);
 });
 
-test('story recency weights also favor a user-grounded text candidate when text has not appeared recently', async () => {
+test('story-output gives the output its Pet name only after the user names it', async () => {
+  const { store, root } = await isolated();
+  const petId = await adopted(store, root);
+  assert.equal(storyOutput(await store.peek()).name, null);
+  await namePet(store, petId, '小耳朵');
+  assert.equal(storyOutput(await store.peek()).name, '小耳朵');
+});
+
+test('the story choice picks evenly among fitting candidates; only the text fallback excludes one', async () => {
   const { store, root } = await isolated();
   await adopted(store, root);
   await store.transaction(state => {
@@ -224,7 +233,7 @@ test('story recency weights also favor a user-grounded text candidate when text 
     for (let i = 1; i <= 3; i++)
       state.stories.push({ ...first, id: `visible-${i}`, triggerId: `visible-${i}`, appearanceChanged: true });
   });
-  const op = (await beginStory(store, 'recency')).pending!.id;
+  const op = (await beginStory(store, 'even')).pending!.id;
   const candidates = {
     purpose: 'story' as const,
     candidates: [
@@ -235,12 +244,45 @@ test('story recency weights also favor a user-grounded text candidate when text 
         contextRefs: ['fixture:shared-event'],
         outputs: ['appearance' as const],
       },
+      { id: 'ungrounded', description: 'A thought with no user reference', contextRefs: [] },
     ],
   };
-  const choice = await chooseCandidate(store, op, candidates, 'text-recency');
+  const choice = await chooseCandidate(store, op, candidates, 'even-choice');
   assert.ok('weights' in choice);
-  assert.ok(choice.weights[0] > choice.weights[1]);
+  assert.deepEqual(choice.weights, [1, 1, 0]);
   assert.equal((await chooseCandidate(store, op, candidates)).candidateId, choice.candidateId);
+});
+
+test('after two text-only stories the choice cannot pick text', async () => {
+  const { store, root } = await isolated();
+  await adopted(store, root);
+  await store.transaction(state => {
+    const first = state.stories[0];
+    for (let i = 1; i <= 2; i++)
+      state.stories.push({
+        ...first,
+        id: `text-${i}`,
+        triggerId: `text-${i}`,
+        appearanceChanged: false,
+        mediaIds: [],
+      });
+  });
+  const op = (await beginStory(store, 'after-text')).pending!.id;
+  const choice = await chooseCandidate(
+    store,
+    op,
+    {
+      purpose: 'story',
+      candidates: [
+        { id: 'thought', description: 'A third thought', contextRefs: ['fixture:shared-event'] },
+        { id: 'item', description: 'A visible object', contextRefs: ['fixture:shared-event'], outputs: ['item'] },
+      ],
+    },
+    'after-text-choice',
+  );
+  assert.ok('weights' in choice);
+  assert.deepEqual(choice.weights, [0, 1]);
+  assert.equal(choice.candidateId, 'item');
 });
 
 test('a saved Pet-only story or its memory ID cannot substitute for a user-related text context', async () => {

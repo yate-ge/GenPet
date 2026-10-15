@@ -108,16 +108,11 @@ export async function chooseCandidate(
     const recent = recentContent(state);
     if (input.purpose === 'story' && !candidates.some(candidate => candidate.outputs?.length))
       throw new Error('Include a candidate with a visible output');
-    const weights = candidates.map(candidate => {
-      if (input.purpose !== 'story') return 1;
-      const textOnly = !candidate.outputs?.length;
-      if (textOnly && (recent.visualRequired || !candidate.contextRefs.length)) return 0;
-      const last = recent.items.findLastIndex(item =>
-        textOnly
-          ? !item.outputs.length
-          : item.outputs.some(output => candidate.outputs!.includes(output as 'appearance' | 'home' | 'item')),
-      );
-      return recent.items.length - last;
+    // The Agent lists only candidates that fit the observed situation; the seed picks evenly among them.
+    // Only the agreed fallback excludes text: it needs a user-related reference and may not run three times.
+    const weights = candidates.map((candidate): number => {
+      if (input.purpose !== 'story' || candidate.outputs?.length) return 1;
+      return recent.visualRequired || !candidate.contextRefs.length ? 0 : 1;
     });
     let pick = seededValue(value, input.purpose) * weights.reduce((sum, weight) => sum + weight, 0);
     let index = weights.length - 1;

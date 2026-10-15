@@ -6237,13 +6237,8 @@ async function chooseCandidate(store2, operationId, input, seed) {
     if (input.purpose === "story" && !candidates.some((candidate) => candidate.outputs?.length))
       throw new Error("Include a candidate with a visible output");
     const weights = candidates.map((candidate) => {
-      if (input.purpose !== "story") return 1;
-      const textOnly = !candidate.outputs?.length;
-      if (textOnly && (recent.visualRequired || !candidate.contextRefs.length)) return 0;
-      const last = recent.items.findLastIndex(
-        (item) => textOnly ? !item.outputs.length : item.outputs.some((output) => candidate.outputs.includes(output))
-      );
-      return recent.items.length - last;
+      if (input.purpose !== "story" || candidate.outputs?.length) return 1;
+      return recent.visualRequired || !candidate.contextRefs.length ? 0 : 1;
     });
     let pick = seededValue(value, input.purpose) * weights.reduce((sum, weight) => sum + weight, 0);
     let index = weights.length - 1;
@@ -6555,7 +6550,10 @@ function storyOutput(state, storyId) {
   const story = storyId ? state.stories.find((story2) => story2.id === storyId) : state.stories.at(-1);
   if (!story) throw new Error("No completed story");
   const appearance = state.art.find((art) => art.id === story.appearanceId);
+  const named = (state.pet?.naming?.status ?? "named") === "named";
   return {
+    /** The name the output uses for narration and dialogue; null before the user names the Pet. */
+    name: named ? state.pet?.name ?? null : null,
     text: story.text,
     media: state.art.filter((art) => story.mediaIds.includes(art.id)),
     appearance,

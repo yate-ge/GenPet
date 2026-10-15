@@ -62,6 +62,7 @@
         "context",
         "pet",
         "growth",
+        "time",
         "recentContent",
         "random"
       ],
@@ -182,7 +183,8 @@
       "inputs": [
         "story",
         "completed",
-        "availableMedia"
+        "availableMedia",
+        "name"
       ],
       "result": {
         "text": "nullable-string",

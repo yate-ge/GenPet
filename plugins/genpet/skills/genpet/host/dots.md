@@ -1,6 +1,6 @@
 # 同一只 Pet 在 Dots
 
-Dots 是共享 cloud ID 的第二个环境，使用同一份已接受云图和这只 Pet 的简介。没有独立 genpet-dots 包、单独 Avatar 生成格式、bind-avatar 或旧 host-request 路线；旧 dots 记录不自动读取。产品规则见 ../rules.md「个体性格与对话」。
+Dots 是共享 cloud ID 的第二个环境，使用同一份已接受云图和这只 Pet 的简介。没有独立 genpet-dots 包、单独 Avatar 生成格式、bind-avatar 或旧 host-request 路线；旧 dots 记录不自动读取。产品规则见 ../rules.md「性格与对话」。
 
 ## 先检查实际能力
 
