@@ -4,7 +4,9 @@ import path from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { Store } from './store.js';
-import { artRequest } from './art.js';
+import { growth } from './growth.js';
+import type { Host } from './model.js';
+import { storyOutputs } from './variety.js';
 import { packageHost, pluginRoot } from './config.js';
 import { hostFor } from './hosts/index.js';
 import { readInventory } from './inventory.js';
@@ -12,9 +14,7 @@ import { ATLAS, actions } from './hosts/desktop/atlas.js';
 import { previewAppearance } from './hosts/desktop/preview.js';
 import { CLOUD_PET_QUERY, refreshViaIpc } from './hosts/desktop/refresh.js';
 import { repairAppearance } from './hosts/repair.js';
-import { hasAppTools, readSelectedPet, selectPet } from './hosts/desktop/switch.js';
-
-/** Explicitly launched, local pet inspection. Host selection and appearance actions are explicit; records are never changed. */
+/** Explicitly launched, local GenPet inspection. Appearance actions change only the host entry; records never change. */
 export async function startServer(port = Number(process.env.GENPET_PORT || 47831), root?: string) {
   const store = new Store(root, packageHost()),
     token = randomBytes(24).toString('hex');
@@ -41,19 +41,26 @@ export async function startServer(port = Number(process.env.GENPET_PORT || 47831
       if (req.headers.origin && req.headers.origin !== `http://${host}`) return json({ error: 'Origin rejected' }, 403);
       const url = new URL(req.url || '/', 'http://' + host);
       if (req.method === 'GET' && url.pathname === '/api/health')
-        return json({
-          service: 'genpet-debugger',
-          root: store.root,
-          pluginRoot: pluginRoot(),
-          appTools: hasAppTools(),
-        });
-      if (req.method === 'GET' && url.pathname === '/api/selection') return json(await readSelectedPet());
+        return json({ service: 'genpet-debugger', root: store.root, pluginRoot: pluginRoot() });
       if (req.method === 'GET' && url.pathname === '/api/atlas') return json({ ...ATLAS, actions });
-      if (req.method === 'GET' && url.pathname === '/api/state')
-        return json({ state: await target(url).peek(), token });
-      if (req.method === 'GET' && url.pathname === '/api/pets') return json(await store.listPets());
+      // Every GenPet record this machine hosts, with its current atlas for the list thumbnail.
+      if (req.method === 'GET' && url.pathname === '/api/records') {
+        const records = [];
+        for (const host of ['desktop', 'cloud'] as Host[])
+          for (const pet of await new Store(store.base, host).listPets()) {
+            const state = pet.error ? null : await new Store(store.base, host).forPet(pet.id).peek();
+            records.push({ host, ...pet, appearanceId: state?.pet?.state.appearanceId ?? null });
+          }
+        return json({ base: store.base, host: store.host, records });
+      }
+      if (req.method === 'GET' && url.pathname === '/api/state') {
+        const state = await target(url).peek();
+        const outputs = Object.fromEntries(
+          state.stories.map((story, index) => [story.id, storyOutputs(story, state.stories[index - 1], state)]),
+        );
+        return json({ state, outputs, growth: growth(state), token });
+      }
       if (req.method === 'GET' && url.pathname === '/api/inventory') return json(await readInventory(store.base));
-      if (req.method === 'GET' && url.pathname === '/api/art-request') return json(artRequest(await store.peek()));
       if (req.method === 'GET' && url.pathname === '/api/native-pets') {
         const scoped = target(url);
         return json(await hostFor(scoped.host).diagnose(scoped));
@@ -88,15 +95,6 @@ export async function startServer(port = Number(process.env.GENPET_PORT || 47831
                 ? await previewAppearance(scoped, String(input.artId ?? ''))
                 : await repairAppearance(scoped),
           });
-        }
-        if (input.action === 'switch-pet') {
-          // Only the host Pet selection changes; Pet records stay untouched.
-          if (store.host !== 'desktop') throw new Error('Only the desktop host can switch its Pet here');
-          const known = (await readInventory(store.base)).pets.some(
-            pet => pet.id === input.petId && pet.sources.some(source => source !== 'record'),
-          );
-          if (!known) throw new Error('Unknown host Pet ID');
-          return json({ ok: true, result: await selectPet(input.petId) });
         }
         return json({ error: 'Use the story workflow to change pet records' }, 400);
       }

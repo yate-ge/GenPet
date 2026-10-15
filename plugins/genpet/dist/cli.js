@@ -4081,7 +4081,6 @@ async function switchPet(args2) {
   return selectPet(entry.id);
 }
 var SELECTED_KEY = "selected-avatar-id";
-var hasAppTools = () => Boolean(process.env.CODEX_APP_TOOLS_PIPE_PATH?.trim() && process.env.CODEX_THREAD_ID?.trim());
 function appToolsConnection(options) {
   const pick = (key2, env) => (Object.hasOwn(options, key2) ? options[key2] : env)?.trim();
   const pipePath = pick("pipePath", process.env.CODEX_APP_TOOLS_PIPE_PATH);
@@ -5985,7 +5984,7 @@ async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageH
     const value = await response.json().catch(() => null);
     if (value?.service !== "genpet-debugger" || value.root !== root)
       throw new Error("Debugger port belongs to another service or data directory");
-    if (value.pluginRoot === pluginRoot() && (value.appTools || !hasAppTools())) return true;
+    if (value.pluginRoot === pluginRoot()) return true;
     const { token } = await (await fetch(url + "/api/state")).json();
     await fetch(url + "/api/action", {
       method: "POST",

@@ -187,7 +187,7 @@ The files behind each part:
 | Everyday and transfer | `journey.ts`, `variety.ts`, `handoff.ts` | Journey recovery, seeded source/candidate choices, complete directory transfer and one writer. |
 | Image support | `pipeline.ts`, `vendor/hatch-pet/` | Python discovery, parallel jobs after the base, directional mirrors, deterministic processing, bounded repairs and the final-image gate. |
 | Support | `config.ts`, `image.ts`, `migration.ts` | Paths and prompt files; pure-JS PNG/WebP reading; explicit import of v1 desktop records. |
-| Debugger | `debugger.ts`, `debugger-server.ts`, `inventory.ts` | Optional local console for every Pet on this machine and its GenPet records: host selection switching, action preview and debug appearance display; records are never changed. |
+| Debugger | `debugger.ts`, `debugger-server.ts`, `inventory.ts` | Optional local developer console for this machine's GenPet records: stories, homes, saved atlases with action preview and debug appearance display; other host Pets in a secondary list; records are never changed. |
 
 **Import rule.** `cli` → Story and Everyday features → Host adapters → Core; imports follow this direction only. Files stay in the flat layout; the groups describe the import rule.
 

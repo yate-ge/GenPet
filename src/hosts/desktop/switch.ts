@@ -178,10 +178,6 @@ export async function switchPet(args: string[]) {
 
 const SELECTED_KEY = 'selected-avatar-id';
 
-/** Whether this process inherited a Codex session's app-tools connection. */
-export const hasAppTools = () =>
-  Boolean(process.env.CODEX_APP_TOOLS_PIPE_PATH?.trim() && process.env.CODEX_THREAD_ID?.trim());
-
 function appToolsConnection(options: AppToolsOptions) {
   const pick = (key: 'pipePath' | 'threadId', env: string | undefined) =>
     (Object.hasOwn(options, key) ? options[key] : env)?.trim();

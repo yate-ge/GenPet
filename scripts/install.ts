@@ -22,8 +22,10 @@ if (previous && (await realpath(previous.root)) !== root) {
   );
 }
 run(['plugin', 'marketplace', 'add', root, '--json']);
-run(['plugin', 'marketplace', 'upgrade', marketplace, '--json']);
+// A local marketplace is read in place; current Codex only upgrades Git sources.
 const refreshed = list().find((entry: { name: string }) => entry.name === marketplace);
+if (refreshed?.marketplaceSource?.sourceType === 'git')
+  run(['plugin', 'marketplace', 'upgrade', marketplace, '--json']);
 if (!refreshed || (await realpath(refreshed.root)) !== root)
   throw new Error('Refreshed marketplace does not match this checkout');
 const source = path.join(refreshed.root, 'plugins', name);

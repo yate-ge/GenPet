@@ -2153,19 +2153,6 @@ function packageHost() {
 }
 var dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), ".genpet");
 var codexHome = () => process.env.CODEX_HOME || path.join(homedir(), ".codex");
-function readPromptFile(fileName) {
-  const candidates = [
-    path.resolve(here, "..", "framework", "prompts", fileName),
-    path.join(pluginRoot(), "prompts", fileName)
-  ];
-  const file = candidates.find(existsSync);
-  if (!file) throw new Error(`Missing prompt file: ${fileName}`);
-  return readFileSync(file, "utf8");
-}
-function readPrompt(name) {
-  if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(name)) throw new Error("Invalid prompt module");
-  return readPromptFile(`${name}.md`);
-}
 
 // src/model.ts
 import { randomUUID } from "node:crypto";
@@ -2205,6 +2192,8 @@ var DAY = 24 * HOUR;
 var STAGE_CEILING = { egg: 5 * HOUR, hatchling: 7 * DAY, juvenile: 7 * DAY };
 var SPECIAL_INTERVAL = 7 * DAY;
 var SPECIAL_DURATION = 2 * DAY;
+var EXPERIENCES_TO_GROW = 5;
+var iso = (time) => new Date(time).toISOString();
 function stageOrigin(state) {
   const pet = state.pet;
   const origin = state.legacy?.importedAt ?? pet.adoptedAt;
@@ -2228,6 +2217,47 @@ function initialClock(state) {
 function ensureGrowthClock(state) {
   if (!state.pet) return null;
   return state.growthClock ??= initialClock(state);
+}
+function pausedTime(state, now = Date.now()) {
+  const clock = state.growthClock;
+  return clock ? clock.pausedMs + (clock.pausedAt === void 0 ? 0 : Math.max(0, now - clock.pausedAt)) : 0;
+}
+function growth(state, now = Date.now()) {
+  const pet = state.pet;
+  if (!pet?.soul.genes || state.needsImport) return null;
+  const clock = state.growthClock ?? initialClock(state);
+  const since = clock.stage === pet.state.stage ? clock.stageSince : stageOrigin(state);
+  const paused = pausedTime(state, now);
+  const stagePause = Math.max(0, paused - clock.stagePausedMs);
+  const ceiling = STAGE_CEILING[pet.state.stage];
+  const deadline = ceiling === void 0 ? null : since + ceiling + stagePause;
+  let required = deadline !== null && now >= deadline ? "advance" : null;
+  let special = null;
+  if (pet.state.stage === "adult") {
+    const active = !!pet.state.special && pet.state.special.endedAt === void 0;
+    const start = active ? pet.state.special.since : Math.max(since, pet.state.special?.endedAt ?? 0);
+    const specialPause = Math.max(0, paused - clock.specialPausedMs);
+    const due = start + (active ? SPECIAL_DURATION : SPECIAL_INTERVAL) + specialPause;
+    if (now >= due) required = active ? "end-special" : "enter-special";
+    special = {
+      active,
+      ...active ? { description: pet.state.special.description } : {},
+      since: iso(start),
+      ...active ? { endBy: iso(due) } : { enterBy: iso(due) }
+    };
+  }
+  const experiences = clock.stage === pet.state.stage ? clock.experiences : 0;
+  return {
+    stage: pet.state.stage,
+    next: stages[stages.indexOf(pet.state.stage) + 1] ?? null,
+    since: iso(since),
+    advanceBy: deadline === null ? null : iso(deadline),
+    experiences,
+    canAdvance: pet.state.stage !== "adult" && (required === "advance" || experiences >= EXPERIENCES_TO_GROW),
+    paused: clock.pausedAt !== void 0,
+    special,
+    required
+  };
 }
 
 // src/hosts/desktop/mapping.ts
@@ -3105,21 +3135,16 @@ function requestId(state) {
   return createHash2("sha256").update(JSON.stringify([pending.id, pending.petId, pending.baseRevision, pending.plan])).digest("hex").slice(0, 24);
 }
 
-// src/appearance.ts
-function appearanceFor(state, stage, id) {
-  const art = state.art.find(
-    (art2) => art2.id === id && art2.petId === state.pet.id && art2.kind === "atlas" && art2.stage === stage
-  );
-  if (!art)
-    throw new Error("Reusable appearance is missing, belongs to another pet, or is incompatible with this host/stage");
-  return art;
-}
-function desiredAppearance(state) {
-  const plan = state.pending?.plan;
-  if (!plan?.appearance) return state.art.find((art) => art.id === state.pet?.state.appearanceId);
-  if (plan.appearance.reuseArtId) return appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
-  const current = requestId(state);
-  return state.art.findLast((art) => art.petId === state.pet?.id && art.requestId === current && art.kind === "atlas");
+// src/variety.ts
+function storyOutputs(story, previous, state) {
+  const result = [];
+  const appearanceChanged = typeof story.appearanceChanged === "boolean" ? story.appearanceChanged : previous ? story.appearanceId !== previous.appearanceId : state?.pet?.soul.acquisition?.storyId === story.id;
+  if (story.appearanceId && appearanceChanged) result.push("appearance");
+  if (story.mediaIds.some((id) => !state || state.art.some((art) => art.id === id && art.kind !== "artifact"))) {
+    if (story.home !== void 0 && story.home !== previous?.home) result.push("home");
+    else result.push("item");
+  }
+  return result;
 }
 
 // src/hosts/desktop/atlas.ts
@@ -3160,6 +3185,23 @@ function checkAtlas(image) {
 import { copyFile as copyFile2, mkdir as mkdir3, readFile as readFile8, rename as rename2, writeFile as writeFile2 } from "node:fs/promises";
 import { createHash as createHash5, randomUUID as randomUUID5 } from "node:crypto";
 import path8 from "node:path";
+
+// src/appearance.ts
+function appearanceFor(state, stage, id) {
+  const art = state.art.find(
+    (art2) => art2.id === id && art2.petId === state.pet.id && art2.kind === "atlas" && art2.stage === stage
+  );
+  if (!art)
+    throw new Error("Reusable appearance is missing, belongs to another pet, or is incompatible with this host/stage");
+  return art;
+}
+function desiredAppearance(state) {
+  const plan = state.pending?.plan;
+  if (!plan?.appearance) return state.art.find((art) => art.id === state.pet?.state.appearanceId);
+  if (plan.appearance.reuseArtId) return appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
+  const current = requestId(state);
+  return state.art.findLast((art) => art.petId === state.pet?.id && art.requestId === current && art.kind === "atlas");
+}
 
 // src/status.ts
 function briefForPet(pet) {
@@ -4920,7 +4962,6 @@ async function switchPet(args) {
   return selectPet(entry.id);
 }
 var SELECTED_KEY = "selected-avatar-id";
-var hasAppTools = () => Boolean(process.env.CODEX_APP_TOOLS_PIPE_PATH?.trim() && process.env.CODEX_THREAD_ID?.trim());
 function appToolsConnection(options) {
   const pick = (key2, env) => (Object.hasOwn(options, key2) ? options[key2] : env)?.trim();
   const pipePath = pick("pipePath", process.env.CODEX_APP_TOOLS_PIPE_PATH);
@@ -5664,32 +5705,6 @@ function hostFor(host) {
   return adapter;
 }
 
-// src/art.ts
-function artRequest(state) {
-  if (!state.pet || !state.pending?.plan) return null;
-  const pet = state.pet;
-  const plan = state.pending.plan;
-  return {
-    id: requestId(state),
-    operationId: state.pending.id,
-    petId: pet.id,
-    host: state.host,
-    status: !plan.appearance ? "unchanged" : desiredAppearance(state) ? "ready" : "pending",
-    stage: plan.stage,
-    name: pet.name,
-    naming: pet.naming,
-    personality: pet.soul.personality ?? plan.personality,
-    genes: pet.soul.genes ?? plan.genes,
-    story: plan.text,
-    appearance: plan.appearance,
-    // The Agent chooses identity references and reusable appearances from this pet's accepted art.
-    savedArt: state.art.filter((art) => art.petId === pet.id),
-    prompt: readPrompt("meta") + "\n" + readPrompt("appearance"),
-    contract: hostFor(state.host).artContract,
-    target: pet.binding ?? null
-  };
-}
-
 // src/inventory.ts
 import { mkdir as mkdir5, readFile as readFile11, rename as rename3, writeFile as writeFile4 } from "node:fs/promises";
 import path11 from "node:path";
@@ -5847,19 +5862,25 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
       if (req.headers.origin && req.headers.origin !== `http://${host}`) return json({ error: "Origin rejected" }, 403);
       const url = new URL(req.url || "/", "http://" + host);
       if (req.method === "GET" && url.pathname === "/api/health")
-        return json({
-          service: "genpet-debugger",
-          root: store.root,
-          pluginRoot: pluginRoot(),
-          appTools: hasAppTools()
-        });
-      if (req.method === "GET" && url.pathname === "/api/selection") return json(await readSelectedPet());
+        return json({ service: "genpet-debugger", root: store.root, pluginRoot: pluginRoot() });
       if (req.method === "GET" && url.pathname === "/api/atlas") return json({ ...ATLAS, actions });
-      if (req.method === "GET" && url.pathname === "/api/state")
-        return json({ state: await target(url).peek(), token });
-      if (req.method === "GET" && url.pathname === "/api/pets") return json(await store.listPets());
+      if (req.method === "GET" && url.pathname === "/api/records") {
+        const records = [];
+        for (const host2 of ["desktop", "cloud"])
+          for (const pet of await new Store(store.base, host2).listPets()) {
+            const state = pet.error ? null : await new Store(store.base, host2).forPet(pet.id).peek();
+            records.push({ host: host2, ...pet, appearanceId: state?.pet?.state.appearanceId ?? null });
+          }
+        return json({ base: store.base, host: store.host, records });
+      }
+      if (req.method === "GET" && url.pathname === "/api/state") {
+        const state = await target(url).peek();
+        const outputs = Object.fromEntries(
+          state.stories.map((story, index) => [story.id, storyOutputs(story, state.stories[index - 1], state)])
+        );
+        return json({ state, outputs, growth: growth(state), token });
+      }
       if (req.method === "GET" && url.pathname === "/api/inventory") return json(await readInventory(store.base));
-      if (req.method === "GET" && url.pathname === "/api/art-request") return json(artRequest(await store.peek()));
       if (req.method === "GET" && url.pathname === "/api/native-pets") {
         const scoped = target(url);
         return json(await hostFor(scoped.host).diagnose(scoped));
@@ -5890,14 +5911,6 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
             ok: true,
             result: input.action === "preview-appearance" ? await previewAppearance(scoped, String(input.artId ?? "")) : await repairAppearance(scoped)
           });
-        }
-        if (input.action === "switch-pet") {
-          if (store.host !== "desktop") throw new Error("Only the desktop host can switch its Pet here");
-          const known = (await readInventory(store.base)).pets.some(
-            (pet) => pet.id === input.petId && pet.sources.some((source) => source !== "record")
-          );
-          if (!known) throw new Error("Unknown host Pet ID");
-          return json({ ok: true, result: await selectPet(input.petId) });
         }
         return json({ error: "Use the story workflow to change pet records" }, 400);
       }
