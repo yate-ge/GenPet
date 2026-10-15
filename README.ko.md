@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/banner.webp" alt="GenPet: 서로 다른 펫들이 알에서 깨어나 자라며 저마다의 삶을 사는 픽셀 세계" width="100%">
+  <img src="docs/assets/banner-world.webp" alt="GenPet: 서로 다른 펫들이 알에서 깨어나 자라며 저마다의 삶을 사는 픽셀 세계" width="100%">
 </p>
 
 <p align="center">

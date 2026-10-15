@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/banner.webp" alt="GenPet: a pixel world where different pets hatch, grow and live their own lives" width="100%">
+  <img src="docs/assets/banner-world.webp" alt="GenPet: a pixel world where different pets hatch, grow and live their own lives" width="100%">
 </p>
 
 <p align="center">

@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/banner.webp" alt="GenPet：さまざまなペットが孵化し、育ち、それぞれの暮らしを送るピクセルの世界" width="100%">
+  <img src="docs/assets/banner-world.webp" alt="GenPet：さまざまなペットが孵化し、育ち、それぞれの暮らしを送るピクセルの世界" width="100%">
 </p>
 
 <p align="center">
