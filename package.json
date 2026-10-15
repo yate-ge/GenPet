@@ -1,6 +1,6 @@
 {
   "name": "genpet",
-  "version": "0.10.10",
+  "version": "0.10.11",
   "private": true,
   "type": "module",
   "description": "A story-driven pixel companion for Codex with native Pet updates.",

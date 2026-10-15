@@ -208,6 +208,8 @@ function projectSelection(value: unknown): Selection {
 async function callSettings(options: AppToolsOptions, petId?: string): Promise<Selection> {
   const { pipePath, threadId, timeoutMs } = appToolsConnection(options);
   const turnId = (Object.hasOwn(options, 'turnId') ? options.turnId : process.env.CODEX_TURN_ID)?.trim();
+  if (petId !== undefined && !turnId)
+    throw new Error('The current active turn ID is unavailable; use the host select_pet tool for known pets.');
   const id = 1;
   const request = {
     jsonrpc: '2.0',
@@ -220,7 +222,7 @@ async function callSettings(options: AppToolsOptions, petId?: string): Promise<S
       callerSource: 'codex',
       threadId,
       callId: `mcp-call-${randomUUID()}`,
-      // Outside a turn (the debugger) this follows the bundled app-tools MCP's own fallback metadata, as in 0.4.0.
+      // Reads outside a turn carry generated metadata; a write above always carries the actual active turn.
       turnId: turnId || `mcp-turn-${randomUUID()}`,
     },
   };

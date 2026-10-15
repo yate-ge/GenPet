@@ -56,8 +56,8 @@ A failed or unusable base never receives an invented placeholder or old-stage su
 
 The output remains transparent v2: 1536×2288, 8×11 cells of 192×208. Ordinary frame counts are 6,8,8,4,5,8,6,6,6; last two rows hold sixteen clockwise directions. r0c6 stores the accepted neutral pose; every other unused cell is transparent. A live read-only Pets preflight on 2026-10-11 accepted an existing v2 sheet with a nonempty r0c6. Revalidate the exact new output with the host's `validate_pet_spritesheet` tool before upload.
 
-Every observed source revision, replaced processing output, report, negative candidate and command log is retained. Metadata histories live in `.history`; source and processing revisions live under `qa/source-history`. Development artifacts go to the user's Google Drive and stay out of git.
+Every observed source revision, replaced processing output, report, negative candidate and command log is retained. Metadata histories live in `.history`; source and processing revisions live under `qa/source-history`.
 
-`processing_seconds` and step timings measure deterministic work. Row extraction runs in parallel worker processes (the hatched jump after idle), falling back to one by one when worker processes are unavailable. The twenty-minute goal requires a real timed run from preparation through generation, review, same-ID update and stored-art readback; fixture tests or parallel manifests do not prove it.
+`processing_seconds` and step timings measure deterministic work. Row extraction runs in parallel worker processes (the hatched jump after idle), falling back to one by one when worker processes are unavailable.
 
 GenPet changed `prepare_pet_run.py`, `process_pet_run.py` (including parallel row extraction), `extract_strip_frames.py` and `validate_atlas.py`, and added `prepare_strip.py`. Run the full `tests/artwork_pipeline_test.py` suite with a Python runtime containing Pillow after changes, then validate a real generated atlas.

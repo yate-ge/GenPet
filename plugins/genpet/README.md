@@ -1,6 +1,6 @@
 # GenPet
 
-Version 0.10.1 development package. Lightweight story-driven pixel Pet framework. Full acceptance is still in progress; it is not a public release.
+Lightweight story-driven pixel Pet framework. Development package; full acceptance is still in progress. The installed version is in `.codex-plugin/plugin.json`.
 
 Each Pet starts as a literal egg designed from its adoption story and hatches into a living creature. Product rules are in [prompts/meta.md](prompts/meta.md).
 

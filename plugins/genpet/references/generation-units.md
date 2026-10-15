@@ -35,7 +35,7 @@
 
 ```json
 {
-  "inputRefs": ["fixture:case-01", "step-of-context", "journey:round-1"],
+  "inputRefs": ["step-of-context", "journey:round-1", "fact:actual-source"],
   "result": {
     "designReason": "具体来源、真实旅程联系与各主要特征的来由",
     "genes": "自包含的这只宠物设计",
@@ -44,18 +44,8 @@
 }
 ```
 
-输入引用定位实际事实、上游 step、已接受图或测试夹具；不需要复制原始私密资料。额外字段允许，身体与性格仍是开放文字。
+输入引用定位实际事实、上游 step 或已接受图；不需要复制原始私密资料。额外字段允许，身体与性格仍是开放文字。
 
 正常流程用 `record-step OPERATION_ID UNIT ABSOLUTE_RESULT_FILE` 保存，生成 step ID 留给下游；同一结果重试去重，修订追加新结果保留旧版。StoryPlan 保存前允许修订上游并检查受影响的下游；保存后继续同一故事与选择，只修正视觉请求和实际图。record-step 不改变 Pet 和完成状态。
 
 旧记录读取兼容 evidenceIds→factIds、designBasis→designReason、basis→reason、carrier→story-item、image-review→ImageReviewer、provenance→source。新生成与新写入只用新名，别为了复用旧记录重新生成身份。
-
-## 独立单元检查
-
-1. 写 `{"inputs": {...}, "inputRefs": ["fixture:CASE_ID"]}`，字段见 units.json。只手写合成原始资料和规则探针；创作上游使用本轮真实保存结果，不预定角色或答案。
-2. `unit-request UNIT ABSOLUTE_FIXTURE_FILE` 保存精确 prompt 与 promptHash。把这一请求给生成 Agent，固定上游，仅运行所选单元。禁止补查真实资料、改 Pet 或创建任务。
-3. 保存 result，`verify-unit UNIT ABSOLUTE_RESULT_FILE` 只验格式；由独立 reviewer 对照输入与检查点逐项写可定位观察。生成者自己的通过声明不算证据。
-4. ImageReviewer 必须接收实际图像；没有文件是未通过。基准出图测试实际调用图像工具、保存请求/参考/返回图；完整 Avatar 的 V 用例另外生成整套和验证宿主，不用静态基准证明整套成功。
-5. 保留全部输入、请求、原始结果、审核、候选、图与运行日志，上传 Google Drive。仓库只追加 docs/evidence/README.md 摘要与链接；未上传的本地暂存也保留，不删除。
-
-测试范围与人工确认见 tests/agent/README.zh-CN.md。检查内容与特质的真实联系、设计兑现、可爱、连续性和差异，不比较固定故事文字，也不以同一个模型的自评替代用户判断。

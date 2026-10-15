@@ -64,7 +64,7 @@ test('select writes only the pet key, then confirms with an independent read', a
   );
 });
 
-test('outside a turn the write uses generated turn metadata, and RPC rejection preserves bounded code/message', async () => {
+test('a missing active turn cannot write, and real RPC rejection preserves bounded code/message', async () => {
   const calls: AppToolsRequest[] = [];
   await withHost(
     (request, socket) => {
@@ -78,15 +78,14 @@ test('outside a turn the write uses generated turn metadata, and RPC rejection p
       );
     },
     async options => {
-      await assert.rejects(selectPet('dewey', { ...options, turnId: null }), /write_settings/);
-      assert.match(calls[0].params!.turnId!, /^mcp-turn-/);
+      await assert.rejects(selectPet('dewey', { ...options, turnId: null }), /active turn ID is unavailable/);
+      assert.equal(calls.length, 0);
       await assert.rejects(selectPet('dewey', options), error => {
         assert.match(String(error), /write_settings.*-32000.*Codex app tool request failed/);
         assert.doesNotMatch(String(error), /must-not-escape/);
         return true;
       });
-      assert.equal(calls.length, 2);
-      assert.equal(calls[1].params!.turnId, 'isolated-test-turn');
+      assert.equal(calls.length, 1);
     },
   );
 });
