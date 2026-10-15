@@ -3,68 +3,26 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>GenPet 记录调试器</title>
+    <title>GenPet 调试台</title>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <header>
-      <h1>GenPet 记录调试器</h1>
-      <p>查看本机所有宠物、GenPet 记录、未完成故事和素材。唯一的操作是切换宿主选中的宠物，不改宠物记录。</p>
-      <label for="pet">查看宠物</label>
-      <select id="pet">
-        <option value="">当前记录</option>
-      </select>
-      <button id="reload">重新读取</button> <button id="stop">关闭调试器</button>
+      <h1>GenPet 调试台</h1>
+      <span id="summary"></span>
+      <span class="spacer"></span>
+      <button id="reload">重新读取</button>
+      <button id="stop">关闭调试器</button>
     </header>
+    <p id="error" role="alert"></p>
+    <p id="switch-result" role="status"></p>
     <main>
-      <p id="identity"></p>
-      <p id="error" role="alert"></p>
-      <section>
-        <h2>本机所有宠物</h2>
-        <p id="inventory-note"></p>
+      <aside>
         <p id="selection"></p>
-        <p id="switch-result" role="status"></p>
-        <div class="table">
-          <table>
-            <thead>
-              <tr>
-                <th>宿主选择</th>
-                <th>类别</th>
-                <th>名称</th>
-                <th>宿主 ID</th>
-                <th>来源</th>
-                <th>GenPet 依据</th>
-                <th>本机记录</th>
-              </tr>
-            </thead>
-            <tbody id="inventory"></tbody>
-          </table>
-        </div>
-      </section>
-      <section>
-        <h2>身份与记录</h2>
-        <pre id="record"></pre>
-      </section>
-      <details>
-        <summary>未完成故事</summary>
-        <pre id="pending"></pre>
-      </details>
-      <details>
-        <summary>故事历史</summary>
-        <pre id="stories"></pre>
-      </details>
-      <details>
-        <summary>素材文件</summary>
-        <div id="art"></div>
-      </details>
-      <details>
-        <summary>宿主检查</summary>
-        <pre id="host"></pre>
-      </details>
-      <details>
-        <summary>完整记录</summary>
-        <pre id="raw"></pre>
-      </details>
+        <nav id="list"></nav>
+        <p id="sources" class="muted"></p>
+      </aside>
+      <section id="detail"></section>
     </main>
     <script src="/app.js"></script>
   </body>

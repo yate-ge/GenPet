@@ -8,9 +8,13 @@ import { artRequest } from './art.js';
 import { packageHost, pluginRoot } from './config.js';
 import { hostFor } from './hosts/index.js';
 import { readInventory } from './inventory.js';
+import { ATLAS, actions } from './hosts/desktop/atlas.js';
+import { previewAppearance } from './hosts/desktop/preview.js';
+import { CLOUD_PET_QUERY, refreshViaIpc } from './hosts/desktop/refresh.js';
+import { repairAppearance } from './hosts/repair.js';
 import { hasAppTools, readSelectedPet, selectPet } from './hosts/desktop/switch.js';
 
-/** Explicitly launched, local, read-only pet inspection. Switching the host Pet requires an explicit action. */
+/** Explicitly launched, local pet inspection. Host selection and appearance actions are explicit; records are never changed. */
 export async function startServer(port = Number(process.env.GENPET_PORT || 47831), root?: string) {
   const store = new Store(root, packageHost()),
     token = randomBytes(24).toString('hex');
@@ -44,6 +48,7 @@ export async function startServer(port = Number(process.env.GENPET_PORT || 47831
           appTools: hasAppTools(),
         });
       if (req.method === 'GET' && url.pathname === '/api/selection') return json(await readSelectedPet());
+      if (req.method === 'GET' && url.pathname === '/api/atlas') return json({ ...ATLAS, actions });
       if (req.method === 'GET' && url.pathname === '/api/state')
         return json({ state: await target(url).peek(), token });
       if (req.method === 'GET' && url.pathname === '/api/pets') return json(await store.listPets());
@@ -66,6 +71,23 @@ export async function startServer(port = Number(process.env.GENPET_PORT || 47831
           server.close();
           server.closeIdleConnections();
           return;
+        }
+        // Desktop appearance actions change only the host entry; Pet records stay untouched.
+        if (['preview-appearance', 'restore-appearance', 'refresh'].includes(input.action)) {
+          if (store.host !== 'desktop') throw new Error('Appearance actions are available for the desktop Pet');
+          if (input.action === 'refresh')
+            return json({
+              ok: true,
+              result: await refreshViaIpc(undefined, 2000, [['custom-avatars'], CLOUD_PET_QUERY]),
+            });
+          const scoped = new Store(store.base, 'desktop').forPet(String(input.petId ?? ''));
+          return json({
+            ok: true,
+            result:
+              input.action === 'preview-appearance'
+                ? await previewAppearance(scoped, String(input.artId ?? ''))
+                : await repairAppearance(scoped),
+          });
         }
         if (input.action === 'switch-pet') {
           // Only the host Pet selection changes; Pet records stay untouched.

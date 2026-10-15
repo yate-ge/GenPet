@@ -187,7 +187,7 @@ Dots 的功能照常。蛋的阶段 Dots 和原来一样，只换了形象；幼
 | 日常与移交 | `journey.ts`、`variety.ts`、`handoff.ts` | 旅程续接、来源与候选选择、完整目录移交和单一写入权。 |
 | 图像支持 | `pipeline.ts`、`vendor/hatch-pet/` | Python 运行环境、基准后并行任务、方向镜像、确定性处理、有限返工和最终图门禁。 |
 | 支持 | `config.ts`、`image.ts`、`migration.ts` | 路径和提示词文件；纯 JS 的 PNG/WebP 读取；v1 桌面端记录的显式导入。 |
-| 调试器 | `debugger.ts`、`debugger-server.ts`、`inventory.ts` | 可选的本地查看器：列出本机所有宠物和 GenPet 记录；唯一的操作是切换宿主选中的宠物。 |
+| 调试器 | `debugger.ts`、`debugger-server.ts`、`inventory.ts` | 可选的本地调试台：列出本机所有宠物和 GenPet 记录，可切换宿主选择、预览动作、在桌面显示某版形象；不改宠物记录。 |
 
 **引用规则。** `cli` → 故事和日常功能 → 宿主适配 → 核心，只沿这个方向引用。文件保持平铺，分组表示的是引用规则。
 
