@@ -4,6 +4,13 @@
 
 [成果汇报 PDF](https://drive.google.com/file/d/13oSP60mjBLSoC6R1xSrA9HYetCxodSng/view) · [Word](https://docs.google.com/document/d/1WP0MAtJONsqVWJNEyP7JhSVXjJ4is6Bx/edit) · [成果目录](https://drive.google.com/drive/folders/11WW2UEENWFibU8VG2jzycz_arD-6-tCF)
 
+## 2026-10-15 README banner 改版
+
+- 用 Codex CLI 按当前版本的 Pet 重画 banner。第一轮两张候选改成了排排站的阵容，用户认为旧图更好：有一个“世界”，不同 Pet 各自生活，带着各自的道具。第二轮沿用旧图的世界布局：左边乡间、蛋窝和石板路，中间是大树下的地洞小屋，右边依次是池塘、芦苇和海边灯塔。各 Pet 带着自己故事里的道具在各自的地方活动。
+- 两张候选中，候选 1（白天到落日）的翠鸟成年更接近原造型；候选 2（傍晚暖光）的嫩叶团能看到脸，几件事在画面里分得更开，但翠鸟偏写实。用户选了候选 2。
+- 替换 `docs/assets/banner.webp`：2172×724，约 498 KB（旧图约 488 KB）。四种语言的 README 都引用这个文件，替代文字仍然准确，未改。banner 属于仓库文件；候选图和 Codex 过程文件只留在本机临时目录，不进仓库。
+- 原来在旧历史的本地 main 上改的。远端历史清理后，本地 main 先留了备份分支 `backup/pre-rewrite-main-20261015`，再对齐 `origin/main`，然后提交新图。
+
 ## 2026-10-15 0.10.5–0.10.7 调试器列出本机所有宠物与切换；git 历史清理
 
 - 0.10.5：调试器列出本机所有 Pet，来源包括内置目录、`~/.codex/pets`、宿主云端缓存（`cloud-pet-artwork-cache`）、迁移映射，以及 `~/.genpet` 的 desktop/cloud 记录。每只分为本机宿主 GenPet（本机有完整记录）、GenPet、非 GenPet、未知。本机不缓存云端宠物名称，所以 `debugger --host-pets FILE` 会保存 Agent 拿到的 `list_pets` 结果，debugger 技能也同步说明。本机实测：内置 9 只，云端 13 只；有宿主列表后，按名称判定 GenPet 10 只、非 GenPet 12 只，本机宿主 GenPet 0 只（没有 `~/.genpet`）。
