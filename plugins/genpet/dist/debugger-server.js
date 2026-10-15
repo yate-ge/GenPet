@@ -35,9 +35,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../GenPet/node_modules/pngjs/lib/chunkstream.js
+// node_modules/pngjs/lib/chunkstream.js
 var require_chunkstream = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/chunkstream.js"(exports, module) {
+  "node_modules/pngjs/lib/chunkstream.js"(exports, module) {
     "use strict";
     var util = __require("util");
     var Stream = __require("stream");
@@ -173,9 +173,9 @@ var require_chunkstream = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/interlace.js
+// node_modules/pngjs/lib/interlace.js
 var require_interlace = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/interlace.js"(exports) {
+  "node_modules/pngjs/lib/interlace.js"(exports) {
     "use strict";
     var imagePasses = [
       {
@@ -256,9 +256,9 @@ var require_interlace = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/paeth-predictor.js
+// node_modules/pngjs/lib/paeth-predictor.js
 var require_paeth_predictor = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/paeth-predictor.js"(exports, module) {
+  "node_modules/pngjs/lib/paeth-predictor.js"(exports, module) {
     "use strict";
     module.exports = function paethPredictor(left, above, upLeft) {
       let paeth = left + above - upLeft;
@@ -276,9 +276,9 @@ var require_paeth_predictor = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/filter-parse.js
+// node_modules/pngjs/lib/filter-parse.js
 var require_filter_parse = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/filter-parse.js"(exports, module) {
+  "node_modules/pngjs/lib/filter-parse.js"(exports, module) {
     "use strict";
     var interlaceUtils = require_interlace();
     var paethPredictor = require_paeth_predictor();
@@ -417,9 +417,9 @@ var require_filter_parse = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/filter-parse-async.js
+// node_modules/pngjs/lib/filter-parse-async.js
 var require_filter_parse_async = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/filter-parse-async.js"(exports, module) {
+  "node_modules/pngjs/lib/filter-parse-async.js"(exports, module) {
     "use strict";
     var util = __require("util");
     var ChunkStream = require_chunkstream();
@@ -443,9 +443,9 @@ var require_filter_parse_async = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/constants.js
+// node_modules/pngjs/lib/constants.js
 var require_constants = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/constants.js"(exports, module) {
+  "node_modules/pngjs/lib/constants.js"(exports, module) {
     "use strict";
     module.exports = {
       PNG_SIGNATURE: [137, 80, 78, 71, 13, 10, 26, 10],
@@ -478,9 +478,9 @@ var require_constants = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/crc.js
+// node_modules/pngjs/lib/crc.js
 var require_crc = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/crc.js"(exports, module) {
+  "node_modules/pngjs/lib/crc.js"(exports, module) {
     "use strict";
     var crcTable = [];
     (function() {
@@ -518,9 +518,9 @@ var require_crc = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/parser.js
+// node_modules/pngjs/lib/parser.js
 var require_parser = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/parser.js"(exports, module) {
+  "node_modules/pngjs/lib/parser.js"(exports, module) {
     "use strict";
     var constants = require_constants();
     var CrcCalculator = require_crc();
@@ -739,9 +739,9 @@ var require_parser = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/bitmapper.js
+// node_modules/pngjs/lib/bitmapper.js
 var require_bitmapper = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/bitmapper.js"(exports) {
+  "node_modules/pngjs/lib/bitmapper.js"(exports) {
     "use strict";
     var interlaceUtils = require_interlace();
     var pixelBppMapper = [
@@ -987,9 +987,9 @@ var require_bitmapper = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/format-normaliser.js
+// node_modules/pngjs/lib/format-normaliser.js
 var require_format_normaliser = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/format-normaliser.js"(exports, module) {
+  "node_modules/pngjs/lib/format-normaliser.js"(exports, module) {
     "use strict";
     function dePalette(indata, outdata, width, height, palette) {
       let pxPos = 0;
@@ -1068,9 +1068,9 @@ var require_format_normaliser = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/parser-async.js
+// node_modules/pngjs/lib/parser-async.js
 var require_parser_async = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/parser-async.js"(exports, module) {
+  "node_modules/pngjs/lib/parser-async.js"(exports, module) {
     "use strict";
     var util = __require("util");
     var zlib = __require("zlib");
@@ -1198,9 +1198,9 @@ var require_parser_async = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/bitpacker.js
+// node_modules/pngjs/lib/bitpacker.js
 var require_bitpacker = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/bitpacker.js"(exports, module) {
+  "node_modules/pngjs/lib/bitpacker.js"(exports, module) {
     "use strict";
     var constants = require_constants();
     module.exports = function(dataIn, width, height, options) {
@@ -1348,9 +1348,9 @@ var require_bitpacker = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/filter-pack.js
+// node_modules/pngjs/lib/filter-pack.js
 var require_filter_pack = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/filter-pack.js"(exports, module) {
+  "node_modules/pngjs/lib/filter-pack.js"(exports, module) {
     "use strict";
     var paethPredictor = require_paeth_predictor();
     function filterNone(pxData, pxPos, byteWidth, rawData, rawPos) {
@@ -1490,9 +1490,9 @@ var require_filter_pack = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/packer.js
+// node_modules/pngjs/lib/packer.js
 var require_packer = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/packer.js"(exports, module) {
+  "node_modules/pngjs/lib/packer.js"(exports, module) {
     "use strict";
     var constants = require_constants();
     var CrcStream = require_crc();
@@ -1590,9 +1590,9 @@ var require_packer = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/packer-async.js
+// node_modules/pngjs/lib/packer-async.js
 var require_packer_async = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/packer-async.js"(exports, module) {
+  "node_modules/pngjs/lib/packer-async.js"(exports, module) {
     "use strict";
     var util = __require("util");
     var Stream = __require("stream");
@@ -1632,9 +1632,9 @@ var require_packer_async = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/sync-inflate.js
+// node_modules/pngjs/lib/sync-inflate.js
 var require_sync_inflate = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/sync-inflate.js"(exports, module) {
+  "node_modules/pngjs/lib/sync-inflate.js"(exports, module) {
     "use strict";
     var assert = __require("assert").ok;
     var zlib = __require("zlib");
@@ -1769,9 +1769,9 @@ var require_sync_inflate = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/sync-reader.js
+// node_modules/pngjs/lib/sync-reader.js
 var require_sync_reader = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/sync-reader.js"(exports, module) {
+  "node_modules/pngjs/lib/sync-reader.js"(exports, module) {
     "use strict";
     var SyncReader = module.exports = function(buffer) {
       this._buffer = buffer;
@@ -1807,9 +1807,9 @@ var require_sync_reader = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/filter-parse-sync.js
+// node_modules/pngjs/lib/filter-parse-sync.js
 var require_filter_parse_sync = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/filter-parse-sync.js"(exports) {
+  "node_modules/pngjs/lib/filter-parse-sync.js"(exports) {
     "use strict";
     var SyncReader = require_sync_reader();
     var Filter = require_filter_parse();
@@ -1831,9 +1831,9 @@ var require_filter_parse_sync = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/parser-sync.js
+// node_modules/pngjs/lib/parser-sync.js
 var require_parser_sync = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/parser-sync.js"(exports, module) {
+  "node_modules/pngjs/lib/parser-sync.js"(exports, module) {
     "use strict";
     var hasSyncZlib = true;
     var zlib = __require("zlib");
@@ -1926,9 +1926,9 @@ var require_parser_sync = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/packer-sync.js
+// node_modules/pngjs/lib/packer-sync.js
 var require_packer_sync = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/packer-sync.js"(exports, module) {
+  "node_modules/pngjs/lib/packer-sync.js"(exports, module) {
     "use strict";
     var hasSyncZlib = true;
     var zlib = __require("zlib");
@@ -1971,9 +1971,9 @@ var require_packer_sync = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/png-sync.js
+// node_modules/pngjs/lib/png-sync.js
 var require_png_sync = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/png-sync.js"(exports) {
+  "node_modules/pngjs/lib/png-sync.js"(exports) {
     "use strict";
     var parse = require_parser_sync();
     var pack = require_packer_sync();
@@ -1986,9 +1986,9 @@ var require_png_sync = __commonJS({
   }
 });
 
-// ../GenPet/node_modules/pngjs/lib/png.js
+// node_modules/pngjs/lib/png.js
 var require_png = __commonJS({
-  "../GenPet/node_modules/pngjs/lib/png.js"(exports) {
+  "node_modules/pngjs/lib/png.js"(exports) {
     "use strict";
     var util = __require("util");
     var Stream = __require("stream");
@@ -3191,7 +3191,7 @@ import { existsSync as existsSync2, readFileSync as readFileSync2 } from "node:f
 import { createRequire } from "node:module";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 
-// ../GenPet/node_modules/@jsquash/webp/codec/dec/webp_dec.js
+// node_modules/@jsquash/webp/codec/dec/webp_dec.js
 var Module = (() => {
   var _scriptDir = import.meta.url;
   return (function(Module2 = {}) {
@@ -4550,7 +4550,7 @@ var Module = (() => {
 })();
 var webp_dec_default = Module;
 
-// ../GenPet/node_modules/@jsquash/webp/utils.js
+// node_modules/@jsquash/webp/utils.js
 function initEmscriptenModule(moduleFactory, wasmModule, moduleOptionOverrides = {}) {
   let instantiateWasm;
   if (wasmModule) {
@@ -4568,7 +4568,7 @@ function initEmscriptenModule(moduleFactory, wasmModule, moduleOptionOverrides =
   });
 }
 
-// ../GenPet/node_modules/@jsquash/webp/decode.js
+// node_modules/@jsquash/webp/decode.js
 var emscriptenModule;
 async function init(module, moduleOptionOverrides) {
   let actualModule = module;

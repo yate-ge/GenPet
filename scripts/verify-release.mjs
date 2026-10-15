@@ -82,7 +82,8 @@ for (const relative of [
 for (const relative of [
   '.mcp.json',
   'dist/mcp.js',
-  'assets',
+  'assets/examples',
+  'assets/pets',
   'src',
   'tests',
   'node_modules',

@@ -1,7 +1,7 @@
 /**
  * Build the desktop plugin package from the shared framework.
  * Copied into each package: framework/{prompts,references,debugger-web} and every framework/skills/* skill.
- * Kept per package: manifest, config/host.json, README, host-only skills, scripts/verify-install.mjs.
+ * Kept per package: manifest, assets/icon.png, config/host.json, README, host-only skills, scripts/verify-install.mjs.
  * Generated: dist/ (bundled runtime) and package.json.
  */
 import { access, cp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';

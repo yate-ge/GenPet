@@ -1,6 +1,6 @@
 # GenPet 开发与验收摘要
 
-主干交付版本为 `0.10.7`；推送不会自动升级用户已安装的插件。原始报告、图片、请求及测试数据保留在本地 `output/` 和 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet，安装验收仅在隔离 CODEX_HOME 中执行。
+主干交付版本为 `0.10.9`；推送不会自动升级用户已安装的插件。原始报告、图片、请求及测试数据保留在本地 `output/` 和 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet，安装验收仅在隔离 CODEX_HOME 中执行。
 
 [成果汇报 PDF](https://drive.google.com/file/d/13oSP60mjBLSoC6R1xSrA9HYetCxodSng/view) · [Word](https://docs.google.com/document/d/1WP0MAtJONsqVWJNEyP7JhSVXjJ4is6Bx/edit) · [成果目录](https://drive.google.com/drive/folders/11WW2UEENWFibU8VG2jzycz_arD-6-tCF)
 

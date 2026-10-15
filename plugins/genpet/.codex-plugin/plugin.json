@@ -1,6 +1,6 @@
 {
   "name": "genpet",
-  "version": "0.10.8",
+  "version": "0.10.9",
   "description": "A story-driven pixel companion for Codex with native Pet updates.",
   "author": {
     "name": "GenPet contributors"
@@ -27,6 +27,8 @@
     "defaultPrompt": [
       "使用 $genpet 查看我的宠物和最近的故事"
     ],
-    "brandColor": "#78934E"
+    "brandColor": "#78934E",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png"
   }
 }
