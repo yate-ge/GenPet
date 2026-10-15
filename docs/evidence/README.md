@@ -1,8 +1,15 @@
 # GenPet 开发与验收摘要
 
-主干交付版本为 `0.10.4`；推送不会自动升级用户已安装的插件。原始报告、图片、请求及测试数据保留在本地 `output/` 和 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet，安装验收仅在隔离 CODEX_HOME 中执行。
+主干交付版本为 `0.10.6`；推送不会自动升级用户已安装的插件。原始报告、图片、请求及测试数据保留在本地 `output/` 和 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet，安装验收仅在隔离 CODEX_HOME 中执行。
 
 [成果汇报 PDF](https://drive.google.com/file/d/13oSP60mjBLSoC6R1xSrA9HYetCxodSng/view) · [Word](https://docs.google.com/document/d/1WP0MAtJONsqVWJNEyP7JhSVXjJ4is6Bx/edit) · [成果目录](https://drive.google.com/drive/folders/11WW2UEENWFibU8VG2jzycz_arD-6-tCF)
+
+## 2026-10-15 生图并发实测（本机 Codex exec）与 0.10.6 分工调整
+
+- 用0.10.2修正后幼体的基准、layout guide与11个源job提示原文，在本机`codex exec`实测生图22张（无重试），不涉及云Pet。A组每job新开worker：宿主默认同时最多3个子代理，第4个起直接拒绝（8次`agent thread limit reached`），派发到最后落盘283.6秒；B组协调者+3个worker连续领单：峰值同时4路、单张19.9–29.1秒未变慢，140.4秒。
+- 新worker从启动到发起生图约25–34秒，连续领单时上一张完成到下一张调用13–21秒；0.10.2的44–74秒间隔来自经协调者转派，而非provider并发。`--ephemeral`下子代理无法启动。
+- 报告与原始数据：`G:/我的云端硬盘/GenPet/开发档案/生图并发实测 0.10.4 2026-10-15/`。
+- 上限来自Codex宿主（`AgentLimitReached`/`agents.max_threads`）：不生图探测中默认6个只开出3个，`-c agents.max_threads=6`时6个全部开出（`thread-limit-probe/`）。0.10.6按用户决定不写死执行者数：workflow/PetDesigner改为尽量并行、协调者也出图，基准通过后一次交给每个执行者它那份job连续做完，不逐张回报或转派；并发数交给Codex，撤回0.10.3“不预先绑定”。未重测完整计时；用户将在桌面Codex自测能否超过3个子代理。
 
 ## 2026-10-15 0.10.4 并行提取与子命令帮助
 

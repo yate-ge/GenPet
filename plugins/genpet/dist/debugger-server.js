@@ -5814,7 +5814,7 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
       if (req.headers.origin && req.headers.origin !== `http://${host}`) return json({ error: "Origin rejected" }, 403);
       const url = new URL(req.url || "/", "http://" + host);
       if (req.method === "GET" && url.pathname === "/api/health")
-        return json({ service: "genpet-debugger", root: store.root });
+        return json({ service: "genpet-debugger", root: store.root, pluginRoot: pluginRoot() });
       if (req.method === "GET" && url.pathname === "/api/state")
         return json({ state: await target(url).peek(), token });
       if (req.method === "GET" && url.pathname === "/api/pets") return json(await store.listPets());
@@ -5826,12 +5826,12 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
       }
       if (req.method === "POST" && url.pathname === "/api/action") {
         if (req.headers["x-genpet-token"] !== token) return json({ error: "Invalid request token" }, 403);
-        let body = "";
+        let body2 = "";
         for await (const chunk of req) {
-          body += chunk;
-          if (body.length > 16384) throw new Error("Request too large");
+          body2 += chunk;
+          if (body2.length > 16384) throw new Error("Request too large");
         }
-        const input = JSON.parse(body);
+        const input = JSON.parse(body2);
         if (input.action === "stop") {
           json({ ok: true, result: { stopped: true } });
           server.close();
@@ -5857,11 +5857,12 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
         ".js": "text/javascript; charset=utf-8",
         ".css": "text/css; charset=utf-8"
       };
+      const body = await readFile12(file);
       res.writeHead(200, {
         "Content-Type": types[path12.extname(file)],
         "Content-Security-Policy": "default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; frame-ancestors 'none'"
       });
-      res.end(await readFile12(file));
+      res.end(body);
     } catch (error) {
       if (!res.headersSent) json({ error: error.message }, 400);
       else res.end();

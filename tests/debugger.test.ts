@@ -5,6 +5,7 @@ import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { Store } from '../src/store.js';
+import { pluginRoot } from '../src/config.js';
 import { beginStory } from '../src/lifecycle.js';
 import { startServer } from '../src/debugger-server.js';
 import { readInventory, saveHostPets } from '../src/inventory.js';
@@ -19,6 +20,8 @@ test('debugger is read-only, rejects cross-origin actions and stops', async () =
   try {
     const { state, token } = await (await fetch(url + '/api/state')).json();
     assert.equal(state.pet.id, (await store.peek()).pet!.id);
+    // The launcher replaces a debugger whose package differs, e.g. one left running across an upgrade.
+    assert.equal((await (await fetch(url + '/api/health')).json()).pluginRoot, pluginRoot());
     assert.equal(await readFile(store.file, 'utf8'), before);
     assert.equal((await fetch(url + '/api/state', { headers: { Origin: 'https://example.com' } })).status, 403);
     assert.equal((await fetch(url + '/api/action', { method: 'POST', body: '{}' })).status, 403);

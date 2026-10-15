@@ -36,7 +36,7 @@ export async function startServer(port = Number(process.env.GENPET_PORT || 47831
       if (req.headers.origin && req.headers.origin !== `http://${host}`) return json({ error: 'Origin rejected' }, 403);
       const url = new URL(req.url || '/', 'http://' + host);
       if (req.method === 'GET' && url.pathname === '/api/health')
-        return json({ service: 'genpet-debugger', root: store.root });
+        return json({ service: 'genpet-debugger', root: store.root, pluginRoot: pluginRoot() });
       if (req.method === 'GET' && url.pathname === '/api/state')
         return json({ state: await target(url).peek(), token });
       if (req.method === 'GET' && url.pathname === '/api/pets') return json(await store.listPets());
@@ -81,12 +81,14 @@ export async function startServer(port = Number(process.env.GENPET_PORT || 47831
           '.js': 'text/javascript; charset=utf-8',
           '.css': 'text/css; charset=utf-8',
         };
+      // Read before the headers so a missing package file is an error, not a blank page.
+      const body = await readFile(file);
       res.writeHead(200, {
         'Content-Type': types[path.extname(file)],
         'Content-Security-Policy':
           "default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; frame-ancestors 'none'",
       });
-      res.end(await readFile(file));
+      res.end(body);
     } catch (error) {
       if (!res.headersSent) json({ error: (error as Error).message }, 400);
       else res.end();
