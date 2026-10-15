@@ -2125,8 +2125,8 @@ var require_png = __commonJS({
 
 // src/debugger-server.ts
 import http from "node:http";
-import { readFile as readFile11 } from "node:fs/promises";
-import path11 from "node:path";
+import { readFile as readFile12 } from "node:fs/promises";
+import path12 from "node:path";
 import { randomBytes } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
@@ -2235,6 +2235,18 @@ import { readFile } from "node:fs/promises";
 import path2 from "node:path";
 var record = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
 var isCloudId = (value) => typeof value === "string" && /^pet_[a-zA-Z0-9_-]+$/.test(value);
+async function readCloudPetIds(home = codexHome()) {
+  try {
+    const state = JSON.parse(await readFile(path2.join(home, ".codex-global-state.json"), "utf8"));
+    const atoms = record(state) ? state["electron-persisted-atom-state"] : null;
+    const cache = record(atoms) ? atoms["cloud-pet-artwork-cache"] : null;
+    if (!record(cache) || !Array.isArray(cache.pets))
+      return { available: false, ids: [], reason: "No host cloud Pet cache" };
+    return { available: true, ids: cache.pets.map((pet) => record(pet) ? pet.id : null).filter(isCloudId) };
+  } catch {
+    return { available: false, ids: [], reason: "Host cloud Pet cache cannot be read" };
+  }
+}
 async function readMigrationMap(home = codexHome()) {
   try {
     const state = JSON.parse(await readFile(path2.join(home, ".codex-global-state.json"), "utf8"));
@@ -3219,11 +3231,11 @@ var Module = (() => {
     var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
     var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions == "object" && typeof process.versions.node == "string";
     var scriptDirectory = "";
-    function locateFile(path12) {
+    function locateFile(path13) {
       if (Module2["locateFile"]) {
-        return Module2["locateFile"](path12, scriptDirectory);
+        return Module2["locateFile"](path13, scriptDirectory);
       }
-      return scriptDirectory + path12;
+      return scriptDirectory + path13;
     }
     var read_, readAsync, readBinary, setWindowTitle;
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -4834,7 +4846,13 @@ async function listPets(home = codexHome()) {
         const cloudId = migration.available ? migration.mappings[localId] : void 0;
         const id = cloudId ?? localId;
         const displayName = (manifest.displayName ?? manifest.id ?? entry.name).trim();
-        local.set(id, { id, displayName, source: cloudId ? "cloud" : "local", ...cloudId ? { localId } : {} });
+        local.set(id, {
+          id,
+          displayName,
+          source: cloudId ? "cloud" : "local",
+          ...cloudId ? { localId } : {},
+          ...typeof manifest.genpetId === "string" ? { genpetId: manifest.genpetId } : {}
+        });
       } catch {
         errors.push(`${directory}/${entry.name}/${filename}: \u65E0\u6CD5\u8BFB\u53D6\u6709\u6548\u5BA0\u7269\u6E05\u5355`);
       }
@@ -5673,9 +5691,114 @@ function artRequest(state) {
   };
 }
 
+// src/inventory.ts
+import { mkdir as mkdir5, readFile as readFile11, rename as rename3, writeFile as writeFile4 } from "node:fs/promises";
+import path11 from "node:path";
+var hostPetsFile = (base) => path11.join(base, "debugger", "host-pets.json");
+function hostIdFor(host, pet, migration) {
+  const binding = pet.binding, cloudId = [binding?.avatarId, binding?.cloudId].find(isCloudId);
+  if (cloudId) return cloudId;
+  const localId = binding?.avatarId.startsWith("custom:") ? binding.avatarId : binding?.destination ? `custom:${path11.basename(binding.destination)}` : !binding && host === "desktop" ? `custom:${pet.id}` : null;
+  return localId && (migration.available && migration.mappings[localId] || localId);
+}
+function hostEvidence(pet) {
+  const found = [];
+  if (pet.name?.startsWith("genpet-")) found.push(`\u5BBF\u4E3B\u540D\u79F0 ${pet.name}`);
+  try {
+    const brief = JSON.parse(pet.description ?? "");
+    if (typeof brief?.id === "string" && brief.id.startsWith("genpet-")) found.push(`\u5BBF\u4E3B\u63CF\u8FF0 id=${brief.id}`);
+  } catch {
+  }
+  return found;
+}
+async function readInventory(base, home = codexHome()) {
+  const rows = /* @__PURE__ */ new Map();
+  const at = (id) => {
+    let row = rows.get(id);
+    if (!row)
+      rows.set(id, row = { id, name: null, sources: [], genpet: null, hostedHere: false, evidence: [], records: [] });
+    return row;
+  };
+  const errors = [];
+  const [catalog, cloud2, migration, saved] = await Promise.all([
+    listPets(home),
+    readCloudPetIds(home),
+    readMigrationMap(home),
+    readFile11(hostPetsFile(base), "utf8").then(
+      (text2) => JSON.parse(text2),
+      (error) => {
+        if (error.code !== "ENOENT") errors.push("\u5BBF\u4E3B\u5217\u8868\u5FEB\u7167\u65E0\u6CD5\u8BFB\u53D6");
+        return null;
+      }
+    )
+  ]);
+  errors.push(...catalog.errors ?? []);
+  for (const pet of catalog.pets) {
+    const row = at(pet.id);
+    row.name = pet.displayName;
+    row.sources.push(pet.source === "builtin" ? "builtin" : "local");
+    if (pet.localId) row.localId = pet.localId;
+    if (pet.source === "builtin") row.genpet = false;
+    if (pet.genpetId) row.evidence.push(`\u672C\u5730\u6E05\u5355 genpetId=${pet.genpetId}`);
+  }
+  for (const id of cloud2.ids) at(id).sources.push("cloud-cache");
+  for (const pet of saved?.pets ?? []) {
+    const row = at(pet.id);
+    row.sources.push("host-list");
+    row.name = pet.name ?? row.name;
+    row.evidence.push(...hostEvidence(pet));
+  }
+  for (const pet of catalog.pets)
+    if (pet.source !== "builtin" && pet.displayName.startsWith("genpet-"))
+      at(pet.id).evidence.push(`\u672C\u5730\u540D\u79F0 ${pet.displayName}`);
+  for (const host of ["desktop", "cloud"]) {
+    let pets;
+    try {
+      pets = await new Store(base, host).listPets();
+    } catch (error) {
+      errors.push(`${host} \u8BB0\u5F55\uFF1A${error.message}`);
+      continue;
+    }
+    for (const pet of pets) {
+      const row = at(hostIdFor(host, pet, migration) ?? `${host}:${pet.id}`);
+      row.sources.push("record");
+      row.records.push({
+        host,
+        petId: pet.id,
+        name: pet.name,
+        ...pet.stage ? { stage: pet.stage } : {},
+        archived: pet.archived,
+        ...pet.error ? { error: pet.error } : {}
+      });
+    }
+  }
+  for (const row of rows.values()) {
+    row.sources = [...new Set(row.sources)];
+    row.hostedHere = row.records.length > 0;
+    if (row.hostedHere || row.evidence.length) row.genpet = true;
+    else if (row.genpet === null && row.name !== null) row.genpet = false;
+  }
+  const rank = (row) => row.hostedHere ? 0 : row.genpet ? 1 : row.genpet === null ? 2 : 3;
+  return {
+    codexHome: home,
+    dataDirectory: base,
+    cloudCache: cloud2.available ? { pets: cloud2.ids.length } : { error: cloud2.reason },
+    migration: migration.available ? { mapped: Object.keys(migration.mappings).length } : { error: migration.reason },
+    hostList: saved ? { savedAt: saved.savedAt, pets: saved.pets.length } : null,
+    pets: [...rows.values()].sort((a, b) => rank(a) - rank(b) || (a.name ?? a.id).localeCompare(b.name ?? b.id)),
+    ...errors.length ? { errors } : {}
+  };
+}
+
 // src/debugger-server.ts
 async function startServer(port = Number(process.env.GENPET_PORT || 47831), root) {
   const store = new Store(root, packageHost()), token = randomBytes(24).toString("hex");
+  const target = (url) => {
+    const host = url.searchParams.get("host") ?? store.host, pet = url.searchParams.get("pet");
+    if (host !== "desktop" && host !== "cloud") throw new Error("Unsupported host environment");
+    const scoped = host === store.host ? store : new Store(store.base, host);
+    return pet ? scoped.forPet(pet) : scoped;
+  };
   const server = http.createServer(async (req, res) => {
     const json = (value, status = 200) => {
       res.writeHead(status, {
@@ -5693,18 +5816,14 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
       if (req.method === "GET" && url.pathname === "/api/health")
         return json({ service: "genpet-debugger", root: store.root });
       if (req.method === "GET" && url.pathname === "/api/state")
-        return json({
-          state: await (url.searchParams.get("pet") ? store.forPet(url.searchParams.get("pet")) : store).peek(),
-          token
-        });
+        return json({ state: await target(url).peek(), token });
       if (req.method === "GET" && url.pathname === "/api/pets") return json(await store.listPets());
+      if (req.method === "GET" && url.pathname === "/api/inventory") return json(await readInventory(store.base));
       if (req.method === "GET" && url.pathname === "/api/art-request") return json(artRequest(await store.peek()));
-      if (req.method === "GET" && url.pathname === "/api/native-pets")
-        return json(
-          await hostFor(store.host).diagnose(
-            url.searchParams.get("pet") ? store.forPet(url.searchParams.get("pet")) : store
-          )
-        );
+      if (req.method === "GET" && url.pathname === "/api/native-pets") {
+        const scoped = target(url);
+        return json(await hostFor(scoped.host).diagnose(scoped));
+      }
       if (req.method === "POST" && url.pathname === "/api/action") {
         if (req.headers["x-genpet-token"] !== token) return json({ error: "Invalid request token" }, 403);
         let body = "";
@@ -5722,27 +5841,27 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
         return json({ error: "Use the story workflow to change pet records" }, 400);
       }
       if (req.method === "GET" && url.pathname.startsWith("/art/")) {
-        const state = await (url.searchParams.get("pet") ? store.forPet(url.searchParams.get("pet")) : store).peek(), record2 = state.art.find((art) => art.id === url.pathname.slice(5));
+        const state = await target(url).peek(), record2 = state.art.find((art) => art.id === url.pathname.slice(5));
         if (!record2 || record2.kind === "artifact") return json({ error: "Image not found" }, 404);
         res.writeHead(200, {
           "Content-Type": record2.file.endsWith(".webp") ? "image/webp" : "image/png",
           "Cache-Control": "no-store"
         });
-        res.end(await readFile11(record2.file));
+        res.end(await readFile12(record2.file));
         return;
       }
       const routes = { "/": "index.html", "/app.js": "app.js", "/style.css": "style.css" };
       if (req.method !== "GET" || !routes[url.pathname]) return json({ error: "Not found" }, 404);
-      const file = path11.join(pluginRoot(), "debugger-web", routes[url.pathname]), types = {
+      const file = path12.join(pluginRoot(), "debugger-web", routes[url.pathname]), types = {
         ".html": "text/html; charset=utf-8",
         ".js": "text/javascript; charset=utf-8",
         ".css": "text/css; charset=utf-8"
       };
       res.writeHead(200, {
-        "Content-Type": types[path11.extname(file)],
+        "Content-Type": types[path12.extname(file)],
         "Content-Security-Policy": "default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; frame-ancestors 'none'"
       });
-      res.end(await readFile11(file));
+      res.end(await readFile12(file));
     } catch (error) {
       if (!res.headersSent) json({ error: error.message }, 400);
       else res.end();

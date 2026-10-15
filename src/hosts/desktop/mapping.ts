@@ -15,6 +15,20 @@ const record = (value: unknown): value is Record<string, unknown> =>
 export const isCloudId = (value: unknown): value is string =>
   typeof value === 'string' && /^pet_[a-zA-Z0-9_-]+$/.test(value);
 
+/** Cloud Pet IDs the desktop host cached for its current account. Names are not cached locally. */
+export async function readCloudPetIds(home = codexHome()) {
+  try {
+    const state: unknown = JSON.parse(await readFile(path.join(home, '.codex-global-state.json'), 'utf8'));
+    const atoms = record(state) ? state['electron-persisted-atom-state'] : null;
+    const cache = record(atoms) ? atoms['cloud-pet-artwork-cache'] : null;
+    if (!record(cache) || !Array.isArray(cache.pets))
+      return { available: false, ids: [] as string[], reason: 'No host cloud Pet cache' };
+    return { available: true, ids: cache.pets.map(pet => (record(pet) ? pet.id : null)).filter(isCloudId) };
+  } catch {
+    return { available: false, ids: [] as string[], reason: 'Host cloud Pet cache cannot be read' };
+  }
+}
+
 /** Keys verified in desktop 26.1007.2314.0. Account scopes are never merged. */
 export async function readMigrationMap(home = codexHome()): Promise<MigrationMap> {
   try {

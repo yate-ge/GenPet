@@ -7,11 +7,20 @@ import { Store } from './store.js';
 import { artRequest } from './art.js';
 import { packageHost, pluginRoot } from './config.js';
 import { hostFor } from './hosts/index.js';
+import { readInventory } from './inventory.js';
 
 /** Explicitly launched, local, read-only pet inspection. Switching requires an explicit action. */
 export async function startServer(port = Number(process.env.GENPET_PORT || 47831), root?: string) {
   const store = new Store(root, packageHost()),
     token = randomBytes(24).toString('hex');
+  /** The requested record; `host` reads the other host's records under the same data directory. */
+  const target = (url: URL) => {
+    const host = url.searchParams.get('host') ?? store.host,
+      pet = url.searchParams.get('pet');
+    if (host !== 'desktop' && host !== 'cloud') throw new Error('Unsupported host environment');
+    const scoped = host === store.host ? store : new Store(store.base, host);
+    return pet ? scoped.forPet(pet) : scoped;
+  };
   const server = http.createServer(async (req, res) => {
     const json = (value: unknown, status = 200) => {
       res.writeHead(status, {
@@ -29,18 +38,14 @@ export async function startServer(port = Number(process.env.GENPET_PORT || 47831
       if (req.method === 'GET' && url.pathname === '/api/health')
         return json({ service: 'genpet-debugger', root: store.root });
       if (req.method === 'GET' && url.pathname === '/api/state')
-        return json({
-          state: await (url.searchParams.get('pet') ? store.forPet(url.searchParams.get('pet')!) : store).peek(),
-          token,
-        });
+        return json({ state: await target(url).peek(), token });
       if (req.method === 'GET' && url.pathname === '/api/pets') return json(await store.listPets());
+      if (req.method === 'GET' && url.pathname === '/api/inventory') return json(await readInventory(store.base));
       if (req.method === 'GET' && url.pathname === '/api/art-request') return json(artRequest(await store.peek()));
-      if (req.method === 'GET' && url.pathname === '/api/native-pets')
-        return json(
-          await hostFor(store.host).diagnose(
-            url.searchParams.get('pet') ? store.forPet(url.searchParams.get('pet')!) : store,
-          ),
-        );
+      if (req.method === 'GET' && url.pathname === '/api/native-pets') {
+        const scoped = target(url);
+        return json(await hostFor(scoped.host).diagnose(scoped));
+      }
       if (req.method === 'POST' && url.pathname === '/api/action') {
         if (req.headers['x-genpet-token'] !== token) return json({ error: 'Invalid request token' }, 403);
         let body = '';
@@ -58,7 +63,7 @@ export async function startServer(port = Number(process.env.GENPET_PORT || 47831
         return json({ error: 'Use the story workflow to change pet records' }, 400);
       }
       if (req.method === 'GET' && url.pathname.startsWith('/art/')) {
-        const state = await (url.searchParams.get('pet') ? store.forPet(url.searchParams.get('pet')!) : store).peek(),
+        const state = await target(url).peek(),
           record = state.art.find(art => art.id === url.pathname.slice(5));
         if (!record || record.kind === 'artifact') return json({ error: 'Image not found' }, 404);
         res.writeHead(200, {

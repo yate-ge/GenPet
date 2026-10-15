@@ -56,6 +56,26 @@ img {
 #error {
   color: #a12e24;
 }
+.table {
+  overflow-x: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+}
+th,
+td {
+  text-align: left;
+  vertical-align: top;
+  padding: 6px 8px;
+  border-bottom: 1px solid #ccc;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+td button {
+  margin: 0 4px 4px 0;
+}
 button:focus-visible,
 select:focus-visible,
 summary:focus-visible {
@@ -73,7 +93,9 @@ summary:focus-visible {
   #error {
     color: #ffaba2;
   }
-  details {
+  details,
+  th,
+  td {
     border-color: #555;
   }
 }

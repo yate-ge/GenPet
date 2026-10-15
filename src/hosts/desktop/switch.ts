@@ -15,6 +15,7 @@ export interface PetEntry {
   displayName: string;
   source: 'builtin' | 'local' | 'cloud';
   localId?: string;
+  genpetId?: string;
 }
 
 // Static catalog verified in Codex 26.924.2738.0; it does not include account-specific cloud pets.
@@ -69,7 +70,13 @@ export async function listPets(home = codexHome()): Promise<{ pets: PetEntry[]; 
         const cloudId = migration.available ? migration.mappings[localId] : undefined;
         const id = cloudId ?? localId;
         const displayName = ((manifest.displayName ?? manifest.id ?? entry.name) as string).trim();
-        local.set(id, { id, displayName, source: cloudId ? 'cloud' : 'local', ...(cloudId ? { localId } : {}) });
+        local.set(id, {
+          id,
+          displayName,
+          source: cloudId ? 'cloud' : 'local',
+          ...(cloudId ? { localId } : {}),
+          ...(typeof manifest.genpetId === 'string' ? { genpetId: manifest.genpetId } : {}),
+        });
       } catch {
         errors.push(`${directory}/${entry.name}/${filename}: 无法读取有效宠物清单`);
       }

@@ -10,6 +10,7 @@ import { acceptArt, artRequest } from './art.js';
 import { noteChat } from './chat.js';
 import { packageHost, readPrompt } from './config.js';
 import { launchDebugger } from './debugger.js';
+import { saveHostPets } from './inventory.js';
 import { recordStep, unitRequest, validateUnitResult } from './generation.js';
 import { growth } from './growth.js';
 import { hostFor, type Command } from './hosts/index.js';
@@ -210,7 +211,14 @@ const shared: Record<string, Command> = {
     run: ([host, dir], store) => exportPet(store, host as 'desktop' | 'cloud', dir),
   },
   'handoff-import': { usage: 'handoff-import TRANSFER_DIR', run: ([dir], store) => importPet(store, dir) },
-  debugger: { usage: 'debugger', run: () => launchDebugger() },
+  debugger: {
+    usage: 'debugger [--host-pets LIST_PETS_JSON]',
+    run: async ([flag, file], store) => {
+      if (flag && flag !== '--host-pets') throw new Error('Usage: debugger [--host-pets LIST_PETS_JSON]');
+      const hostList = flag ? await saveHostPets(store.base, file) : undefined;
+      return { ...(await launchDebugger()), ...(hostList ? { hostList } : {}) };
+    },
+  },
 };
 
 const argv = process.argv.slice(2);

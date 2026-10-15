@@ -2125,9 +2125,9 @@ var require_png = __commonJS({
 });
 
 // src/cli.ts
-import { readFile as readFile13 } from "node:fs/promises";
-import path17 from "node:path";
-import { randomUUID as randomUUID12 } from "node:crypto";
+import { readFile as readFile14 } from "node:fs/promises";
+import path18 from "node:path";
+import { randomUUID as randomUUID13 } from "node:crypto";
 
 // src/art.ts
 import { mkdir as mkdir3, readFile as readFile9, rename as rename2, rm, stat as stat3, writeFile as writeFile3 } from "node:fs/promises";
@@ -2348,11 +2348,11 @@ var Module = (() => {
     var ENVIRONMENT_IS_WORKER = typeof importScripts == "function";
     var ENVIRONMENT_IS_NODE = typeof process == "object" && typeof process.versions == "object" && typeof process.versions.node == "string";
     var scriptDirectory = "";
-    function locateFile(path18) {
+    function locateFile(path19) {
       if (Module2["locateFile"]) {
-        return Module2["locateFile"](path18, scriptDirectory);
+        return Module2["locateFile"](path19, scriptDirectory);
       }
-      return scriptDirectory + path18;
+      return scriptDirectory + path19;
     }
     var read_, readAsync, readBinary, setWindowTitle;
     if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
@@ -4007,7 +4007,13 @@ async function listPets(home = codexHome()) {
         const cloudId = migration.available ? migration.mappings[localId] : void 0;
         const id = cloudId ?? localId;
         const displayName = (manifest.displayName ?? manifest.id ?? entry.name).trim();
-        local.set(id, { id, displayName, source: cloudId ? "cloud" : "local", ...cloudId ? { localId } : {} });
+        local.set(id, {
+          id,
+          displayName,
+          source: cloudId ? "cloud" : "local",
+          ...cloudId ? { localId } : {},
+          ...typeof manifest.genpetId === "string" ? { genpetId: manifest.genpetId } : {}
+        });
       } catch {
         errors.push(`${directory}/${entry.name}/${filename}: \u65E0\u6CD5\u8BFB\u53D6\u6709\u6548\u5BA0\u7269\u6E05\u5355`);
       }
@@ -6003,6 +6009,36 @@ async function launchDebugger(port = Number(process.env.GENPET_PORT || (packageH
   throw new Error("Debugger startup timed out");
 }
 
+// src/inventory.ts
+import { mkdir as mkdir6, readFile as readFile12, rename as rename4, writeFile as writeFile5 } from "node:fs/promises";
+import path14 from "node:path";
+import { randomUUID as randomUUID9 } from "node:crypto";
+var isRecord2 = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
+var hostPetsFile = (base) => path14.join(base, "debugger", "host-pets.json");
+async function saveHostPets(base, file) {
+  if (!path14.isAbsolute(file ?? "")) throw new Error("--host-pets requires an absolute JSON file");
+  const pets = /* @__PURE__ */ new Map();
+  const collect = (value, depth) => {
+    if (depth > 6) return;
+    if (Array.isArray(value)) return value.forEach((item) => collect(item, depth + 1));
+    if (!isRecord2(value)) return;
+    if (typeof value.id === "string" && value.id)
+      return void pets.set(value.id, {
+        id: value.id,
+        ...typeof value.name === "string" ? { name: value.name } : {},
+        ...typeof value.description === "string" ? { description: value.description } : {}
+      });
+    for (const item of Object.values(value)) collect(item, depth + 1);
+  };
+  collect(JSON.parse(await readFile12(file, "utf8")), 0);
+  if (!pets.size) throw new Error("No pets with an id were found in the host list");
+  const target2 = hostPetsFile(base), tmp = `${target2}.${randomUUID9()}`;
+  await mkdir6(path14.dirname(target2), { recursive: true });
+  await writeFile5(tmp, JSON.stringify({ savedAt: (/* @__PURE__ */ new Date()).toISOString(), pets: [...pets.values()] }, null, 2));
+  await rename4(tmp, target2);
+  return { file: target2, pets: pets.size };
+}
+
 // src/generation.ts
 import { createHash as createHash7 } from "node:crypto";
 var object2 = (value) => !!value && typeof value === "object" && !Array.isArray(value);
@@ -6066,9 +6102,9 @@ async function recordStep(store2, operationId, unit, input) {
 }
 
 // src/lifecycle.ts
-import { randomUUID as randomUUID9 } from "node:crypto";
+import { randomUUID as randomUUID10 } from "node:crypto";
 import { access as access2 } from "node:fs/promises";
-import path14 from "node:path";
+import path15 from "node:path";
 
 // src/naming.ts
 function namingDue(state) {
@@ -6292,7 +6328,7 @@ async function chooseCandidate(store2, operationId, input, seed) {
 // src/lifecycle.ts
 function startPending(pet, triggerId, mode) {
   return {
-    id: `story-${randomUUID9()}`,
+    id: `story-${randomUUID10()}`,
     triggerId,
     petId: pet.id,
     baseRevision: pet.revision,
@@ -6561,7 +6597,7 @@ async function resetPet(store2, operationId) {
       throw new Error("Resume or cancel the unfinished story before an explicit reset");
     if (!state.pet && await findLegacyRecord(store2))
       throw new Error("Migrate the existing legacy pet before resetting its identity");
-    const backup = path14.join(store2.root, "backups", `reset-${Date.now()}-${randomUUID9()}.json`);
+    const backup = path15.join(store2.root, "backups", `reset-${Date.now()}-${randomUUID10()}.json`);
     await atomicJson(backup, state);
     const previous = state.pet;
     const schedule = state.schedule;
@@ -6634,22 +6670,22 @@ async function journeyStep(store2, operationId, input) {
 }
 
 // src/handoff.ts
-import { access as access3, cp, mkdir as mkdir6, readFile as readFile12 } from "node:fs/promises";
-import path15 from "node:path";
-import { randomUUID as randomUUID10 } from "node:crypto";
+import { access as access3, cp, mkdir as mkdir7, readFile as readFile13 } from "node:fs/promises";
+import path16 from "node:path";
+import { randomUUID as randomUUID11 } from "node:crypto";
 async function exportPet(store2, target2, destination) {
   if (target2 === store2.host || !["desktop", "cloud"].includes(target2))
     throw new Error("Choose the other main environment");
-  if (!path15.isAbsolute(destination)) throw new Error("Transfer destination must be an absolute directory");
+  if (!path16.isAbsolute(destination)) throw new Error("Transfer destination must be an absolute directory");
   const before = await store2.peek();
   if (!before.pet) throw new Error("No Pet to transfer");
   if (before.pending) throw new Error("Finish the current story before handing off");
   const owner = store2.forPet(before.pet.id);
-  const directory = path15.join(destination, before.pet.id);
-  const source = path15.join(store2.root, "pets", before.pet.id);
-  if (path15.resolve(directory).startsWith(path15.resolve(source) + path15.sep) || path15.resolve(directory) === path15.resolve(source))
+  const directory = path16.join(destination, before.pet.id);
+  const source = path16.join(store2.root, "pets", before.pet.id);
+  if (path16.resolve(directory).startsWith(path16.resolve(source) + path16.sep) || path16.resolve(directory) === path16.resolve(source))
     throw new Error("Transfer destination must be outside the source Pet directory");
-  const transferId = before.handoff?.status === "exported" && before.handoff.target === target2 ? before.handoff.id : `handoff-${randomUUID10()}`;
+  const transferId = before.handoff?.status === "exported" && before.handoff.target === target2 ? before.handoff.id : `handoff-${randomUUID11()}`;
   const previousSchedule = before.schedule;
   if (before.handoff?.status === "exported" && before.handoff.target !== target2)
     throw new Error("This Pet already has an outstanding transfer to another environment");
@@ -6666,10 +6702,10 @@ async function exportPet(store2, target2, destination) {
       state.schedule = { ...state.schedule, timezone: state.schedule?.timezone ?? "UTC", stoppedAt: Date.now() };
       delete state.schedule.resumedAt;
     });
-  await mkdir6(destination, { recursive: true });
+  await mkdir7(destination, { recursive: true });
   await cp(source, directory, { recursive: true, force: false, errorOnExist: false });
   const exported = await owner.peek();
-  await atomicJson(path15.join(directory, "transfer.json"), {
+  await atomicJson(path16.join(directory, "transfer.json"), {
     version: 1,
     transferId,
     petId: before.pet.id,
@@ -6692,8 +6728,8 @@ async function exportPet(store2, target2, destination) {
   };
 }
 async function importPet(store2, directory) {
-  if (!path15.isAbsolute(directory)) throw new Error("Transfer source must be an absolute directory");
-  const manifest = JSON.parse(await readFile12(path15.join(directory, "transfer.json"), "utf8"));
+  if (!path16.isAbsolute(directory)) throw new Error("Transfer source must be an absolute directory");
+  const manifest = JSON.parse(await readFile13(path16.join(directory, "transfer.json"), "utf8"));
   identifier(manifest.petId, "petId");
   identifier(manifest.transferId, "transferId");
   if (manifest.version !== 1 || !["desktop", "cloud"].includes(manifest.source) || manifest.target !== store2.host || manifest.source === store2.host || manifest.state.host !== manifest.source || manifest.state.pet?.id !== manifest.petId || manifest.state.handoff?.id !== manifest.transferId || manifest.state.handoff?.target !== manifest.target || manifest.state.handoff?.previousTransferId !== manifest.previousTransferId || manifest.state.handoff?.status !== "exported")
@@ -6715,13 +6751,13 @@ async function importPet(store2, directory) {
     throw new Error("The destination Pet is already writable; finish its handoff first");
   if (existing.pet && existing.handoff?.id !== manifest.previousTransferId)
     throw new Error("Stale transfer; its predecessor does not match the latest handoff");
-  const target2 = path15.join(store2.root, "pets", manifest.petId);
-  await mkdir6(target2, { recursive: true });
-  const sourceStateFile = path15.resolve(directory, "state.json");
+  const target2 = path16.join(store2.root, "pets", manifest.petId);
+  await mkdir7(target2, { recursive: true });
+  const sourceStateFile = path16.resolve(directory, "state.json");
   await cp(directory, target2, {
     recursive: true,
     force: true,
-    filter: (source) => path15.resolve(source) !== sourceStateFile
+    filter: (source) => path16.resolve(source) !== sourceStateFile
   });
   const state = manifest.state;
   state.host = store2.host;
@@ -6734,7 +6770,7 @@ async function importPet(store2, directory) {
   };
   if (state.pet.binding) state.pet.binding.host = store2.host;
   for (const art of state.art) {
-    const local = path15.join(target2, "assets", path15.basename(art.file));
+    const local = path16.join(target2, "assets", path16.basename(art.file));
     await access3(local);
     art.file = local;
   }
@@ -6751,13 +6787,13 @@ async function importPet(store2, directory) {
 // src/pipeline.ts
 import { execFile } from "node:child_process";
 import { existsSync as existsSync3 } from "node:fs";
-import { mkdir as mkdir7, writeFile as writeFile5 } from "node:fs/promises";
-import { randomUUID as randomUUID11 } from "node:crypto";
-import path16 from "node:path";
+import { mkdir as mkdir8, writeFile as writeFile6 } from "node:fs/promises";
+import { randomUUID as randomUUID12 } from "node:crypto";
+import path17 from "node:path";
 import { promisify } from "node:util";
 var execute = promisify(execFile);
 var HELPER_TIMEOUT_MS = 55e3;
-var helperDirectory = () => path16.join(pluginRoot(), "vendor", "hatch-pet", "scripts");
+var helperDirectory = () => path17.join(pluginRoot(), "vendor", "hatch-pet", "scripts");
 async function pipelineRuntime(python) {
   const candidates = [
     ...new Set(
@@ -6792,10 +6828,10 @@ function helperFailure(error) {
   };
 }
 async function callHelper(script, args2, runDir, python, preparing = false) {
-  if (!path16.isAbsolute(runDir)) throw new Error("Pipeline runDir must be an absolute local path");
+  if (!path17.isAbsolute(runDir)) throw new Error("Pipeline runDir must be an absolute local path");
   const runtime = await pipelineRuntime(python);
   if (!runtime.available) return { ok: false, runtime, run_dir: runDir };
-  const helper = path16.join(runtime.helpers, script);
+  const helper = path17.join(runtime.helpers, script);
   if (!existsSync3(helper))
     return { ok: false, runtime, run_dir: runDir, error: "Installed deterministic image helper is missing" };
   let stdout = "", stderr = "", exitCode = 0, timedOut = false;
@@ -6811,9 +6847,9 @@ async function callHelper(script, args2, runDir, python, preparing = false) {
   } catch (error) {
     ({ stdout, stderr, exitCode, timedOut } = helperFailure(error));
   }
-  const reportFile = preparing && !existsSync3(path16.join(runDir, "imagegen-jobs.json")) ? `${runDir}.prepare-${randomUUID11()}.json` : path16.join(runDir, "qa", "wrapper-runs", `${script.replace(".py", "")}-${Date.now()}-${randomUUID11()}.json`);
-  await mkdir7(path16.dirname(reportFile), { recursive: true });
-  await writeFile5(reportFile, JSON.stringify({ runtime, helper, args: args2, stdout, stderr, exitCode, timedOut }, null, 2), {
+  const reportFile = preparing && !existsSync3(path17.join(runDir, "imagegen-jobs.json")) ? `${runDir}.prepare-${randomUUID12()}.json` : path17.join(runDir, "qa", "wrapper-runs", `${script.replace(".py", "")}-${Date.now()}-${randomUUID12()}.json`);
+  await mkdir8(path17.dirname(reportFile), { recursive: true });
+  await writeFile6(reportFile, JSON.stringify({ runtime, helper, args: args2, stdout, stderr, exitCode, timedOut }, null, 2), {
     flag: "wx"
   });
   try {
@@ -6854,7 +6890,7 @@ async function pipelinePrepare(input) {
   if (input.requestId) args2.push("--request-id", input.requestId);
   if (input.noMirrorLook) args2.push("--no-mirror-look", input.noMirrorLook);
   for (const reference of input.references ?? []) {
-    if (!path16.isAbsolute(reference)) throw new Error("Pipeline references must be absolute local paths");
+    if (!path17.isAbsolute(reference)) throw new Error("Pipeline references must be absolute local paths");
     args2.push("--reference", reference);
   }
   return callHelper("prepare_pet_run.py", args2, input.runDir, input.python, true);
@@ -6888,8 +6924,8 @@ async function pipelineProcess(runDir, options = {}) {
 
 // src/cli.ts
 async function jsonFile(file) {
-  if (!path17.isAbsolute(file ?? "")) throw new Error("JSON input requires an absolute file");
-  return JSON.parse(await readFile13(file, "utf8"));
+  if (!path18.isAbsolute(file ?? "")) throw new Error("JSON input requires an absolute file");
+  return JSON.parse(await readFile14(file, "utf8"));
 }
 var shared = {
   help: {
@@ -6914,7 +6950,7 @@ var shared = {
   // Story lifecycle
   "begin-story": {
     usage: "begin-story [TRIGGER_ID] [--grow]",
-    run: ([trigger, flag], store2) => beginStory(store2, trigger || `manual:${randomUUID12()}`, { forceGrowth: flag === "--grow" })
+    run: ([trigger, flag], store2) => beginStory(store2, trigger || `manual:${randomUUID13()}`, { forceGrowth: flag === "--grow" })
   },
   "journey-step": {
     usage: "journey-step OPERATION_ID STEP_JSON",
@@ -6939,7 +6975,7 @@ var shared = {
   "finish-story": { usage: "finish-story OPERATION_ID", run: ([id], store2) => finishStory(store2, id) },
   "cancel-story": { usage: "cancel-story OPERATION_ID", run: ([id], store2) => cancelStory(store2, id) },
   "story-output": { usage: "story-output [STORY_ID]", run: async ([id], store2) => storyOutput(await store2.peek(), id) },
-  reset: { usage: "reset [OPERATION_ID]", run: ([id], store2) => resetPet(store2, id || randomUUID12()) },
+  reset: { usage: "reset [OPERATION_ID]", run: ([id], store2) => resetPet(store2, id || randomUUID13()) },
   // Artwork and host updates
   "art-request": { usage: "art-request", run: async (_, store2) => artRequest(await store2.peek()) },
   "find-avatar": { usage: "find-avatar", run: async (_, store2) => hostFor(store2.host).findAvatar(await store2.peek()) },
@@ -7060,7 +7096,14 @@ var shared = {
     run: ([host2, dir], store2) => exportPet(store2, host2, dir)
   },
   "handoff-import": { usage: "handoff-import TRANSFER_DIR", run: ([dir], store2) => importPet(store2, dir) },
-  debugger: { usage: "debugger", run: () => launchDebugger() }
+  debugger: {
+    usage: "debugger [--host-pets LIST_PETS_JSON]",
+    run: async ([flag, file], store2) => {
+      if (flag && flag !== "--host-pets") throw new Error("Usage: debugger [--host-pets LIST_PETS_JSON]");
+      const hostList = flag ? await saveHostPets(store2.base, file) : void 0;
+      return { ...await launchDebugger(), ...hostList ? { hostList } : {} };
+    }
+  }
 };
 var argv = process.argv.slice(2);
 var hostIndex = argv.indexOf("--host");

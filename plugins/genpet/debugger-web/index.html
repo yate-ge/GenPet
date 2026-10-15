@@ -9,7 +9,7 @@
   <body>
     <header>
       <h1>GenPet 记录调试器</h1>
-      <p>只读查看宠物记录、未完成故事和素材。</p>
+      <p>只读查看本机所有宠物，以及 GenPet 记录、未完成故事和素材。</p>
       <label for="pet">查看宠物</label>
       <select id="pet">
         <option value="">当前记录</option>
@@ -19,6 +19,25 @@
     <main>
       <p id="identity"></p>
       <p id="error" role="alert"></p>
+      <section>
+        <h2>本机所有宠物</h2>
+        <p id="inventory-note"></p>
+        <div class="table">
+          <table>
+            <thead>
+              <tr>
+                <th>类别</th>
+                <th>名称</th>
+                <th>宿主 ID</th>
+                <th>来源</th>
+                <th>GenPet 依据</th>
+                <th>本机记录</th>
+              </tr>
+            </thead>
+            <tbody id="inventory"></tbody>
+          </table>
+        </div>
+      </section>
       <section>
         <h2>身份与记录</h2>
         <pre id="record"></pre>

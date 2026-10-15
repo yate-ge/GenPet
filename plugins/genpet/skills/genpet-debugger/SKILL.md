@@ -5,4 +5,4 @@ description: Open the optional local GenPet record debugger only on /genpet-debu
 
 # genpet-debugger
 
-Run `node ROOT/dist/cli.js debugger` from this installed plugin root and open the returned URL. The debugger reads persisted stories and assets; it never adopts, grows or starts schedules. Stop it through its Stop button when requested. Follow `prompts/output.md` for conversation content.
+Run `node ROOT/dist/cli.js debugger` from this installed plugin root and open the returned URL. It lists every Pet this machine knows and marks GenPets and those whose full GenPet record lives here. Cloud Pet names are not cached locally, so when the host `list_pets` tool is available, read all its pages, save them unchanged to an absolute JSON file and pass `--host-pets FILE`; otherwise unnamed cloud Pets stay marked unknown. The debugger reads persisted stories and assets; it never adopts, grows or starts schedules. Stop it through its Stop button when requested. Follow `prompts/output.md` for conversation content.
