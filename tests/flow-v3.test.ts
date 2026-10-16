@@ -207,6 +207,21 @@ test('story-output gives the output its Pet name only after the user names it', 
   assert.equal(storyOutput(await store.peek()).name, '小耳朵');
 });
 
+test('story-output marks media an earlier story already showed', async () => {
+  const { store, root } = await isolated();
+  await adopted(store, root);
+  await store.transaction(state => {
+    const first = state.stories[0];
+    const art = { ...state.art[0], id: 'home-shown', kind: 'story' as const };
+    state.art.push(art);
+    first.mediaIds = [...first.mediaIds, art.id];
+    state.stories.push({ ...first, id: 'reuses-home', triggerId: 'reuses-home', mediaIds: [art.id] });
+  });
+  const state = await store.peek();
+  assert.equal(storyOutput(state, state.stories[0].id).media.find(art => art.id === 'home-shown')!.shownBefore, false);
+  assert.equal(storyOutput(state).media.find(art => art.id === 'home-shown')!.shownBefore, true);
+});
+
 test('a story is decided directly; seeded choice is only for the genes design', async () => {
   const { store, root } = await isolated();
   await adopted(store, root);

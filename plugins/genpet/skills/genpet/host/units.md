@@ -27,7 +27,7 @@
 | story-item | context、pet、story、savedArt | reason、item 或 null | 物件形式、视觉目的、原样文字 |
 | chat | pet、message | text、note 或 null | 阶段、个性与 memory，状态不变 |
 | ImageReviewer | visual、actualFile | 实际观察、accept/repair、定向修正 | 先产品边界，再设计、阶段、连续性与格式 |
-| output | story、completed、availableMedia、name | text 或 null、mediaRefs | 真实完成、一次展示、成长图、孵化命名 |
+| output | story、completed、availableMedia、name | 最终消息 message 或 null | 真实完成、一次展示、图片写法、成长图、孵化命名 |
 
 ## 结果格式
 

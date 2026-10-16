@@ -186,8 +186,7 @@
         "name"
       ],
       "result": {
-        "text": "nullable-string",
-        "mediaRefs": "array"
+        "message": "nullable-string"
       }
     }
   }

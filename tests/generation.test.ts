@@ -183,7 +183,7 @@ test('completed stories keep their unit artifacts and accept an internal output 
     const pet = (await store.peek()).pet;
     await recordStep(store, operation, 'output', {
       inputRefs: [first.id],
-      result: { text: story.text, mediaRefs: [] },
+      result: { message: story.text },
     });
     const state = await store.peek();
     assert.deepEqual(state.pet, pet);

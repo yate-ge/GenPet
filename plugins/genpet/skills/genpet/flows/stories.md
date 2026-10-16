@@ -8,7 +8,7 @@
 4. 将结果合成 StoryPlan，reason/contextRefs 写清采用的真实依据；计划保存 `plan-story OPERATION_ID PLAN_FILE` 后保持不变。纯文字是否成立由实际计划/素材确定，最多连续两次；每次正常检查有内容，不因「没有新事实」取消。
 5. `art-request` 返回请求 `.id`、`.savedArt` 与宿主格式 `.contract`；`.id` 用作 `pipeline-prepare` 的 `requestId` 和 `accept-art REQUEST_ID ABSOLUTE_FILE KIND SOURCE [DESCRIPTION]` 的第一个参数。复用指定 reuseArtId；新素材交 PetDesigner/图像子代理，ImageReviewer 看真实图；source 写实际生成/来源记录，portrait、atlas、story、artifact 各按用途。
 6. 形象变化时按 ../host/desktop.md 或 ../host/dots.md 更新同一个绑定 cloud ID，上传、刷新与回读分别记录。未上传的云图保留 pending，不能说下次加载会自动生效；已回读一致但刷新不可用可记录该事实，实际显示未证实仍未知。无形象变化不需要 Pet 上传。
-7. `finish-story OPERATION_ID` 原子提交 memory、state、历史和完成 trigger；有形象变化时由完成回读的图像协调者紧接着执行这一步和简介，不先回报主 Agent。取 `companion-brief`，按当前 revision 和真实 cloud ID 更新简介并回读。完整摘文超出宿主 500 字符上限时，按 ../host/dots.md 由 Agent 摘要后再校验，不截断字段。简介同步失败保留证据，重试最新简介，不重新完成故事或改写经历。再取 `story-output STORY_ID`，运行 output 并保存结果，只呈现实际采用媒体。必要时处理一次孵化命名邀请，见 naming.md。
+7. `finish-story OPERATION_ID` 原子提交 memory、state、历史和完成 trigger；有形象变化时由完成回读的图像协调者紧接着执行这一步和简介，不先回报主 Agent。取 `companion-brief`，按当前 revision 和真实 cloud ID 更新简介并回读。完整摘文超出宿主 500 字符上限时，按 ../host/dots.md 由 Agent 摘要后再校验，不截断字段。简介同步失败保留证据，重试最新简介，不重新完成故事或改写经历。再取 `story-output STORY_ID`，运行 output，用 record-step 保存结果，把其中的 message 原样发给用户。必要时处理一次孵化命名邀请，见 naming.md。
 
 ## 图像与失败续接
 

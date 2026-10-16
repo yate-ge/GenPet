@@ -347,11 +347,15 @@ export function storyOutput(state: State, storyId?: string) {
   if (!story) throw new Error('No completed story');
   const appearance = state.art.find(art => art.id === story.appearanceId);
   const named = (state.pet?.naming?.status ?? 'named') === 'named';
+  const earlier = new Set(state.stories.slice(0, state.stories.indexOf(story)).flatMap(story => story.mediaIds));
   return {
     /** The name the output uses for narration and dialogue; null before the user names the Pet. */
     name: named ? (state.pet?.name ?? null) : null,
     text: story.text,
-    media: state.art.filter(art => story.mediaIds.includes(art.id)),
+    /** `shownBefore`: an earlier story's message already carried this image, so the output does not embed it again. */
+    media: state.art
+      .filter(art => story.mediaIds.includes(art.id))
+      .map(art => ({ ...art, shownBefore: earlier.has(art.id) })),
     appearance,
     portrait:
       state.art.findLast(
