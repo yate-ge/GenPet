@@ -3,7 +3,7 @@
 ## 每次故事
 
 1. 读取 status；定时触发先 `due`，用返回的 triggerId。完成的触发直接复用结果，没到期保持安静。新 `begin-story` 返回 growth、time 与目标；另取 `recent-content [COUNT]`。明确强行成长使用 `begin-story TRIGGER_ID --grow`，只写在 reason 中不会启用 runtime 的强行成长权限；稳定 ID 重试不重复分配。
-2. 按 ../context/README.md 真正读取并运行 context，包括观察用户此刻的情境（也可以这次不观察）。StoryDesigner 按 ../rules.md「故事节奏」先形成符合这个情境、有依据、差别明显的候选，含至少一个可见结果；很久没来之后按「时间感」。`random-choice OPERATION_ID CANDIDATES_JSON [SEED]`（purpose: story）保存并在候选里平均选定；recentContent 供 StoryDesigner 避开最近的重复，重试沿用同一选择。
+2. 按 ../context/README.md 真正读取并运行 context，包括观察用户此刻的情境（也可以这次不观察）。StoryDesigner 按 ../rules.md「故事节奏」直接决定这次怎样回应，recentContent 供它避开最近的重复；很久没来之后按「时间感」。重试沿用已保存的步骤结果。
 3. story → evolution，已有 soul 原样读取。旧记录只补缺项一次。需要形象时 appearance，需要家的变化时 home，物件时 story-item。每个结果保存 record-step 并交给下游；memory 值得记才重写。
 4. 将结果合成 StoryPlan，reason/contextRefs 写清采用的真实依据；计划保存 `plan-story OPERATION_ID PLAN_FILE` 后保持不变。纯文字是否成立由实际计划/素材确定，最多连续两次；每次正常检查有内容，不因「没有新事实」取消。
 5. `art-request` 返回请求 `.id`、`.savedArt` 与宿主格式 `.contract`；`.id` 用作 `pipeline-prepare` 的 `requestId` 和 `accept-art REQUEST_ID ABSOLUTE_FILE KIND SOURCE [DESCRIPTION]` 的第一个参数。复用指定 reuseArtId；新素材交 PetDesigner/图像子代理，ImageReviewer 看真实图；source 写实际生成/来源记录，portrait、atlas、story、artifact 各按用途。

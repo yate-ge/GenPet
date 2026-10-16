@@ -12,7 +12,7 @@
 | HomeDesigner | home | 孵化建立家，或故事改变家 |
 | ImageReviewer | ImageReviewer | 实际基准图和整套图审核 |
 
-完整角色说明由主 skill 的 references/ 下五份 Designer 文档按需读取；它们是内部工作文档，不新增菜单命令。
+完整角色说明按需读取 ../designers/ 下各角色的 README.md；它们是内部工作文档，不新增菜单命令。
 
 | 单元 | 输入 | 可观察结果 | 核查重点 |
 | --- | --- | --- | --- |
@@ -20,7 +20,7 @@
 | encounter | context、已有 journey | 故事、地点、connection、factIds、journey | 用户真实选择、可续接、五轮内得到蛋 |
 | genes | context、完成旅程、random | genes、eggAppearance、designReason | 具体来源与各结构理由，工具选择与身体设计相合 |
 | personality | context、旅程、genes | 性格与拟声词/说话习惯 | 行动差异、真实特质来源、之后关系留给 memory |
-| story | context、pet、growth、time、recentContent、random | 经历、factIds、状态/图像/家/memory 意图 | 候选符合观察到的情境、一眼看得懂、被养着的 Pet、候选选择、每次内容、真实联系 |
+| story | context、pet、growth、time、recentContent | 经历、factIds、状态/图像/家/memory 意图 | 回应符合观察到的情境、对话留下的话得到回应、一眼看得懂、被养着的 Pet、每次内容、真实联系 |
 | evolution | context、pet、growth、story | stage、state、reason、special、visibleState、memory | 五次经历与上限、状态和身体变化、值得记的重写 |
 | appearance | genes、story、change、savedArt、hostRequirements | appearance 或 null、visuals | 同一身体、阶段、整套日常样子与动作槽位、真实复用 |
 | home | context、pet、story、savedArt | 家或 null、全景请求或 null | 能住的整体、物件延续、孵化全景 |

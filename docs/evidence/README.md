@@ -1,8 +1,22 @@
 # GenPet 开发与验收摘要
 
-主干交付版本为 `0.10.9`；推送不会自动升级用户已安装的插件。原始报告、图片、请求及测试数据保留在本地 `output/` 和 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet，安装验收仅在隔离 CODEX_HOME 中执行。
+主干交付版本为 `0.10.13`（上一版 0.10.12 为 `fff10f193e1b28a3130e807bd2f19224acb7578a`）；推送不会自动升级用户已安装的插件。原始报告、图片、请求及测试数据保留在 Google Drive，不提交 Git，不操作 Obsidian。测试使用合成资料与独立测试 Pet；真实重装与隔离安装分别核验，生命周期测试使用隔离数据。最新结论见下节，早期小节保留当时状态。
 
 [成果汇报 PDF](https://drive.google.com/file/d/13oSP60mjBLSoC6R1xSrA9HYetCxodSng/view) · [Word](https://docs.google.com/document/d/1WP0MAtJONsqVWJNEyP7JhSVXjJ4is6Bx/edit) · [成果目录](https://drive.google.com/drive/folders/11WW2UEENWFibU8VG2jzycz_arD-6-tCF)
+
+## 2026-10-16 故事去掉候选与种子（0.10.13）
+
+- 起因是首稿盲测 S4：两个候选都引用了用户在对话里问的「木片为何浮」，种子选中的那个没有回应。故事改为 Agent 按情境直接决定怎样回应；对话留下的话，下一次故事按它自己的方式回应一次。领养时的基因设计保留种子选择。
+- `random-choice` 只接受 purpose genes；旧记录里 purpose story 的选择照常读取，基因的同一种子仍选出同一候选。自查后另修三处：`evolution.md` 漏改的「候选故事」、对话的话改为「上一次故事之后留下的话」（status 里的对话没有 id，按时间判断）、文档里的旧种子说法。Node 测试 153 通过、2 跳过，`verify:fast` 与版本检查（0.10.12 → 0.10.13）通过。按用户要求推送前没有跑 `verify:release`，也没有做隔离安装和旧数据兼容验收；没有重跑 S4 或其他故事测试。交接与待确认事项见 [Claude 文档](https://claude.ai/code/artifact/3345fd22-2dd8-4513-ab01-4f1a7a8dc5f6)。
+
+## 2026-10-16 0.10.12 验收与首稿补测（总体未通过）
+
+- [完整验收报告](https://drive.google.com/file/d/1MTIwSe7Ieo3h8MHM5xu5Z3BCYK-qJ-iz/view)：测试源码、远端与 marketplace 均为上述提交，实际安装 0.10.12，74 个文件哈希一致。工程检查通过；0.10.10/0.10.11 写入的隔离格式夹具可由新版读取，不替代真实旧 Pet 的云端与定时验收。
+- 两套真实新形象分别用时 17分46.603秒（日常）和 17分41.644秒（少年成长）；同一 inactive cloud Pet 的图像更新、完整 RGBA 回读、finish 与简介回读完成。实际桌面显示及播放未知；成长由显式 grow 触发，不是自然等待或经历触发。
+- [定点修稿复测](https://drive.google.com/file/d/1vb5ggh-ViIQ0HwxDNPySYxC5-IAfrN5P/view)在不改产品提示词的情况下，修正 A8、S4、S21、S24、S26 对应问题稿、测试输入和展示包装。带反馈修稿通过不证明首稿稳定，原失败全部保留。
+- [无缺陷反馈首稿盲测](https://drive.google.com/file/d/1Z8MPei5MV8ZyCREYyPoRDENi6A8fooKa/view)截至台北时间 10月16日12:48：S4 固定旧候选探针仍未回应「木片为何浮」；S26 缺展示历史对照组 7/7 原稿含空格坏图路径，并同时在 text 与 mediaRefs 声明同图，英文三稿 alt 为中文。不能扩大为全链路失败或真实双显；60 份格式校验通过不代表语义通过。
+- S21 在补齐合法合成已展示历史的主测试中 0/7 复现，缺历史对照 7/7 选择旧图；正式流程展示历史传递与主聊天实际去重仍待核验。A8、ABC10 句数及 S24 旧明确缺陷在本批相应首稿中未复现，但 S24 多个最终 output 为 null、缺实际媒体，不能升级成完整交付通过。「字面反斜杠 n」与 A02 安静旧家图的语义指控已撤回。
+- 原 90 项表是补测前快照（部分验证61、未验证17、需修正5、暂缓7），不作为当前缺陷数量。R2b 仍只有5条七篇完整链和1条一篇部分链；8处候选声明与下游视觉计划不一致、跨篇纯文字兜底、原始输入覆盖导致的证据缺口仍未关闭。真实定时上下文、重开补跑、自然成长/成年幻化闭环、活动 Pet 显示、多 Pet 路由、实际命令/静默/聊天名、Dots 与 R5 用户判断仍未完成，总体维持 `ready:false`。详见[最终证据边界审计](https://drive.google.com/file/d/1FduM5CbiXTr8vyzDbVxXp_WZ9Pem57A7/view)。
 
 ## 2026-10-15 日常、幻化与动作表达（0.10.12，本地，未提交）
 

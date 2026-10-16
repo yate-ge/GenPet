@@ -6216,19 +6216,16 @@ async function chooseSource(store2, operationId, seed) {
   });
 }
 async function chooseCandidate(store2, operationId, input, seed) {
-  if (!["story", "genes"].includes(input.purpose)) throw new Error("Choice purpose must be story or genes");
+  if (input.purpose !== "genes") throw new Error("Choice purpose must be genes; a story is decided directly");
   if (!Array.isArray(input.candidates) || input.candidates.length < 2)
     throw new Error("Provide at least two grounded candidates");
   const candidates = input.candidates.map((candidate) => ({
     id: identifier(candidate.id, "candidateId"),
     description: text(candidate.description, "candidate description"),
-    contextRefs: candidate.contextRefs.map((ref) => text(ref, "context reference")),
-    ...candidate.outputs ? { outputs: candidate.outputs } : {}
+    contextRefs: candidate.contextRefs.map((ref) => text(ref, "context reference"))
   }));
   if (new Set(candidates.map((candidate) => candidate.id)).size !== candidates.length)
     throw new Error("Candidate IDs must be unique");
-  if (candidates.some((candidate) => candidate.outputs?.some((output) => !["appearance", "home", "item"].includes(output))))
-    throw new Error("Unknown visual output");
   const hash2 = createHash8("sha256").update(JSON.stringify(candidates)).digest("hex");
   return store2.transaction((state) => {
     const pending = pendingFor(state, operationId);
@@ -6238,22 +6235,7 @@ async function chooseCandidate(store2, operationId, input, seed) {
       return { ...pending.selection, candidates: pending.candidates };
     }
     const value = seed ?? pending.sourceChoice?.seed ?? randomBytes(16).toString("hex");
-    const recent = recentContent(state);
-    if (input.purpose === "story" && !candidates.some((candidate) => candidate.outputs?.length))
-      throw new Error("Include a candidate with a visible output");
-    const weights = candidates.map((candidate) => {
-      if (input.purpose !== "story" || candidate.outputs?.length) return 1;
-      return recent.visualRequired || !candidate.contextRefs.length ? 0 : 1;
-    });
-    let pick = seededValue(value, input.purpose) * weights.reduce((sum, weight) => sum + weight, 0);
-    let index = weights.length - 1;
-    for (let i = 0; i < weights.length; i++) {
-      pick -= weights[i];
-      if (pick < 0) {
-        index = i;
-        break;
-      }
-    }
+    const index = Math.floor(seededValue(value, input.purpose) * candidates.length);
     pending.candidates = candidates;
     pending.selection = {
       seed: value,
@@ -6262,7 +6244,7 @@ async function chooseCandidate(store2, operationId, input, seed) {
       candidateHash: hash2,
       ...pending.sourceChoice ? { sourceType: pending.sourceChoice.sourceType } : {}
     };
-    return { ...pending.selection, candidates, weights };
+    return { ...pending.selection, candidates };
   });
 }
 

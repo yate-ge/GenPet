@@ -157,6 +157,7 @@ export interface Pending {
   candidates?: Candidate[];
   selection?: {
     seed: string;
+    /** 'story' only in records from before 0.10.13. */
     purpose: 'story' | 'genes';
     candidateId: string;
     sourceType?: SourceType;

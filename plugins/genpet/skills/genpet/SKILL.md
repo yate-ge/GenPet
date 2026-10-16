@@ -36,7 +36,7 @@ Keep the notice consistent with the actual host. On desktop, explain briefly tha
 ## Load only the work needed
 
 - [GeneDesigner](designers/GeneDesigner/README.md): journey, genes, personality, initial memory and one-time legacy fill.
-- [StoryDesigner](designers/StoryDesigner/README.md): context, seeded story, state/memory/growth, story item, chat and output.
+- [StoryDesigner](designers/StoryDesigner/README.md): context, story, state/memory/growth, story item, chat and output.
 - [PetDesigner](designers/PetDesigner/README.md): accepted art reuse and full new Avatar sets.
 - [HomeDesigner](designers/HomeDesigner/README.md): a livable home and its real image.
 - [ImageReviewer](designers/ImageReviewer/README.md): actual visual observations and bounded repair.

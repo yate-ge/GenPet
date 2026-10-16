@@ -10,7 +10,7 @@ export interface Candidate {
   id: string;
   description: string;
   contextRefs: string[];
-  /** Proposed observable outputs, not a subject or activity taxonomy. */
+  /** Only in records from before 0.10.13, when stories were also chosen from candidates. */
   outputs?: ('appearance' | 'home' | 'item')[];
 }
 
@@ -76,22 +76,20 @@ export async function chooseSource(store: Store, operationId: string, seed?: str
 export async function chooseCandidate(
   store: Store,
   operationId: string,
-  input: { purpose: 'story' | 'genes'; candidates: Candidate[] },
+  input: { purpose: 'genes'; candidates: Candidate[] },
   seed?: string,
 ) {
-  if (!['story', 'genes'].includes(input.purpose)) throw new Error('Choice purpose must be story or genes');
+  // Stories are decided by the Agent from the observed situation; only the genes design is seeded.
+  if (input.purpose !== 'genes') throw new Error('Choice purpose must be genes; a story is decided directly');
   if (!Array.isArray(input.candidates) || input.candidates.length < 2)
     throw new Error('Provide at least two grounded candidates');
   const candidates = input.candidates.map(candidate => ({
     id: identifier(candidate.id, 'candidateId'),
     description: text(candidate.description, 'candidate description'),
     contextRefs: candidate.contextRefs.map(ref => text(ref, 'context reference')),
-    ...(candidate.outputs ? { outputs: candidate.outputs } : {}),
   }));
   if (new Set(candidates.map(candidate => candidate.id)).size !== candidates.length)
     throw new Error('Candidate IDs must be unique');
-  if (candidates.some(candidate => candidate.outputs?.some(output => !['appearance', 'home', 'item'].includes(output))))
-    throw new Error('Unknown visual output');
   const hash = createHash('sha256').update(JSON.stringify(candidates)).digest('hex');
   return store.transaction(state => {
     const pending = pendingFor(state, operationId);
@@ -105,24 +103,7 @@ export async function chooseCandidate(
       return { ...pending.selection, candidates: pending.candidates };
     }
     const value = seed ?? pending.sourceChoice?.seed ?? randomBytes(16).toString('hex');
-    const recent = recentContent(state);
-    if (input.purpose === 'story' && !candidates.some(candidate => candidate.outputs?.length))
-      throw new Error('Include a candidate with a visible output');
-    // The Agent lists only candidates that fit the observed situation; the seed picks evenly among them.
-    // Only the agreed fallback excludes text: it needs a user-related reference and may not run three times.
-    const weights = candidates.map((candidate): number => {
-      if (input.purpose !== 'story' || candidate.outputs?.length) return 1;
-      return recent.visualRequired || !candidate.contextRefs.length ? 0 : 1;
-    });
-    let pick = seededValue(value, input.purpose) * weights.reduce((sum, weight) => sum + weight, 0);
-    let index = weights.length - 1;
-    for (let i = 0; i < weights.length; i++) {
-      pick -= weights[i];
-      if (pick < 0) {
-        index = i;
-        break;
-      }
-    }
+    const index = Math.floor(seededValue(value, input.purpose) * candidates.length);
     pending.candidates = candidates;
     pending.selection = {
       seed: value,
@@ -131,6 +112,6 @@ export async function chooseCandidate(
       candidateHash: hash,
       ...(pending.sourceChoice ? { sourceType: pending.sourceChoice.sourceType } : {}),
     };
-    return { ...pending.selection, candidates, weights };
+    return { ...pending.selection, candidates };
   });
 }

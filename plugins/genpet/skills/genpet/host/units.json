@@ -63,8 +63,7 @@
         "pet",
         "growth",
         "time",
-        "recentContent",
-        "random"
+        "recentContent"
       ],
       "result": {
         "text": "string",

@@ -81,7 +81,7 @@ In the diagram, the blue label at the top left of a step is the skill responsibl
 
 1. Resolve the host selection to a Pet ID; `begin-story` opens one unfinished story for a stable trigger. Retries keep the same story, and later steps keep its starting Pet ID.
 2. Before `context`, the Agent reads actual available sources and records success, unavailability or failure and source references. First adoption requires explicit consent before reading. See [User information](#user-information).
-3. The Agent loads the needed roles and saves results with `record-step`. `random-source` selects a source type; `random-choice` selects among open proposals using the seed and recent content. `journey-step` saves an offered scene and the user's real choice, up to five rounds, with interruption recovery.
+3. The Agent loads the needed roles and saves results with `record-step`. At adoption, `random-source` selects a source type and `random-choice` uses the seed to select one of the open design proposals; a story is decided directly by the Agent. `journey-step` saves an offered scene and the user's real choice, up to five rounds, with interruption recovery.
 4. `plan-story` checks and saves the plan once. Artwork retries keep it.
 5. A state that was drawn before is reused. For a new image the Agent draws, ImageReviewer checks the actual file, and `accept-art` copies it into the pet's assets under the plan's request ID.
 6. The new appearance goes through the [host interface](#host-interface) onto the pet's own Pet Avatar, found by ID.
@@ -159,7 +159,7 @@ The Agent chooses which information matters and how far back to look.
 The runtime has five parts, matching the runtime layer in the diagram:
 
 - **Commands**: every command the Agent runs enters here and returns one JSON result.
-- **Everyday features**: check periods, naming, chat notes, status and brief, recent content and seeded candidate selection.
+- **Everyday features**: check periods, naming, chat notes, status and brief, recent content and the seeded genes choice.
 - **Story flow**: begin → units → plan → images → appearance → finish. Code preserves identity, one pending story, valid stage advances, experience/deadline growth and at most two consecutive text-only stories.
 - **Host adapters**: desktop and cloud share the cloud Pet format and same-ID update path. They validate, locate, update, verify stored artwork and diagnose.
 - **Core**: the saved data format, locking and atomic writes. The other parts read and write records through it.
@@ -184,7 +184,7 @@ The files behind each part:
 | Core | `model.ts` | Saved data types and small validators. |
 | | `store.ts` | Read without side effects (`peek`), locked `transaction`, atomic writes. |
 | | `pending.ts`, `appearance.ts` | Pending reads, request IDs and artwork resolution without a host dependency. |
-| Everyday | `journey.ts`, `variety.ts` | Journey recovery and seeded source/candidate choices. |
+| Everyday | `journey.ts`, `variety.ts` | Journey recovery and the seeded source and genes choices. |
 | Image support | `pipeline.ts`, `vendor/hatch-pet/` | Python discovery, parallel jobs after the base, directional mirrors, deterministic processing, bounded repairs and the final-image gate. |
 | Support | `config.ts`, `image.ts`, `migration.ts` | Paths and prompt files; pure-JS PNG/WebP reading; explicit import of v1 desktop records. |
 | Debugger | `debugger/` | Optional local developer console for this machine's GenPet records: stories, homes, saved atlases with action preview and debug appearance display; other host Pets in a secondary list; records are never changed. |
