@@ -29,7 +29,7 @@
 
 代码与安装测试用独立的测试记录和隔离的 `CODEX_HOME`。真实宿主测试使用专属测试 Pet 和明确的 cloud ID；用户正在养的那只宠物的记录、图像和选择保持原样。隔离测试不能证明真实桌面或 Dots 的实际显示。
 
-跑用例产出的东西全部保留：报告、故事、图片、单元原始结果、快照和运行输出。这些都不提交到 git，直接放到用户的 Google Drive，放在哪个文件夹由开发的人决定。仓库里只在 [测试记录摘要](evidence/README.md) 里写几行结论。见 [开发计划「开发和测试产出的保存」](DEVELOPMENT_PLAN.zh-CN.md#开发和测试产出的保存)。
+跑用例产出的东西保留，不提交到 git，按 [测试说明「上传 Drive」](../tests/agent/README.zh-CN.md#上传-drive) 整理后放到用户的 Google Drive。仓库里只在 [测试记录摘要](evidence/README.md) 里写几行结论。见 [开发计划「开发和测试产出的保存」](DEVELOPMENT_PLAN.zh-CN.md#开发和测试产出的保存)。
 
 ## 领养
 
