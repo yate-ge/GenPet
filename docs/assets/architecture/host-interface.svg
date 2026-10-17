@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 906" role="img" aria-labelledby="t d">
   <title id="t">GenPet architecture: the host interface</title>
-  <desc id="d">In the runtime, the story flow calls the host adapters, which implement the four functions of the host interface. The desktop adapter lists its steps, each done by the runtime or left to the Agent; the Dots adapter, used when Dots is the main environment, targets the same cloud Pet and its steps are still to test. Runtime steps reach the Pet Avatar in the host through files, IPC and app-tools; the Agent does the other steps with the host's own tools and reports with host-result. Below, the four appearance checks; finish-story requires the second.</desc>
+  <desc id="d">In the runtime, the story flow calls the host adapters, which implement the four functions of the host interface. The desktop adapter lists its steps, each done by the runtime or left to the Agent; the Dots adapter, used when Dots is the main environment, targets the same cloud Pet, and each step goes to the runtime or the Agent as the host allows. Runtime steps reach the Pet Avatar in the host through files, IPC and app-tools; the Agent does the other steps with the host's own tools and reports with host-result. Below, the four appearance checks; finish-story requires the second.</desc>
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; fill: #1F2A1C; }
     .layer { font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; }
@@ -35,9 +35,7 @@
   <text class="tag" x="179.24" y="31" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
   <rect x="218.24" y="18" width="62" height="18" rx="4" fill="#EEF4E4" stroke="#6E8A3C"/>
   <text class="tag" x="249.24" y="31" text-anchor="middle" fill="#3F5A1C">AGENT</text>
-  <rect x="288.24" y="18" width="62" height="18" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="319.24" y="31" text-anchor="middle" fill="#8A5A00">TO TEST</text>
-  <text class="sub" x="360.24" y="31">runtime if the host lets it, otherwise the Agent; decided by host tests</text>
+  <text class="sub" x="290.24" y="31">runtime if the host lets it, otherwise the Agent</text>
 
   <!-- RUNTIME -->
   <rect x="20" y="48" width="960" height="514" rx="10" fill="#FBF3E4" stroke="#D8B978"/>
@@ -61,29 +59,27 @@
   <text class="cmd" x="683" y="184.5" text-anchor="middle">findAvatar</text>
   <rect x="522" y="166" width="104" height="28" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
   <text class="cmd" x="574" y="184.5" text-anchor="middle">validateArt</text>
-  <rect x="901" y="145" width="55" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="928.5" y="157.5" text-anchor="middle">planned</text>
   <rect x="50" y="208" width="456" height="326" rx="10" fill="#FAFBF8" stroke="#B7BFAE"/>
   <text class="name" x="68" y="234">Desktop adapter</text>
   <text class="sub" x="192.05" y="234">Codex desktop Pet</text>
   <rect x="68" y="248" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
   <text class="tag" x="99" y="264" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
   <text class="step" x="142" y="264.5"><tspan class="cmd">validateArt</tspan>  v2 atlas, 8 × 11 cells</text>
-  <rect x="68" y="288" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="99" y="304" text-anchor="middle" fill="#8A5A00">TO TEST</text>
+  <rect x="68" y="288" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="99" y="304" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
   <text class="step" x="142" y="304.5"><tspan class="cmd">findAvatar</tspan>  local custom: ID ↔ cloud pet_ ID</text>
   <rect x="68" y="328" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
   <text class="tag" x="99" y="344" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
   <text class="step" x="142" y="344.5"><tspan class="cmd">setAppearance</tspan>  write local atlas and manifest</text>
-  <rect x="68" y="368" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="99" y="384" text-anchor="middle" fill="#8A5A00">TO TEST</text>
+  <rect x="68" y="368" width="62" height="24" rx="4" fill="#EEF4E4" stroke="#6E8A3C"/>
+  <text class="tag" x="99" y="384" text-anchor="middle" fill="#3F5A1C">AGENT</text>
   <text class="step" x="142" y="384.5"><tspan class="cmd">setAppearance</tspan>  replace the cloud Pet's image</text>
   <rect x="68" y="408" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
   <text class="tag" x="99" y="424" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
   <text class="step" x="142" y="424.5"><tspan class="cmd">setAppearance</tspan>  IPC refresh for that Avatar</text>
-  <rect x="68" y="448" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="99" y="464" text-anchor="middle" fill="#8A5A00">TO TEST</text>
-  <text class="step" x="142" y="464.5"><tspan class="cmd">setAppearance</tspan>  read back the saved image</text>
+  <rect x="68" y="448" width="62" height="24" rx="4" fill="#EEF4E4" stroke="#6E8A3C"/>
+  <text class="tag" x="99" y="464" text-anchor="middle" fill="#3F5A1C">AGENT</text>
+  <text class="step" x="142" y="464.5"><tspan class="cmd">setAppearance</tspan>  read back the saved image; runtime compares</text>
   <rect x="68" y="488" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
   <text class="tag" x="99" y="504" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
   <text class="step" x="142" y="504.5"><tspan class="cmd">diagnose</tspan>  record, Pet list, mapping, selection, schedule</text>
@@ -93,19 +89,12 @@
   <rect x="538" y="248" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
   <text class="tag" x="569" y="264" text-anchor="middle" fill="#7A5A12">RUNTIME</text>
   <text class="step" x="612" y="264.5"><tspan class="cmd">validateArt</tspan>  the same v2 atlas</text>
-  <rect x="538" y="288" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="569" y="304" text-anchor="middle" fill="#8A5A00">TO TEST</text>
   <text class="step" x="612" y="304.5"><tspan class="cmd">findAvatar</tspan>  the same cloud pet_ ID</text>
-  <rect x="538" y="328" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="569" y="344" text-anchor="middle" fill="#8A5A00">TO TEST</text>
   <text class="step" x="612" y="344.5"><tspan class="cmd">setAppearance</tspan>  replace the existing cloud Pet's image</text>
-  <rect x="538" y="368" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="569" y="384" text-anchor="middle" fill="#8A5A00">TO TEST</text>
   <text class="step" x="612" y="384.5"><tspan class="cmd">setAppearance</tspan>  read back the saved image</text>
-  <rect x="538" y="408" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="569" y="424" text-anchor="middle" fill="#8A5A00">TO TEST</text>
   <text class="step" x="612" y="424.5"><tspan class="cmd">diagnose</tspan>  record, cloud ID, selection</text>
-  <text class="sub" x="538" y="465">same cloud Pet as desktop; steps decided by tests on Dots</text>
+  <text class="sub" x="538" y="465">same cloud Pet as desktop; each step goes to</text>
+  <text class="sub" x="538" y="481">the runtime or the Agent as the host allows</text>
 
   <!-- HOST -->
   <rect x="20" y="604" width="960" height="112" rx="10" fill="#EEF4E4" stroke="#9DB57A"/>

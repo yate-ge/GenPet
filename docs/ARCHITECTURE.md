@@ -2,7 +2,7 @@
 
 [中文](ARCHITECTURE.zh-CN.md)
 
-This is the target architecture agreed on 2026-10-10. Implementation of the 0.10.0 development package began on 2026-10-11. The diagrams retain the original planning labels; the current source and acceptance status is in the [implementation tracker](evidence/README.md). Passing source checks does not establish visual quality, actual display, scheduling or cross-end Dots behavior.
+This is the target architecture agreed on 2026-10-10, updated when the design changes. This document and its diagrams describe the design, not development progress; what is built and what still needs acceptance is under [Implementation status](#implementation-status).
 
 ## Principles
 
@@ -57,7 +57,7 @@ Sub skills are roles the same Agent plays in turn. They are called in two orders
 - **Adoption**: GeneDesigner → PetDesigner → ImageReviewer.
 - **A later story**: StoryDesigner → PetDesigner (only for a new appearance) → HomeDesigner (only when the home changes) → ImageReviewer (before acceptance).
 
-**References** are the knowledge the main skill and the sub skills share: product rules, the record format, the story check schedule, naming, and what each host can do and its formats. Whichever skill needs one refers to it, and each rule is written there once.
+**References** are the knowledge the main skill and the sub skills share, split by what they own: `rules.md` holds the product rules, `output.md` what the user sees, `context/` how user information is read, `flows/` the steps for adoption, stories, naming and scheduling, and `host/` what each host can do, the record format and the unit contracts. Whichever skill needs one refers to it, and each rule is written once.
 
 **Current source.** The main skill loads five internal Designer/Reviewer documents as needed. These documents add no menu entries. Thin commands share the workflow and product rules; twelve units can be checked independently with `unit-request` and `verify-unit`.
 
@@ -71,7 +71,7 @@ Sub skills are roles the same Agent plays in turn. They are called in two orders
 
 `context` serves both: at adoption it gives GeneDesigner the user's traits, and afterwards it gives StoryDesigner the user's activity.
 
-Everything the Agent reads lives in `plugins/genpet/skills/genpet/`: `rules.md` (product rules), `output.md`, `context/` (reading user context), `designers/<Role>/` (each role's README and the units it owns), `flows/` (adoption, each story, naming, scheduling) and `host/` (desktop, Dots, storage and unit contracts). See [Where each rule is written](#where-each-rule-is-written).
+These files and the role folders `designers/<Role>/` (each role's README and the units it owns) live in `plugins/genpet/skills/genpet/`. See [Where each rule is written](#where-each-rule-is-written).
 
 ## One story, end to end
 
@@ -80,19 +80,19 @@ Everything the Agent reads lives in `plugins/genpet/skills/genpet/`: `rules.md` 
 In the diagram, the blue label at the top left of a step is the skill responsible for it, and the grey label at the top right is when the step runs: step 5 only when the story has images, step 6 only for a new appearance.
 
 1. Resolve the host selection to a Pet ID; `begin-story` opens one unfinished story for a stable trigger. Retries keep the same story, and later steps keep its starting Pet ID.
-2. Before `context`, the Agent reads actual available sources and records success, unavailability or failure and source references. First adoption requires explicit consent before reading. See [User information](#user-information).
+2. Before `context`, the Agent reads actual available sources and records success, unavailability or failure and source references. Words the user left in chat are part of context too. First adoption requires explicit consent before reading. See [User information](#user-information).
 3. The Agent loads the needed roles and saves results with `record-step`. At adoption, `random-source` selects a source type and `random-choice` uses the seed to select one of the open design proposals; a story is decided directly by the Agent. `journey-step` saves an offered scene and the user's real choice, up to five rounds, with interruption recovery.
 4. `plan-story` checks and saves the plan once. Artwork retries keep it.
-5. A state that was drawn before is reused. For a new image the Agent draws, ImageReviewer checks the actual file, and `accept-art` copies it into the pet's assets under the plan's request ID.
+5. A state that was drawn before is reused. A new image goes to an image coordinator subagent: several workers draw their share of the artwork in parallel, the coordinator collects and assembles it, ImageReviewer checks the actual files, and `accept-art` copies the result into the pet's assets under the plan's request ID.
 6. The new appearance goes through the [host interface](#host-interface) onto the pet's own Pet Avatar, found by ID.
-7. `finish-story` atomically saves memory, state, history and trigger, including whether the appearance actually changed. `companion-brief` extracts the current brief; the Agent updates the same cloud ID's description and reads it back.
-8. `story-output` returns the finished story and its saved media for StoryDesigner to tell the user. A check that only changed the state may have no message, and each image appears in the chat once.
+7. `finish-story` atomically saves memory, state, history and trigger, including whether the appearance actually changed. The new appearance, the name and the brief all sync through the same cloud ID: `companion-brief` extracts the brief from the current record (the name is part of it), and the Agent writes it to that cloud ID's description and reads it back. The desktop and Dots show the same pet.
+8. `story-output` returns the finished story and its saved media; the output unit writes the final message and the main Agent sends it as is. A check that only changed the state may have no message, and an image an earlier story already showed is not embedded again.
 
 Most ordinary checks are a new look: the pet's appearance changes, and a look drawn before is reused. A text-only story skips steps 5 and 6 and can run at most twice in a row. "Every check has pet content" uses this same flow; the story types are in [the development plan, "故事类型"](DEVELOPMENT_PLAN.zh-CN.md#故事类型).
 
 ## Host interface
 
-![In the runtime, the story flow calls the host adapters. They implement the four functions of the host interface. Each step of the desktop adapter is done by the runtime or left to the Agent; the Dots adapter is used when Dots is the main environment, targets the same cloud Pet, and its steps are still to test. Runtime steps reach the Pet Avatar in the host directly; the Agent does the other steps with the host's own tools and reports with host-result. Below, the four appearance checks; finish-story requires the second.](assets/architecture/host-interface.svg)
+![In the runtime, the story flow calls the host adapters. They implement the four functions of the host interface. Each step of the desktop adapter is done by the runtime or left to the Agent; the Dots adapter is used when Dots is the main environment, targets the same cloud Pet, and each step goes to the runtime or the Agent as the host allows. Runtime steps reach the Pet Avatar in the host directly; the Agent does the other steps with the host's own tools and reports with host-result. Below, the four appearance checks; finish-story requires the second.](assets/architecture/host-interface.svg)
 
 Every host difference between the two environments sits behind one interface, implemented by the runtime's host adapters. The story flow calls only this interface.
 
@@ -103,7 +103,7 @@ Every host difference between the two environments sits behind one interface, im
 | `setAppearance` | Put the new appearance on the Pet Avatar: do the steps the runtime can do, and return the steps left for the Agent. |
 | `diagnose` | Read-only check of the record, the Avatar ID, the host's Pet list, the local-to-cloud mapping, the selection, the refresh channel and the scheduled task. The initialization check and diagnosis both use it. |
 
-**The same steps in both environments, on the same cloud Pet.** `set-appearance` (working name) runs `setAppearance`. The remaining steps come back as a list for the Agent, who does it with the host's own tools and reports with `host-result`. On the desktop the runtime writes the local entry and requests the IPC refresh itself; which of the remaining steps the runtime can do is decided by [host tests](#host-tests). When Dots is the main environment it uses the same atlas format and sets the image for the same cloud ID; how each step is done is tested when Dots is adapted.
+**The same steps in both environments, on the same cloud Pet.** `set-appearance` (working name) runs `setAppearance`. The remaining steps come back as a list for the Agent, who does it with the host's own tools and reports with `host-result`. On the desktop the runtime writes the local entry and requests the IPC refresh itself; who does the remaining steps is under [Who does each update step](#who-does-each-update-step). When Dots is the main environment it uses the same atlas format and sets the image for the same cloud ID; how each step is done is tested when Dots is adapted.
 
 **Which Avatar gets the new appearance.** The record keeps the pet's local Avatar ID and the cloud ID last found for it. The host owns the mapping, so `findAvatar` asks the host again every time. A local `custom:` entry and the `pet_` ID it migrated to are the same Pet: the new image goes to the cloud ID, the refresh covers the cloud Pet resources, and the Pet counts as active when the host's selection matches either ID.
 
@@ -122,11 +122,11 @@ A story with a new appearance can finish once check 2 passes. If the host cannot
 
 The host, skills and runtime exist once in Codex desktop and once in Dots. There is one main environment at a time, and stories and new appearances are made there; it is Codex desktop by default. Three links connect the two environments:
 
-| Link | What it does | Status |
-| --- | --- | --- |
-| 1. One pet through its cloud ID | The main environment puts the new appearance on the cloud Pet and Codex syncs it to both sides. In Dots the user selects the Pet with the same cloud ID. Each pet has its own cloud ID. | Sync tested by the user; setting the cloud Pet's image is planned |
-| 2. Dots becomes this pet | Dots takes the pet's look and replies in its speaking style, and its own functions stay as they are. After every finished story the code takes a pet brief out of the pet's record: its name, soul, memory and state; see [Records](#records). | Planned; how the brief reaches Dots (first try: the Pet entry's `description`) and how the style stays in effect are to test |
-| 3. Switch the main environment | The user can switch the main environment to Dots. The old environment stops its scheduled checks, the record moves, and the new environment continues the stories. | Planned; setting the appearance for the same cloud ID from Dots is to test |
+| Link | What it does |
+| --- | --- |
+| 1. One pet through its cloud ID | The main environment puts the new appearance on the cloud Pet and Codex syncs it to both sides. In Dots the user selects the Pet with the same cloud ID. Each pet has its own cloud ID. |
+| 2. Dots becomes this pet | Dots takes the pet's look and replies in its speaking style, and its own functions stay as they are. After every finished story the code takes a pet brief out of the pet's record: its name, soul, memory and state; see [Records](#records). The brief is written to the `description` of the Pet entry with the same cloud ID. |
+| 3. Switch the main environment | The user can switch the main environment to Dots. The old environment stops its scheduled checks, the record moves, and the new environment continues the stories. |
 
 The speaking style comes from two parts of the record: the pet's sounds and basic speaking habits are written in the personality in its soul, and how close and in what tone it talks to the user comes from its memory. It is used in three places: when the user talks to the pet, in what the pet says in stories, and in Dots' replies.
 
@@ -179,7 +179,7 @@ The files behind each part:
 | | `status.ts` | The short summary the Agent reads by default. |
 | Host adapters | `hosts/index.ts` | The host interface and the list of adapters. |
 | | `hosts/result.ts` | Checks and saves what a host did (`host-result`). |
-| | `hosts/desktop/` | Desktop Pet: `atlas` format, `publish` to one entry per pet, `refresh` through the IPC router, `switch` the visible Pet (the user's test on 2026-10-11 found switching does not work; to be retested), shared `frames` codec. |
+| | `hosts/desktop/` | Desktop Pet: `atlas` format, `publish` to one entry per pet, `refresh` through the IPC router, `switch` the visible local Pet (builtin and cloud Pets use the host's `select_pet`), shared `frames` codec. |
 | | `hosts/cloud.ts`, `hosts/identity.ts` | Shared cloud Pet adapter, actual migration mapping and same-ID lookup; the former `hosts/dots.ts` is removed. |
 | Core | `model.ts` | Saved data types and small validators. |
 | | `store.ts` | Read without side effects (`peek`), locked `transaction`, atomic writes. |
@@ -204,7 +204,7 @@ The former dots/lifecycle and publish/art cycles are removed. Pending reads live
   backups/              full record before a reset or a legacy import
 ```
 
-Records live in the main environment. `GENPET_DATA_DIR` sets the root, with desktop/cloud subdirectories. Moving a Pet's main environment to the other host is shelved (never validated on a real host); a record exported by an earlier version stays read-only. Writes are locked and atomic; units live in separate files. Legacy records are discovered read-only and imported after confirmation. Fields are described in `plugins/genpet/skills/genpet/host/storage.md`.
+Records live in the main environment. `GENPET_DATA_DIR` sets the root, with desktop/cloud subdirectories. Moving a Pet's main environment to Dots is left to a later version; a record exported by an earlier version stays read-only. Writes are locked and atomic; units live in separate files. Legacy records are discovered read-only and imported after confirmation. Fields are described in `plugins/genpet/skills/genpet/host/storage.md`.
 
 The v3 `pet` has identity and three blocks. A story commits shared memory and current state; naming changes only the name:
 
@@ -244,35 +244,17 @@ Each rule is written once, in the place the table names; other files point to it
 
 ## Implementation status
 
-| Part | 0.10.0 development source | Acceptance still needed |
-| --- | --- | --- |
-| v3, legacy records, separate units, multiple Pets and pause ledger | Implemented; isolated regressions pass | Actual intake and cross-end M cases |
-| Journey recovery, five-round cap, seeded source/candidate tools | Implemented; six designs and full hatchling sets; overall direction accepted by user | Seeded-hatch supplements do not prove six cold adoptions |
-| Memory, experience/deadline growth, transformations (formerly special forms), text-only cap | Implemented;380 independently reviewed revised text views;actual D growth/F special-form submissions | Actual host deadline wake and displayed artwork |
-| Main entry, chat, naming and five internal roles | Implemented; twelve unit contracts | Actual routing and one menu entry per command |
-| validateArt/findAvatar/setAppearance/diagnose | Implemented; migration mapping, same-ID updates, separate downloads and supported refresh tested | Actual displayed image remains unavailable from these interfaces |
-| Same-ID cloud updates and actual artwork fingerprints | Implemented; actual V1–V4 stored RGBA and brief readbacks match | Dots own-avatar linkage |
-| Parallel images, mirrors, bounded repairs and two reviews | Implemented; new B travel set 17m42s and D mechanic set 13m24s, including 9 actions/16 directions, review, same-ID update and pixels/brief readback, no prior-art fallback | Current target20minutes; a few results are not a universal guarantee |
-| Diagnosis, same-identity repair and read-only debugger | Implemented; isolated browser reads preserve records | Actual G host conditions |
-| Pet brief and one writer | Implemented; isolated protocol tests pass. Main-environment transfer shelved on 2026-10-15 | New Dots sessions and actual cross-end scheduling/readback |
-| Persistent Dots voice, setup and proactive exchange | Same-session stage/state replies and reported shared-rule readback observed | New-session and cross-environment work deferred at user's request |
-| One plugin, generated copies, version and install integrity | Separate genpet-dots removed;latest isolated0.10.0/86hash release gate passed | Actual menu and public release not yet performed |
+What each part has built and what acceptance it still needs is in the [engineering status](ENGINEERING.zh-CN.md#待决问题状态) and the [evidence index](evidence/README.md). Implemented source and completed probes do not replace user or real-host acceptance.
 
-See the [evidence index](evidence/README.md) for current status, outstanding cases and cloud archive links. Implemented source and completed probes do not replace outstanding user or host acceptance.
+### Who does each update step
 
-### Host tests
+Desktop tests settled how an appearance update is split:
 
-These three facts decide whether a step is done by the runtime or by the Agent.
-
-1. Can the plugin runtime, a Node process, replace a cloud Pet's artwork itself, or can only the Agent call the Pets API?
-2. Can the local-to-cloud mapping be read through a host interface, or only from the client's own storage?
-3. Can the runtime read back a cloud Pet's saved artwork to compare it with the accepted image?
+1. The Agent uploads and updates the cloud Pet's artwork with the host's Pets tools (`validate_pet_spritesheet`, `prepare_pet_upload`, `update_pet`). The runtime returns these steps as a list.
+2. The runtime reads the mapping from a local `custom:` entry to its cloud `pet_` ID from the client's own state file.
+3. For the readback, the Agent downloads the stored artwork with `get_pet_download_link` and the runtime compares its pixels with the accepted image.
 
 The six further things to test when Dots is adapted are listed in [the development plan](DEVELOPMENT_PLAN.zh-CN.md#开发要解决的问题).
-
-### Open decision
-
-How the release is delivered. The marketplace clones this repository in full under a 30-second limit, and the history is far larger than the current files. The options are rewriting the history or publishing from a branch that holds only `plugins/` and the marketplace file.
 
 ## Extending
 

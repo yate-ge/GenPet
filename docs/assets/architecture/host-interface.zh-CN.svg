@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 906" role="img" aria-labelledby="t d">
   <title id="t">GenPet 架构：宿主接口</title>
-  <desc id="d">运行时里，故事流程调用宿主适配，宿主适配实现宿主接口的四个函数。桌面端适配器列出步骤，每一步由运行时做或交给 Agent；Dots 适配器在 Dots 成为主环境时使用，目标是同一个云端 Pet，各步骤待测。运行时做的步骤通过文件、IPC 和 app-tools 到达宿主里的 Pet Avatar；其余步骤由 Agent 用宿主自带的工具做，再用 host-result 回报。下方是换形象的四项检查，finish-story 要求第二项通过。</desc>
+  <desc id="d">运行时里，故事流程调用宿主适配，宿主适配实现宿主接口的四个函数。桌面端适配器列出步骤，每一步由运行时做或交给 Agent；Dots 适配器在 Dots 成为主环境时使用，目标是同一个云端 Pet，每一步同样看宿主允许，分给运行时或 Agent。运行时做的步骤通过文件、IPC 和 app-tools 到达宿主里的 Pet Avatar；其余步骤由 Agent 用宿主自带的工具做，再用 host-result 回报。下方是换形象的四项检查，finish-story 要求第二项通过。</desc>
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Segoe UI', Helvetica, Arial, sans-serif; fill: #1F2A1C; }
     .layer { font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; }
@@ -35,9 +35,7 @@
   <text class="tag" x="147.5" y="31" text-anchor="middle" fill="#7A5A12">运行时</text>
   <rect x="186.5" y="18" width="62" height="18" rx="4" fill="#EEF4E4" stroke="#6E8A3C"/>
   <text class="tag" x="217.5" y="31" text-anchor="middle" fill="#3F5A1C">Agent</text>
-  <rect x="256.5" y="18" width="62" height="18" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="287.5" y="31" text-anchor="middle" fill="#8A5A00">待测</text>
-  <text class="sub" x="328.5" y="31">宿主允许就由运行时做，否则由 Agent 做；由宿主测试决定</text>
+  <text class="sub" x="258.5" y="31">宿主允许就由运行时做，否则由 Agent 做</text>
 
   <!-- RUNTIME -->
   <rect x="20" y="48" width="960" height="514" rx="10" fill="#FBF3E4" stroke="#D8B978"/>
@@ -61,29 +59,27 @@
   <text class="cmd" x="683" y="184.5" text-anchor="middle">findAvatar</text>
   <rect x="522" y="166" width="104" height="28" rx="6" fill="#FFFFFF" stroke="#9DB57A"/>
   <text class="cmd" x="574" y="184.5" text-anchor="middle">validateArt</text>
-  <rect x="908" y="145" width="48" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="932" y="157.5" text-anchor="middle">待开发</text>
   <rect x="50" y="208" width="456" height="326" rx="10" fill="#FAFBF8" stroke="#B7BFAE"/>
   <text class="name" x="68" y="234">桌面端适配器</text>
   <text class="sub" x="161" y="234">Codex 桌面端 Pet</text>
   <rect x="68" y="248" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
   <text class="tag" x="99" y="264" text-anchor="middle" fill="#7A5A12">运行时</text>
   <text class="step" x="142" y="264.5"><tspan class="cmd">validateArt</tspan>  v2 图集，8 × 11 格</text>
-  <rect x="68" y="288" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="99" y="304" text-anchor="middle" fill="#8A5A00">待测</text>
+  <rect x="68" y="288" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
+  <text class="tag" x="99" y="304" text-anchor="middle" fill="#7A5A12">运行时</text>
   <text class="step" x="142" y="304.5"><tspan class="cmd">findAvatar</tspan>  本地 custom: ID ↔ 云端 pet_ ID</text>
   <rect x="68" y="328" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
   <text class="tag" x="99" y="344" text-anchor="middle" fill="#7A5A12">运行时</text>
   <text class="step" x="142" y="344.5"><tspan class="cmd">setAppearance</tspan>  写入本地图集和清单</text>
-  <rect x="68" y="368" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="99" y="384" text-anchor="middle" fill="#8A5A00">待测</text>
+  <rect x="68" y="368" width="62" height="24" rx="4" fill="#EEF4E4" stroke="#6E8A3C"/>
+  <text class="tag" x="99" y="384" text-anchor="middle" fill="#3F5A1C">Agent</text>
   <text class="step" x="142" y="384.5"><tspan class="cmd">setAppearance</tspan>  替换云端 Pet 的图</text>
   <rect x="68" y="408" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
   <text class="tag" x="99" y="424" text-anchor="middle" fill="#7A5A12">运行时</text>
   <text class="step" x="142" y="424.5"><tspan class="cmd">setAppearance</tspan>  通过 IPC 刷新这个 Avatar</text>
-  <rect x="68" y="448" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="99" y="464" text-anchor="middle" fill="#8A5A00">待测</text>
-  <text class="step" x="142" y="464.5"><tspan class="cmd">setAppearance</tspan>  回读宿主存的图</text>
+  <rect x="68" y="448" width="62" height="24" rx="4" fill="#EEF4E4" stroke="#6E8A3C"/>
+  <text class="tag" x="99" y="464" text-anchor="middle" fill="#3F5A1C">Agent</text>
+  <text class="step" x="142" y="464.5"><tspan class="cmd">setAppearance</tspan>  回读宿主存的图，运行时比对像素</text>
   <rect x="68" y="488" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
   <text class="tag" x="99" y="504" text-anchor="middle" fill="#7A5A12">运行时</text>
   <text class="step" x="142" y="504.5"><tspan class="cmd">diagnose</tspan>  记录、Pet 列表、映射、选中项、定时任务</text>
@@ -93,19 +89,12 @@
   <rect x="538" y="248" width="62" height="24" rx="4" fill="#FBF3E4" stroke="#D8B978"/>
   <text class="tag" x="569" y="264" text-anchor="middle" fill="#7A5A12">运行时</text>
   <text class="step" x="612" y="264.5"><tspan class="cmd">validateArt</tspan>  同一种 v2 图集</text>
-  <rect x="538" y="288" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="569" y="304" text-anchor="middle" fill="#8A5A00">待测</text>
   <text class="step" x="612" y="304.5"><tspan class="cmd">findAvatar</tspan>  同一个云端 pet_ ID</text>
-  <rect x="538" y="328" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="569" y="344" text-anchor="middle" fill="#8A5A00">待测</text>
   <text class="step" x="612" y="344.5"><tspan class="cmd">setAppearance</tspan>  给已有的云端 Pet 换图</text>
-  <rect x="538" y="368" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="569" y="384" text-anchor="middle" fill="#8A5A00">待测</text>
   <text class="step" x="612" y="384.5"><tspan class="cmd">setAppearance</tspan>  回读宿主存的图</text>
-  <rect x="538" y="408" width="62" height="24" rx="4" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="tag" x="569" y="424" text-anchor="middle" fill="#8A5A00">待测</text>
   <text class="step" x="612" y="424.5"><tspan class="cmd">diagnose</tspan>  记录、云端 ID、选中项</text>
-  <text class="sub" x="538" y="465">和桌面端是同一个云端 Pet；各步骤在 Dots 上实测后确定</text>
+  <text class="sub" x="538" y="465">和桌面端是同一个云端 Pet；</text>
+  <text class="sub" x="538" y="481">每一步同样看宿主允许，分给运行时或 Agent</text>
 
   <!-- HOST -->
   <rect x="20" y="604" width="960" height="112" rx="10" fill="#EEF4E4" stroke="#9DB57A"/>

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1046" role="img" aria-labelledby="t d">
   <title id="t">GenPet architecture: layers</title>
-  <desc id="d">Three layers. Inside the host, chat and the scheduler start the Agent; the Agent reads user information, draws with image generation and puts new appearances on the Pet Avatar. In the prompt layer, the main skill handles the entries (/genpet takes any request) and the main workflow and calls sub skills when needed: four Designer roles and the ImageReviewer. References sit beside the flow and both the main skill and the sub skills refer to them. In the runtime, commands call the story flow, everyday features and host adapters; all three read and write records through the core, and the story flow sets appearances through the host adapters. Everyday features include recent content and a random tool; records have one folder per pet.</desc>
+  <desc id="d">Three layers. Inside the host, chat and the scheduler start the Agent; the Agent reads user information, draws with image generation and puts new appearances on the Pet Avatar. In the prompt layer, the main skill handles the entries (/genpet takes any request) and the main workflow and calls sub skills when needed: four Designer roles and the ImageReviewer. References are split by what they own into rules.md, output.md, context/, flows/ and host/; they sit beside the flow and both the main skill and the sub skills refer to them. In the runtime, commands call the story flow, everyday features and host adapters; all three read and write records through the core, and the story flow sets appearances through the host adapters. Everyday features include recent content and the random tool used at adoption; records have one folder per pet.</desc>
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; fill: #1F2A1C; }
     .layer { font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; }
@@ -32,9 +32,6 @@
   <rect x="0.5" y="0.5" width="1079" height="1045" rx="14" fill="none" stroke="#E2E6DA"/>
 
   <!-- legend -->
-  <rect x="716" y="17" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="744" y="29.5" text-anchor="middle">planned</text>
-  <text class="sub" x="780" y="30">part of this box is not implemented yet</text>
 
   <!-- HOST -->
   <rect x="30" y="50" width="1020" height="212" rx="10" fill="#EEF4E4" stroke="#9DB57A"/>
@@ -63,8 +60,6 @@
   <rect x="600" y="104" width="170" height="56" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
   <text class="name" x="685" y="128" text-anchor="middle">User information</text>
   <text class="sub" x="685" y="147" text-anchor="middle">Codex memory and other data</text>
-  <rect x="706" y="95" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="734" y="107.5" text-anchor="middle">planned</text>
 
   <rect x="600" y="184" width="170" height="56" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
   <text class="name" x="685" y="208" text-anchor="middle">Image generation</text>
@@ -98,8 +93,6 @@
   <text class="name" x="66" y="313">Main skill</text>
   <text class="sub" x="66" y="334">entries: /genpet takes any request; each function also has its own command</text>
   <text class="sub" x="66" y="352">workflow: status, user info → decide → draw and check → appearance → finish → tell</text>
-  <rect x="526" y="281" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="554" y="293.5" text-anchor="middle">planned</text>
 
   <path class="flow" d="M420 368V392" marker-end="url(#a)"/>
   <text class="rel" x="432" y="385">calls when needed</text>
@@ -142,11 +135,16 @@
   <text class="sub" x="717" y="344" text-anchor="middle">knowledge shared by the</text>
   <text class="sub" x="717" y="360" text-anchor="middle">main skill and sub skills</text>
   <path d="M650 386H784" stroke="#C5D3EA" stroke-width="1"/>
-  <text class="sub" x="717" y="414" text-anchor="middle" fill="#1F2A1C">product rules</text>
-  <text class="sub" x="717" y="438" text-anchor="middle" fill="#1F2A1C">record format</text>
-  <text class="sub" x="717" y="462" text-anchor="middle" fill="#1F2A1C">story check schedule</text>
-  <text class="sub" x="717" y="486" text-anchor="middle" fill="#1F2A1C">naming</text>
-  <text class="sub" x="717" y="510" text-anchor="middle" fill="#1F2A1C">host capabilities, formats</text>
+  <text class="mono" x="717" y="408" text-anchor="middle" fill="#1F2A1C">rules.md</text>
+  <text class="sub" x="717" y="423" text-anchor="middle">product rules</text>
+  <text class="mono" x="717" y="448" text-anchor="middle" fill="#1F2A1C">output.md</text>
+  <text class="sub" x="717" y="463" text-anchor="middle">what the user sees</text>
+  <text class="mono" x="717" y="488" text-anchor="middle" fill="#1F2A1C">context/</text>
+  <text class="sub" x="717" y="503" text-anchor="middle">reading user information</text>
+  <text class="mono" x="717" y="528" text-anchor="middle" fill="#1F2A1C">flows/</text>
+  <text class="sub" x="717" y="543" text-anchor="middle">step-by-step procedures</text>
+  <text class="mono" x="717" y="568" text-anchor="middle" fill="#1F2A1C">host/</text>
+  <text class="sub" x="717" y="583" text-anchor="middle">host, record, unit formats</text>
 
   <path class="flow" d="M632 329H592" stroke-dasharray="5 4" marker-end="url(#a)"/>
   <text class="rel" x="612" y="322" text-anchor="middle">refer</text>
@@ -172,9 +170,7 @@
   <text class="sub" x="123" y="576" text-anchor="middle">check periods · naming</text>
   <text class="sub" x="123" y="591" text-anchor="middle">chat notes · status</text>
   <text class="sub" x="123" y="606" text-anchor="middle">recent content</text>
-  <text class="sub" x="123" y="621" text-anchor="middle">random tool</text>
-  <rect x="134" y="525" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="162.0" y="537.5" text-anchor="middle">planned</text>
+  <text class="sub" x="123" y="621" text-anchor="middle">adoption random tool</text>
 
   <rect x="212" y="534" width="372" height="100" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
   <text class="name" x="226" y="556">Story flow</text>
@@ -198,8 +194,6 @@
   <text class="chip" x="542.6" y="578.6" text-anchor="middle">finish</text>
   <text class="sub" x="398" y="606" text-anchor="middle">the code enforces: fixed identity · stages only forward ·</text>
   <text class="sub" x="398" y="621" text-anchor="middle" fill="#3F4A3B">growth deadlines · at most 2 text-only stories in a row</text>
-  <rect x="520" y="525" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="548.0" y="537.5" text-anchor="middle">planned</text>
 
   <rect x="652" y="534" width="150" height="100" rx="8" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.6"/>
   <text class="name" x="727" y="556" text-anchor="middle">Host adapters</text>
@@ -207,8 +201,6 @@
   <text class="sub" x="727" y="591" text-anchor="middle">check image format,</text>
   <text class="sub" x="727" y="606" text-anchor="middle">find the Avatar,</text>
   <text class="sub" x="727" y="621" text-anchor="middle">set appearance, diagnose</text>
-  <rect x="738" y="525" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="766" y="537.5" text-anchor="middle">planned</text>
   <path class="flow" d="M584 584H650" marker-end="url(#a)"/>
   <text class="rel" x="617" y="577" text-anchor="middle">appearance</text>
 

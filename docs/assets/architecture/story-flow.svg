@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 948" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 992" role="img" aria-labelledby="t d">
   <title id="t">GenPet architecture: one story, end to end</title>
-  <desc id="d">Eight numbered steps. Inside the host, the Agent follows the main skill's workflow in the middle column and uses the host's capabilities on the left; each step is marked with the main skill or the sub skill responsible for it. On the right, the runtime's commands save every step; at adoption, a random tool gives a seed that picks one of the Agent's design candidates.</desc>
+  <desc id="d">Eight numbered steps. Inside the host, the Agent follows the main skill's workflow in the middle column and uses the host's capabilities on the left; each step is marked with the main skill or the sub skill responsible for it. In step 5 several workers draw in parallel, an image coordinator subagent collects and assembles the artwork, and ImageReviewer checks it. After step 7 the appearance, name and brief sync through the same cloud ID. On the right, the runtime's commands save every step; at adoption, a random tool gives a seed that picks one of the Agent's design candidates.</desc>
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; fill: #1F2A1C; }
     .layer { font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; }
@@ -24,8 +24,8 @@
     </marker>
   </defs>
 
-  <rect width="1000" height="948" rx="14" fill="#FFFFFF"/>
-  <rect x="0.5" y="0.5" width="999" height="947" rx="14" fill="none" stroke="#E2E6DA"/>
+  <rect width="1000" height="992" rx="14" fill="#FFFFFF"/>
+  <rect x="0.5" y="0.5" width="999" height="991" rx="14" fill="none" stroke="#E2E6DA"/>
 
   <!-- legend -->
   <rect x="24" y="17" width="63" height="18" rx="9" fill="#FFFFFF" stroke="#9CB3DC"/>
@@ -36,21 +36,18 @@
   <rect x="368.56" y="17" width="95" height="18" rx="9" fill="#F3F3F0" stroke="#B7BFAE"/>
   <text class="pill" x="416.06" y="29.5" text-anchor="middle" fill="#4A5646">new appearance</text>
   <text class="sub" x="471.56" y="30">when the step runs</text>
-  <rect x="606.35" y="17" width="55" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="633.85" y="29.5" text-anchor="middle" fill="#8A5A00">planned</text>
-  <text class="sub" x="669.35" y="30">not implemented yet</text>
 
   <!-- host: capabilities and the Agent -->
-  <rect x="20" y="46" width="628" height="882" rx="10" fill="#EEF4E4" stroke="#9DB57A"/>
+  <rect x="20" y="46" width="628" height="926" rx="10" fill="#EEF4E4" stroke="#9DB57A"/>
   <text class="layer" x="36" y="71">HOST</text>
   <text class="where" x="91.12" y="71">Codex desktop by default · can switch to Dots</text>
   <text class="where" x="36" y="109">what the Agent uses</text>
-  <rect x="300" y="84" width="332" height="832" rx="10" fill="#F6F8F3" stroke="#6E8A3C" stroke-width="1.4"/>
+  <rect x="300" y="84" width="332" height="876" rx="10" fill="#F6F8F3" stroke="#6E8A3C" stroke-width="1.4"/>
   <text class="layer" x="330" y="109">AGENT</text>
   <text class="where" x="389.4" y="109">follows the main skill's workflow</text>
 
   <!-- runtime -->
-  <rect x="668" y="46" width="312" height="882" rx="10" fill="#FBF3E4" stroke="#D8B978"/>
+  <rect x="668" y="46" width="312" height="926" rx="10" fill="#FBF3E4" stroke="#D8B978"/>
   <text class="layer" x="684" y="71">RUNTIME</text>
   <text class="where" x="759.13" y="71">CLI commands</text>
 
@@ -61,8 +58,6 @@
   <rect x="316" y="130" width="300" height="60" rx="8" fill="#FFFFFF" stroke="#6E8A3C"/>
   <text class="name" x="466" y="157" text-anchor="middle">Read status</text>
   <text class="sub" x="466" y="175" text-anchor="middle">find the selected pet; start or resume</text>
-  <rect x="551" y="121" width="55" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="578.5" y="133.5" text-anchor="middle" fill="#8A5A00">planned</text>
   <rect x="334" y="121" width="63" height="18" rx="9" fill="#FFFFFF" stroke="#9CB3DC"/>
   <text class="pill" x="365.5" y="133.5" text-anchor="middle" fill="#2F4A7A">main skill</text>
   <circle cx="316" cy="130" r="11" fill="#4E6B22"/><text class="num" x="316" y="134.3" text-anchor="middle">1</text>
@@ -78,11 +73,9 @@
   <text class="sub" x="156" y="258" text-anchor="middle">Codex memory and other readable data</text>
   <rect x="316" y="214" width="300" height="60" rx="8" fill="#FFFFFF" stroke="#6E8A3C"/>
   <text class="name" x="466" y="241" text-anchor="middle">Read user information</text>
-  <text class="sub" x="466" y="259" text-anchor="middle">notes where each piece came from</text>
+  <text class="sub" x="466" y="259" text-anchor="middle">includes words left in chat; notes sources</text>
   <rect x="334" y="205" width="63" height="18" rx="9" fill="#FFFFFF" stroke="#9CB3DC"/>
   <text class="pill" x="365.5" y="217.5" text-anchor="middle" fill="#2F4A7A">main skill</text>
-  <rect x="551" y="205" width="55" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="578.5" y="217.5" text-anchor="middle" fill="#8A5A00">planned</text>
   <circle cx="316" cy="214" r="11" fill="#4E6B22"/><text class="num" x="316" y="218.3" text-anchor="middle">2</text>
   <path class="flow" d="M314 244H278" marker-end="url(#a)"/>
 
@@ -107,8 +100,6 @@
   <rect x="684" y="298" width="280" height="52" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
   <text class="name" x="824" y="320" text-anchor="middle">Random tool</text>
   <text class="sub" x="824" y="338" text-anchor="middle">at adoption, a seed picks a design</text>
-  <rect x="901" y="289" width="55" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="928.5" y="301.5" text-anchor="middle" fill="#8A5A00">planned</text>
   <path class="flow" d="M618 324H682" marker-start="url(#a)" marker-end="url(#a)"/>
   <rect x="684" y="362" width="280" height="52" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
   <text class="cmd" x="824" y="384" text-anchor="middle">record-step</text>
@@ -131,11 +122,22 @@
   <rect x="36" y="522" width="240" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
   <text class="name" x="156" y="547" text-anchor="middle">Image generation</text>
   <text class="sub" x="156" y="566" text-anchor="middle">built-in imagegen, sprite helpers</text>
-  <rect x="316" y="522" width="300" height="60" rx="8" fill="#FFFFFF" stroke="#6E8A3C"/>
+  <rect x="316" y="522" width="300" height="104" rx="8" fill="#FFFFFF" stroke="#6E8A3C"/>
   <text class="name" x="466" y="549" text-anchor="middle">Draw and check</text>
-  <text class="sub" x="466" y="567" text-anchor="middle">reuses drawn art; checks the actual file</text>
-  <rect x="334" y="513" width="90" height="18" rx="9" fill="#D6E2F6" stroke="#9CB3DC"/>
-  <text class="pill" x="379" y="525.5" text-anchor="middle" fill="#2F4A7A">ImageReviewer</text>
+  <rect x="328" y="560" width="72" height="36" rx="6" fill="#F4F7FC" stroke="#C5D3EA"/>
+  <text class="role" x="364" y="575" text-anchor="middle">Workers</text>
+  <text class="when" x="364" y="589" text-anchor="middle">in parallel</text>
+  <rect x="414" y="560" width="80" height="36" rx="6" fill="#F4F7FC" stroke="#C5D3EA"/>
+  <text class="role" x="454" y="575" text-anchor="middle">Coordinator</text>
+  <text class="when" x="454" y="589" text-anchor="middle">collects</text>
+  <rect x="508" y="560" width="96" height="36" rx="6" fill="#F4F7FC" stroke="#C5D3EA"/>
+  <text class="role" x="556" y="575" text-anchor="middle">ImageReviewer</text>
+  <text class="when" x="556" y="589" text-anchor="middle">checks files</text>
+  <path class="flow" d="M401 578H412" marker-end="url(#a)"/>
+  <path class="flow" d="M495 578H506" marker-end="url(#a)"/>
+  <text class="sub" x="466" y="614" text-anchor="middle">reuses art drawn before</text>
+  <rect x="334" y="513" width="150" height="18" rx="9" fill="#D6E2F6" stroke="#9CB3DC"/>
+  <text class="pill" x="409" y="525.5" text-anchor="middle" fill="#2F4A7A">PetDesigner · ImageReviewer</text>
   <rect x="531" y="513" width="75" height="18" rx="9" fill="#F3F3F0" stroke="#B7BFAE"/>
   <text class="pill" x="568.5" y="525.5" text-anchor="middle" fill="#4A5646">with images</text>
   <circle cx="316" cy="522" r="11" fill="#4E6B22"/><text class="num" x="316" y="526.3" text-anchor="middle">5</text>
@@ -146,60 +148,63 @@
   <path class="flow" d="M616 552H682" marker-end="url(#a)"/>
 
   <!-- 6: appearance through the host interface -->
-  <rect x="28" y="598" width="944" height="146" rx="10" fill="#6E8A3C" fill-opacity="0.08" stroke="#6E8A3C" stroke-dasharray="5 4"/>
-  <text class="layer" x="466" y="618" text-anchor="middle" fill="#4E6B22">HOST INTERFACE</text>
-  <rect x="36" y="628" width="240" height="104" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
-  <text class="name" x="156" y="664" text-anchor="middle">Pet Avatar</text>
-  <text class="sub" x="156" y="684" text-anchor="middle">local entry · cloud Pet, the same one in Dots</text>
-  <text class="sub" x="156" y="700" text-anchor="middle">looked up by ID every time</text>
-  <rect x="684" y="628" width="280" height="104" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
-  <text class="cmd" x="824" y="656" text-anchor="middle">set-appearance → host-result</text>
-  <text class="sub" x="824" y="677" text-anchor="middle">the runtime does its steps,</text>
-  <text class="sub" x="824" y="692" text-anchor="middle">leaves the rest to the Agent,</text>
-  <text class="sub" x="824" y="707" text-anchor="middle">saves what the host did</text>
-  <rect x="901" y="619" width="55" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="928.5" y="631.5" text-anchor="middle" fill="#8A5A00">planned</text>
-  <path class="port" d="M682 644H278" marker-end="url(#p)"/>
-  <text class="sub" x="466" y="638" text-anchor="middle" fill="#4E6B22">done by the runtime: files · IPC · app-tools</text>
-  <rect x="316" y="666" width="300" height="60" rx="8" fill="#FFFFFF" stroke="#6E8A3C"/>
-  <text class="name" x="466" y="693" text-anchor="middle">Appearance</text>
-  <text class="sub" x="466" y="711" text-anchor="middle">other steps with the host's tools, then report</text>
-  <rect x="334" y="657" width="63" height="18" rx="9" fill="#FFFFFF" stroke="#9CB3DC"/>
-  <text class="pill" x="365.5" y="669.5" text-anchor="middle" fill="#2F4A7A">main skill</text>
-  <rect x="511" y="657" width="95" height="18" rx="9" fill="#F3F3F0" stroke="#B7BFAE"/>
-  <text class="pill" x="558.5" y="669.5" text-anchor="middle" fill="#4A5646">new appearance</text>
-  <circle cx="316" cy="666" r="11" fill="#4E6B22"/><text class="num" x="316" y="670.3" text-anchor="middle">6</text>
-  <path class="port" d="M682 696H618" marker-start="url(#p)" marker-end="url(#p)"/>
-  <path class="port" d="M314 696H278" marker-end="url(#p)"/>
+  <rect x="28" y="642" width="944" height="146" rx="10" fill="#6E8A3C" fill-opacity="0.08" stroke="#6E8A3C" stroke-dasharray="5 4"/>
+  <text class="layer" x="466" y="662" text-anchor="middle" fill="#4E6B22">HOST INTERFACE</text>
+  <rect x="36" y="672" width="240" height="104" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="156" y="708" text-anchor="middle">Pet Avatar</text>
+  <text class="sub" x="156" y="728" text-anchor="middle">local entry · cloud Pet, the same one in Dots</text>
+  <text class="sub" x="156" y="744" text-anchor="middle">looked up by ID every time</text>
+  <rect x="684" y="672" width="280" height="104" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
+  <text class="cmd" x="824" y="700" text-anchor="middle">set-appearance → host-result</text>
+  <text class="sub" x="824" y="721" text-anchor="middle">the runtime does its steps,</text>
+  <text class="sub" x="824" y="736" text-anchor="middle">leaves the rest to the Agent,</text>
+  <text class="sub" x="824" y="751" text-anchor="middle">saves what the host did</text>
+  <path class="port" d="M682 688H278" marker-end="url(#p)"/>
+  <text class="sub" x="466" y="682" text-anchor="middle" fill="#4E6B22">done by the runtime: files · IPC · app-tools</text>
+  <rect x="316" y="710" width="300" height="60" rx="8" fill="#FFFFFF" stroke="#6E8A3C"/>
+  <text class="name" x="466" y="737" text-anchor="middle">Appearance</text>
+  <text class="sub" x="466" y="755" text-anchor="middle">other steps with the host's tools, then report</text>
+  <rect x="334" y="701" width="63" height="18" rx="9" fill="#FFFFFF" stroke="#9CB3DC"/>
+  <text class="pill" x="365.5" y="713.5" text-anchor="middle" fill="#2F4A7A">main skill</text>
+  <rect x="511" y="701" width="95" height="18" rx="9" fill="#F3F3F0" stroke="#B7BFAE"/>
+  <text class="pill" x="558.5" y="713.5" text-anchor="middle" fill="#4A5646">new appearance</text>
+  <circle cx="316" cy="710" r="11" fill="#4E6B22"/><text class="num" x="316" y="714.3" text-anchor="middle">6</text>
+  <path class="port" d="M682 740H618" marker-start="url(#p)" marker-end="url(#p)"/>
+  <path class="port" d="M314 740H278" marker-end="url(#p)"/>
 
   <!-- 7 -->
-  <rect x="316" y="760" width="300" height="60" rx="8" fill="#FFFFFF" stroke="#6E8A3C"/>
-  <text class="name" x="466" y="787" text-anchor="middle">Finish</text>
-  <text class="sub" x="466" y="805" text-anchor="middle">the pet's record changes at this step</text>
-  <rect x="334" y="751" width="63" height="18" rx="9" fill="#FFFFFF" stroke="#9CB3DC"/>
-  <text class="pill" x="365.5" y="763.5" text-anchor="middle" fill="#2F4A7A">main skill</text>
-  <circle cx="316" cy="760" r="11" fill="#4E6B22"/><text class="num" x="316" y="764.3" text-anchor="middle">7</text>
-  <rect x="684" y="760" width="280" height="60" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
-  <text class="cmd" x="824" y="780" text-anchor="middle">finish-story</text>
-  <text class="sub" x="824" y="797" text-anchor="middle">needs: saved image matches;</text>
-  <text class="sub" x="824" y="812" text-anchor="middle">saves memory, state, history together</text>
-  <rect x="901" y="751" width="55" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="928.5" y="763.5" text-anchor="middle" fill="#8A5A00">planned</text>
-  <path class="flow" d="M616 790H682" marker-end="url(#a)"/>
+  <rect x="316" y="804" width="300" height="60" rx="8" fill="#FFFFFF" stroke="#6E8A3C"/>
+  <text class="name" x="466" y="825" text-anchor="middle">Finish</text>
+  <text class="sub" x="466" y="843" text-anchor="middle">the pet's record changes at this step</text>
+  <text class="sub" x="466" y="858" text-anchor="middle">the brief goes to the same cloud ID</text>
+  <rect x="334" y="795" width="63" height="18" rx="9" fill="#FFFFFF" stroke="#9CB3DC"/>
+  <text class="pill" x="365.5" y="807.5" text-anchor="middle" fill="#2F4A7A">main skill</text>
+  <circle cx="316" cy="804" r="11" fill="#4E6B22"/><text class="num" x="316" y="808.3" text-anchor="middle">7</text>
+  <rect x="684" y="804" width="280" height="60" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
+  <text class="cmd" x="824" y="824" text-anchor="middle">finish-story · companion-brief</text>
+  <text class="sub" x="824" y="841" text-anchor="middle">needs: saved image matches;</text>
+  <text class="sub" x="824" y="856" text-anchor="middle">saves memory, state, history together</text>
+  <path class="flow" d="M616 834H682" marker-end="url(#a)"/>
+  <rect x="36" y="804" width="240" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="156" y="826" text-anchor="middle">Cloud sync</text>
+  <text class="sub" x="156" y="844" text-anchor="middle">look, name and brief follow</text>
+  <text class="sub" x="156" y="858" text-anchor="middle">the cloud ID; same pet in Dots</text>
+  <path class="flow" d="M314 834H278" marker-end="url(#a)"/>
 
   <!-- 8 -->
-  <rect x="36" y="844" width="240" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
-  <text class="name" x="156" y="869" text-anchor="middle">Chat</text>
-  <text class="sub" x="156" y="888" text-anchor="middle">pet content; each image shown once</text>
-  <rect x="316" y="844" width="300" height="60" rx="8" fill="#FFFFFF" stroke="#6E8A3C"/>
-  <text class="name" x="466" y="871" text-anchor="middle">Tell the user</text>
-  <text class="sub" x="466" y="889" text-anchor="middle">tells it; a state-only change may be silent</text>
-  <rect x="334" y="835" width="91" height="18" rx="9" fill="#D6E2F6" stroke="#9CB3DC"/>
-  <text class="pill" x="379.5" y="847.5" text-anchor="middle" fill="#2F4A7A">StoryDesigner</text>
-  <circle cx="316" cy="844" r="11" fill="#4E6B22"/><text class="num" x="316" y="848.3" text-anchor="middle">8</text>
-  <rect x="684" y="844" width="280" height="60" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
-  <text class="cmd" x="824" y="869" text-anchor="middle">story-output</text>
-  <text class="sub" x="824" y="888" text-anchor="middle">the finished story and its saved media</text>
-  <path class="flow" d="M682 874H618" marker-end="url(#a)"/>
-  <path class="flow" d="M314 874H278" marker-end="url(#a)"/>
+  <rect x="36" y="888" width="240" height="60" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
+  <text class="name" x="156" y="908" text-anchor="middle">Chat</text>
+  <text class="sub" x="156" y="926" text-anchor="middle">the final message, sent as is;</text>
+  <text class="sub" x="156" y="941" text-anchor="middle">images shown before are not repeated</text>
+  <rect x="316" y="888" width="300" height="60" rx="8" fill="#FFFFFF" stroke="#6E8A3C"/>
+  <text class="name" x="466" y="915" text-anchor="middle">Tell the user</text>
+  <text class="sub" x="466" y="933" text-anchor="middle">tells it; a state-only change may be silent</text>
+  <rect x="334" y="879" width="91" height="18" rx="9" fill="#D6E2F6" stroke="#9CB3DC"/>
+  <text class="pill" x="379.5" y="891.5" text-anchor="middle" fill="#2F4A7A">StoryDesigner</text>
+  <circle cx="316" cy="888" r="11" fill="#4E6B22"/><text class="num" x="316" y="892.3" text-anchor="middle">8</text>
+  <rect x="684" y="888" width="280" height="60" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
+  <text class="cmd" x="824" y="913" text-anchor="middle">story-output</text>
+  <text class="sub" x="824" y="932" text-anchor="middle">the finished story and its saved media</text>
+  <path class="flow" d="M682 918H618" marker-end="url(#a)"/>
+  <path class="flow" d="M314 918H278" marker-end="url(#a)"/>
 </svg>

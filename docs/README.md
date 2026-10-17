@@ -16,7 +16,7 @@
 
 | 文档 | 内容 |
 | --- | --- |
-| [工程设计与待决问题](ENGINEERING.zh-CN.md) | 测试里发现的问题和当时的背景、宿主接入、持久记录与宠物编号。每个问题现在的解决方向见开发计划 |
+| [工程设计与待决问题](ENGINEERING.zh-CN.md) | 测试里发现的工程问题现在的状态。每个问题的解决方向见开发计划 |
 | [开发与验收摘要](evidence/README.md) | 当前缺陷修复、故事/形象补测、20分钟结果和未验收宿主范围；原始数据、图片与完整报告放 Google Drive |
 
 ## 安装和研究背景
@@ -42,7 +42,7 @@
 
 过时的文档移进 `archive/<版本>/`，`docs/` 只放当前有效的文档。
 
-- [v0.10](archive/v0.10/RELEASE-0.10.2.zh-CN.md)：0.10.2 的版本记录。
+- [v0.10](archive/v0.10/RELEASE-0.10.2.zh-CN.md)：0.10.2 的版本记录。同目录还有 [工程问题的背景](archive/v0.10/ENGINEERING-BACKGROUND.zh-CN.md)：2026-10-05 到 10-11 测试里发现的问题、当时的宿主接入设想和 0.5.0 的设计说明。
 - [v0.9](archive/v0.9/DESKTOP-REFRESH.zh-CN.md)：0.9.3 时期的桌面端自动刷新模块记录；当前做法见 `plugins/genpet/skills/genpet/host/desktop.md`。
 - [plan-2026-10](archive/plan-2026-10/EARLY_DRAFTS.zh-CN.md)：开发计划 2026-10-08 到 2026-10-10 的早期草案，已被开发计划取代。
 - [v0.6](archive/v0.6/COMPANION_0_6.zh-CN.md)：0.6.0 命名、用户联系与性格那一轮的实现记录。

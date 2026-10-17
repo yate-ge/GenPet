@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1046" role="img" aria-labelledby="t d">
   <title id="t">GenPet 架构：分层</title>
-  <desc id="d">三层。宿主内部：对话框和定时任务启动 Agent；Agent 读取用户资料、用图像生成画图，并把新形象换到 Pet Avatar 上；提示词层里，主 skill 负责入口和主流程，/genpet 是总入口，需要时调用子 skill 模块：四个 Designer 角色和 ImageReviewer。参考文档不在流程里，主 skill 和子 skill 都会引用；运行时里，命令入口调用故事流程、日常功能和宿主适配；三者都通过核心读写记录，故事流程通过宿主适配换形象；日常功能里有最近的内容和随机工具；记录按宠物分目录。</desc>
+  <desc id="d">三层。宿主内部：对话框和定时任务启动 Agent；Agent 读取用户资料、用图像生成画图，并把新形象换到 Pet Avatar 上；提示词层里，主 skill 负责入口和主流程，/genpet 是总入口，需要时调用子 skill 模块：四个 Designer 角色和 ImageReviewer。参考文档按负责的内容分成 rules.md、output.md、context/、flows/ 和 host/，不在流程里，主 skill 和子 skill 都会引用；运行时里，命令入口调用故事流程、日常功能和宿主适配；三者都通过核心读写记录，故事流程通过宿主适配换形象；日常功能里有最近的内容和领养时用的随机工具；记录按宠物分目录。</desc>
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Segoe UI', Helvetica, Arial, sans-serif; fill: #1F2A1C; }
     .layer { font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; }
@@ -32,9 +32,6 @@
   <rect x="0.5" y="0.5" width="1079" height="1045" rx="14" fill="none" stroke="#E2E6DA"/>
 
   <!-- legend -->
-  <rect x="716" y="17" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="744" y="29.5" text-anchor="middle">待开发</text>
-  <text class="sub" x="780" y="30">框内有尚未实现的部分</text>
 
   <!-- HOST -->
   <rect x="30" y="50" width="1020" height="212" rx="10" fill="#EEF4E4" stroke="#9DB57A"/>
@@ -63,8 +60,6 @@
   <rect x="600" y="104" width="170" height="56" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
   <text class="name" x="685" y="128" text-anchor="middle">用户资料</text>
   <text class="sub" x="685" y="147" text-anchor="middle">Codex 记忆等可读到的内容</text>
-  <rect x="706" y="95" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="734" y="107.5" text-anchor="middle">待开发</text>
 
   <rect x="600" y="184" width="170" height="56" rx="8" fill="#FFFFFF" stroke="#9DB57A"/>
   <text class="name" x="685" y="208" text-anchor="middle">图像生成</text>
@@ -98,8 +93,6 @@
   <text class="name" x="66" y="313">主 skill</text>
   <text class="sub" x="66" y="334">入口：/genpet 是总入口，由 Agent 判断做哪件事；各项功能另有单独的命令</text>
   <text class="sub" x="66" y="352">主流程：读记录和用户资料 → 做决定 → 画图并检查 → 换形象 → 完成 → 讲给用户</text>
-  <rect x="526" y="281" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="554" y="293.5" text-anchor="middle">待开发</text>
 
   <path class="flow" d="M420 368V392" marker-end="url(#a)"/>
   <text class="rel" x="432" y="385">需要时调用</text>
@@ -142,11 +135,16 @@
   <text class="sub" x="717" y="344" text-anchor="middle">主 skill 和子 skill</text>
   <text class="sub" x="717" y="360" text-anchor="middle">共用的知识</text>
   <path d="M650 386H784" stroke="#C5D3EA" stroke-width="1"/>
-  <text class="sub" x="717" y="414" text-anchor="middle" fill="#1F2A1C">产品规则</text>
-  <text class="sub" x="717" y="438" text-anchor="middle" fill="#1F2A1C">记录格式</text>
-  <text class="sub" x="717" y="462" text-anchor="middle" fill="#1F2A1C">故事检查与定时</text>
-  <text class="sub" x="717" y="486" text-anchor="middle" fill="#1F2A1C">命名</text>
-  <text class="sub" x="717" y="510" text-anchor="middle" fill="#1F2A1C">宿主的能力和格式</text>
+  <text class="mono" x="717" y="408" text-anchor="middle" fill="#1F2A1C">rules.md</text>
+  <text class="sub" x="717" y="423" text-anchor="middle">产品规则</text>
+  <text class="mono" x="717" y="448" text-anchor="middle" fill="#1F2A1C">output.md</text>
+  <text class="sub" x="717" y="463" text-anchor="middle">用户看到什么</text>
+  <text class="mono" x="717" y="488" text-anchor="middle" fill="#1F2A1C">context/</text>
+  <text class="sub" x="717" y="503" text-anchor="middle">怎样读用户资料</text>
+  <text class="mono" x="717" y="528" text-anchor="middle" fill="#1F2A1C">flows/</text>
+  <text class="sub" x="717" y="543" text-anchor="middle">领养、故事、命名、定时</text>
+  <text class="mono" x="717" y="568" text-anchor="middle" fill="#1F2A1C">host/</text>
+  <text class="sub" x="717" y="583" text-anchor="middle">宿主能力、记录和单元格式</text>
 
   <path class="flow" d="M632 329H592" stroke-dasharray="5 4" marker-end="url(#a)"/>
   <text class="rel" x="612" y="322" text-anchor="middle">引用</text>
@@ -172,9 +170,7 @@
   <text class="sub" x="123" y="576" text-anchor="middle">检查周期 · 命名</text>
   <text class="sub" x="123" y="591" text-anchor="middle">对话摘要 · 状态摘要</text>
   <text class="sub" x="123" y="606" text-anchor="middle">最近的内容</text>
-  <text class="sub" x="123" y="621" text-anchor="middle">随机工具</text>
-  <rect x="134" y="525" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="162.0" y="537.5" text-anchor="middle">待开发</text>
+  <text class="sub" x="123" y="621" text-anchor="middle">领养时的随机工具</text>
 
   <rect x="212" y="534" width="372" height="100" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
   <text class="name" x="226" y="556">故事流程</text>
@@ -198,8 +194,6 @@
   <text class="chip" x="518.0" y="578.6" text-anchor="middle">完成</text>
   <text class="sub" x="398" y="606" text-anchor="middle">每一步都能安全重试；代码保证：</text>
   <text class="sub" x="398" y="621" text-anchor="middle" fill="#3F4A3B">身份不变 · 阶段只向前 · 到期必须成长 · 只有文字最多连续 2 次</text>
-  <rect x="520" y="525" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="548.0" y="537.5" text-anchor="middle">待开发</text>
 
   <rect x="652" y="534" width="150" height="100" rx="8" fill="#F3F8EA" stroke="#6E8A3C" stroke-width="1.6"/>
   <text class="name" x="727" y="556" text-anchor="middle">宿主适配</text>
@@ -207,8 +201,6 @@
   <text class="sub" x="727" y="591" text-anchor="middle">检查图片格式、</text>
   <text class="sub" x="727" y="606" text-anchor="middle">找到 Avatar、</text>
   <text class="sub" x="727" y="621" text-anchor="middle">换形象、诊断</text>
-  <rect x="738" y="525" width="56" height="18" rx="9" fill="#FFF1CC" stroke="#D99A1E"/>
-  <text class="pill" x="766" y="537.5" text-anchor="middle">待开发</text>
   <path class="flow" d="M584 584H650" marker-end="url(#a)"/>
   <text class="rel" x="617" y="577" text-anchor="middle">换形象</text>
 
