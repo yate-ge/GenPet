@@ -3,10 +3,13 @@
  * Runs the story unit as a chain of consecutive checks for one Pet, one fresh Codex context per step.
  * Usage: node tests/agent/chain/run-chain.mjs START_INPUT_JSON PET_KEY OUT_DIR [STEPS]
  *   START_INPUT_JSON  a saved story-unit input (context, pet, growth, time, recentContent) to continue from
- *   PET_KEY           the timeline key in timelines.json (A, B, C)
+ *   PET_KEY           the timeline key (A, B, C in timelines.json; U1… in timelines-users.json)
  * Env: GENPET_CHAIN_MODEL (default gpt-6-astra), GENPET_CHAIN_EFFORT (default medium),
  *   GENPET_CHAIN_VARIANT: unset for the current prompt; `template` swaps the story unit's fixed writing structure for
  *   variants/template.md; `dice` does the same and adds variants/dice.md with a seeded surprise roll as input.
+ *   GENPET_CHAIN_TIMELINES: the timeline file (default timelines.json); a user entry also replaces the pet's memory
+ *   and sets the check times. GENPET_CHAIN_CLI: the GenPet cli.js to build prompts with (default this checkout's),
+ *   for running a group on an older copy of the plugin.
  *
  * Only the story unit runs. Between steps this script carries the result forward the way finish-story would:
  * memoryIntent rewrites memory and counts one experience, stateIntent and homeIntent become the new state, and the
@@ -20,17 +23,19 @@ import { existsSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadTimeline } from './timeline.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../../..');
-const cli = path.join(root, 'plugins/genpet/dist/cli.js');
+const cli = path.resolve(process.env.GENPET_CHAIN_CLI ?? path.join(root, 'plugins/genpet/dist/cli.js'));
 const [startArg, key, outArg, stepsArg] = process.argv.slice(2);
 const startFile = startArg && path.resolve(startArg);
 const out = outArg && path.resolve(outArg);
 if (!startFile || !key || !out) throw new Error('Usage: run-chain.mjs START_INPUT_JSON PET_KEY OUT_DIR [STEPS]');
 const model = process.env.GENPET_CHAIN_MODEL ?? 'gpt-6-astra';
 const effort = process.env.GENPET_CHAIN_EFFORT ?? 'medium';
-const timeline = JSON.parse(await readFile(path.join(here, 'timelines.json'), 'utf8'))[key];
+const user = await loadTimeline(key);
+const timeline = user.steps;
 const steps = Math.min(Number(stepsArg ?? timeline.length), timeline.length);
 const start = JSON.parse(await readFile(startFile, 'utf8')).inputs;
 const english = /^[\x00-\x7F]*$/.test(start.pet.name);
@@ -123,8 +128,9 @@ const outputsOf = r => {
 };
 
 const pet = structuredClone(start.pet);
+if (user.memory) pet.memory = { ...pet.memory, text: user.memory };
 const recent = structuredClone(start.recentContent.items);
-let lastStoryAt = Date.parse(start.time.lastStoryAt);
+let lastStoryAt = user.startAt ?? Date.parse(start.time.lastStoryAt);
 let at = lastStoryAt;
 let experiences = start.growth.experiences ?? 0;
 await mkdir(out, { recursive: true });
@@ -132,7 +138,7 @@ const log = [];
 
 for (let k = 1; k <= steps; k++) {
   const step = timeline[k - 1];
-  at += step.gapH * 3_600_000;
+  at = step.at ?? at + step.gapH * 3_600_000;
   const dir = path.join(out, `step-${String(k).padStart(2, '0')}`);
   await mkdir(dir, { recursive: true });
   const failed = step.read === 'failed';

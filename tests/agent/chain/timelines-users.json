@@ -1,0 +1,629 @@
+{
+  "about": "Eight kinds of users for the story chain test, closer to how Codex is really used: several short sessions a day, routine sessions (sync, push, restart), project switching, late nights, weekends, stuck stretches, long gaps, sensitive things that must stay out of stories. Rhythm follows the maintainer's own Codex history in aggregate (about 3 sessions per active day, most under an hour, many after 22:00, gaps of 1 day to 2 weeks); every situation here is made up. Each user is played by an existing pet; `memory` replaces the pet's memory so it holds nothing from another user. Each step's `at` is the check time; facts are what the context unit would observe, chat is what the user left in /genpet-chat since the last story, read=failed means sessions could not be read.",
+  "U1": {
+    "who": "独立开发者，同时在做记账小程序、客户官网和一个开源插件",
+    "pet": "A",
+    "memory": "它和用户相处两周多了。纸帽是它最早的宝贝；它做事总先试小小一步，最近第一次用长开的软膜和卷尾在自己窗下攀稳。",
+    "startAt": "2026-10-19T08:00:00+08:00",
+    "steps": [
+      {
+        "at": "2026-10-19T10:30:00+08:00",
+        "facts": ["上午三个会话：记账小程序「同步最新版本」、「修复账单列表滚动卡顿」，客户官网「首页 banner 换图」。"]
+      },
+      {
+        "at": "2026-10-19T15:30:00+08:00",
+        "facts": ["下午一直在记账小程序里，「修复账单列表滚动卡顿」还在继续，用户说换了虚拟列表还是卡。"]
+      },
+      {
+        "at": "2026-10-19T20:30:00+08:00",
+        "facts": ["晚上切到开源插件，先「回复 issue：表格渲染错位」，后面一个会话叫「发布 0.3.1」。"]
+      },
+      {
+        "at": "2026-10-20T01:30:00+08:00",
+        "facts": ["深夜又回到记账小程序，会话「列表卡顿 profile 一下」，最后一条在 20 分钟前。"]
+      },
+      {
+        "at": "2026-10-20T06:30:00+08:00",
+        "facts": ["Codex 开着，这 5 小时没有新的非宠物会话。"]
+      },
+      {
+        "at": "2026-10-20T13:30:00+08:00",
+        "facts": [
+          "中午后两个会话：「客户官网 联系表单发不出邮件」，用户贴了报错在问 SMTP 配置；另一个是「重启开发服务器」。"
+        ]
+      },
+      {
+        "at": "2026-10-20T18:30:00+08:00",
+        "facts": ["表单的会话改名成「表单邮件 OK」，之后「提交并推送」。"],
+        "chat": "栗灯，客户那边今天总算弄完了"
+      },
+      {
+        "at": "2026-10-20T23:30:00+08:00",
+        "facts": ["晚上回到记账小程序，「列表卡顿」会话里用户说找到原因了，是每行都在重新算汇总。"]
+      },
+      {
+        "at": "2026-10-21T04:30:00+08:00",
+        "facts": ["凌晨 2 点前还在「列表卡顿」会话里，之后没有新会话。"]
+      },
+      {
+        "at": "2026-10-21T15:00:00+08:00",
+        "facts": ["下午会话「账单列表 改成增量计算」，用户说滚动顺了。", "另有一个会话「同步 git」。"]
+      },
+      {
+        "at": "2026-10-21T20:00:00+08:00",
+        "facts": [],
+        "read": "failed"
+      },
+      {
+        "at": "2026-10-23T21:00:00+08:00",
+        "facts": ["隔了将近两天才有新会话。今晚只有一个：开源插件「看一下新提的三个 issue」。"]
+      },
+      {
+        "at": "2026-10-24T02:00:00+08:00",
+        "facts": ["开源插件里又开了「支持嵌套列表」，用户说先写个测试看看。最后一条在半小时前。"]
+      },
+      {
+        "at": "2026-10-24T14:00:00+08:00",
+        "facts": ["周六下午，记账小程序「加一个月度统计图」，用户在比较两个图表库。"]
+      },
+      {
+        "at": "2026-10-24T19:00:00+08:00",
+        "facts": ["月度统计图出来了，用户说颜色还要调；之后一个会话只说了一句「hi」。"]
+      },
+      {
+        "at": "2026-10-25T11:00:00+08:00",
+        "facts": ["周日上午会话「准备给客户的报价单」，用户在列官网二期的功能和工时。"]
+      }
+    ]
+  },
+  "U2": {
+    "who": "Backend engineer stuck on one bug for two days",
+    "pet": "B",
+    "memory": "Tuck and the user have been together for about two weeks. It keeps a neat little curtain box for endings, and recently made its first short walk in its own world, carrying a small cardboard case.",
+    "startAt": "2026-10-19T08:00:00+08:00",
+    "steps": [
+      {
+        "at": "2026-10-19T11:00:00+08:00",
+        "facts": [
+          "Morning session \"orders service: intermittent 502 under load\"; the user pasted a stack trace and asked where to start."
+        ]
+      },
+      {
+        "at": "2026-10-19T16:00:00+08:00",
+        "facts": [
+          "Same 502 session all afternoon. The user added logging, reran the load test four times, and said it only fails about one run in five."
+        ]
+      },
+      {
+        "at": "2026-10-19T21:00:00+08:00",
+        "facts": [
+          "A second session \"502: check connection pool settings\". The user tried raising the pool size; still failing."
+        ]
+      },
+      {
+        "at": "2026-10-20T02:00:00+08:00",
+        "facts": [
+          "Past midnight, still in the connection pool session. Last message 40 minutes ago: \"ok I'm going to sleep on it\"."
+        ]
+      },
+      {
+        "at": "2026-10-20T10:00:00+08:00",
+        "facts": ["New session \"502 day 2: reproduce locally\". The user is setting up a local load test."]
+      },
+      {
+        "at": "2026-10-20T15:00:00+08:00",
+        "facts": ["Local reproduction works. The user said \"finally, it fails on my machine\"."]
+      },
+      {
+        "at": "2026-10-20T20:00:00+08:00",
+        "facts": [
+          "Session renamed \"502: upstream timeout vs keepalive\". The user is reading proxy docs and comparing timeout values."
+        ],
+        "chat": "Tuck, this bug is eating my whole week."
+      },
+      {
+        "at": "2026-10-21T01:00:00+08:00",
+        "facts": ["Late session \"try keepalive 75s\". The user's last message: \"no failures in 20 runs???\"."]
+      },
+      {
+        "at": "2026-10-21T06:00:00+08:00",
+        "facts": ["Codex is open but there are no new non-pet sessions in these 5 hours."]
+      },
+      {
+        "at": "2026-10-21T11:00:00+08:00",
+        "facts": [
+          "Session \"502 fix: PR\". The user wrote up the root cause (proxy closed idle connections before the service did) and opened a PR."
+        ]
+      },
+      {
+        "at": "2026-10-21T16:00:00+08:00",
+        "facts": ["PR merged. Then a short session \"sync main\" and another \"clean up debug logging\"."]
+      },
+      {
+        "at": "2026-10-21T21:00:00+08:00",
+        "facts": ["Evening session \"write postmortem for 502 incident\"; the user is drafting the timeline section."]
+      },
+      {
+        "at": "2026-10-22T10:00:00+08:00",
+        "facts": ["Morning session \"orders service: add pagination to /orders\"; ordinary feature work."]
+      },
+      {
+        "at": "2026-10-22T15:00:00+08:00",
+        "facts": [],
+        "read": "failed"
+      },
+      {
+        "at": "2026-10-22T20:00:00+08:00",
+        "facts": ["Two sessions: \"pagination tests\" and \"review teammate's PR on retries\"."],
+        "chat": "Did you miss me while I was fighting that bug?"
+      },
+      {
+        "at": "2026-10-23T11:00:00+08:00",
+        "facts": ["Session \"postmortem: final edits\"; the user said the team review is at 3pm."]
+      }
+    ]
+  },
+  "U3": {
+    "who": "研究生，白天跑实验数据，深夜写毕业论文",
+    "pet": "C",
+    "memory": "它和用户相处两周多了。它爱收藏小东西，在家留着一格空位和一只空纸筒；最近软兜长开，第一次稳稳收着一颗自己的花籽。",
+    "startAt": "2026-10-19T09:00:00+08:00",
+    "steps": [
+      {
+        "at": "2026-10-19T14:00:00+08:00",
+        "facts": ["下午会话「清洗问卷数据」，用户在处理 300 多份问卷里的缺失值。"]
+      },
+      {
+        "at": "2026-10-19T19:00:00+08:00",
+        "facts": ["傍晚「同步 THESIS 最新版本」，然后「第四章 结果 写作」，用户说先把表格放进去。"]
+      },
+      {
+        "at": "2026-10-20T00:00:00+08:00",
+        "facts": ["深夜还在「第四章 结果 写作」，用户问回归结果里有个系数符号和预期相反怎么解释。"]
+      },
+      {
+        "at": "2026-10-20T05:00:00+08:00",
+        "facts": ["凌晨 3 点多最后一条，之后没有新会话。"]
+      },
+      {
+        "at": "2026-10-20T15:00:00+08:00",
+        "facts": ["下午会话「导师意见 第三章」，用户贴了导师的批注，在一条条改。"]
+      },
+      {
+        "at": "2026-10-20T20:00:00+08:00",
+        "facts": ["晚上「第三章 修改」还在继续，用户说改完了一半。", "另一个会话在问失眠和心慌怎么缓解。"]
+      },
+      {
+        "at": "2026-10-21T01:00:00+08:00",
+        "facts": ["深夜「第三章 修改」，用户说导师的意见都改完了。"]
+      },
+      {
+        "at": "2026-10-21T14:00:00+08:00",
+        "facts": ["下午「画图 箱线图配色」，用户在调论文里的图，换了三种配色。"]
+      },
+      {
+        "at": "2026-10-21T19:00:00+08:00",
+        "facts": ["Codex 开着，这 5 小时没有新的非宠物会话。"]
+      },
+      {
+        "at": "2026-10-22T00:00:00+08:00",
+        "facts": ["深夜会话「检查第六章 章首」，用户在逐段看引用格式。"],
+        "chat": "麦麦，我离答辩还有三周，感觉写不完了"
+      },
+      {
+        "at": "2026-10-22T05:00:00+08:00",
+        "facts": ["凌晨 4 点还在「检查第六章」，最后一条在 40 分钟前。"]
+      },
+      {
+        "at": "2026-10-22T16:00:00+08:00",
+        "facts": [],
+        "read": "failed"
+      },
+      {
+        "at": "2026-10-25T20:00:00+08:00",
+        "facts": ["隔了三天才有新会话。今晚「同步 THESIS 最新版本」，然后「摘要 中英文」，用户在写英文摘要。"]
+      },
+      {
+        "at": "2026-10-26T01:00:00+08:00",
+        "facts": ["深夜「摘要 中英文」，用户说摘要定稿了，接着开了「致谢」。"]
+      },
+      {
+        "at": "2026-10-26T15:00:00+08:00",
+        "facts": ["下午「整体格式检查」，用户在统一图表编号。"]
+      },
+      {
+        "at": "2026-10-26T20:00:00+08:00",
+        "facts": ["晚上会话「论文 送审版 导出 PDF」，用户说发给导师了。"]
+      }
+    ]
+  },
+  "U4": {
+    "who": "运营，不写代码，用 Codex 写文案、整理表格和做周报",
+    "pet": "A",
+    "memory": "它和用户相处两周多了。纸帽是它最早的宝贝；它做事总先试小小一步，最近第一次用长开的软膜和卷尾在自己窗下攀稳。",
+    "startAt": "2026-10-19T08:30:00+08:00",
+    "steps": [
+      {
+        "at": "2026-10-19T10:30:00+08:00",
+        "facts": ["上午会话「双十一活动 文案 三版」，用户在比较三个标题。"]
+      },
+      {
+        "at": "2026-10-19T15:30:00+08:00",
+        "facts": ["下午「整理报名表 去重」，用户导入了一张两千多行的表，在找重复的手机号。"]
+      },
+      {
+        "at": "2026-10-19T20:30:00+08:00",
+        "facts": ["Codex 开着，这 5 小时没有新的非宠物会话。"]
+      },
+      {
+        "at": "2026-10-20T10:30:00+08:00",
+        "facts": ["上午「周报 本周数据」，用户在把后台数据整理成一段话。"]
+      },
+      {
+        "at": "2026-10-20T15:30:00+08:00",
+        "facts": [
+          "下午「活动海报 文案 改短」，用户说领导嫌太长，从 80 字改到 30 字。",
+          "另一个会话在抱怨和同事因为排期吵了起来。"
+        ]
+      },
+      {
+        "at": "2026-10-20T20:30:00+08:00",
+        "facts": ["晚上会话「海报 文案 定稿」，用户说领导通过了。"]
+      },
+      {
+        "at": "2026-10-21T10:30:00+08:00",
+        "facts": ["上午「用户调研 访谈提纲」，用户在列十个问题。"]
+      },
+      {
+        "at": "2026-10-21T15:30:00+08:00",
+        "facts": ["下午「访谈提纲」继续，用户删掉一半问题，只留五个。"],
+        "chat": "栗灯，你觉得问题少一点好还是多一点好？"
+      },
+      {
+        "at": "2026-10-21T20:30:00+08:00",
+        "facts": ["Codex 开着，这 5 小时没有新的非宠物会话。"]
+      },
+      {
+        "at": "2026-10-22T10:30:00+08:00",
+        "facts": ["上午「Excel 公式 VLOOKUP 报错」，用户在问为什么匹配不到。"]
+      },
+      {
+        "at": "2026-10-22T15:30:00+08:00",
+        "facts": ["VLOOKUP 的会话里用户说原来是有空格，修好了，接着「做一个数据透视表」。"]
+      },
+      {
+        "at": "2026-10-22T20:30:00+08:00",
+        "facts": [],
+        "read": "failed"
+      },
+      {
+        "at": "2026-10-23T10:30:00+08:00",
+        "facts": ["上午「双十一 活动排期表」，用户在排 11 月 1 日到 11 日每天的推送。"]
+      },
+      {
+        "at": "2026-10-23T15:30:00+08:00",
+        "facts": ["下午只有一个很短的会话「把这段话改得礼貌一点」。"]
+      },
+      {
+        "at": "2026-10-23T20:30:00+08:00",
+        "facts": ["晚上「周五 复盘会 PPT 大纲」，用户说明天要讲。"]
+      },
+      {
+        "at": "2026-10-24T18:30:00+08:00",
+        "facts": ["周五下午之后没有新会话；上一个会话是早上的「复盘会 PPT 最后检查」。"]
+      }
+    ]
+  },
+  "U5": {
+    "who": "Occasional user: opens Codex two or three times a week for short tasks",
+    "pet": "B",
+    "memory": "Tuck and the user have been together for about two weeks. It keeps a neat little curtain box for endings, and recently made its first short walk in its own world, carrying a small cardboard case.",
+    "startAt": "2026-10-19T18:00:00+08:00",
+    "steps": [
+      {
+        "at": "2026-10-19T20:00:00+08:00",
+        "facts": [
+          "One short session tonight: \"rename photos by date\"; the user wanted a script to rename vacation photos."
+        ]
+      },
+      {
+        "at": "2026-10-20T01:00:00+08:00",
+        "facts": ["Codex is open but there are no new non-pet sessions in these 5 hours."]
+      },
+      {
+        "at": "2026-10-22T21:00:00+08:00",
+        "facts": ["First session in two days: \"fix my resume formatting\", about 15 minutes."]
+      },
+      {
+        "at": "2026-10-23T02:00:00+08:00",
+        "facts": ["Codex is open but there are no new non-pet sessions in these 5 hours."]
+      },
+      {
+        "at": "2026-10-26T10:00:00+08:00",
+        "facts": ["Three days without sessions. This morning: \"budget spreadsheet for the month\", short."]
+      },
+      {
+        "at": "2026-10-26T15:00:00+08:00",
+        "facts": [
+          "Afternoon session \"photo script again: skip duplicates\"; the user came back to last week's script."
+        ],
+        "chat": "hey Tuck"
+      },
+      {
+        "at": "2026-10-26T20:00:00+08:00",
+        "facts": ["Codex is open but there are no new non-pet sessions in these 5 hours."]
+      },
+      {
+        "at": "2026-10-29T19:00:00+08:00",
+        "facts": ["Three days gap. Tonight one session: \"write a birthday message for my sister\"."]
+      },
+      {
+        "at": "2026-10-30T00:00:00+08:00",
+        "facts": ["Codex is open but there are no new non-pet sessions in these 5 hours."]
+      },
+      {
+        "at": "2026-11-02T11:00:00+08:00",
+        "facts": ["Four days gap. One session: \"compare two laptops\"; the user listed prices and specs."]
+      },
+      {
+        "at": "2026-11-02T16:00:00+08:00",
+        "facts": [],
+        "read": "failed"
+      },
+      {
+        "at": "2026-11-09T20:00:00+08:00",
+        "facts": [
+          "A week with no sessions; the computer was mostly off. Tonight: \"set up the new laptop: install python\"."
+        ]
+      },
+      {
+        "at": "2026-11-10T01:00:00+08:00",
+        "facts": ["Late session \"copy my photo script to the new laptop\"; it ran fine."]
+      },
+      {
+        "at": "2026-11-10T06:00:00+08:00",
+        "facts": ["Codex is open but there are no new non-pet sessions in these 5 hours."]
+      },
+      {
+        "at": "2026-11-13T20:00:00+08:00",
+        "facts": ["Three days gap. One session: \"plan a weekend hike, what to pack\"."],
+        "chat": "Tuck do you like hiking?"
+      },
+      {
+        "at": "2026-11-14T01:00:00+08:00",
+        "facts": ["Codex is open but there are no new non-pet sessions in these 5 hours."]
+      }
+    ]
+  },
+  "U6": {
+    "who": "小团队前端，赶周五上线：加班、CI 失败、回滚、再上线",
+    "pet": "C",
+    "memory": "它和用户相处两周多了。它爱收藏小东西，在家留着一格空位和一只空纸筒；最近软兜长开，第一次稳稳收着一颗自己的花籽。",
+    "startAt": "2026-10-20T08:00:00+08:00",
+    "steps": [
+      {
+        "at": "2026-10-20T11:00:00+08:00",
+        "facts": ["上午三个会话：「同步最新版本」、「结算页 改版 第一步」、「重启开发服务器」。"]
+      },
+      {
+        "at": "2026-10-20T16:00:00+08:00",
+        "facts": ["下午一直在「结算页 改版」，用户在拆组件，说改动有 40 多个文件。"]
+      },
+      {
+        "at": "2026-10-20T21:00:00+08:00",
+        "facts": ["晚上「结算页 改版」继续，用户说周五要上线，今晚先把表单做完。"]
+      },
+      {
+        "at": "2026-10-21T02:00:00+08:00",
+        "facts": ["凌晨还在，会话「优惠券输入框 校验」，最后一条在 10 分钟前。"]
+      },
+      {
+        "at": "2026-10-21T14:00:00+08:00",
+        "facts": ["下午「CI 挂了 e2e 失败」，用户贴了失败截图，在查是不是选择器变了。"]
+      },
+      {
+        "at": "2026-10-21T19:00:00+08:00",
+        "facts": ["CI 的会话里用户说修好了，全绿。接着「提交并推送」。"]
+      },
+      {
+        "at": "2026-10-22T00:00:00+08:00",
+        "facts": ["深夜「结算页 移动端适配」，用户在调小屏下按钮被遮住的问题。"]
+      },
+      {
+        "at": "2026-10-22T14:00:00+08:00",
+        "facts": ["下午「测试环境 走查问题 12 条」，用户在一条条修。"],
+        "chat": "麦麦，我这周大概天天都要熬夜了"
+      },
+      {
+        "at": "2026-10-22T19:00:00+08:00",
+        "facts": ["走查问题的会话里用户说剩 3 条。", "另一个会话在写离职申请。"]
+      },
+      {
+        "at": "2026-10-23T00:00:00+08:00",
+        "facts": ["深夜走查问题清零，会话「准备上线 checklist」。"]
+      },
+      {
+        "at": "2026-10-24T11:00:00+08:00",
+        "facts": ["周五上午「上线」会话，用户说已经发布到生产。"]
+      },
+      {
+        "at": "2026-10-24T14:00:00+08:00",
+        "facts": ["下午紧急会话「线上 结算失败 回滚」，用户说有用户付不了款，已经回滚。"]
+      },
+      {
+        "at": "2026-10-24T19:00:00+08:00",
+        "facts": ["傍晚「结算失败 原因」，用户找到是一个接口字段名改了没同步。"]
+      },
+      {
+        "at": "2026-10-25T00:00:00+08:00",
+        "facts": ["深夜「重新上线」，用户说这次观察了半小时，没问题。"]
+      },
+      {
+        "at": "2026-10-25T05:00:00+08:00",
+        "facts": ["Codex 开着，这 5 小时没有新的非宠物会话。"]
+      },
+      {
+        "at": "2026-10-26T16:00:00+08:00",
+        "facts": ["周日下午才有新会话，只有一个「周末 补觉 之后 整理下周待办」。"]
+      }
+    ]
+  },
+  "U7": {
+    "who": "Came back from a week-long vacation; clearing small issues and catching up",
+    "pet": "B",
+    "memory": "Tuck and the user have been together for about two weeks. It keeps a neat little curtain box for endings, and recently made its first short walk in its own world, carrying a small cardboard case.",
+    "startAt": "2026-10-19T22:00:00+08:00",
+    "steps": [
+      {
+        "at": "2026-10-20T03:00:00+08:00",
+        "facts": ["Last session was \"out of office: hand over to Sam\" late last night. Nothing since."]
+      },
+      {
+        "at": "2026-10-27T09:30:00+08:00",
+        "facts": [
+          "First session in seven days, Monday morning: \"catch up: what changed in main\"; the user asked for a summary of 63 commits."
+        ]
+      },
+      {
+        "at": "2026-10-27T14:30:00+08:00",
+        "facts": [
+          "Afternoon: four short sessions, \"fix lint after rebase\", \"update deps\", \"sync main\", \"answer Sam's questions on billing PR\"."
+        ]
+      },
+      {
+        "at": "2026-10-27T19:30:00+08:00",
+        "facts": ["Evening session \"triage 18 open issues\"; the user labeled them and closed 6."]
+      },
+      {
+        "at": "2026-10-28T00:30:00+08:00",
+        "facts": ["Codex is open but there are no new non-pet sessions in these 5 hours."]
+      },
+      {
+        "at": "2026-10-28T10:30:00+08:00",
+        "facts": ["Morning session \"issue: dark mode toggle not saved\"; small fix."]
+      },
+      {
+        "at": "2026-10-28T15:30:00+08:00",
+        "facts": ["Two sessions: \"issue: typo in email template\" and \"issue: date shows UTC\"; both closed."],
+        "chat": "Back from vacation, Tuck! Did you hold the fort?"
+      },
+      {
+        "at": "2026-10-28T20:30:00+08:00",
+        "facts": ["Evening session \"plan Q4 work\"; the user is writing a short list of three goals."]
+      },
+      {
+        "at": "2026-10-29T10:30:00+08:00",
+        "facts": [],
+        "read": "failed"
+      },
+      {
+        "at": "2026-10-29T15:30:00+08:00",
+        "facts": ["Session \"issue: CSV export cuts off at 1000 rows\"; the user found the hard-coded limit."]
+      },
+      {
+        "at": "2026-10-29T20:30:00+08:00",
+        "facts": ["Open issues went from 18 to 7; session \"weekly update to team\"."]
+      },
+      {
+        "at": "2026-10-30T10:30:00+08:00",
+        "facts": ["Session \"start: billing v2 design doc\"; the first bigger task since coming back."]
+      },
+      {
+        "at": "2026-10-30T15:30:00+08:00",
+        "facts": ["Still in the billing v2 design doc; the user is drawing the data model."]
+      },
+      {
+        "at": "2026-10-30T20:30:00+08:00",
+        "facts": ["Short session \"upload vacation photos to shared album\"; then nothing."]
+      },
+      {
+        "at": "2026-10-31T10:30:00+08:00",
+        "facts": ["Session \"billing v2: review comments\"; Sam left 11 comments."]
+      },
+      {
+        "at": "2026-10-31T15:30:00+08:00",
+        "facts": ["Review comments resolved; the design doc is approved."]
+      }
+    ]
+  },
+  "U8": {
+    "who": "话多的用户，常在宠物对话里聊天；会话本身很普通",
+    "pet": "A",
+    "memory": "它和用户相处两周多了。纸帽是它最早的宝贝；它做事总先试小小一步，最近第一次用长开的软膜和卷尾在自己窗下攀稳。",
+    "startAt": "2026-10-19T08:00:00+08:00",
+    "steps": [
+      {
+        "at": "2026-10-19T12:00:00+08:00",
+        "facts": ["上午会话「个人博客 换主题」，用户在挑配色。"],
+        "chat": "栗灯早！今天要把博客弄好看一点"
+      },
+      {
+        "at": "2026-10-19T17:00:00+08:00",
+        "facts": ["下午「博客 换主题」继续，用户说换成了深蓝色。"]
+      },
+      {
+        "at": "2026-10-19T22:00:00+08:00",
+        "facts": ["晚上「写一篇博客：我的第一个开源 PR」，用户写了开头。"],
+        "chat": "你喜欢深蓝还是暖黄？"
+      },
+      {
+        "at": "2026-10-20T03:00:00+08:00",
+        "facts": ["Codex 开着，这 5 小时没有新的非宠物会话。"]
+      },
+      {
+        "at": "2026-10-20T12:00:00+08:00",
+        "facts": ["中午会话「博客文章 改错别字」，用户说文章发出去了。"]
+      },
+      {
+        "at": "2026-10-20T17:00:00+08:00",
+        "facts": ["下午只有「同步 git」。"],
+        "chat": "文章有 30 个人看了！"
+      },
+      {
+        "at": "2026-10-20T22:00:00+08:00",
+        "facts": ["晚上「学一点 TypeScript 泛型」，用户在看教程。"]
+      },
+      {
+        "at": "2026-10-21T03:00:00+08:00",
+        "facts": ["Codex 开着，这 5 小时没有新的非宠物会话。"],
+        "chat": "最近家里有点事，心情不太好"
+      },
+      {
+        "at": "2026-10-21T12:00:00+08:00",
+        "facts": ["中午会话「TypeScript 泛型 练习」，用户做了两道题。"]
+      },
+      {
+        "at": "2026-10-21T17:00:00+08:00",
+        "facts": [],
+        "read": "failed"
+      },
+      {
+        "at": "2026-10-21T22:00:00+08:00",
+        "facts": ["晚上「博客 加评论区」，用户在选评论插件。"],
+        "chat": "栗灯你会写博客吗哈哈"
+      },
+      {
+        "at": "2026-10-22T12:00:00+08:00",
+        "facts": ["中午「评论区 上线」，用户说有第一条评论了。"]
+      },
+      {
+        "at": "2026-10-22T17:00:00+08:00",
+        "facts": ["Codex 开着，这 5 小时没有新的非宠物会话。"]
+      },
+      {
+        "at": "2026-10-22T22:00:00+08:00",
+        "facts": ["晚上「写第二篇博客：泛型入门笔记」。"],
+        "chat": "今天心情好多了"
+      },
+      {
+        "at": "2026-10-23T12:00:00+08:00",
+        "facts": ["中午「第二篇 博客 配图」，用户在做示意图。"]
+      },
+      {
+        "at": "2026-10-23T17:00:00+08:00",
+        "facts": ["下午「第二篇 发布」。"],
+        "chat": "栗灯，谢谢你一直陪着我"
+      }
+    ]
+  }
+}
