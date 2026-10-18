@@ -5,6 +5,7 @@ import sys
 import tempfile
 import subprocess
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -16,7 +17,7 @@ from prepare_pet_run import make_jobs, make_egg_jobs, make_parallel_jobs, create
 from process_pet_run import process, read_json, write_json, compose_egg, record_review, record_failure, mirrored_look_frames
 from compose_atlas import ROW_SPECS
 from prepare_strip import clean_strip
-from extract_strip_frames import extract_state, register_frames, extract_component_frames, fit_registered_frames
+from extract_strip_frames import extract_state, register_frames, extract_component_frames, fit_registered_frames, component_frame_groups
 
 
 class ArtworkPipelineTests(unittest.TestCase):
@@ -377,6 +378,63 @@ class ArtworkPipelineTests(unittest.TestCase):
         self.assertEqual(boxes[-1], reference.getbbox())
         self.assertEqual({(b[2]-b[0], b[3]-b[1]) for b in boxes}, {(80, 120)})
         self.assertEqual(boxes[0][1] - boxes[2][1], 25)
+
+    def test_connected_strip_does_not_promote_background_specks_to_frame_anchors(self):
+        strip = Image.new("RGBA", (1000, 240))
+        draw = ImageDraw.Draw(strip)
+        for index in range(5):
+            draw.rectangle((index * 200 + 50, 60, index * 200 + 149, 199), fill="white")
+        # A faint generated line joins all five bodies into one component. The
+        # remaining isolated pixels must not be used to invent four more poses.
+        draw.line((50, 100, 949, 100), fill=(70, 90, 30, 32))
+        for x in (10, 210, 410, 610):
+            draw.rectangle((x, 5, x + 2, 7), fill=(70, 90, 30, 32))
+        strip.save(self.run / "connected-strip-with-specks.png")
+        self.assertTrue(component_frame_groups(strip, 5) is None,
+                        "background specks were promoted to sprite anchors")
+
+    def test_bad_jump_anchor_is_rejected_before_allocating_an_enlarged_canvas(self):
+        reference = Image.new("RGBA", (192, 208))
+        ImageDraw.Draw(reference).rectangle((56, 70, 135, 189), fill="white")
+        images = [Image.new("RGBA", (200, 240)) for _ in range(5)]
+        ImageDraw.Draw(images[0]).point((100, 100), fill="white")
+        for image in images[1:]:
+            ImageDraw.Draw(image).rectangle((50, 60, 149, 199), fill="white")
+        original_new, original_resize = Image.new, Image.Image.resize
+
+        def bounded_new(mode, size, *args, **kwargs):
+            self.assertLessEqual(size[0] * size[1], 1_000_000,
+                                 "allocated oversized registration canvas before rejecting bad anchor")
+            return original_new(mode, size, *args, **kwargs)
+
+        def bounded_resize(image, size, *args, **kwargs):
+            self.assertLessEqual(size[0] * size[1], 1_000_000,
+                                 "resized to oversized registration canvas before rejecting bad anchor")
+            return original_resize(image, size, *args, **kwargs)
+
+        with patch.object(Image, "new", bounded_new), patch.object(Image.Image, "resize", bounded_resize):
+            with self.assertRaisesRegex(ValueError, "registration.*too large"):
+                register_frames(images, jump_reference=reference, allow_overflow=True)
+
+    def test_bounded_jump_overflow_preserves_motion_for_shared_atlas_fit(self):
+        reference = Image.new("RGBA", (192, 208))
+        ImageDraw.Draw(reference).rectangle((56, 10, 135, 199), fill="white")
+        images = []
+        for lift in (0, 15, 30, 15, 0):
+            frame = Image.new("RGBA", (192, 260))
+            ImageDraw.Draw(frame).rectangle((56, 50 - lift, 135, 239 - lift), fill="white")
+            images.append(frame)
+        frames = register_frames(images, jump_reference=reference, allow_overflow=True)
+        self.assertEqual(frames[0].info["registration_offset"], (0, 20))
+        self.assertEqual(frames[0].getbbox()[1] - frames[2].getbbox()[1], 30)
+        fitted, report = fit_registered_frames([reference, *frames],
+                                              [(0, 0), *[(0, 20)] * 5])
+        self.assertTrue(report["required"])
+        self.assertEqual({image.size for image in fitted}, {(192, 208)})
+        self.assertEqual(fitted[1].tobytes(), fitted[-1].tobytes())
+        for image in fitted:
+            box = image.getbbox()
+            self.assertTrue(0 < box[0] < box[2] < 192 and 0 < box[1] < box[3] < 208)
 
     def test_oversized_jump_is_rejected_instead_of_shrunk_or_clipped(self):
         reference = Image.new("RGBA", (192, 208))

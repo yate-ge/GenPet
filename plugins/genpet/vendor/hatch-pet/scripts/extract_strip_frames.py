@@ -15,6 +15,9 @@ from despill_chroma_edges import decontaminate_image, edge_band, chroma_similari
 
 CELL_WIDTH = 192
 CELL_HEIGHT = 208
+# Shared-atlas fitting permits ordinary jump overflow, not unbounded canvases
+# amplified from a bad component anchor. Bound output pixels before allocating.
+MAX_REGISTRATION_PIXELS = CELL_WIDTH * CELL_HEIGHT * 16
 ROW_FRAME_COUNTS = {
     "idle": 6,
     "running-right": 8,
@@ -215,9 +218,13 @@ def component_frame_groups(
 
     largest_area = max(component["area"] for component in components)
     seed_threshold = max(120, largest_area * 0.20)
+    noise_threshold = max(12, largest_area * 0.002)
     seeds = [component for component in components if component["area"] >= seed_threshold]
     if len(seeds) < frame_count:
-        seeds = sorted(components, key=lambda component: component["area"], reverse=True)[
+        # Joined poses can leave only one real component and many background
+        # specks. Never promote those specks to grounded-pose scale anchors.
+        candidates = [component for component in components if component["area"] >= noise_threshold]
+        seeds = sorted(candidates, key=lambda component: component["area"], reverse=True)[
             :frame_count
         ]
     if len(seeds) < frame_count:
@@ -229,7 +236,6 @@ def component_frame_groups(
     )
     seed_ids = {id(seed) for seed in seeds}
     groups: list[list[dict[str, object]]] = [[seed] for seed in seeds]
-    noise_threshold = max(12, largest_area * 0.002)
 
     for component in components:
         if id(component) in seed_ids or component["area"] < noise_threshold:
@@ -287,6 +293,11 @@ def register_frames(images, origins=None, jump_reference=None, allow_overflow=Fa
                              + "; ".join(fixes) + ". Do not shrink idle or the jump body.")
     offset = (overflow["left"], overflow["top"]) if jump_reference is not None and allow_overflow else (0, 0)
     canvas = (CELL_WIDTH + offset[0] + overflow["right"], CELL_HEIGHT + offset[1] + overflow["bottom"]) if jump_reference is not None and allow_overflow else (CELL_WIDTH, CELL_HEIGHT)
+    if max(size[0] * size[1], canvas[0] * canvas[1]) > MAX_REGISTRATION_PIXELS:
+        raise ValueError(f"Jump registration is too large ({size[0]}x{size[1]} pixels, "
+                         f"canvas {canvas[0]}x{canvas[1]}; limit {MAX_REGISTRATION_PIXELS} pixels). "
+                         "Check noisy/joined sprite components or an inconsistent grounded pose. "
+                         "No enlarged frames were allocated; inspect only the jumping source.")
     frames = []
     for image, (x, y) in zip(images, origins):
         viewport = Image.new("RGBA", (width, height))

@@ -4,6 +4,11 @@ Notable changes to the GenPet plugin. Versions follow [semantic versioning](http
 
 ## Unreleased
 
+## 0.10.15 — 2026-10-18
+
+- Frame extraction no longer treats background specks as missing pose anchors when sprite components are joined.
+- Jump registration rejects abnormally large intermediate images before allocating them, while preserving ordinary overflow and shared-atlas fitting.
+
 - The repository keeps only user and contributor documentation. Development plans, content examples, research notes and run records moved out of `docs/`.
 - Test cases moved to `tests/agent/CASES.zh-CN.md`. Test output goes under the ignored `output/` directory.
 - Added this changelog, a security policy and `docs/RELEASING.md`.
