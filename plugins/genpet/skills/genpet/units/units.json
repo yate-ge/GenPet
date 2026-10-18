@@ -1,0 +1,181 @@
+{
+  "version": 3,
+  "units": {
+    "context": {
+      "file": "units/context.md",
+      "inputs": [
+        "availableContext"
+      ],
+      "result": {
+        "facts": "array",
+        "traits": "array",
+        "unknowns": "array",
+        "read": "object"
+      }
+    },
+    "encounter": {
+      "file": "units/encounter.md",
+      "inputs": [
+        "context",
+        "journey"
+      ],
+      "result": {
+        "text": "string",
+        "place": "string",
+        "connection": "string",
+        "factIds": "array",
+        "journey": "object"
+      }
+    },
+    "genes": {
+      "file": "units/genes.md",
+      "inputs": [
+        "context",
+        "encounter",
+        "random"
+      ],
+      "result": {
+        "genes": "string",
+        "eggAppearance": "string",
+        "designReason": "string"
+      }
+    },
+    "personality": {
+      "file": "units/personality.md",
+      "inputs": [
+        "context",
+        "encounter",
+        "genes"
+      ],
+      "result": {
+        "personality": "string"
+      }
+    },
+    "story": {
+      "file": "units/story.md",
+      "inputs": [
+        "context",
+        "pet",
+        "growth",
+        "time",
+        "recentContent"
+      ],
+      "result": {
+        "text": "string",
+        "connection": "string",
+        "factIds": "array",
+        "stateIntent": "string",
+        "visualIntent": "string",
+        "homeIntent": "nullable-string",
+        "memoryIntent": "nullable-string"
+      }
+    },
+    "evolution": {
+      "file": "units/evolution.md",
+      "inputs": [
+        "context",
+        "pet",
+        "growth",
+        "story"
+      ],
+      "result": {
+        "stage": "string",
+        "state": "string",
+        "reason": "string",
+        "special": "nullable-string",
+        "visibleState": "nullable-string",
+        "memory": "nullable-string"
+      },
+      "choices": {
+        "stage": [
+          "egg",
+          "hatchling",
+          "juvenile",
+          "adult"
+        ]
+      }
+    },
+    "appearance": {
+      "file": "units/appearance.md",
+      "inputs": [
+        "genes",
+        "story",
+        "change",
+        "savedArt",
+        "hostRequirements"
+      ],
+      "result": {
+        "appearance": "nullable-object",
+        "visuals": "array"
+      }
+    },
+    "home": {
+      "file": "units/home.md",
+      "inputs": [
+        "context",
+        "pet",
+        "story",
+        "savedArt"
+      ],
+      "result": {
+        "home": "nullable-string",
+        "visual": "nullable-object"
+      }
+    },
+    "story-item": {
+      "file": "units/story-item.md",
+      "inputs": [
+        "context",
+        "pet",
+        "story",
+        "savedArt"
+      ],
+      "result": {
+        "reason": "string",
+        "item": "nullable-object"
+      }
+    },
+    "chat": {
+      "file": "units/chat.md",
+      "inputs": [
+        "pet",
+        "message"
+      ],
+      "result": {
+        "text": "string",
+        "note": "nullable-string"
+      }
+    },
+    "ImageReviewer": {
+      "file": "units/review.md",
+      "inputs": [
+        "visual",
+        "actualFile"
+      ],
+      "result": {
+        "file": "string",
+        "verdict": "string",
+        "observations": "array",
+        "repair": "nullable-string"
+      },
+      "choices": {
+        "verdict": [
+          "accept",
+          "repair"
+        ]
+      }
+    },
+    "output": {
+      "file": "units/output.md",
+      "inputs": [
+        "story",
+        "completed",
+        "availableMedia",
+        "name"
+      ],
+      "result": {
+        "message": "nullable-string"
+      }
+    }
+  }
+}

@@ -4,6 +4,12 @@ Notable changes to the GenPet plugin. Versions follow [semantic versioning](http
 
 ## Unreleased
 
+## 0.10.16 — 2026-10-18
+
+- Commands reduced to three. `/genpet` handles everything from what the user asks: start or resume, status, naming, pausing or resuming the scheduled checks, replacing the Pet or adding another, switching the desktop Pet and diagnosis. `/genpet-chat` is unchanged. `/genpet-debug` replaces `/genpet-story`, `/genpet-grow` and `/genpet-debugger`: open the record page, request a story, or force a growth step or transformation. `/genpet-start`, `/genpet-stop`, `/genpet-reset` and `/genpet-switch` are removed; existing Pets, records and schedules are unchanged.
+- The skill prompts are reorganized: one short `principles.md` is served with every unit, each unit prompt carries its own rules, and the procedures are in four task files. The old reference-only relationship notes became part of the personality unit. Development and test notes were removed from the shipped files.
+- Stories keep company with a similar thing in the Pet's own world, shown mostly by its look. The narration says only what it did, and the user's own thing is named only in what it says.
+- Release checks: the plugin directory is checked against a list of shipped entries, and a unit test checks that every unit prompt loads and every link in the skills resolves.
 - The repository documents are the README, CONTRIBUTING and `docs/DESIGN.md`. The design document merges the architecture and research pages and adds the design idea and principles; agent install steps moved into the README and the release process into CONTRIBUTING. AGENTS.md now points development agents to the design document.
 
 ## 0.10.15 — 2026-10-18

@@ -2189,11 +2189,11 @@ function readSkillFile(relative) {
   return readFileSync(file, "utf8");
 }
 function readUnits() {
-  return JSON.parse(readSkillFile("host/units.json")).units;
+  return JSON.parse(readSkillFile("units/units.json")).units;
 }
 function readPrompt(name2) {
   if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(name2)) throw new Error("Invalid prompt module");
-  if (name2 === "meta") return readSkillFile("rules.md");
+  if (name2 === "meta") return readSkillFile("principles.md");
   const unit = readUnits()[name2];
   if (!unit) throw new Error(`Unknown prompt module: ${name2}`);
   return readSkillFile(unit.file);

@@ -92,7 +92,7 @@ The updated skills load in a new Codex chat. Installing does not adopt, change o
 **2. Adopt your egg.** Open a new Codex chat and type:
 
 ```text
-/genpet-start
+/genpet start
 ```
 
 Codex explains the data it uses and asks you to confirm. You then make a few choices on a short adventure that ends with an egg.
@@ -105,23 +105,9 @@ Codex explains the data it uses and asks you to confirm. You then make a few cho
 
 | Command | What it does |
 | --- | --- |
-| `/genpet-start` | Adopt an egg, or carry on with your pet, and turn on its 5-hour check-ins |
-| `/genpet` | Check on your pet, name it, diagnose a problem or request an action |
+| `/genpet` | Everything about your pet, by what you ask for: adopt an egg or carry on ("start"), check on it, name it, pause or resume the 5-hour check-ins, replace it or adopt another, switch the Codex desktop pet, or diagnose a problem |
 | `/genpet-chat` | Talk to your pet |
-| `/genpet-stop` | Pause the scheduled check-ins until `/genpet-start`; its records and `/genpet-story` stay available |
-
-<details>
-<summary>Testing shortcuts</summary>
-
-| Command | What it does |
-| --- | --- |
-| `/genpet-story` | Get a new story right now |
-| `/genpet-grow` | Skip ahead to the next stage (an adult transforms, or changes back if transformed; asks first) |
-| `/genpet-reset` | Say goodbye and adopt a new egg (the old record is backed up) |
-| `/genpet-switch` | List or switch the Codex desktop pet |
-| `/genpet-debugger` | Open a local page to browse your pet's records |
-
-</details>
+| `/genpet-debug` | For testing: open a local page to browse your pet's records, get a new story right now, or skip ahead to the next stage (an adult transforms, or changes back if transformed; asks first) |
 
 ## How it works
 
@@ -163,7 +149,7 @@ GenPet has three layers, and most changes touch only one of them:
 
 | Layer | Where | What it decides |
 | --- | --- | --- |
-| Product rules | [`plugins/genpet/skills/genpet/rules.md`](plugins/genpet/skills/genpet/rules.md) | What a pet, egg, story and home must be (the single source of rules) |
+| Product principles | [`plugins/genpet/skills/genpet/principles.md`](plugins/genpet/skills/genpet/principles.md) | What a pet, egg, story and home must be (the single source of principles) |
 | Generation | [`plugins/genpet/skills/genpet/`](plugins/genpet/skills/genpet/) | One prompt per step: adoption, design, story, artwork, home… |
 | Engineering | [`src/`](src/) | Identity, saving, retries, artwork files and desktop updates |
 

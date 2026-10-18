@@ -92,7 +92,7 @@ codex plugin add genpet@genpet
 **2. 领养你的蛋。** 新开一个 Codex 对话，输入：
 
 ```text
-/genpet-start
+/genpet 开始
 ```
 
 Codex 先说明会用到哪些资料，请你确认。之后你在一段短冒险里做几个选择，最后得到一颗蛋。
@@ -105,23 +105,9 @@ Codex 先说明会用到哪些资料，请你确认。之后你在一段短冒�
 
 | 命令 | 作用 |
 | --- | --- |
-| `/genpet-start` | 领养一颗蛋，或继续和你的宠物相处，并开启每 5 小时一次的检查 |
-| `/genpet` | 看近况、起名或改名、查问题，或请求其他操作 |
+| `/genpet` | 宠物的一切事务，按你说的事来办：领养一颗蛋或继续相处（“开始”）、看近况、起名或改名、暂停或恢复每 5 小时一次的检查、换一只或再养一只、切换 Codex 桌面宠物、查问题 |
 | `/genpet-chat` | 和你的宠物说话 |
-| `/genpet-stop` | 暂停每 5 小时的检查，直到 `/genpet-start`；记录保留，`/genpet-story` 仍可使用 |
-
-<details>
-<summary>测试用的快捷命令</summary>
-
-| 命令 | 作用 |
-| --- | --- |
-| `/genpet-story` | 立刻来一篇新故事 |
-| `/genpet-grow` | 直接进入下一个阶段（成年宠物则幻化，幻化中则变回原样；执行前先确认） |
-| `/genpet-reset` | 和当前宠物告别，重新领养一颗蛋（旧记录会备份） |
-| `/genpet-switch` | 查看或切换 Codex 桌面宠物 |
-| `/genpet-debugger` | 打开本地页面，查看宠物的记录 |
-
-</details>
+| `/genpet-debug` | 测试用：打开本地页面查看宠物的记录、立刻来一篇新故事，或直接进入下一个阶段（成年宠物则幻化，幻化中则变回原样；执行前先确认） |
 
 ## 它是怎么运作的
 
@@ -163,7 +149,7 @@ GenPet 分为三层，大多数改动只涉及其中一层：
 
 | 层 | 位置 | 决定什么 |
 | --- | --- | --- |
-| 产品规则 | [`plugins/genpet/skills/genpet/rules.md`](plugins/genpet/skills/genpet/rules.md) | 宠物、蛋、故事和家必须是什么样（规则的唯一来源） |
+| 产品原则 | [`plugins/genpet/skills/genpet/principles.md`](plugins/genpet/skills/genpet/principles.md) | 宠物、蛋、故事和家必须是什么样（原则的唯一来源） |
 | 生成 | [`plugins/genpet/skills/genpet/`](plugins/genpet/skills/genpet/) | 每个步骤一份提示词：领养、设计、故事、形象、家…… |
 | 工程 | [`src/`](src/) | 身份、保存、重试、图像文件和桌面宠物的换形象 |
 

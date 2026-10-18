@@ -2,7 +2,7 @@
 /**
  * Independent review of one story chain in a fresh Codex context.
  * Usage: node tests/agent/chain/run-review.mjs CHAIN_DIR START_INPUT_JSON PET_KEY
- * Writes CHAIN_DIR/review.md. The reviewer gets the product rules, the observed situations and the stories, and the
+ * Writes CHAIN_DIR/review.md. The reviewer gets the product principles and the story unit, the observed situations and the stories, and the
  * questions to answer; it gets no expected conclusions.
  */
 import { spawn } from 'node:child_process';
@@ -19,7 +19,11 @@ const [dirArg, startArg, key] = process.argv.slice(2);
 if (!dirArg || !startArg || !key) throw new Error('Usage: run-review.mjs CHAIN_DIR START_INPUT_JSON PET_KEY');
 const dir = path.resolve(dirArg);
 const model = process.env.GENPET_CHAIN_MODEL ?? 'gpt-6-astra';
-const rules = await readFile(path.join(root, 'plugins/genpet/skills/genpet/rules.md'), 'utf8');
+const skill = path.join(root, 'plugins/genpet/skills/genpet');
+const rules = [
+  await readFile(path.join(skill, 'principles.md'), 'utf8'),
+  await readFile(path.join(skill, 'units/story.md'), 'utf8'),
+].join('\n\n');
 const start = JSON.parse(await readFile(path.resolve(startArg), 'utf8')).inputs;
 const user = await loadTimeline(key);
 const timeline = user.steps;

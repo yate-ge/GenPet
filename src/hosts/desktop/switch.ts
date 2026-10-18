@@ -125,7 +125,7 @@ export async function selectPet(petId: string, options: AppToolsOptions = {}) {
 
 const SWITCH_USAGE = 'Usage: switch-pet [PET_ID|--current|--list|--help]';
 
-/** CLI entry for /genpet-switch. */
+/** CLI entry for switching the desktop Pet from /genpet. */
 export async function switchPet(args: string[]) {
   if (args.length > 1) throw new Error(SWITCH_USAGE);
   const target = args[0] ?? '--current';

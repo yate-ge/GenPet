@@ -1,7 +1,7 @@
 /** Verify the plugin people install from GitHub without modifying the real Codex Pet. */
 import { spawnSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
-import { access, mkdir, mkdtemp, readdir, readFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
@@ -53,46 +53,27 @@ function run(label, command, args, cwd = root, env = process.env) {
   console.log(`${label}: passed (${((Date.now() - started) / 1000).toFixed(1)}s)`);
   return result.stdout;
 }
-const exists = file =>
-  access(file).then(
-    () => true,
-    () => false,
-  );
-
 run('Source checks', 'npm', ['run', 'verify:fast']);
 run('Build committed plugin', 'npm', ['run', 'build:plugin']);
 run('Release version', 'npm', ['run', 'verify:version']);
 
-for (const relative of [
+// The plugin directory is what ships: only these entries belong in it.
+const shipped = new Set([
+  '.codex-plugin',
+  'LICENSE',
   'README.md',
-  'dist/debugger-server.js',
-  'debugger-web/index.html',
-  'skills/genpet-debugger/SKILL.md',
-  'dist/cli.js',
-  'dist/webp_dec.wasm',
-  'skills/genpet-story/SKILL.md',
-  'skills/genpet/rules.md',
-  'skills/genpet/host/units.json',
-  'skills/genpet/flows/stories.md',
-  'vendor/hatch-pet/SKILL.md',
-]) {
-  assert.ok(await exists(path.join(plugin, relative)), `Missing from plugin: ${relative}`);
-}
-for (const relative of [
-  '.mcp.json',
-  'dist/mcp.js',
-  'assets/examples',
-  'assets/pets',
-  'src',
-  'prompts',
-  'references',
-  'tests',
-  'node_modules',
-  'scripts/package.ts',
-  'docs',
-]) {
-  assert.equal(await exists(path.join(plugin, relative)), false, `Developer-only path leaked into plugin: ${relative}`);
-}
+  'THIRD_PARTY_NOTICES.md',
+  'assets',
+  'config',
+  'debugger-web',
+  'dist',
+  'package.json',
+  'scripts',
+  'skills',
+  'vendor',
+]);
+const extra = (await readdir(plugin)).filter(name => !shipped.has(name) && name !== '.DS_Store');
+assert.deepEqual(extra, [], `Unexpected entries in the plugin directory: ${extra.join(', ')}`);
 
 const found = findCodex();
 const codex = found.bin;

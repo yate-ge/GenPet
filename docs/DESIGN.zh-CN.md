@@ -2,7 +2,7 @@
 
 [English](DESIGN.md)
 
-本文说明 GenPet 是怎样设计的：设计思路、每次改动都要遵守的原则，以及实现这些原则的框架。读者是人，也是做开发的 Agent。改规则、提示词或运行时之前先读本文。插件实际执行的产品规则在 [rules.md](../plugins/genpet/skills/genpet/rules.md)。本文和图随设计变化同步修改。
+本文说明 GenPet 是怎样设计的：设计思路、每次改动都要遵守的原则，以及实现这些原则的框架。读者是人，也是做开发的 Agent。改规则、提示词或运行时之前先读本文。插件实际执行的产品原则在 [principles.md](../plugins/genpet/skills/genpet/principles.md)。本文和图随设计变化同步修改。
 
 ## 设计思路
 
@@ -18,8 +18,8 @@
 
 ### 产品
 
-1. **故事以用户为中心。** 每个故事都直接回应用户正在做的事，让用户一看就知道是冲着自己来的。宠物对用户说话、做或送一样东西，或者在自己的世界里陪着用户；它不假装在用户的现实世界里做了什么。见 [rules.md「故事与日常」](../plugins/genpet/skills/genpet/rules.md#故事与日常)，目标输出见 [日常故事的目标输出](../tests/agent/targets/STORIES.zh-CN.md)。
-2. **用户的事不能编。** 宠物的世界可以虚构，用户的行为、情绪和话不能虚构。读用户资料前先征得同意，敏感内容不使用也不保存，只保存简短的观察和来源。见 [rules.md「用户资料与安全」](../plugins/genpet/skills/genpet/rules.md#用户资料与安全)。
+1. **故事以用户为中心。** 每个故事都直接回应用户正在做的事，让用户一看就知道是冲着自己来的。宠物对用户说话、做或送一样东西，或者在自己的世界里陪着用户；它不假装在用户的现实世界里做了什么。见 [principles.md](../plugins/genpet/skills/genpet/principles.md)，目标输出见 [日常故事的目标输出](../tests/agent/targets/STORIES.zh-CN.md)。
+2. **用户的事不能编。** 宠物的世界可以虚构，用户的行为、情绪和话不能虚构。读用户资料前先征得同意，敏感内容不使用也不保存，只保存简短的观察和来源。见 [principles.md](../plugins/genpet/skills/genpet/principles.md)。
 3. **规则定边界，Agent 来设计。** 每只宠物从一个具体、熟悉的来源设计（某个物种、某个传说、某部作品里的某个角色），每个主要特征都有理由。没有物种目录、身体模板或性格预设；随机只在有依据的设计之间做选择。
 4. **一只宠物，一个身份。** 蛋是字面的蛋，只用壳面透露里面是什么。孵化后，每个阶段、每个新样子都认得出是同一只。soul、memory 和 state 保存在一起。
 5. **先可爱、先看得清。** 宠物是可爱的卡通像素伙伴，至少有眼睛，在桌面的小尺寸下看得清。让人不舒服的设计不合格，故事再好也一样。
@@ -62,7 +62,7 @@
 
 **主 skill** 负责基本的事：
 
-- 入口：`/genpet` 是总入口，Agent 按用户说的内容判断做哪件事。各项功能另有单独的命令：开始、对话、新故事、成长、停止、重置和调试器，验收用例见 [测试用例的「命令入口」](../tests/agent/CASES.zh-CN.md#命令入口)。
+- 入口：`/genpet` 是总入口，Agent 按用户说的内容判断做哪件事（开始、近况、起名、停止、换宠物、切换桌面宠物、诊断）。另有两个独立模式的命令：`/genpet-chat` 对话，`/genpet-debug` 测试用（记录页、按需出故事、强行成长），验收用例见 [测试用例的「命令入口」](../tests/agent/CASES.zh-CN.md#命令入口)。
 - 判断这次请求是对话、故事还是诊断，见[三类请求](#三类请求)。
 - 主流程：读记录和用户资料 → 做决定 → 画图并检查 → 换形象 → 完成 → 讲给用户。
 
@@ -83,11 +83,11 @@
 - **领养**：GeneDesigner → PetDesigner → ImageReviewer。
 - **之后的故事**：StoryDesigner → PetDesigner（只在换形象时）→ HomeDesigner（只在家有变化时）→ ImageReviewer（验收之前）。
 
-**参考文档**是主 skill 和子 skill 共用的知识，按负责的内容分开：`rules.md` 是产品规则，`output.md` 规定用户看到什么，`context/` 说明怎样读用户资料，`flows/` 是领养、故事、命名和定时的步骤，`host/` 是宿主的能力、记录格式和单元格式。谁用到就引用，每条规则只写一次。
+**参考文档**是主 skill 和子 skill 共用的知识，按负责的内容分开：`principles.md` 是产品原则，`units/` 是每个生成单元的提示词（`units.json` 列出它们的输入和结果），`adoption.md`、`stories.md`（故事、定时、命名）、`art.md` 和 `host.md` 是步骤和各宿主的能力，`units/output.md` 规定用户看到什么。谁用到就引用，每条规则只写一次。
 
-**现在的实现。** 主 skill 按需加载五份内部 Designer/Reviewer 文档，内部文档不增加菜单入口。薄命令共用流程与规则，12 个单元可用 `unit-request` 和 `verify-unit` 单独检查合同。
+**现在的实现。** 上面的角色只是给 12 个单元分组，没有各自的文件。单元提示词都在 `plugins/genpet/skills/genpet/units/`，任务文件说明它们的运行顺序。运行时把每个单元和产品原则一起提供，`unit-request` 和 `verify-unit` 可以单独检查某个单元的合同。
 
-| 子 skill | 现在对应的单元 |
+| 角色 | 现在对应的单元 |
 | --- | --- |
 | GeneDesigner | `encounter`、`genes`、`personality`（含说话习惯） |
 | StoryDesigner | `context`、`story`、`evolution`、`story-item`、`chat`、`output`（故事完成时重写 memory） |
@@ -95,9 +95,7 @@
 | HomeDesigner | `home` |
 | ImageReviewer | `ImageReviewer` |
 
-`context` 两边共用：领养时给 GeneDesigner 提供用户特质，之后给 StoryDesigner 提供用户活动。
-
-这些文件和各角色的文件夹 `designers/<角色>/`（角色说明和它负责的单元）都在 `plugins/genpet/skills/genpet/`。各规则的位置见[每条规则写在哪里](#每条规则写在哪里)。
+`context` 两边共用：领养时给 GeneDesigner 提供用户特质，之后给 StoryDesigner 提供用户活动。各规则的位置见[每条规则写在哪里](#每条规则写在哪里)。
 
 ### 一次故事的完整流程
 
@@ -114,7 +112,7 @@
 7. `finish-story` 原子保存 memory、state、历史和触发 ID，记录本次形象是否实际变化。新形象、名字和简介都跟着同一个 cloud ID 云端同步：`companion-brief` 从当前记录摘出简介（名字在简介里），Agent 写到这个 cloud ID 的 description 并回读。桌面和 Dots 看到的是同一只。
 8. `story-output` 返回完成的故事和已保存的图片，output 单元写出最终消息，主 Agent 原样发给用户。只换了状态的检查可以没有消息；之前故事展示过的图不再嵌入。
 
-平常的检查多数是日常变化：换的是这只宠物的形象，画过的直接复用。只有文字的故事跳过第 5、6 步，最多连续 2 次。「每次检查都有宠物内容」用的就是这条流程；一次故事能呈现什么见 [rules.md「故事与日常」](../plugins/genpet/skills/genpet/rules.md#故事与日常)。
+平常的检查多数是日常变化：换的是这只宠物的形象，画过的直接复用。只有文字的故事跳过第 5、6 步，最多连续 2 次。「每次检查都有宠物内容」用的就是这条流程；一次故事能呈现什么见 [principles.md](../plugins/genpet/skills/genpet/principles.md) 和 [story 单元](../plugins/genpet/skills/genpet/units/story.md)。
 
 ### 宿主接口
 
@@ -256,13 +254,12 @@ memory 记的是共同经历；对用户的了解优先读宿主记忆。旧记�
 
 | 规则 | 写在哪里 |
 | --- | --- |
-| 宠物、蛋、故事和 Avatar 必须是什么；故事多久来一次；用户怎样出现在故事里 | `plugins/genpet/skills/genpet/rules.md` |
-| 一个角色什么时候工作、按什么顺序跑哪些单元、结果交给谁 | `plugins/genpet/skills/genpet/designers/<角色>/README.md` |
-| 一个单元的输入、结果和检查点 | 角色文件夹里这个单元的提示词，以及它在 `plugins/genpet/skills/genpet/host/units.json` 里的条目 |
-| 怎样读取用户资料 | `plugins/genpet/skills/genpet/context/` |
-| 步骤的顺序，以及该执行哪条命令 | `plugins/genpet/skills/genpet/flows/` |
-| 宿主能做什么，以及它的格式 | `plugins/genpet/skills/genpet/host/desktop.md`、`dots.md` |
-| 用户能看到什么 | `plugins/genpet/skills/genpet/output.md` |
+| 宠物、蛋、故事和 Avatar 必须是什么；用户怎样出现在故事里 | `plugins/genpet/skills/genpet/principles.md` |
+| 一个单元的输入、结果、判断要点和检查点 | `plugins/genpet/skills/genpet/units/` 里这个单元的提示词，以及它在 `units/units.json` 里的条目（故事多久来一次、成长节奏见 `units/story.md`、`units/evolution.md`） |
+| 怎样读取用户资料 | `plugins/genpet/skills/genpet/units/context.md` |
+| 步骤的顺序，以及该执行哪条命令 | `plugins/genpet/skills/genpet/adoption.md`、`stories.md`、`art.md` |
+| 宿主能做什么、它的格式和记录格式 | `plugins/genpet/skills/genpet/host.md` |
+| 用户能看到什么 | `plugins/genpet/skills/genpet/units/output.md`；其他回复的写法在 `SKILL.md` |
 | 一条命令什么时候适用，是否需要用户确认 | 对应的 skill，其余内容只链接到上面的文件 |
 | 由代码保证的规则：身份、pending、阶段、经历与期限、绑定、纯文字最多连续两次 | `src/` |
 
@@ -280,8 +277,8 @@ memory 记的是共同经历；对用户的了解优先读宿主记忆。旧记�
 
 ### 扩展方式
 
-- **改一条产品规则**：改 `rules.md`。只有当某个单元的检查点依赖这条规则时，才去改那个单元的提示词。
-- **新增或修改生成单元**：提示词放在负责它的角色文件夹里，同时改 `host/units.json` 里的条目（含 `file`）。`unit-request` 和 `verify-unit` 会自动识别。
+- **改一条产品原则**：改 `principles.md`。只有当某个单元的检查点依赖这条原则时，才去改那个单元的提示词。
+- **新增或修改生成单元**：提示词放在 `units/` 里，同时改 `units/units.json` 里的条目（含 `file`）。`unit-request` 和 `verify-unit` 会自动识别。
 - **新增宿主**：写一个实现宿主接口的适配器，并加上它自己的命令。在 `hosts/index.ts` 里登记，增加 `config/host.json` 和一个插件目录，把包名加到 `scripts/build-plugin.ts`，并把实测到的宿主能力写成它的参考文档。
 - **新增命令**：在 `cli.ts` 的命令表里加一项；只有一个宿主需要时，加到那个适配器的 `commands` 里。逻辑留在功能模块里。
 - **修改 skill**：直接改 `plugins/genpet/skills/`，这是唯一的一份。
@@ -292,4 +289,4 @@ memory 记的是共同经历；对用户的了解优先读宿主记忆。旧记�
 
 ### 检查
 
-`npm run verify:fast` 检查类型、格式和单元测试。`npm run verify:release` 另外构建、在隔离 Codex home 安装 genpet、核对全部文件哈希，并运行已安装 CLI 和调试器。输出与夹具保留在 output/，上传 Google Drive。这些是工程检查；实际故事和图像按 tests/agent/README.zh-CN.md 执行和审核。
+`npm run verify:fast` 检查类型、格式和单元测试。`npm run verify:release` 另外构建、在隔离 Codex home 安装 genpet、核对全部文件哈希，并运行已安装 CLI 和调试器。输出与夹具保留在 output/。这些是工程检查；实际故事和图像按 tests/agent/README.zh-CN.md 执行和审核，并和 [tests/agent/targets/](../tests/agent/targets/) 里的目标输出（日常故事、领养旅程）对照，目标输出怎样维护见 [CONTRIBUTING](../CONTRIBUTING.md#target-outputs)。

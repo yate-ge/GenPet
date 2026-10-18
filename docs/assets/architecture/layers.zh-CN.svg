@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1046" role="img" aria-labelledby="t d">
   <title id="t">GenPet 架构：分层</title>
-  <desc id="d">三层。宿主内部：对话框和定时任务启动 Agent；Agent 读取用户资料、用图像生成画图，并把新形象换到 Pet Avatar 上；提示词层里，主 skill 负责入口和主流程，/genpet 是总入口，需要时调用子 skill 模块：四个 Designer 角色和 ImageReviewer。参考文档按负责的内容分成 rules.md、output.md、context/、flows/ 和 host/，不在流程里，主 skill 和子 skill 都会引用；运行时里，命令入口调用故事流程、日常功能和宿主适配；三者都通过核心读写记录，故事流程通过宿主适配换形象；日常功能里有最近的内容和领养时用的随机工具；记录按宠物分目录。</desc>
+  <desc id="d">三层。宿主内部：对话框和定时任务启动 Agent；Agent 读取用户资料、用图像生成画图，并把新形象换到 Pet Avatar 上；提示词层里，主 skill 负责入口和主流程，/genpet 是总入口，需要时调用子 skill 模块：四个 Designer 角色和 ImageReviewer。参考文档按负责的内容分成 principles.md、units/、SKILL.md、stories.md 和 host.md，不在流程里，主 skill 和子 skill 都会引用；运行时里，命令入口调用故事流程、日常功能和宿主适配；三者都通过核心读写记录，故事流程通过宿主适配换形象；日常功能里有最近的内容和领养时用的随机工具；记录按宠物分目录。</desc>
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Segoe UI', Helvetica, Arial, sans-serif; fill: #1F2A1C; }
     .layer { font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; }
@@ -135,16 +135,16 @@
   <text class="sub" x="717" y="344" text-anchor="middle">主 skill 和子 skill</text>
   <text class="sub" x="717" y="360" text-anchor="middle">共用的知识</text>
   <path d="M650 386H784" stroke="#C5D3EA" stroke-width="1"/>
-  <text class="mono" x="717" y="408" text-anchor="middle" fill="#1F2A1C">rules.md</text>
-  <text class="sub" x="717" y="423" text-anchor="middle">产品规则</text>
-  <text class="mono" x="717" y="448" text-anchor="middle" fill="#1F2A1C">output.md</text>
-  <text class="sub" x="717" y="463" text-anchor="middle">用户看到什么</text>
-  <text class="mono" x="717" y="488" text-anchor="middle" fill="#1F2A1C">context/</text>
-  <text class="sub" x="717" y="503" text-anchor="middle">怎样读用户资料</text>
-  <text class="mono" x="717" y="528" text-anchor="middle" fill="#1F2A1C">flows/</text>
-  <text class="sub" x="717" y="543" text-anchor="middle">领养、故事、命名、定时</text>
-  <text class="mono" x="717" y="568" text-anchor="middle" fill="#1F2A1C">host/</text>
-  <text class="sub" x="717" y="583" text-anchor="middle">宿主能力、记录和单元格式</text>
+  <text class="mono" x="717" y="408" text-anchor="middle" fill="#1F2A1C">principles.md</text>
+  <text class="sub" x="717" y="423" text-anchor="middle">产品原则</text>
+  <text class="mono" x="717" y="448" text-anchor="middle" fill="#1F2A1C">units/</text>
+  <text class="sub" x="717" y="463" text-anchor="middle">每个单元一份提示词</text>
+  <text class="mono" x="717" y="488" text-anchor="middle" fill="#1F2A1C">SKILL.md</text>
+  <text class="sub" x="717" y="503" text-anchor="middle">路由和回复写法</text>
+  <text class="mono" x="717" y="528" text-anchor="middle" fill="#1F2A1C">stories.md</text>
+  <text class="sub" x="717" y="543" text-anchor="middle">领养、故事、图像</text>
+  <text class="mono" x="717" y="568" text-anchor="middle" fill="#1F2A1C">host.md</text>
+  <text class="sub" x="717" y="583" text-anchor="middle">宿主、Dots、记录格式</text>
 
   <path class="flow" d="M632 329H592" stroke-dasharray="5 4" marker-end="url(#a)"/>
   <text class="rel" x="612" y="322" text-anchor="middle">引用</text>

@@ -1,0 +1,6 @@
+interface:
+  display_name: "genpet-debug"
+  short_description: "调试当前宠物：打开记录页、立即来一篇故事、强行成长或幻化"
+  default_prompt: "使用 $genpet-debug 打开我的宠物的记录页。"
+policy:
+  allow_implicit_invocation: false

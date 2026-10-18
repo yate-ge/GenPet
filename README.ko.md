@@ -92,7 +92,7 @@ Codex에게 설치를 부탁할 수도 있습니다.
 **2. 알 입양하기.** Codex에서 새 대화를 열고 다음을 입력합니다.
 
 ```text
-/genpet-start
+/genpet 시작
 ```
 
 Codex가 사용하는 정보를 설명하고 동의를 확인합니다. 그다음 짧은 모험에서 몇 가지를 선택하고, 마지막에 알을 발견합니다.
@@ -105,23 +105,9 @@ Codex가 사용하는 정보를 설명하고 동의를 확인합니다. 그다�
 
 | 명령어 | 하는 일 |
 | --- | --- |
-| `/genpet-start` | 알을 입양하거나 펫과의 생활을 이어 가고, 5시간마다 확인하기를 켭니다 |
-| `/genpet` | 근황, 이름, 문제 확인 및 작업 요청 |
+| `/genpet` | 펫에 관한 모든 일을 말한 내용에 맞춰 처리합니다: 알 입양 또는 이어서 키우기("시작"), 근황, 이름, 5시간마다 하는 확인의 중지와 재개, 교체 또는 한 마리 더 입양, Codex 데스크톱 펫 바꾸기, 문제 확인 |
 | `/genpet-chat` | 펫에게 말 걸기 |
-| `/genpet-stop` | `/genpet-start`까지 5시간마다 하는 확인을 중지. 기록과 `/genpet-story`는 그대로 쓸 수 있습니다 |
-
-<details>
-<summary>테스트용 단축 명령어</summary>
-
-| 명령어 | 하는 일 |
-| --- | --- |
-| `/genpet-story` | 지금 바로 새 이야기 받기 |
-| `/genpet-grow` | 다음 단계로 건너뛰기 (성체라면 변신, 변신 중이면 원래대로. 실행 전에 확인합니다) |
-| `/genpet-reset` | 지금의 펫과 작별하고 새 알 입양하기 (이전 기록은 백업됩니다) |
-| `/genpet-switch` | Codex 데스크톱 펫 목록 보기 또는 바꾸기 |
-| `/genpet-debugger` | 펫의 기록을 볼 수 있는 로컬 페이지 열기 |
-
-</details>
+| `/genpet-debug` | 테스트용: 펫의 기록을 볼 수 있는 로컬 페이지 열기, 지금 바로 새 이야기 받기, 다음 단계로 건너뛰기 (성체라면 변신, 변신 중이면 원래대로. 실행 전에 확인합니다) |
 
 ## 작동 방식
 
@@ -163,7 +149,7 @@ GenPet은 세 개의 층으로 되어 있고, 대부분의 변경은 그중 하�
 
 | 층 | 위치 | 정하는 것 |
 | --- | --- | --- |
-| 제품 규칙 | [`plugins/genpet/skills/genpet/rules.md`](plugins/genpet/skills/genpet/rules.md) | 펫, 알, 이야기, 집이 어때야 하는지 (규칙의 유일한 출처) |
+| 제품 원칙 | [`plugins/genpet/skills/genpet/principles.md`](plugins/genpet/skills/genpet/principles.md) | 펫, 알, 이야기, 집이 어때야 하는지 (원칙의 유일한 출처) |
 | 생성 | [`plugins/genpet/skills/genpet/`](plugins/genpet/skills/genpet/) | 단계마다 하나의 프롬프트: 입양, 디자인, 이야기, 모습, 집… |
 | 엔지니어링 | [`src/`](src/) | 정체성, 저장, 재시도, 이미지 파일, 데스크톱 펫에 새 모습 적용 |
 

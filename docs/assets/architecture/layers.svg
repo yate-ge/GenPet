@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1046" role="img" aria-labelledby="t d">
   <title id="t">GenPet architecture: layers</title>
-  <desc id="d">Three layers. Inside the host, chat and the scheduler start the Agent; the Agent reads user information, draws with image generation and puts new appearances on the Pet Avatar. In the prompt layer, the main skill handles the entries (/genpet takes any request) and the main workflow and calls sub skills when needed: four Designer roles and the ImageReviewer. References are split by what they own into rules.md, output.md, context/, flows/ and host/; they sit beside the flow and both the main skill and the sub skills refer to them. In the runtime, commands call the story flow, everyday features and host adapters; all three read and write records through the core, and the story flow sets appearances through the host adapters. Everyday features include recent content and the random tool used at adoption; records have one folder per pet.</desc>
+  <desc id="d">Three layers. Inside the host, chat and the scheduler start the Agent; the Agent reads user information, draws with image generation and puts new appearances on the Pet Avatar. In the prompt layer, the main skill handles the entries (/genpet takes any request) and the main workflow and calls sub skills when needed: four Designer roles and the ImageReviewer. References are split by what they own into principles.md, units/, SKILL.md, stories.md and host.md; they sit beside the flow and both the main skill and the sub skills refer to them. In the runtime, commands call the story flow, everyday features and host adapters; all three read and write records through the core, and the story flow sets appearances through the host adapters. Everyday features include recent content and the random tool used at adoption; records have one folder per pet.</desc>
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; fill: #1F2A1C; }
     .layer { font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; }
@@ -135,16 +135,16 @@
   <text class="sub" x="717" y="344" text-anchor="middle">knowledge shared by the</text>
   <text class="sub" x="717" y="360" text-anchor="middle">main skill and sub skills</text>
   <path d="M650 386H784" stroke="#C5D3EA" stroke-width="1"/>
-  <text class="mono" x="717" y="408" text-anchor="middle" fill="#1F2A1C">rules.md</text>
-  <text class="sub" x="717" y="423" text-anchor="middle">product rules</text>
-  <text class="mono" x="717" y="448" text-anchor="middle" fill="#1F2A1C">output.md</text>
-  <text class="sub" x="717" y="463" text-anchor="middle">what the user sees</text>
-  <text class="mono" x="717" y="488" text-anchor="middle" fill="#1F2A1C">context/</text>
-  <text class="sub" x="717" y="503" text-anchor="middle">reading user information</text>
-  <text class="mono" x="717" y="528" text-anchor="middle" fill="#1F2A1C">flows/</text>
-  <text class="sub" x="717" y="543" text-anchor="middle">step-by-step procedures</text>
-  <text class="mono" x="717" y="568" text-anchor="middle" fill="#1F2A1C">host/</text>
-  <text class="sub" x="717" y="583" text-anchor="middle">host, record, unit formats</text>
+  <text class="mono" x="717" y="408" text-anchor="middle" fill="#1F2A1C">principles.md</text>
+  <text class="sub" x="717" y="423" text-anchor="middle">product principles</text>
+  <text class="mono" x="717" y="448" text-anchor="middle" fill="#1F2A1C">units/</text>
+  <text class="sub" x="717" y="463" text-anchor="middle">one prompt per unit</text>
+  <text class="mono" x="717" y="488" text-anchor="middle" fill="#1F2A1C">SKILL.md</text>
+  <text class="sub" x="717" y="503" text-anchor="middle">routing and reply wording</text>
+  <text class="mono" x="717" y="528" text-anchor="middle" fill="#1F2A1C">stories.md</text>
+  <text class="sub" x="717" y="543" text-anchor="middle">adoption, stories, artwork</text>
+  <text class="mono" x="717" y="568" text-anchor="middle" fill="#1F2A1C">host.md</text>
+  <text class="sub" x="717" y="583" text-anchor="middle">host, Dots, record formats</text>
 
   <path class="flow" d="M632 329H592" stroke-dasharray="5 4" marker-end="url(#a)"/>
   <text class="rel" x="612" y="322" text-anchor="middle">refer</text>

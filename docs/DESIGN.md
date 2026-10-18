@@ -2,7 +2,7 @@
 
 [中文](DESIGN.zh-CN.md)
 
-This document describes how GenPet is designed: the idea behind it, the principles every change follows, and the framework that carries them out. It is written for people and for development agents. Read it before changing a rule, a prompt or the runtime. The exact product rules the plugin runs on are in [rules.md](../plugins/genpet/skills/genpet/rules.md). This document and its diagrams change when the design changes.
+This document describes how GenPet is designed: the idea behind it, the principles every change follows, and the framework that carries them out. It is written for people and for development agents. Read it before changing a rule, a prompt or the runtime. The exact product principles the plugin runs on are in [principles.md](../plugins/genpet/skills/genpet/principles.md). This document and its diagrams change when the design changes.
 
 ## Design idea
 
@@ -18,8 +18,8 @@ This document describes how GenPet is designed: the idea behind it, the principl
 
 ### Product
 
-1. **Stories center on the user.** Each story is a direct response to what the user is doing, so the user can tell at a glance that it is about them. The pet talks to the user, makes or gives something, or keeps them company in its own world; it never claims to act in the user's real world. See [rules.md, "故事与日常"](../plugins/genpet/skills/genpet/rules.md#故事与日常); the target outputs are in [the daily story targets](../tests/agent/targets/STORIES.zh-CN.md).
-2. **Nothing about the user is made up.** The pet's world can be imaginary; the user's actions, feelings and words cannot. Reading user information needs consent first, sensitive details are never used or saved, and only short observations with their sources are kept. See [rules.md, "用户资料与安全"](../plugins/genpet/skills/genpet/rules.md#用户资料与安全).
+1. **Stories center on the user.** Each story is a direct response to what the user is doing, so the user can tell at a glance that it is about them. The pet talks to the user, makes or gives something, or keeps them company in its own world; it never claims to act in the user's real world. See [principles.md](../plugins/genpet/skills/genpet/principles.md); the target outputs are in [the daily story targets](../tests/agent/targets/STORIES.zh-CN.md).
+2. **Nothing about the user is made up.** The pet's world can be imaginary; the user's actions, feelings and words cannot. Reading user information needs consent first, sensitive details are never used or saved, and only short observations with their sources are kept. See [principles.md](../plugins/genpet/skills/genpet/principles.md).
 3. **The rules set the boundary, the Agent designs.** Each pet is designed from a named, familiar source (a specific species, legend or character) with a reason for every main feature. There is no species catalog, body template or personality preset; randomness only picks among grounded designs.
 4. **One pet, one identity.** The egg is a literal egg that only hints at what is inside. After hatching, every stage and every new look is still recognizably the same pet. Soul, memory and state are saved together.
 5. **Cute and readable first.** Pets are cute cartoon pixel companions with at least eyes, readable at the small size the desktop shows them. A design that is unsettling or unpleasant to look at fails, whatever its story.
@@ -62,7 +62,7 @@ Logically the prompt layer is skills: one main skill, a few sub skills, and a se
 
 The **main skill** handles the basics:
 
-- Entries: `/genpet` takes any request and the Agent picks what to do from what the user said. Each function also has its own command: start, chat, story, grow, stop, reset and the debugger; the acceptance cases are in [the test cases, "命令入口"](../tests/agent/CASES.zh-CN.md#命令入口).
+- Entries: `/genpet` takes any request and the Agent picks what to do from what the user said (start, status, naming, stop, replace, switch the desktop pet, diagnosis). Two more commands cover distinct modes: `/genpet-chat` to talk and `/genpet-debug` for testing (the record page, a story on demand, forced growth); the acceptance cases are in [the test cases, "命令入口"](../tests/agent/CASES.zh-CN.md#命令入口).
 - Telling talk, a story and diagnosis apart; see [Three kinds of request](#three-kinds-of-request).
 - The main workflow: read status and user information → decide → draw and check → appearance → finish → tell the user.
 
@@ -83,11 +83,11 @@ Sub skills are roles the same Agent plays in turn. They are called in two orders
 - **Adoption**: GeneDesigner → PetDesigner → ImageReviewer.
 - **A later story**: StoryDesigner → PetDesigner (only for a new appearance) → HomeDesigner (only when the home changes) → ImageReviewer (before acceptance).
 
-**References** are the knowledge the main skill and the sub skills share, split by what they own: `rules.md` holds the product rules, `output.md` what the user sees, `context/` how user information is read, `flows/` the steps for adoption, stories, naming and scheduling, and `host/` what each host can do, the record format and the unit contracts. Whichever skill needs one refers to it, and each rule is written once.
+**References** are the knowledge the main skill and the sub skills share, split by what they own: `principles.md` holds the product principles, `units/` one prompt per generation unit (`units.json` lists their inputs and results), `adoption.md`, `stories.md` (stories, scheduling, naming), `art.md` and `host.md` the steps and what each host can do, and `units/output.md` what the user sees. Whichever skill needs one refers to it, and each rule is written once.
 
-**Current source.** The main skill loads five internal Designer/Reviewer documents as needed. These documents add no menu entries. Thin commands share the workflow and product rules; twelve units can be checked independently with `unit-request` and `verify-unit`.
+**Current source.** The roles above are a way to group the twelve units; they have no files of their own. The units live in `plugins/genpet/skills/genpet/units/`, and the task files give the order in which they run. The runtime serves each unit as the principles plus that unit's prompt, and `unit-request` and `verify-unit` can check each unit's contract on its own.
 
-| Sub skill | Units today |
+| Role | Units today |
 | --- | --- |
 | GeneDesigner | `encounter`, `genes`, `personality` (including speaking habits) |
 | StoryDesigner | `context`, `story`, `evolution`, `story-item`, `chat`, `output` (memory commits with the story) |
@@ -95,9 +95,7 @@ Sub skills are roles the same Agent plays in turn. They are called in two orders
 | HomeDesigner | `home` |
 | ImageReviewer | `ImageReviewer` |
 
-`context` serves both: at adoption it gives GeneDesigner the user's traits, and afterwards it gives StoryDesigner the user's activity.
-
-These files and the role folders `designers/<Role>/` (each role's README and the units it owns) live in `plugins/genpet/skills/genpet/`. See [Where each rule is written](#where-each-rule-is-written).
+`context` serves both: at adoption it gives GeneDesigner the user's traits, and afterwards it gives StoryDesigner the user's activity. See [Where each rule is written](#where-each-rule-is-written).
 
 ### One story, end to end
 
@@ -114,7 +112,7 @@ In the diagram, the blue label at the top left of a step is the skill responsibl
 7. `finish-story` atomically saves memory, state, history and trigger, including whether the appearance actually changed. The new appearance, the name and the brief all sync through the same cloud ID: `companion-brief` extracts the brief from the current record (the name is part of it), and the Agent writes it to that cloud ID's description and reads it back. The desktop and Dots show the same pet.
 8. `story-output` returns the finished story and its saved media; the output unit writes the final message and the main Agent sends it as is. A check that only changed the state may have no message, and an image an earlier story already showed is not embedded again.
 
-Most ordinary checks are a new look: the pet's appearance changes, and a look drawn before is reused. A text-only story skips steps 5 and 6 and can run at most twice in a row. "Every check has pet content" uses this same flow; what a story may show is in [rules.md, "故事与日常"](../plugins/genpet/skills/genpet/rules.md#故事与日常).
+Most ordinary checks are a new look: the pet's appearance changes, and a look drawn before is reused. A text-only story skips steps 5 and 6 and can run at most twice in a row. "Every check has pet content" uses this same flow; what a story may show is in [principles.md](../plugins/genpet/skills/genpet/principles.md) and the [story unit](../plugins/genpet/skills/genpet/units/story.md).
 
 ### Host interface
 
@@ -256,13 +254,12 @@ Each GenPet has its own directory, artwork and binding. Readable host selection 
 
 | Kind of rule | Written in |
 | --- | --- |
-| What a pet, egg, story and Avatar must be; how often stories come; how the user appears in them | `plugins/genpet/skills/genpet/rules.md` |
-| When a role works, which units it runs in what order, where results go | `plugins/genpet/skills/genpet/designers/<Role>/README.md` |
-| One unit's inputs, result and review points | That unit's prompt in its role folder and its entry in `plugins/genpet/skills/genpet/host/units.json` |
-| How user context is read | `plugins/genpet/skills/genpet/context/` |
-| The order of steps and which command to run | `plugins/genpet/skills/genpet/flows/` |
-| What a host can do and its formats | `plugins/genpet/skills/genpet/host/desktop.md`, `dots.md` |
-| What the user sees | `plugins/genpet/skills/genpet/output.md` |
+| What a pet, egg, story and Avatar must be; how the user appears in stories | `plugins/genpet/skills/genpet/principles.md` |
+| One unit's inputs, result, decision guidance and review points | That unit's prompt in `plugins/genpet/skills/genpet/units/` and its entry in `units/units.json` (how often stories come and growth timing: `units/story.md`, `units/evolution.md`) |
+| How user context is read | `plugins/genpet/skills/genpet/units/context.md` |
+| The order of steps and which command to run | `plugins/genpet/skills/genpet/adoption.md`, `stories.md`, `art.md` |
+| What a host can do, its formats and the record format | `plugins/genpet/skills/genpet/host.md` |
+| What the user sees | `plugins/genpet/skills/genpet/units/output.md`; wording of other replies in `SKILL.md` |
 | When a command applies and whether it needs the user's confirmation | The skill, which otherwise only links to the files above |
 | Code guarantees: identity, pending, stage/experience/deadline growth, binding and two consecutive text-only stories at most | `src/` |
 
@@ -280,8 +277,8 @@ Adapting Dots still has to test how Dots receives the pet brief, how the speakin
 
 ### Extending
 
-- **Change a product rule**: edit `rules.md`. Only touch a unit prompt if its review points depend on that rule.
-- **Add or change a generation unit**: keep its prompt in the owning role's folder and update its entry, including `file`, in `host/units.json`. `unit-request` and `verify-unit` pick it up.
+- **Change a product principle**: edit `principles.md`. Only touch a unit prompt if its review points depend on that principle.
+- **Add or change a generation unit**: keep its prompt in `units/` and update its entry, including `file`, in `units/units.json`. `unit-request` and `verify-unit` pick it up.
 - **Add a host**: write an adapter that implements the host interface and adds its own commands. Register it in `hosts/index.ts`, add `config/host.json` and a plugin directory, add the package name to `scripts/build-plugin.ts`, and write its reference with what you tested the host can do.
 - **Add a command**: add an entry to the command table in `cli.ts`, or to the host adapter's `commands` if only one host needs it. Keep the logic in the feature module.
 - **Change a skill**: edit `plugins/genpet/skills/` directly; it is the only copy.
@@ -292,4 +289,4 @@ Adapting Dots still has to test how Dots receives the pet brief, how the speakin
 
 ### Checks
 
-`npm run verify:fast` checks types, formatting and unit tests. `npm run verify:release` additionally builds and installs GenPet into an isolated Codex home, checks all installed file hashes, and runs its CLI/debugger. Outputs and fixtures are retained under output/ and uploaded to Google Drive. These checks cover engineering; actual stories and images are reviewed with `tests/agent/README.zh-CN.md`.
+`npm run verify:fast` checks types, formatting and unit tests. `npm run verify:release` additionally builds and installs GenPet into an isolated Codex home, checks all installed file hashes, and runs its CLI/debugger. Outputs and fixtures are retained under output/. These checks cover engineering; actual stories and images are reviewed with `tests/agent/README.zh-CN.md` and compared with the target outputs (daily stories, adoption journeys) in [tests/agent/targets/](../tests/agent/targets/). How the targets are maintained is in [CONTRIBUTING](../CONTRIBUTING.md#target-outputs).

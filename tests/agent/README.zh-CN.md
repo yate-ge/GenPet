@@ -1,6 +1,6 @@
 # GenPet Agent 验收
 
-本套验证生成语义、真实图像和宿主表现，完整用例以 [测试用例](CASES.zh-CN.md) 为准，产品规则见 [rules.md](../../plugins/genpet/skills/genpet/rules.md)。生成的故事、消息和领养结果和 [目标输出](targets/) 对照：[日常故事](targets/STORIES.zh-CN.md)、[领养旅程](targets/ADOPTION.zh-CN.md)，报告里把实际内容和目标输出并排写出。工程检查是 npm run verify:fast；字段有效、脚本通过或生成者自评都不能证明内容和桌面体验。
+本套验证生成语义、真实图像和宿主表现，完整用例以 [测试用例](CASES.zh-CN.md) 为准，产品原则见 [principles.md](../../plugins/genpet/skills/genpet/principles.md)。生成的故事、消息和领养结果和 [目标输出](targets/) 对照：[日常故事](targets/STORIES.zh-CN.md)、[领养旅程](targets/ADOPTION.zh-CN.md)，报告里把实际内容和目标输出并排写出。工程检查是 npm run verify:fast；字段有效、脚本通过或生成者自评都不能证明内容和桌面体验。
 
 ## 范围与证据
 
@@ -17,7 +17,7 @@
 | D1–D11 | 同 cloud ID、简介、Dots 持续风格与主环境 | 跨端实际回读、新会话、工作对照 |
 | M1–M8 | 环境检查、确认、清理、增养替换、多 Pet | 每只目录/云 ID、选择路由和中断恢复 |
 
-旧说明中的模块编号 M1–M8 已废弃；本文件 M 组指最新的初始化和多宠物用例。独立单元名见 plugins/genpet/skills/genpet/host/units.json，使用 story-item 和 ImageReviewer；旧历史别名由读取兼容。
+旧说明中的模块编号 M1–M8 已废弃；本文件 M 组指最新的初始化和多宠物用例。独立单元名见 plugins/genpet/skills/genpet/units/units.json，使用 story-item 和 ImageReviewer；旧历史别名由读取兼容。
 
 ## 基本做法
 

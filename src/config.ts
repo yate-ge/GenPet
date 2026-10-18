@@ -24,7 +24,7 @@ export function packageHost(): Host {
 export const dataRoot = () => process.env.GENPET_DATA_DIR || path.join(homedir(), '.genpet');
 export const codexHome = () => process.env.CODEX_HOME || path.join(homedir(), '.codex');
 
-/** The genpet skill holds rules, units and flows; source runs and installs read the same plugin directory. */
+/** The genpet skill holds the principles, unit prompts and flows; source runs and installs read the same plugin directory. */
 function readSkillFile(relative: string) {
   const file = path.join(pluginRoot(), 'skills', 'genpet', relative);
   if (!existsSync(file)) throw new Error(`Missing skill file: ${relative}`);
@@ -32,23 +32,21 @@ function readSkillFile(relative: string) {
 }
 
 export interface UnitDefinition {
-  /** Unit prompt inside the genpet skill, next to the role that owns it. */
+  /** Unit prompt file inside the genpet skill. */
   file: string;
-  /** The role that owns the unit (documentation; see host/units.md). */
-  designer?: string;
   inputs: string[];
   result: Record<string, 'string' | 'array' | 'object' | 'nullable-string' | 'nullable-object'>;
   choices?: Record<string, string[]>;
 }
 
 export function readUnits(): Record<string, UnitDefinition> {
-  return JSON.parse(readSkillFile('host/units.json')).units;
+  return JSON.parse(readSkillFile('units/units.json')).units;
 }
 
-/** `meta` is the product rules; every other module is a unit named in units.json. */
+/** `meta` is the product principles; every other module is a unit named in units.json. */
 export function readPrompt(name: string) {
   if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(name)) throw new Error('Invalid prompt module');
-  if (name === 'meta') return readSkillFile('rules.md');
+  if (name === 'meta') return readSkillFile('principles.md');
   const unit = readUnits()[name];
   if (!unit) throw new Error(`Unknown prompt module: ${name}`);
   return readSkillFile(unit.file);
