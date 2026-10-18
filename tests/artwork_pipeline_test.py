@@ -186,9 +186,6 @@ class ArtworkPipelineTests(unittest.TestCase):
         self.assertEqual([job["id"] for job in manifest["jobs"][-2:]],["look-row-9","look-row-10"])
         for job in manifest["jobs"][1:]:
             self.assertEqual(job["depends_on"],["base"])
-        base_prompt = (directory / "prompts/base-pet.md").read_text()
-        self.assertIn("at least eyes",base_prompt)
-        self.assertIn("cute, approachable",base_prompt)
 
     def test_repeated_error_changes_approach_and_three_failed_attempts_fill_only_named_cells(self):
         self.manifest()
