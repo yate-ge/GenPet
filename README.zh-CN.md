@@ -3,11 +3,11 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/banner-world.webp" alt="GenPet：各不相同的宠物在像素世界里孵化、长大、过着自己的生活" width="100%">
+  <img src="docs/assets/banner-world.webp" alt="GenPet：像素宠物和它们的家、明信片与小礼物" width="100%">
 </p>
 
 <p align="center">
-  <b>GenPet 是一个 Codex 插件，让 Codex 桌面宠物可以动态变化：<br>它从一颗蛋孵化、逐步长大，并随着时间不断改变样子。</b>
+  <b>GenPet 是一个 Codex 插件，让桌面宠物和你一起生活：<br>它从蛋孵化、长大，并一直留意你在做什么。</b>
 </p>
 
 <p align="center">
@@ -18,30 +18,26 @@
 
 ---
 
-市场版本为 **0.10.14**。各版本的改动见[更新记录](CHANGELOG.md)。
+Codex 的桌面宠物本来一直是同一个样子。GenPet 的宠物从一颗你在一次小冒险里找到的蛋开始，孵化成专门为你设计的小生物，一路长大，不断变化。
 
-Codex 的桌面宠物本来一直是同一个样子。GenPet 让它有了自己的生命：你的宠物从一颗专属于你的蛋开始，孵化成一只独一无二的小生物，在自己的故事里慢慢长大。每次变化，新的样子都会出现在你的桌面上。
-
-不用喂食，也不用点它。每隔几个小时，它会自己出门过一段小日子：探险、收集东西、换身打扮，再带着一个故事回来讲给你听。
+它像住在你家里的猫，只是住在桌面上一个小小的虚拟世界里。它看着你在 Codex 里做什么，并作出反应：你工作时陪着你，你做完或卡住时说句话，或者递给你一样它世界里的小东西。每隔几个小时你会收到一篇新故事，故事让它换了样子，新的样子就出现在桌面上。不用喂它，也不用点它。
 
 ## 亮点
 
 - 🥚 **只属于你的蛋。** 每只宠物都从一段"你是怎么得到这颗蛋的"故事开始。蛋壳的颜色和花纹透露了一点线索，但它到底长什么样，要等孵化才知道。
-- 🌱 **真的会长大。** 蛋 → 幼年 → 少年 → 成年。成年后，它偶尔会幻化：一次出人意料、超越自然的变身，过两天就变回来。每个阶段都会画出全新的形象。
+- 🌱 **真的会长大。** 蛋 → 幼年 → 少年 → 成年。成年后，它偶尔会幻化成出人意料的样子，过两天就变回来。每个阶段都会画出全新的形象。
 - 🎨 **每一只都不一样。** 没有固定的物种表。每只宠物都根据自己的领养故事单独设计，各个阶段都能认出是同一只。
-- 📖 **每次检查都有内容。** Codex 运行时每 5 小时检查一次，带来新打扮、故事物件、家的变化或一句想法。
-- 💌 **从它的世界寄来的小礼物。** 盖着邮戳的明信片、自拍照、带回来的小物件、几格小漫画，还有它的家，家会随着它的生活不断变化。
+- 👀 **它会回应你。** Codex 运行时每 5 小时一次，它看看你最近在忙什么，然后用一身新打扮、一份小礼物、家里的变化或几句话来回应。
+- 💌 **从它的世界寄来的小东西。** 盖着邮戳的明信片、奖章、自拍照、几格小漫画，还有它的家，家会随着时间慢慢变化。
 - 🗣️ **可以和它说话。** 输入 `/genpet-chat`。蛋只会晃一晃，幼年只会发出叫声，长大后会用自己的语气回答你。
 - 🧩 **开放，可以改造。** 规则、提示词和生成步骤都是普通文件，你可以阅读、修改、替换，做出属于你自己的宠物玩法。
 
-## 看它长大
+## 它长什么样
 
 <p align="center">
   <img src="docs/assets/growth.webp" alt="五只 GenPet，分别展示蛋、幼年、少年、成年和幻化" width="720">
 </p>
 <p align="center"><sub>蛋 → 幼年 → 少年 → 成年 → 幻化。来自我们测试中的五只宠物，每只都有自己的设计。</sub></p>
-
-## 它带给你的故事
 
 <p align="center">
   <img src="docs/assets/stories.webp" alt="GenPet 做的明信片、自拍照、四格漫画和家的全景" width="820">
@@ -62,7 +58,36 @@ codex plugin add genpet@genpet
 
 也可以直接让 Codex 帮你装：
 
-> 请按照 https://github.com/yate-ge/GenPet/blob/main/docs/AGENT_INSTALL.md 为 Codex 桌面版安装 GenPet 插件
+> 请按照 https://github.com/yate-ge/GenPet/blob/main/README.zh-CN.md#agent-install 里「给 Codex 的安装步骤」为 Codex 桌面版安装 GenPet 插件
+
+<a id="agent-install"></a>
+<details>
+<summary>给 Codex 的安装步骤</summary>
+
+1. 运行 `node --version`。GenPet 需要 Node.js 22 或更新版本。没有安装或版本过低时，告诉用户，请用户先安装或升级再继续。
+2. 找到能用的 Codex CLI。`codex` 不在 PATH 里时，用桌面 App 自带的那个（macOS 上是 `/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex`，或 `Codex.app` 里的同一路径）。
+3. 运行 `codex plugin list`。如果 GenPet 已经来自另一个 marketplace，报告那个来源，不再重复安装。
+4. 添加并刷新 marketplace，然后安装：
+
+   ```sh
+   codex plugin marketplace add yate-ge/GenPet
+   codex plugin marketplace upgrade genpet
+   codex plugin add genpet@genpet
+   ```
+
+   `marketplace add` 显示 `already added` 不代表已经刷新，仍要运行 `upgrade`。upgrade 超时时先重试再安装，不刷新就安装会装上旧版本。
+5. 找到刷新后的 marketplace 目录和实际安装的插件目录，然后运行：
+
+   ```sh
+   node <marketplace>/plugins/genpet/scripts/verify-install.mjs \
+     <installed-plugin> \
+     <marketplace>/plugins/genpet
+   ```
+6. 报告 marketplace 的 commit、安装的版本、安装路径和校验结果。
+
+更新后的 skills 在新的 Codex 对话里生效。安装本身不会领养、修改或选中宠物。
+
+</details>
 
 **2. 领养你的蛋。** 新开一个 Codex 对话，输入：
 
@@ -70,11 +95,11 @@ codex plugin add genpet@genpet
 /genpet-start
 ```
 
-Codex 先说明会用到哪些资料，请你确认。之后你在一段短旅程里做选择，最后得到一颗蛋。
+Codex 先说明会用到哪些资料，请你确认。之后你在一段短冒险里做几个选择，最后得到一颗蛋。
 
 **3. 让它出现在桌面上。** 在 Codex 的宠物设置里选中新的宠物（名称显示为 `genpet-xxxxxx`）。GenPet 不会在没问过你的情况下换掉你当前的宠物。
 
-**4. 剩下的交给它。** 就这样。它会在大约 5 小时内孵化，之后每 5 小时检查一次。孵化后，它会邀请你给它起个名字。
+**4. 让它和你一起生活。** 它会在大约 5 小时内孵化，之后每 5 小时检查一次。孵化后，它会邀请你给它起个名字。
 
 ### 命令
 
@@ -83,7 +108,7 @@ Codex 先说明会用到哪些资料，请你确认。之后你在一段短旅�
 | `/genpet-start` | 领养一颗蛋，或继续和你的宠物相处，并开启每 5 小时一次的检查 |
 | `/genpet` | 看近况、起名或改名、查问题，或请求其他操作 |
 | `/genpet-chat` | 和你的宠物说话 |
-| `/genpet-stop` | 暂停定时检查，直到 `/genpet-start`；记录保留，仍可手动要故事 |
+| `/genpet-stop` | 暂停每 5 小时的检查，直到 `/genpet-start`；记录保留，`/genpet-story` 仍可使用 |
 
 <details>
 <summary>测试用的快捷命令</summary>
@@ -103,40 +128,34 @@ Codex 先说明会用到哪些资料，请你确认。之后你在一段短旅�
 ```mermaid
 flowchart LR
   A["🥚 领养一颗<br>有来历的蛋"] --> B["⏰ 每 5 小时<br>检查一次"]
-  B --> C["📖 Codex 写出<br>宠物的新故事"]
-  C --> D["✨ 由故事决定<br>发生什么变化"]
-  D --> E["🎨 样子变了<br>就画新形象"]
-  E --> F["🖥️ 更新<br>桌面宠物"]
+  B --> C["👀 Codex 看看<br>你在做什么"]
+  C --> D["📖 宠物的故事<br>回应你"]
+  D --> E["✨ 故事决定<br>发生什么变化"]
+  E --> F["🎨 画新形象，<br>显示在桌面上"]
   F --> B
 ```
 
-- **一切变化都来自故事。** 宠物不会无缘无故地变。每篇故事决定它这次是换了心情或打扮、长到下一个阶段，还是幻化。
+- **一切变化都来自故事。** 宠物不会无缘无故地变。每篇故事决定它这次是换了打扮、送你一样东西、改了家里的布置、长到下一个阶段，还是幻化。
 - **成长有节奏。** 积累够了，它可以提前长大；就算没有，也会按时长大：蛋最晚 5 小时孵化，幼年和少年各最多持续一周。
 - **始终是同一只。** 它的设计、性格、家和经历都保存在一起，所以每个新样子都还是它。
-- **建立在 Codex 之上。** 故事由 Codex Agent 来写，形象用 Codex 自带的图像生成来画；GenPet 负责保存记录、管理图像文件和更新桌面宠物。
+- **建立在 Codex 之上。** 故事由 Codex Agent 来写，形象用 Codex 自带的图像生成来画；GenPet 负责保存记录、管理图像文件，并把新形象换到桌面宠物上。
 
 ## 你的数据与我们的原则
 
-- **记录跟着主环境走。** 桌面记录和原图保存在 `~/.genpet/desktop/pets/<id>/`。验收后的整套形象和宠物简介上传到同一个云端 Pet，用于跨端使用。
+- **读之前先问你。** Codex 记忆、你最近的对话、你在领养旅程里的选择和你与宠物的聊天，会用于设计宠物和写故事，但都要你确认后才读。保存简短的摘要和出处；敏感和隐私细节不使用、不保存。
 - **不编造关于你的事。** 宠物的世界是想象出来的，但它不会编造你做过什么、有什么感受、说过什么。
-- **同意后才读可用资料。** Codex 记忆、旅程选择和宠物对话用于设计和故事；保存必要的摘要与出处，敏感和隐私细节不使用、不保存。
-- **不控制你的屏幕。** GenPet 通过 Codex 自带的宠物功能来更新宠物，不会接管你的鼠标或屏幕。
+- **安静地陪着。** 它不催你，不向你提问，也不把成长显示成数字或进度条。
+- **记录留在你这里。** 记录保存在 `~/.genpet/desktop/pets/<id>/`。验收后的整套形象和宠物简介上传到同一个云端 Pet，用于跨设备使用。
+- **不控制你的屏幕。** GenPet 通过 Codex 自带的宠物功能来换宠物的形象，不会接管你的鼠标或屏幕。
 
 ## 路线图
 
 GenPet 还在早期预览阶段，变化很快。接下来我们在做：
 
-- [ ] **更懂你。** 从领养开始，就根据你真实的对话和反馈来回应，不编造任何关于你的事。
-- [ ] **每次检查都有新内容。** 每 5 小时的检查都会带来宠物的一点近况，或长或短。
+- [ ] **更懂你。** 更贴近你真实的工作和反馈来回应，不编造任何关于你的事。
 - [ ] **宠物不见了，能自己找回来。** 桌面上看不到宠物时，GenPet 会查明原因，帮你把它找回来。
 - [ ] **画得更快更顺。** 换新形象时，更少重画，更少等待。
 - [ ] **去更多地方生活。** 在 Codex Dots 等更多地方使用同一只宠物。
-
-## 项目的潜力
-
-Codex 桌面宠物只是一个小窗口，背后是更大的可能：AI 伙伴不再是一套固定的素材，它的样子和性格会随着时间、随着和它一起生活的人而变化。GenPet 的做法是这样的：产品规则划定边界，Agent 做创作上的决定，少量代码负责保证身份和记录可靠。这套做法并不局限于宠物或 Codex，你可以用它为其他 Agent 和应用打造伙伴，并写上你自己的规则。
-
-如果你也觉得有意思，欢迎提出想法、Issue 和 Pull Request。
 
 ## 开发者
 
@@ -146,14 +165,20 @@ GenPet 分为三层，大多数改动只涉及其中一层：
 | --- | --- | --- |
 | 产品规则 | [`plugins/genpet/skills/genpet/rules.md`](plugins/genpet/skills/genpet/rules.md) | 宠物、蛋、故事和家必须是什么样（规则的唯一来源） |
 | 生成 | [`plugins/genpet/skills/genpet/`](plugins/genpet/skills/genpet/) | 每个步骤一份提示词：领养、设计、故事、形象、家…… |
-| 工程 | [`src/`](src/) | 身份、保存、重试、图像文件和桌面更新 |
+| 工程 | [`src/`](src/) | 身份、保存、重试、图像文件和桌面宠物的换形象 |
 
-先看 [架构说明](docs/ARCHITECTURE.zh-CN.md)，再看 [贡献指南](CONTRIBUTING.md) 和 [发布流程](docs/RELEASING.md)。开发需要 Node.js 22+：`npm ci && npm run verify:fast`。
+先看 [设计文档](docs/DESIGN.zh-CN.md)，了解设计思路、原则和框架；再看 [贡献指南](CONTRIBUTING.md)，其中也有发布流程。开发需要 Node.js 22+：
+
+```sh
+npm ci && npm run verify:fast
+```
+
+这套做法并不局限于宠物或 Codex：产品规则划定边界，Agent 做创作上的决定，少量代码保证身份和记录可靠。你可以用它为其他 Agent 和应用打造伙伴。欢迎提出想法、Issue 和 Pull Request。
 
 ## 研究背景
 
-GenPet 的思路来自 **GenFaceUI**：一个面向生成式、个性化智能体界面的元设计框架。设计者制定规则，每只宠物在规则之内生成。详见 [研究基础](docs/RESEARCH.md)。
+GenPet 的思路来自我们的研究 **GenFaceUI**（[CHI '26](https://arxiv.org/abs/2602.11055)）：一个面向生成式、个性化智能体界面的元设计框架。设计者制定规则，每只宠物在规则之内生成。GenPet 怎样运用这个思路，见 [设计文档](docs/DESIGN.zh-CN.md#设计思路)。
 
-## 许可证
+## 更新记录与许可证
 
-[MIT](LICENSE)。第三方声明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+各版本的改动见[更新记录](CHANGELOG.md)。GenPet 使用 [MIT 许可证](LICENSE)，第三方声明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

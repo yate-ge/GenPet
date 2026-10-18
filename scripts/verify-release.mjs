@@ -89,7 +89,7 @@ for (const relative of [
   'tests',
   'node_modules',
   'scripts/package.ts',
-  'docs/RESEARCH.md',
+  'docs',
 ]) {
   assert.equal(await exists(path.join(plugin, relative)), false, `Developer-only path leaked into plugin: ${relative}`);
 }

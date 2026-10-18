@@ -1,8 +1,10 @@
 # Changelog
 
-Notable changes to the GenPet plugin. Versions follow [semantic versioning](https://semver.org/); every published plugin change gets a new version, as described in [docs/RELEASING.md](docs/RELEASING.md).
+Notable changes to the GenPet plugin. Versions follow [semantic versioning](https://semver.org/); every published plugin change gets a new version, as described in [CONTRIBUTING.md, "Releasing"](CONTRIBUTING.md#releasing).
 
 ## Unreleased
+
+- The repository documents are the README, CONTRIBUTING and `docs/DESIGN.md`. The design document merges the architecture and research pages and adds the design idea and principles; agent install steps moved into the README and the release process into CONTRIBUTING. AGENTS.md now points development agents to the design document.
 
 ## 0.10.15 — 2026-10-18
 

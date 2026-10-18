@@ -1,18 +1,44 @@
-# Architecture
+# GenPet design
 
-[中文](ARCHITECTURE.zh-CN.md)
+[中文](DESIGN.zh-CN.md)
 
-This document and its diagrams describe GenPet's current design and change when the design changes.
+This document describes how GenPet is designed: the idea behind it, the principles every change follows, and the framework that carries them out. It is written for people and for development agents. Read it before changing a rule, a prompt or the runtime. The exact product rules the plugin runs on are in [rules.md](../plugins/genpet/skills/genpet/rules.md). This document and its diagrams change when the design changes.
+
+## Design idea
+
+**A desktop pet that lives with you.** A Codex desktop pet normally ships as a fixed image. A GenPet starts as an egg found on a short adventure the user takes part in, hatches into a creature designed for that user, grows up, and keeps changing. Every change comes from a story, and every new look is drawn and put on the desktop.
+
+**The pet watches the user, like a house cat.** The pet lives in its own small world, and what connects that world to the user is the host: what Codex knows about the user, the user's recent sessions, and what the user says to the pet. Each story is the pet's reaction to what the user is doing right now: it keeps them company while they work, says something when they finish or get stuck, or gives them a small thing from its world. The story is about the user and the pet together; the pet has no separate life line of its own.
+
+**Designers set the rules, the Agent designs each pet.** This comes from our research on meta-design for generative agent interfaces, published as [GenFaceUI (CHI '26)](https://arxiv.org/abs/2602.11055). There, designers define templates, rules and how context maps to expression, and each agent's face is generated at runtime within those rules, keeping one recognizable identity while its expression changes with the context. GenPet applies the same idea to a companion that lasts for weeks: the product rules fix the boundaries (a literal egg, a cute pixel companion with eyes, one identity across stages), and the Codex Agent makes every creative choice inside them, from the pet's design to each story.
+
+**Beyond pets.** The same split works for other companions in other agents and apps: product rules set the boundaries, an Agent makes the creative choices, and a small amount of code keeps identity and records reliable.
 
 ## Principles
 
-1. **The Agent decides, the runtime records.** Creative content and decisions live in the prompt layer. `src/` handles identity, saved records, retries and putting a new appearance on the Pet Avatar.
-2. **The host is a layer.** User information, image generation, scheduling and the Pet Avatar are things the host provides. Each one is either called by the runtime, or used by the Agent with the host's own tools and reported back. Both paths follow the same steps.
-3. **A new appearance is checked in four separate ways.** Files written, saved image matches, refresh requested, display confirmed. Each is saved and judged on its own.
-4. **Each rule is written once.** A rule lives in one file; other files link to it.
-5. **Imports go one way.** Upper parts import lower ones: commands → story flow and everyday features → host adapters → core.
+### Product
 
-## Layers
+1. **Stories center on the user.** Each story is a direct response to what the user is doing, so the user can tell at a glance that it is about them. The pet talks to the user, makes or gives something, or keeps them company in its own world; it never claims to act in the user's real world. See [rules.md, "故事与日常"](../plugins/genpet/skills/genpet/rules.md#故事与日常).
+2. **Nothing about the user is made up.** The pet's world can be imaginary; the user's actions, feelings and words cannot. Reading user information needs consent first, sensitive details are never used or saved, and only short observations with their sources are kept. See [rules.md, "用户资料与安全"](../plugins/genpet/skills/genpet/rules.md#用户资料与安全).
+3. **The rules set the boundary, the Agent designs.** Each pet is designed from a named, familiar source (a specific species, legend or character) with a reason for every main feature. There is no species catalog, body template or personality preset; randomness only picks among grounded designs.
+4. **One pet, one identity.** The egg is a literal egg that only hints at what is inside. After hatching, every stage and every new look is still recognizably the same pet. Soul, memory and state are saved together.
+5. **Cute and readable first.** Pets are cute cartoon pixel companions with at least eyes, readable at the small size the desktop shows them. A design that is unsettling or unpleasant to look at fails, whatever its story.
+6. **Three ways to change.** Everyday changes keep the body and change what the pet wears, holds or does. Growth moves through egg, hatchling, juvenile and adult. A transformation is a rare, temporary, playful change for adults. The pet's condition belongs to its own world and never mirrors the user's health or mood.
+7. **Quiet company.** The pet does not ask questions, invite replies, nag or make the user feel guilty. Growth is never shown as a number, level or progress bar.
+
+### Engineering
+
+1. **The Agent decides, the runtime records.** Creative content and decisions live in the prompt layer. `src/` handles identity, saved records, retries and putting a new appearance on the Pet Avatar. When the Agent can handle a situation from context, there is no code, fixed rule or extra flow for it. The agreed fixed mechanisms are few: the latest-time growth deadlines, at most two text-only stories in a row, the transformation limits, and the weighted source type and seeded choice used for the genes design at adoption.
+2. **The host is a layer.** User information, image generation, scheduling and the Pet Avatar are things the host provides. Each one is either called by the runtime, or used by the Agent with the host's own tools and reported back. Both paths follow the same steps. GenPet only uses host APIs, app-tools, IPC and the plugin runtime; it never controls the screen or mouse.
+3. **A new appearance is checked in four separate ways.** Files written, saved image matches, refresh requested, display confirmed. Each is saved and judged on its own; a refresh request or a selection readback does not prove what is displayed.
+4. **Evidence comes from the actual output.** A valid JSON result or a model saying it passed proves neither content nor visuals. Generation is split into units with clear inputs, results and review points, and images are judged by looking at the generated pixels.
+5. **Each rule is written once.** A rule lives in one file; other files link to it. See [Where each rule is written](#where-each-rule-is-written).
+6. **Imports go one way.** Upper parts import lower ones: commands → story flow and everyday features → host adapters → core.
+7. **The repository stays small.** The marketplace clones it in full under a fixed 30-second timeout, so generated images, PDFs and run output stay out of git.
+
+## Framework
+
+### Layers
 
 ![Three layers: host, prompt layer, runtime. The Agent in the host reads the prompt layer and runs the runtime's commands; the runtime's host adapters reach the Pet Avatar through the host interface.](assets/architecture/layers.svg)
 
@@ -30,7 +56,7 @@ The three layers are connected through the Agent. The Agent reads the prompt lay
 
 The **Pet Avatar** is the host's own entry that shows the pet: the Pet in Codex, which is the local entry under `CODEX_HOME/pets/` and the cloud Pet it maps to. The cloud Pet has a cloud ID and Codex syncs it; selecting the same cloud ID in Dots shows the same Pet. The host also owns its list, selection and refresh. GenPet keeps the pet's record and artwork files under `~/.genpet/`.
 
-## Prompt layer
+### Prompt layer
 
 Logically the prompt layer is skills: one main skill, a few sub skills, and a set of references. The Agent in the host reads and runs all of them.
 
@@ -73,7 +99,7 @@ Sub skills are roles the same Agent plays in turn. They are called in two orders
 
 These files and the role folders `designers/<Role>/` (each role's README and the units it owns) live in `plugins/genpet/skills/genpet/`. See [Where each rule is written](#where-each-rule-is-written).
 
-## One story, end to end
+### One story, end to end
 
 ![Eight steps: the Agent in the host follows the main skill's workflow and uses what the host provides, and each step is marked with the main skill or the sub skill responsible for it; on the right, the runtime's commands save every step.](assets/architecture/story-flow.svg)
 
@@ -90,7 +116,7 @@ In the diagram, the blue label at the top left of a step is the skill responsibl
 
 Most ordinary checks are a new look: the pet's appearance changes, and a look drawn before is reused. A text-only story skips steps 5 and 6 and can run at most twice in a row. "Every check has pet content" uses this same flow; what a story may show is in [rules.md, "故事与日常"](../plugins/genpet/skills/genpet/rules.md#故事与日常).
 
-## Host interface
+### Host interface
 
 ![In the runtime, the story flow calls the host adapters. They implement the four functions of the host interface. Each step of the desktop adapter is done by the runtime or left to the Agent; the Dots adapter is used when Dots is the main environment, targets the same cloud Pet, and each step goes to the runtime or the Agent as the host allows. Runtime steps reach the Pet Avatar in the host directly; the Agent does the other steps with the host's own tools and reports with host-result. Below, the four appearance checks; finish-story requires the second.](assets/architecture/host-interface.svg)
 
@@ -116,7 +142,7 @@ Every host difference between the two environments sits behind one interface, im
 
 A story with a new appearance can finish once check 2 passes. If the host cannot be reached at all, the story may finish with a clear note, and the files show when the host next loads them. If the host is reachable but its saved image is different, the story stays unfinished and the next check retries. All four checks go through the host's own interfaces: host APIs, app-tools, IPC and the plugin runtime.
 
-## Two environments
+### Two environments
 
 ![Codex desktop and Dots each have the same host, skills and runtime. Codex desktop is the main environment by default; its Agent runs GenPet and puts each new appearance on the cloud Pet. Codex syncs the cloud Pet, so the Pet on the desktop and the Dots look are the same Pet. The main environment hands a pet brief to the Dots Agent, which keeps its own functions and replies in the pet's speaking style. The main environment can be switched to Dots, and the record moves with it.](assets/architecture/environments.svg)
 
@@ -134,7 +160,7 @@ Dots keeps working as before. While the pet is an egg, Dots speaks as it always 
 
 Development has two phases: the desktop and link 1 first, then the Dots adaptation with links 2 and 3.
 
-## User information
+### User information
 
 Reading user information is something the Agent does before writing.
 
@@ -144,7 +170,7 @@ Reading user information is something the Agent does before writing.
 
 The Agent chooses which information matters and how far back to look.
 
-## Three kinds of request
+### Three kinds of request
 
 `/genpet` and explicit GenPet requests lead to one of three things. The Agent picks from what the user asked:
 
@@ -154,7 +180,7 @@ The Agent chooses which information matters and how far back to look.
 | Story | A scheduled, proactive or explicit trigger. Runs the full flow above. | In the pet's voice |
 | Diagnosis | "Load my pet", "it isn't showing", "I can't find it". Runs `diagnose`, fixes what it actually found, then checks again. It works on the host side only; the pet itself stays as it is. | Plain and direct |
 
-## Runtime modules
+### Runtime modules
 
 The runtime has five parts, matching the runtime layer in the diagram:
 
@@ -193,7 +219,7 @@ The files behind each part:
 
 The former dots/lifecycle and publish/art cycles are removed. Pending reads live in Core; image validation and host diagnosis use the interface. The debugger inspects the requested Pet without activating it.
 
-## Records
+### Records
 
 ```
 ~/.genpet/<host>/
@@ -226,7 +252,7 @@ Memory records shared experiences; knowledge about the user comes first from hos
 
 Each GenPet has its own directory, artwork and binding. Readable host selection resolves the one active Pet; failed reads keep the last active record, and inactive time is frozen. The main skill checks existing resources with actual host tools and handles the user's choice. Cross-end selection and intake still need real-host acceptance. See [the test cases, "初始化检查和多只宠物"](../tests/agent/CASES.zh-CN.md#初始化检查和多只宠物).
 
-## Where each rule is written
+### Where each rule is written
 
 | Kind of rule | Written in |
 | --- | --- |
@@ -240,9 +266,9 @@ Each GenPet has its own directory, artwork and binding. Readable host selection 
 | When a command applies and whether it needs the user's confirmation | The skill, which otherwise only links to the files above |
 | Code guarantees: identity, pending, stage/experience/deadline growth, binding and two consecutive text-only stories at most | `src/` |
 
-Each rule is written once, in the place the table names; other files point to its section instead of restating it. The directory conventions are in AGENTS.md "GenPet repository layout". Contract validation does not replace semantic or visual review.
+Each rule is written once, in the place the table names; other files point to its section instead of restating it. The directory conventions are in [CONTRIBUTING.md, "Where to edit"](../CONTRIBUTING.md#where-to-edit). Contract validation does not replace semantic or visual review.
 
-## Who does each update step
+### Who does each update step
 
 Desktop tests settled how an appearance update is split:
 
@@ -252,7 +278,7 @@ Desktop tests settled how an appearance update is split:
 
 Adapting Dots still has to test how Dots receives the pet brief, how the speaking style stays on, how GenPet is installed there, how the main environment switches, how Dots updates the artwork and when Dots shows new artwork.
 
-## Extending
+### Extending
 
 - **Change a product rule**: edit `rules.md`. Only touch a unit prompt if its review points depend on that rule.
 - **Add or change a generation unit**: keep its prompt in the owning role's folder and update its entry, including `file`, in `host/units.json`. `unit-request` and `verify-unit` pick it up.
@@ -260,10 +286,10 @@ Adapting Dots still has to test how Dots receives the pet brief, how the speakin
 - **Add a command**: add an entry to the command table in `cli.ts`, or to the host adapter's `commands` if only one host needs it. Keep the logic in the feature module.
 - **Change a skill**: edit `plugins/genpet/skills/` directly; it is the only copy.
 
-## Packages
+### Packages
 
 `npm run build:plugin` bundles `src/` into `dist/` and writes the package's `package.json`. Everything else in `plugins/genpet/` (manifest, skills, debugger page, host config, README, install verifier and the vendored image pipeline) is edited in place. Dots installation and persistent loading require actual host validation.
 
-## Checks
+### Checks
 
 `npm run verify:fast` checks types, formatting and unit tests. `npm run verify:release` additionally builds and installs GenPet into an isolated Codex home, checks all installed file hashes, and runs its CLI/debugger. Outputs and fixtures are retained under output/ and uploaded to Google Drive. These checks cover engineering; actual stories and images are reviewed with `tests/agent/README.zh-CN.md`.
