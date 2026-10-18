@@ -4,7 +4,9 @@
  * Usage: node tests/agent/chain/run-chain.mjs START_INPUT_JSON PET_KEY OUT_DIR [STEPS]
  *   START_INPUT_JSON  a saved story-unit input (context, pet, growth, time, recentContent) to continue from
  *   PET_KEY           the timeline key in timelines.json (A, B, C)
- * Env: GENPET_CHAIN_MODEL (default gpt-6-astra), GENPET_CHAIN_EFFORT (default medium).
+ * Env: GENPET_CHAIN_MODEL (default gpt-6-astra), GENPET_CHAIN_EFFORT (default medium),
+ *   GENPET_CHAIN_VARIANT: unset for the current prompt; `template` swaps the story unit's fixed writing structure for
+ *   variants/template.md; `dice` does the same and adds variants/dice.md with a seeded surprise roll as input.
  *
  * Only the story unit runs. Between steps this script carries the result forward the way finish-story would:
  * memoryIntent rewrites memory and counts one experience, stateIntent and homeIntent become the new state, and the
@@ -12,6 +14,7 @@
  * intents, because no image or evolution unit runs. Growth is frozen so the chain tests variety, not stage changes.
  */
 import { spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { copyFile, mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import os from 'node:os';
@@ -31,6 +34,56 @@ const timeline = JSON.parse(await readFile(path.join(here, 'timelines.json'), 'u
 const steps = Math.min(Number(stepsArg ?? timeline.length), timeline.length);
 const start = JSON.parse(await readFile(startFile, 'utf8')).inputs;
 const english = /^[\x00-\x7F]*$/.test(start.pet.name);
+const variant = process.env.GENPET_CHAIN_VARIANT ?? '';
+if (!['', 'template', 'dice'].includes(variant)) throw new Error(`Unknown GENPET_CHAIN_VARIANT: ${variant}`);
+const fixedStructure = '先写它为什么在意这件事、经历后有什么小发现，再让行动支持这个想法。';
+const variantText = async name => (await readFile(path.join(here, 'variants', `${name}.md`), 'utf8')).trim();
+const replacement = variant
+  ? [await variantText('template'), variant === 'dice' ? await variantText('dice') : null].filter(Boolean).join('\n\n')
+  : null;
+/**
+ * The surprise roll: in every block of three checks one random check gets a surprise, and its kind is drawn from a
+ * shuffled deck of broad classes so kinds do not repeat until the deck runs out. Seeded by pet, so reruns match.
+ */
+const kinds = english
+  ? [
+      'a visitor',
+      'the weather or season changes',
+      'finding or noticing something',
+      'a small mishap',
+      'learning or working out a new trick',
+      'an old thing turns up again',
+      'something met while out',
+    ]
+  : [
+      '来了一位访客',
+      '天气或季节变了',
+      '捡到或发现一样东西',
+      '出了点小差错',
+      '学会或想出一样新本领',
+      '一件旧东西又冒出来',
+      '出门时遇到的事',
+    ];
+const draw = (
+  n => () =>
+    createHash('sha256').update(`genpet-chain:${key}:${n++}`).digest().readUInt32BE(0) / 0x1_0000_0000
+)(0);
+const surprises = new Map();
+{
+  let deck = [];
+  for (let block = 0; block * 3 < timeline.length; block++) {
+    const k = block * 3 + 1 + Math.floor(draw() * 3);
+    if (!deck.length) {
+      deck = [...kinds];
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(draw() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+    }
+    surprises.set(k, deck.pop());
+  }
+}
+const roll = k => ({ happens: surprises.has(k), kind: surprises.get(k) ?? null });
 
 const run = (cmd, args, opts = {}) =>
   new Promise((resolve, reject) => {
@@ -137,6 +190,7 @@ for (let k = 1; k <= steps; k++) {
         visualRequired: textOnlyStreak >= 2,
         memory: pet.memory,
       },
+      ...(variant === 'dice' ? { surprise: roll(k) } : {}),
     },
   };
   const inputFile = path.join(dir, 'input.json');
@@ -144,7 +198,12 @@ for (let k = 1; k <= steps; k++) {
   const req = await run('node', [cli, 'unit-request', 'story', inputFile], { cwd: root });
   if (req.code) throw new Error(`unit-request failed at step ${k}: ${req.stderr}`);
   await writeFile(path.join(dir, 'request.json'), req.stdout);
-  const { prompt } = JSON.parse(req.stdout);
+  let { prompt } = JSON.parse(req.stdout);
+  if (replacement) {
+    if (!prompt.includes(fixedStructure)) throw new Error('story.md no longer has the sentence this variant replaces');
+    prompt = prompt.replace(fixedStructure, replacement);
+    await writeFile(path.join(dir, 'prompt.txt'), prompt);
+  }
 
   let result;
   let verify;
@@ -200,7 +259,7 @@ for (let k = 1; k <= steps; k++) {
     }
     await writeFile(
       path.join(dir, `run-${attempt}.json`),
-      JSON.stringify({ exit: res.code, ms, model, effort, verify }, null, 2),
+      JSON.stringify({ exit: res.code, ms, model, effort, variant, verify }, null, 2),
     );
   }
   if (!result) {
@@ -226,10 +285,18 @@ for (let k = 1; k <= steps; k++) {
   if (result.homeIntent) pet.state = { ...pet.state, home: result.homeIntent };
   pet.revision = (pet.revision ?? 0) + 1;
   lastStoryAt = at;
-  log.push({ step: k, at: iso(at), outputs, memory: Boolean(result.memoryIntent), text: result.text });
+  log.push({
+    step: k,
+    at: iso(at),
+    outputs,
+    memory: Boolean(result.memoryIntent),
+    surprise: input.inputs.surprise ?? null,
+    surpriseUse: result.surprise ?? null,
+    text: result.text,
+  });
   await writeFile(
     path.join(out, 'chain.json'),
-    JSON.stringify({ key, pet: pet.name, model, effort, steps: log }, null, 2),
+    JSON.stringify({ key, pet: pet.name, model, effort, variant, steps: log }, null, 2),
   );
   console.log(`[${key}] step ${k}/${steps} ${outputs.join(',') || 'text'}${result.memoryIntent ? ' +memory' : ''}`);
 }
