@@ -9,9 +9,7 @@ import { findCodex } from './codex-bin.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const plugin = path.join(root, 'plugins', 'genpet');
-const evidenceRoot = path.resolve(
-  process.env.GENPET_TEST_EVIDENCE_DIR || path.join(root, 'output/implementation-20261011/release-tests'),
-);
+const evidenceRoot = path.resolve(process.env.GENPET_TEST_EVIDENCE_DIR || path.join(root, 'output/release-tests'));
 await mkdir(evidenceRoot, { recursive: true });
 const checkLogs = await mkdtemp(path.join(evidenceRoot, 'checks-'));
 function run(label, command, args, cwd = root, env = process.env) {

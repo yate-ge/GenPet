@@ -6,7 +6,7 @@ import { Store } from '../src/store.js';
 import { createPet } from '../src/model.js';
 
 async function rootFor(label: string) {
-  const base = path.resolve('output/implementation-20261011/records');
+  const base = path.resolve('output/tests/records');
   await mkdir(base, { recursive: true });
   return mkdtemp(path.join(base, `${label}-`));
 }

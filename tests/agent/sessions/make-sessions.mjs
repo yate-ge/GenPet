@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Writes fictional Codex session records for observation tests (TEST_PLAN_0.10.12 R1a, R2).
+ * Writes fictional Codex session records for observation tests (cases S25 and T1–T15).
  * Usage: node tests/agent/sessions/make-sessions.mjs OUT_DIR [NOW_ISO]
  * Each scenario gets OUT_DIR/<scenario>/codex-home (point CODEX_HOME at it). The expected observations are printed
  * to stdout for the reviewer only; keep them out of the Agent's reach.

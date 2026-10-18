@@ -6,9 +6,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 const plugin = path.resolve(process.argv[2]);
 const source = path.resolve(process.argv[3]);
-const parent = path.resolve(
-  process.env.GENPET_TEST_EVIDENCE_DIR || path.join(source, 'output/implementation-20261011/installed-tests'),
-);
+const parent = path.resolve(process.env.GENPET_TEST_EVIDENCE_DIR || path.join(source, 'output/installed-tests'));
 await mkdir(parent, { recursive: true });
 const run = await mkdtemp(path.join(parent, 'installed-'));
 const home = path.join(run, 'codex-home');

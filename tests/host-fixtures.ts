@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 export async function hostTestDirectory(name: string) {
-  const parent = path.resolve('output/implementation-20261011/hosts/test-data');
+  const parent = path.resolve('output/tests/hosts/test-data');
   await mkdir(parent, { recursive: true });
   return mkdtemp(path.join(parent, `${name}-`));
 }

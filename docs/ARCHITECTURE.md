@@ -2,7 +2,7 @@
 
 [中文](ARCHITECTURE.zh-CN.md)
 
-This is the target architecture agreed on 2026-10-10, updated when the design changes. This document and its diagrams describe the design, not development progress; what is built and what still needs acceptance is under [Implementation status](#implementation-status).
+This document and its diagrams describe GenPet's current design and change when the design changes.
 
 ## Principles
 
@@ -36,7 +36,7 @@ Logically the prompt layer is skills: one main skill, a few sub skills, and a se
 
 The **main skill** handles the basics:
 
-- Entries: `/genpet` takes any request and the Agent picks what to do from what the user said. Each function also has its own command: start, chat, story, grow, stop, reset and the debugger; the choices are in [the development plan, "命令入口"](DEVELOPMENT_PLAN.zh-CN.md#命令入口).
+- Entries: `/genpet` takes any request and the Agent picks what to do from what the user said. Each function also has its own command: start, chat, story, grow, stop, reset and the debugger; the acceptance cases are in [the test cases, "命令入口"](../tests/agent/CASES.zh-CN.md#命令入口).
 - Telling talk, a story and diagnosis apart; see [Three kinds of request](#three-kinds-of-request).
 - The main workflow: read status and user information → decide → draw and check → appearance → finish → tell the user.
 
@@ -88,7 +88,7 @@ In the diagram, the blue label at the top left of a step is the skill responsibl
 7. `finish-story` atomically saves memory, state, history and trigger, including whether the appearance actually changed. The new appearance, the name and the brief all sync through the same cloud ID: `companion-brief` extracts the brief from the current record (the name is part of it), and the Agent writes it to that cloud ID's description and reads it back. The desktop and Dots show the same pet.
 8. `story-output` returns the finished story and its saved media; the output unit writes the final message and the main Agent sends it as is. A check that only changed the state may have no message, and an image an earlier story already showed is not embedded again.
 
-Most ordinary checks are a new look: the pet's appearance changes, and a look drawn before is reused. A text-only story skips steps 5 and 6 and can run at most twice in a row. "Every check has pet content" uses this same flow; the story types are in [the development plan, "故事类型"](DEVELOPMENT_PLAN.zh-CN.md#故事类型).
+Most ordinary checks are a new look: the pet's appearance changes, and a look drawn before is reused. A text-only story skips steps 5 and 6 and can run at most twice in a row. "Every check has pet content" uses this same flow; what a story may show is in [rules.md, "故事与日常"](../plugins/genpet/skills/genpet/rules.md#故事与日常).
 
 ## Host interface
 
@@ -132,7 +132,7 @@ The speaking style comes from two parts of the record: the pet's sounds and basi
 
 Dots keeps working as before. While the pet is an egg, Dots speaks as it always did and only its look changes; for a hatchling, one short sound is added at the start or end of a reply; a juvenile or adult speaks from its personality and how it and the user get along now. The speaking style applies only to what Dots says to the user; the code, documents and messages Dots produces for the user stay as they are.
 
-Development has two phases: the desktop and link 1 first, then the Dots adaptation with links 2 and 3. The questions to test for each and the approaches to try are in [the development plan, "Dots 联动"](DEVELOPMENT_PLAN.zh-CN.md#dots-联动).
+Development has two phases: the desktop and link 1 first, then the Dots adaptation with links 2 and 3.
 
 ## User information
 
@@ -224,7 +224,7 @@ pet
 
 Memory records shared experiences; knowledge about the user comes first from host memory. Legacy fields map into the three blocks. Missing memory/speaking habits can be supplemented once after confirmation from existing records; the initial supplement adds no experience and preserves the original personality text.
 
-Each GenPet has its own directory, artwork and binding. Readable host selection resolves the one active Pet; failed reads keep the last active record, and inactive time is frozen. The main skill checks existing resources with actual host tools and handles the user's choice. Cross-end selection and intake still need real-host acceptance. See [the requirements](DEVELOPMENT_PLAN.zh-CN.md#初始化检查领养新宠物和多只宠物).
+Each GenPet has its own directory, artwork and binding. Readable host selection resolves the one active Pet; failed reads keep the last active record, and inactive time is frozen. The main skill checks existing resources with actual host tools and handles the user's choice. Cross-end selection and intake still need real-host acceptance. See [the test cases, "初始化检查和多只宠物"](../tests/agent/CASES.zh-CN.md#初始化检查和多只宠物).
 
 ## Where each rule is written
 
@@ -242,11 +242,7 @@ Each GenPet has its own directory, artwork and binding. Readable host selection 
 
 Each rule is written once, in the place the table names; other files point to its section instead of restating it. The directory conventions are in AGENTS.md "GenPet repository layout". Contract validation does not replace semantic or visual review.
 
-## Implementation status
-
-What each part has built and what acceptance it still needs is in the [engineering status](ENGINEERING.zh-CN.md#待决问题状态) and the [evidence index](evidence/README.md). Implemented source and completed probes do not replace user or real-host acceptance.
-
-### Who does each update step
+## Who does each update step
 
 Desktop tests settled how an appearance update is split:
 
@@ -254,7 +250,7 @@ Desktop tests settled how an appearance update is split:
 2. The runtime reads the mapping from a local `custom:` entry to its cloud `pet_` ID from the client's own state file.
 3. For the readback, the Agent downloads the stored artwork with `get_pet_download_link` and the runtime compares its pixels with the accepted image.
 
-The six further things to test when Dots is adapted are listed in [the development plan](DEVELOPMENT_PLAN.zh-CN.md#开发要解决的问题).
+Adapting Dots still has to test how Dots receives the pet brief, how the speaking style stays on, how GenPet is installed there, how the main environment switches, how Dots updates the artwork and when Dots shows new artwork.
 
 ## Extending
 

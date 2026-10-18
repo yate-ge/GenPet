@@ -15,7 +15,7 @@ import { dueStory } from '../src/schedule.js';
 import { namePet } from '../src/naming.js';
 
 async function isolated() {
-  const root = path.resolve('output/implementation-20261011/flow-tests', randomUUID());
+  const root = path.resolve('output/tests/flow-tests', randomUUID());
   await mkdir(root, { recursive: true });
   return { root, store: new Store(root, 'cloud') };
 }

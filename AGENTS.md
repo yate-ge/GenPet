@@ -1,14 +1,7 @@
 # GenPet release rules
 
-- Every published plugin upgrade must increment the semantic version, including changes only to skills, prompts, bundled documentation or scripts. Use a patch bump for compatible fixes; choose minor/major for broader or breaking changes. Do not bump merely for each local edit.
-- Keep package.json, package-lock.json (root and packages[""]), plugins/genpet/.codex-plugin/plugin.json and the generated plugins/genpet/package.json consistent. Rebuild the generated runtime after changes.
-- Before publishing a new version, check compatibility with the currently published version so that updating cannot lose user data or break working functions. Review what the change removes or renames (record fields, stored files, CLI commands, skills, host bindings, schedules) and load representative existing data, including records written by earlier versions, with the new build in an isolated CODEX_HOME and data directory. Existing Pets, stories, artwork, bindings and schedules must still load and work; a format change needs a migration that preserves the original. Report what was checked. Do not publish while a compatibility risk remains unresolved.
-- Never push to the remote on your own. Prepare the change, run the checks, report what changed, and push only after the user has reviewed and explicitly confirmed it. Approval to push earlier changes does not cover later ones.
-- Before publishing, run npm run verify:release. The version gate compares the deliverable against origin/main (or GENPET_RELEASE_BASE when explicitly set); fetch the release base before release checks. Never bypass a failed gate by only changing the comparison base.
-- When installing from an existing marketplace, refresh it even if the plugin is currently uninstalled. `marketplace add` returning already-added does not establish freshness.
-- Verify installed manifest versions and file hashes against the refreshed marketplace source using scripts/verify-install.mjs. Report the marketplace commit, installed version and installed path. Directory names and installed/enabled status alone are insufficient.
-- Do not reset, adopt, age or regenerate a user's Pet as part of installation verification. Use an isolated CODEX_HOME for release tests. New chats load updated skills and tools; do not promise an active chat has discarded its old instructions.
-- For "log and git push" in this project, keep the log in this repository. Do not read or modify Obsidian or its Daily Note unless the user explicitly includes that vault in the task.
+- Before a version bump, release check, publish or install verification, read and follow [docs/RELEASING.md](docs/RELEASING.md).
+- Do not push, tag or publish without the maintainer's explicit approval of that change. Approval of earlier changes does not cover later ones.
 
 # GenPet repository layout
 
@@ -16,9 +9,9 @@
 - Everything the Agent reads at runtime lives in `plugins/genpet/skills/genpet/`, organized by owner: `rules.md` is the only source of product rules; `output.md` governs what the user sees; `context/` holds how user context is read (README) and the context unit; `designers/<Role>/` holds the role's README and the unit prompts it owns; `flows/` holds end-to-end procedures (README for shared conventions, adoption, stories with image coordination, naming, scheduling); `host/` holds host formats and capabilities, storage and the unit contracts (`units.json` records each unit's file, inputs and results).
 - Write each rule once, in the file that owns it, and point to its section elsewhere (for example `../../rules.md「成长节奏」`) instead of restating it. A role README says only when the role runs, which units it uses in what order and where results go; a unit says what it produces, its own judgment guidance and its checkpoints.
 - A new unit goes into its owning role's folder with an entry, including `file`, in `host/units.json`. A new slash command is a thin `plugins/genpet/skills/<command>/SKILL.md` that links into `skills/genpet/`.
-- Development and test procedures, test cases and evidence handling belong in `tests/agent/` and `docs/`, never in runtime files.
+- Test procedures and test cases belong in `tests/agent/`, never in runtime files. Development and test output goes under the ignored `output/` directory and is never committed.
 - When moving or renaming a runtime file, update every link to it and check that all relative links in `plugins/genpet/skills/` resolve.
-- `docs/` holds only current documents. Move an outdated one to `docs/archive/<version>/`, fix its relative links and every link to it, and list it in the archive section of `docs/README.md`.
+- `docs/` holds only current documents for users and contributors: architecture, installation, research background and releasing. Delete a document when it is outdated (git history keeps it) and fix every link to it. Plans, discussions and run records do not go in the repository.
 
 # GenPet framework design rules
 
@@ -40,4 +33,4 @@
 - Each host animation row is a trigger slot, not a literal action. PetDesigner designs every slot's continuous frames for the current look and condition: a resting Pet does not get up and run, while direction and click slots still read clearly. Review checks the slot's response, not literal walking or jumping.
 - The former state-change command becomes a new-story entry point. Form the new Pet story first, then let it determine state and appearance changes and the story's text-and-image expression. Save state artwork under the Pet's identity and let the Agent reuse suitable existing artwork when a later story calls for it.
 - Use code for necessary engineering support, including identity, persistence, host binding and reliable updates. Preserve explicitly agreed product behavior: update the target Pet/Avatar by its unique ID, and refresh its visible appearance immediately when the target is active.
-- Keep the artifacts and test data produced during development and testing; do not delete them. They are never committed to git and go to the user's Google Drive as one folder per test round: a report, per-case inputs, results, final messages, reviews and final images, and everything else in a single `raw.zip`; regenerable files (installed plugin copies, caches, `.pyc`) are not uploaded. The layout is in `tests/agent/README.zh-CN.md`「上传 Drive」. Only the summary index `docs/evidence/README.md` is tracked. Keep the repository small: it is cloned in full by the marketplace under a fixed 30-second timeout, so do not commit generated images, PDFs or run output.
+- Keep the repository small: the marketplace clones it in full under a fixed 30-second timeout, so do not commit generated images, PDFs or run output.

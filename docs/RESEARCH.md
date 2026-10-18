@@ -1,6 +1,6 @@
 # Research foundation
 
-> The theoretical background is retained below; its implementation mapping describes the pre-0.5.0 design. Current product boundaries and runtime mechanisms are defined in [the development plan](DEVELOPMENT_PLAN.zh-CN.md) and [the shared meta rules](../plugins/genpet/skills/genpet/rules.md): literal eggs, recognizable biological Pets, open individual bodies and story-driven development.
+> This page explains where GenPet's design comes from. The rules the plugin runs on are in [rules.md](../plugins/genpet/skills/genpet/rules.md), and [the architecture](ARCHITECTURE.md) shows how they are carried out.
 
 GenPet takes theoretical inspiration from **GenFaceUI: Meta-Design of Generative Personalized Facial Expression Interfaces for Intelligent Agents** and its Generative Personalized Facial Expression Interface (GPFEI) framework. It is a native Codex Pet plugin, not a replication of GenFaceUI. It applies bounded personalization and contextual expression to a companion that persists and changes over time.
 
@@ -10,22 +10,22 @@ The GPFEI framework has four connected components: personalized base-face genera
 
 GenPet translates these components into:
 
-| GPFEI component | GenPet implementation target |
+| GPFEI component | GenPet |
 | --- | --- |
-| Personalized base face | An abstract shell signature, then an identity resolved at hatching and preserved across later life stages |
-| Contextual expression | Native Codex action animations, with longer-lived contextual props |
-| Context mapping | Explicit mappings from automatically read local activity labels to visual changes |
-| Meta-design | A shared visual family, immutable identity features, permitted variation, and validation rules |
+| Personalized base face | A literal egg whose shell colors and patterns come from the adoption journey; the body designed from the genes appears at hatching and is kept, recognizably the same Pet, through later stages |
+| Contextual expression | Everyday looks (日常): what the Pet wears, holds or does and its momentary condition, drawn as a full set for every host animation slot |
+| Context mapping | The Agent observes the user's current situation from Codex memories and recent sessions and decides how this Pet responds; there is no fixed activity-to-look table |
+| Meta-design | Product rules that every design follows: specific inspiration, cute cartoon pixel style, readable at small size, at least eyes, egg stays an egg |
 
-The visual family establishes the common silhouette language, facial structure, materials, palette range, and animation semantics. Each egg receives only faint palette and abstract shell clues. A complete creature is not selected or generated at adoption. Hatching resolves the first individual from those clues, incubation evidence and a seed. Its approved identity is then preserved across maturation. The clues support retrospective continuity without revealing the answer in advance.
+The rules fix the boundaries and leave the individual open. Each egg shows only shell clues; the complete creature is designed at adoption from the user's traits and journey choices but is shown only when it hatches. The clues support continuity in hindsight without giving the answer away.
 
-## Three different time scales
+## Three time scales
 
-1. **Identity and growth:** an egg hatches after five hours; subsequent daily growth changes the life stage, proportions, and accumulated details. Elapsed time provides growth. Sustained activities can shape optional visual differences.
-2. **Five-hour context:** an authorized recent activity summary can change a prop or small scene. Context changes should preserve the character's identity and developmental stage. Missing context must not be presented as observed user behavior.
-3. **Immediate interaction:** Codex runtime actions continue to communicate current work, waiting, review, and failure. A contextual outfit must not change what an action means.
+1. **Growth:** an egg hatches within five hours. After that the Pet grows when it has accumulated enough experiences (rewrites of its memory), preferably at a real change in the user's life, with one week per stage as the latest fallback. Adults can occasionally transform (幻化) for at most two days.
+2. **Stories:** a scheduled check runs every five hours while Codex is open. Each check gives the Pet something to show: usually an everyday look, sometimes an item, a change at home or a few words.
+3. **Immediate interaction:** Codex's own animations continue to show running, waiting, review and failure. An everyday look does not change what an animation slot means.
 
-The five-hour and daily schedules are **GenPet design choices**, not timings established by the GenFaceUI study. Personality-like changes describe the companion's expression preferences; they should not be presented as diagnoses or reliable measurements of the user's personality.
+The five-hour and one-week figures are GenPet design choices, not timings established by the GenFaceUI study. The Pet's personality shapes how it responds; it is not a diagnosis or measurement of the user's personality.
 
 ## Image-generation continuity
 
@@ -37,15 +37,14 @@ For reproducible demonstrations, previously generated and reviewed assets may be
 
 ## User and designer control
 
-GenFaceUI participants requested structured inputs, parameter locking, clearer rule relationships, and lightweight explanations of how rules affected outputs. GenPet should make the following visible and editable:
+GenFaceUI participants asked for structured inputs, clearer rule relationships and lightweight explanations of how rules affected outputs. In GenPet:
 
-- Adoption preferences and immutable identity features.
-- The recent-context summary and the rule that caused a change.
-- Permitted life-stage, accessory, and scene changes.
-- Options to lock an appearance, correct context, and reject or reverse a proposed visual change.
-- An explicit distinction between real elapsed time and accelerated demo time.
+- Adoption starts with a short notice of what the Pet reads, and stops if the user declines.
+- The user's own choices in the adoption journey are real input to the design, alongside what Codex already knows about them.
+- The user names the Pet, can talk to it with `/genpet-chat`, ask for a story, growth or a replacement, and stop the scheduled checks.
+- Developers change behavior by editing the rules and unit prompts; the debugger page shows exactly what a Pet's record holds.
 
-Automatic adaptation based on user information differs from intentional user customization. A system that changes from activity data does not, on that basis alone, establish user design agency. Direct choices, corrections, locks, and rejection mechanisms provide concrete opportunities for participation.
+Adapting automatically from user information is not the same as the user designing. Direct choices and the ability to stop or replace provide the concrete points of participation.
 
 ## What this prototype does not establish
 

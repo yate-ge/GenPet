@@ -14,7 +14,7 @@ const START = Date.parse('2026-10-01T00:00:00Z'),
   HOUR = 3600000,
   DAY = 24 * HOUR;
 async function rootFor(label: string) {
-  const base = path.resolve('output/implementation-20261011/records');
+  const base = path.resolve('output/tests/records');
   await mkdir(base, { recursive: true });
   return mkdtemp(path.join(base, `${label}-`));
 }

@@ -7,7 +7,7 @@ import { findLegacyRecord, migrateLegacy } from '../src/migration.js';
 import { growth } from '../src/growth.js';
 
 async function rootFor(label: string) {
-  const base = path.resolve('output/implementation-20261011/records');
+  const base = path.resolve('output/tests/records');
   await mkdir(base, { recursive: true });
   return mkdtemp(path.join(base, `${label}-`));
 }

@@ -18,7 +18,7 @@
 
 ---
 
-市场版本为 **0.10.14**。已完成的实现、验收结果与仍需宿主证据的项目见[开发与验收摘要](docs/evidence/README.md)。
+市场版本为 **0.10.14**。各版本的改动见[更新记录](CHANGELOG.md)。
 
 Codex 的桌面宠物本来一直是同一个样子。GenPet 让它有了自己的生命：你的宠物从一颗专属于你的蛋开始，孵化成一只独一无二的小生物，在自己的故事里慢慢长大。每次变化，新的样子都会出现在你的桌面上。
 
@@ -148,7 +148,7 @@ GenPet 分为三层，大多数改动只涉及其中一层：
 | 生成 | [`plugins/genpet/skills/genpet/`](plugins/genpet/skills/genpet/) | 每个步骤一份提示词：领养、设计、故事、形象、家…… |
 | 工程 | [`src/`](src/) | 身份、保存、重试、图像文件和桌面更新 |
 
-先看 [架构说明](docs/ARCHITECTURE.zh-CN.md)，再看 [贡献指南](CONTRIBUTING.md) 和 [文档索引](docs/README.md)。开发需要 Node.js 22+：`npm ci && npm run verify:fast`。
+先看 [架构说明](docs/ARCHITECTURE.zh-CN.md)，再看 [贡献指南](CONTRIBUTING.md) 和 [发布流程](docs/RELEASING.md)。开发需要 Node.js 22+：`npm ci && npm run verify:fast`。
 
 ## 研究背景
 

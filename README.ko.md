@@ -18,7 +18,7 @@
 
 ---
 
-마켓플레이스 버전은 **0.10.14**입니다. 구현·검증 결과와 남은 호스트 확인 항목은 [개발 및 검증 요약](docs/evidence/README.md)을 참고하세요.
+마켓플레이스 버전은 **0.10.14**입니다. 버전별 변경 사항은 [변경 기록](CHANGELOG.md)을 참고하세요.
 
 Codex 데스크톱 펫은 원래 늘 같은 모습입니다. GenPet은 펫에게 삶을 줍니다. 오직 당신만을 위한 알에서 시작해, 세상에 하나뿐인 생명체로 깨어나고, 자기만의 이야기 속에서 조금씩 자랍니다. 모습이 바뀔 때마다 새 모습이 데스크톱에 나타납니다.
 
@@ -148,7 +148,7 @@ GenPet은 세 개의 층으로 되어 있고, 대부분의 변경은 그중 하�
 | 생성 | [`plugins/genpet/skills/genpet/`](plugins/genpet/skills/genpet/) | 단계마다 하나의 프롬프트: 입양, 디자인, 이야기, 모습, 집… |
 | 엔지니어링 | [`src/`](src/) | 정체성, 저장, 재시도, 이미지 파일, 데스크톱 업데이트 |
 
-먼저 [아키텍처 개요](docs/ARCHITECTURE.md)를 보고, 이어서 [기여 가이드](CONTRIBUTING.md)와 [문서 목록](docs/README.md)을 확인하세요. 개발에는 Node.js 22 이상이 필요합니다: `npm ci && npm run verify:fast`.
+먼저 [아키텍처 개요](docs/ARCHITECTURE.md)를 보고, 이어서 [기여 가이드](CONTRIBUTING.md)와 [릴리스 절차](docs/RELEASING.md)을 확인하세요. 개발에는 Node.js 22 이상이 필요합니다: `npm ci && npm run verify:fast`.
 
 ## 연구 배경
 

@@ -105,7 +105,7 @@ test('inactive, stopped, exported and unimported records schedule no wake; pause
 });
 
 test('production beginStory opens the deadline after a completed ordinary trigger, then resumes it on retry', async t => {
-  const root = path.resolve('output/implementation-20261011/scheduling-regression', randomUUID());
+  const root = path.resolve('output/tests/scheduling-regression', randomUUID());
   await mkdir(root, { recursive: true });
   const store = new Store(root, 'cloud');
   const deadline = START + 172 * HOUR;

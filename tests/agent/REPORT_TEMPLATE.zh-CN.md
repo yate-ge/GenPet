@@ -4,7 +4,7 @@
 - 范围：<A/T/S/V/C/E/G/U/D/M 的具体编号>
 - 环境：<隔离目录、宿主、专属 Pet ID/cloud ID、真实或模拟>
 - 生成与独立检查：<Agent、工具、实际图像与人工审核>
-- Google Drive：<本轮文件夹链接，目录见 [README「上传 Drive」](README.zh-CN.md#上传-drive)>
+- 产出位置：<本轮文件夹，目录见 [README「产出」](README.zh-CN.md#产出)>
 - 未验证：<缺证据的项目与下一步；不以格式通过代替>
 
 ## 用例总表

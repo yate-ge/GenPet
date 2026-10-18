@@ -22,7 +22,7 @@ from extract_strip_frames import extract_state, register_frames, extract_compone
 class ArtworkPipelineTests(unittest.TestCase):
     def setUp(self):
         parent = Path(os.environ.get("GENPET_TEST_EVIDENCE_DIR",
-                                     ROOT / "output/implementation-20261011/pipeline/test-data")) / "artwork-pipeline"
+                                     ROOT / "output/tests/pipeline/test-data")) / "artwork-pipeline"
         parent.mkdir(parents=True, exist_ok=True)
         self.run = Path(tempfile.mkdtemp(prefix="artwork-", dir=parent)).resolve()
         for directory in ("decoded", "qa", "references"):

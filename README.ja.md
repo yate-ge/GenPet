@@ -18,7 +18,7 @@
 
 ---
 
-マーケットプレイス版は **0.10.14** です。実装・検証結果と未完了のホスト確認は[開発と検証の概要](docs/evidence/README.md)をご覧ください。
+マーケットプレイス版は **0.10.14** です。各バージョンの変更は[変更履歴](CHANGELOG.md)をご覧ください。
 
 Codex のデスクトップペットは、ふつうはずっと同じ姿のままです。GenPet はそこに命を吹き込みます。あなただけのタマゴから始まり、ほかにはいない生き物として孵化し、自分の物語の中で少しずつ大きくなっていきます。姿が変わるたびに、新しい姿がデスクトップに現れます。
 
@@ -148,7 +148,7 @@ GenPet は 3 つの層でできていて、ほとんどの変更はそのうち 
 | 生成 | [`plugins/genpet/skills/genpet/`](plugins/genpet/skills/genpet/) | 手順ごとに 1 つのプロンプト：お迎え、デザイン、物語、姿、家… |
 | エンジニアリング | [`src/`](src/) | アイデンティティ、保存、再試行、画像ファイル、デスクトップの更新 |
 
-まずは [アーキテクチャの概要](docs/ARCHITECTURE.md)、次に [コントリビューションガイド](CONTRIBUTING.md) と [ドキュメント一覧](docs/README.md) をご覧ください。開発には Node.js 22 以降が必要です：`npm ci && npm run verify:fast`。
+まずは [アーキテクチャの概要](docs/ARCHITECTURE.md)、次に [コントリビューションガイド](CONTRIBUTING.md) と [リリース手順](docs/RELEASING.md) をご覧ください。開発には Node.js 22 以降が必要です：`npm ci && npm run verify:fast`。
 
 ## 研究の背景
 

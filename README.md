@@ -18,7 +18,7 @@
 
 ---
 
-The marketplace version is **0.10.14**. See the [implementation and acceptance results](docs/evidence/README.md) for completed work and remaining host checks.
+The marketplace version is **0.10.14**. See the [changelog](CHANGELOG.md) for what each version changed.
 
 A Codex desktop pet normally keeps the same look forever. GenPet gives it a life: your pet starts as an egg made just for you, hatches into a creature nobody else has, and grows up through its own stories. Every time it changes, the new look shows up on your desktop.
 
@@ -148,7 +148,7 @@ GenPet has three layers, and most changes touch only one of them:
 | Generation | [`plugins/genpet/skills/genpet/`](plugins/genpet/skills/genpet/) | One prompt per step: adoption, design, story, artwork, home… |
 | Engineering | [`src/`](src/) | Identity, saving, retries, artwork files and desktop updates |
 
-Start with the [architecture overview](docs/ARCHITECTURE.md), then see [contributing](CONTRIBUTING.md) and the [docs index](docs/README.md). Development needs Node.js 22+: `npm ci && npm run verify:fast`.
+Start with the [architecture overview](docs/ARCHITECTURE.md), then see [contributing](CONTRIBUTING.md) and the [release process](docs/RELEASING.md). Development needs Node.js 22+: `npm ci && npm run verify:fast`.
 
 ## Research background
 

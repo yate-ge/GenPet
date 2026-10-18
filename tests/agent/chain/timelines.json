@@ -1,0 +1,141 @@
+{
+  "about": "Fictional user situations for the 20-story chain test. Each step is what the context unit would observe at that check: gapH is the hours since the previous check, facts are short observations, chat is what the user left in /genpet-chat since the last story, read=failed means the sessions could not be read. The same timelines are used for every group so results can be compared.",
+  "A": [
+    { "gapH": 5, "facts": ["最近三小时的会话都叫「年会演讲 幻灯片」，用户在改第 6 到 12 页，还在继续。"] },
+    { "gapH": 5, "facts": ["同一个演讲幻灯片的会话一直延续，新会话叫「演讲 讲稿精简」，用户在把讲稿从 15 分钟压到 10 分钟。"] },
+    { "gapH": 5, "facts": ["凌晨仍有「演讲 讲稿精简」会话，最后一条在 40 分钟前。"] },
+    { "gapH": 5, "facts": ["上午没有新的非宠物会话；最后一次是凌晨的讲稿会话。"], "unknowns": ["用户是在休息还是离开电脑，不知道"] },
+    {
+      "gapH": 5,
+      "facts": ["下午出现「演讲 彩排计时」会话，用户在掐时间排练。"],
+      "chat": "栗灯，我明天就要上台讲了，有点紧张。"
+    },
+    { "gapH": 5, "facts": ["晚上会话「演讲 最后检查」，用户说「就这样吧，不改了」。"] },
+    { "gapH": 5, "facts": ["深夜到清晨没有新的非宠物会话。"] },
+    { "gapH": 5, "facts": ["中午出现会话「演讲后 整理听众提问」，用户在记录现场被问到的三个问题，说讲得比预想顺。"] },
+    { "gapH": 5, "facts": ["下午会话「周末想做的菜」，用户在找一道不太甜的南瓜汤做法。"] },
+    { "gapH": 5, "facts": ["Codex 开着，但这 5 小时没有新的非宠物会话。"] },
+    { "gapH": 5, "facts": ["晚上会话「南瓜汤 少放糖」，用户问能不能用椰奶代替淡奶油。"] },
+    { "gapH": 50, "facts": ["这两天没有任何会话，电脑大部分时间没开；上一次会话是周五晚上。"] },
+    { "gapH": 5, "facts": ["周日晚上回来，新会话「学一下 Rust 所有权」，用户在看入门教程的第 4 章。"] },
+    { "gapH": 5, "facts": ["Rust 入门会话继续，用户写了第一个能编译的小练习，说「借用检查器真严格」。"] },
+    { "gapH": 5, "facts": [], "read": "failed" },
+    {
+      "gapH": 5,
+      "facts": ["会话「Rust 练习 链表」，用户卡在可变借用上，换了三种写法。"],
+      "chat": "那碗南瓜汤我真的做了，椰奶版很好喝。"
+    },
+    { "gapH": 5, "facts": ["深夜会话「Rust 练习 链表」还在继续，最后一条在 20 分钟前。"] },
+    { "gapH": 5, "facts": ["上午会话标题「链表终于过了」，用户说用 Option 和 take 解决了。"] },
+    { "gapH": 5, "facts": ["下午会话「下个月去青岛 行程」，用户在查海边的住处。"] },
+    { "gapH": 5, "facts": ["晚上会话「青岛 行程」继续，用户订好了周六的车票。"] }
+  ],
+  "B": [
+    {
+      "gapH": 5,
+      "facts": ["The last three hours of sessions are titled \"release 2.4 checklist\"; the user is closing the final issues before Friday's release."]
+    },
+    {
+      "gapH": 5,
+      "facts": ["A new session \"flaky e2e test on checkout\" continues the release work; the user has rerun the same test many times."]
+    },
+    {
+      "gapH": 5,
+      "facts": ["Late-night session \"flaky e2e test on checkout\" is still going; the last message was 30 minutes ago."]
+    },
+    {
+      "gapH": 5,
+      "facts": ["Morning session \"found it: race in cart timer\"; the user fixed the flaky test."]
+    },
+    {
+      "gapH": 5,
+      "facts": ["Afternoon session \"release 2.4 notes\"; the user is writing release notes for users."]
+    },
+    {
+      "gapH": 5,
+      "facts": ["Evening session \"release 2.4 shipped\"; the user said the release is out."],
+      "chat": "Tuck, the release went out!"
+    },
+    { "gapH": 5, "facts": ["No new non-pet sessions overnight."] },
+    {
+      "gapH": 5,
+      "facts": ["Codex is open but there are no new non-pet sessions in these 5 hours."]
+    },
+    {
+      "gapH": 5,
+      "facts": ["Session \"docs: theming guide\"; the user is writing a guide on dark mode colors."]
+    },
+    {
+      "gapH": 5,
+      "facts": ["Session \"docs: theming guide\" continues; the user is choosing screenshots."]
+    },
+    {
+      "gapH": 5,
+      "facts": ["Session \"weekend: build a small playlist app?\"; the user is sketching an idea for a side project."]
+    },
+    {
+      "gapH": 52,
+      "facts": ["No sessions for two days; the computer was mostly off. The last session was Friday evening."]
+    },
+    {
+      "gapH": 5,
+      "facts": ["Sunday night, new session \"playlist app: pick a stack\"; the user is comparing two frameworks."]
+    },
+    {
+      "gapH": 5,
+      "facts": ["Session \"playlist app: first screen\"; the user got a list of songs to render."]
+    },
+    { "gapH": 5, "facts": [], "read": "failed" },
+    {
+      "gapH": 5,
+      "facts": ["Session \"playlist app: drag to reorder\"; the user is stuck on drag and drop."],
+      "chat": "Do you ever get bored waiting for me?"
+    },
+    {
+      "gapH": 5,
+      "facts": ["Late-night session \"playlist app: drag to reorder\" still going; last message 15 minutes ago."]
+    },
+    {
+      "gapH": 5,
+      "facts": ["Morning session \"reorder works!\"; the user got drag and drop working."]
+    },
+    {
+      "gapH": 5,
+      "facts": ["Session \"team offsite next week\"; the user is planning a talk for the team offsite."]
+    },
+    {
+      "gapH": 5,
+      "facts": ["Codex is open but there are no new non-pet sessions in these 5 hours."]
+    }
+  ],
+  "C": [
+    { "gapH": 5, "facts": ["最近的会话叫「搬家 装箱顺序」，用户在排哪些箱子先打包。"] },
+    { "gapH": 5, "facts": ["会话「搬家 装箱顺序」继续，用户说书已经装完四箱。"] },
+    { "gapH": 5, "facts": ["深夜没有新的非宠物会话。"] },
+    { "gapH": 5, "facts": ["上午会话「搬家公司 确认时间」，用户确认后天上午搬。"] },
+    { "gapH": 5, "facts": ["下午会话「花盆怎么搬」，用户在问新买的那盆花怎么带上车不伤到。"] },
+    { "gapH": 5, "facts": ["Codex 开着，这 5 小时没有新的非宠物会话。"] },
+    { "gapH": 5, "facts": ["晚上会话「搬家 最后一晚」，用户说房间已经空了，只剩床和一盏灯。"] },
+    { "gapH": 5, "facts": ["深夜到清晨没有新的非宠物会话。"] },
+    {
+      "gapH": 5,
+      "facts": ["中午会话「新家 网络」，用户说已经搬进新家，正在等宽带上门。"],
+      "chat": "麦麦，新家阳台很小，但花放得下。"
+    },
+    { "gapH": 5, "facts": ["会话「新家 拆箱」，用户在拆厨房的箱子，找不到开瓶器。"] },
+    { "gapH": 5, "facts": ["会话「新家 书桌放哪」，用户在比较靠窗还是靠墙。"] },
+    { "gapH": 48, "facts": ["这两天没有任何会话，电脑没开；上一次会话是周五晚上。"] },
+    { "gapH": 5, "facts": ["周日晚上回来，会话「新家 第一周的采购清单」。"] },
+    { "gapH": 5, "facts": [], "read": "failed" },
+    { "gapH": 5, "facts": ["会话「花 开了」，用户说阳台那盆花开了第一朵。"] },
+    { "gapH": 5, "facts": ["会话「工作 周报」，用户在写周报，内容和搬家无关。"] },
+    {
+      "gapH": 5,
+      "facts": ["会话「工作 周报」继续，用户在改第二版。"],
+      "chat": "麦麦你会想念老房子吗？"
+    },
+    { "gapH": 5, "facts": ["深夜没有新的非宠物会话。"] },
+    { "gapH": 5, "facts": ["上午会话「邀请朋友来新家吃饭」，用户在想菜单。"] },
+    { "gapH": 5, "facts": ["晚上会话「朋友来了」，用户说饭吃完了，大家都喜欢阳台那盆花。"] }
+  ]
+}
