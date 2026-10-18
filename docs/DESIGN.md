@@ -18,12 +18,12 @@ This document describes how GenPet is designed: the idea behind it, the principl
 
 ### Product
 
-1. **Stories center on the user.** Each story is a direct response to what the user is doing, so the user can tell at a glance that it is about them. The pet talks to the user, makes or gives something, or keeps them company in its own world; it never claims to act in the user's real world. See [rules.md, "故事与日常"](../plugins/genpet/skills/genpet/rules.md#故事与日常).
+1. **Stories center on the user.** Each story is a direct response to what the user is doing, so the user can tell at a glance that it is about them. The pet talks to the user, makes or gives something, or keeps them company in its own world; it never claims to act in the user's real world. See [rules.md, "故事与日常"](../plugins/genpet/skills/genpet/rules.md#故事与日常); the target outputs are in [the daily story targets](../tests/agent/targets/STORIES.zh-CN.md).
 2. **Nothing about the user is made up.** The pet's world can be imaginary; the user's actions, feelings and words cannot. Reading user information needs consent first, sensitive details are never used or saved, and only short observations with their sources are kept. See [rules.md, "用户资料与安全"](../plugins/genpet/skills/genpet/rules.md#用户资料与安全).
 3. **The rules set the boundary, the Agent designs.** Each pet is designed from a named, familiar source (a specific species, legend or character) with a reason for every main feature. There is no species catalog, body template or personality preset; randomness only picks among grounded designs.
 4. **One pet, one identity.** The egg is a literal egg that only hints at what is inside. After hatching, every stage and every new look is still recognizably the same pet. Soul, memory and state are saved together.
 5. **Cute and readable first.** Pets are cute cartoon pixel companions with at least eyes, readable at the small size the desktop shows them. A design that is unsettling or unpleasant to look at fails, whatever its story.
-6. **Three ways to change.** Everyday changes keep the body and change what the pet wears, holds or does. Growth moves through egg, hatchling, juvenile and adult. A transformation is a rare, temporary, playful change for adults. The pet's condition belongs to its own world and never mirrors the user's health or mood.
+6. **Three ways to change.** Everyday changes keep the body and change what the pet wears, holds or does. Growth moves through egg, hatchling, juvenile and adult. A transformation is a rare, temporary, playful change for adults. The pet's look follows how it responds to the user (keeping watch, celebrating, welcoming them back), but never copies the user's health or mood.
 7. **Quiet company.** The pet does not ask questions, invite replies, nag or make the user feel guilty. Growth is never shown as a number, level or progress bar.
 
 ### Engineering

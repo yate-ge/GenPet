@@ -48,6 +48,21 @@ for (let k = 1; k <= timeline.length; k++) {
       story.visualIntent ?? '',
     );
     lines.push('', `> ${oneLine(story.text)}`, '');
+    const shown = await json(path.join(dir, 'output-result.json'));
+    if (shown) {
+      const message = (shown.result ?? shown).message;
+      lines.push(
+        '用户看到的消息：',
+        '',
+        message
+          ? message
+              .split('\n')
+              .map(l => `> ${l}`)
+              .join('\n')
+          : '> （没有消息，只换了桌面上的样子）',
+        '',
+      );
+    }
     if (textOnly) lines.push('（这次纯文字，不出图）');
     lines.push('');
   }

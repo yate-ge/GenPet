@@ -31,19 +31,28 @@ for (const name of (await readdir(dir)).filter(n => n.startsWith('step-')).sort(
   const parsed = JSON.parse(await readFile(file, 'utf8'));
   const input = JSON.parse(await readFile(path.join(dir, name, 'input.json'), 'utf8')).inputs;
   const n = Number(name.slice(5));
-  steps.push({ step: n, situation: timeline[n - 1], story: parsed.result ?? parsed, surprise: input.surprise });
+  const outputFile = path.join(dir, name, 'output-result.json');
+  const shown = existsSync(outputFile) ? JSON.parse(await readFile(outputFile, 'utf8')) : null;
+  steps.push({
+    step: n,
+    situation: timeline[n - 1],
+    story: parsed.result ?? parsed,
+    surprise: input.surprise,
+    message: shown ? ((shown.result ?? shown).message ?? '（没有消息）') : undefined,
+  });
 }
 
 const dice = steps.some(s => s.surprise);
 const earlier = start.recentContent.items.map((item, i) => `${i + 1}. ${item.text}`).join('\n');
 const chain = steps
-  .map(({ step, situation, story, surprise }) =>
+  .map(({ step, situation, story, surprise, message }) =>
     [
       `### 第 ${step} 次检查（距上次 ${situation.gapH} 小时）`,
       `观察到的情况：${situation.read === 'failed' ? '这次没能读到最近的会话' : situation.facts.join(' ') || '无'}`,
       situation.chat ? `对话里留下的话：${situation.chat}` : null,
       surprise ? `骰子：${surprise.happens ? `这次要有一件「${surprise.kind}」类的意外` : '这次不加意外'}` : null,
       `故事：${story.text}`,
+      message !== undefined ? `用户看到的消息：${message}` : null,
       `联系（内部）：${story.connection}`,
       `状态意图：${story.stateIntent}`,
       `画面意图：${story.visualIntent}`,
@@ -70,7 +79,7 @@ ${
 8. 总评：`
     : '7. 总评：'
 }这条序列读起来是丰富、有期待感，还是趋于固化。一段话，具体说依据。`;
-const userQuestions = `产品的设定：宠物像用户家里养的猫，一直看着用户，故事以用户为中心，是它冲着用户此刻在做的事的反应；它的家、物件和性格是回应的方式，不是一条它自己的生活线；只有用户不在时（很久没来、读不到会话）才讲它自己在做什么。
+const userQuestions = `产品的设定：宠物像用户家里养的猫，一直看着用户，故事以用户为中心，是它冲着用户此刻在做的事的反应；它的家、物件和性格是回应的方式，不是一条它自己的生活线；只有用户不在时（很久没来、读不到会话）才讲它自己在做什么。有「用户看到的消息」时，那是 output 单元写给用户的最终消息；用户一读能否认出、说得是否直接、有没有复述用户的事，主要按这条消息和画面意图来评（这次不画图，画面意图代表桌面上会看到的样子）。
 
 1. 逐篇一行：第几次｜它做了什么（10 字内）｜用户一读是否知道它在回应自己（是/部分/否，说明）｜回应是否对得上当时观察到的情况（是/部分/否）｜是不是在写它自己的生活（是/否；用户不在时写自己不算问题，注明）｜和前面哪一篇明显重复（写篇号和重复点，没有写「无」）。
 2. 以用户为中心：多少篇直接回应用户（对用户说话、为用户做或给东西、陪着用户做这件事），多少篇在写它自己；写它自己的那些是不是都在用户不在的时候。挑出最好和最差的各两篇，写原文片段和原因。

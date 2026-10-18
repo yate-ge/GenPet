@@ -9,7 +9,7 @@
  *   variants/template.md; `dice` does the same and adds variants/dice.md with a seeded surprise roll as input.
  *   GENPET_CHAIN_TIMELINES: the timeline file (default timelines.json); a user entry also replaces the pet's memory
  *   and sets the check times. GENPET_CHAIN_CLI: the GenPet cli.js to build prompts with (default this checkout's),
- *   for running a group on an older copy of the plugin.
+ *   for running a group on an older copy of the plugin. GENPET_CHAIN_OUTPUT=1 also runs the output unit each step.
  *
  * Only the story unit runs. Between steps this script carries the result forward the way finish-story would:
  * memoryIntent rewrites memory and counts one experience, stateIntent and homeIntent become the new state, and the
@@ -101,6 +101,70 @@ const run = (cmd, args, opts = {}) =>
     child.on('close', code => resolve({ code, stdout, stderr }));
     child.stdin.end(opts.input ?? '');
   });
+
+/**
+ * Runs one unit prompt in a fresh, isolated Codex context (two attempts) and returns the contract-valid result.
+ * A step that already has a valid result file is read back instead of run again. Files are prefixed with `tag`.
+ */
+const codexUnit = async (unit, prompt, dir, tag) => {
+  const saved = path.join(dir, `${tag}result.json`);
+  if (existsSync(saved) && (await run('node', [cli, 'verify-unit', unit, saved], { cwd: root })).code === 0) {
+    const parsed = JSON.parse(await readFile(saved, 'utf8'));
+    return { result: parsed.result ?? parsed };
+  }
+  let verify;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const home = await mkdtemp(path.join(os.tmpdir(), 'genpet-chain-'));
+    const work = await mkdtemp(path.join(os.tmpdir(), 'genpet-chain-work-'));
+    await copyFile(path.join(os.homedir(), '.codex/auth.json'), path.join(home, 'auth.json'));
+    const t0 = Date.now();
+    const last = path.join(dir, `${tag}last-message-${attempt}.txt`);
+    const res = await run(
+      'codex',
+      [
+        'exec',
+        '--skip-git-repo-check',
+        '-s',
+        'read-only',
+        '-m',
+        model,
+        '-c',
+        `model_reasoning_effort="${effort}"`,
+        '-C',
+        work,
+        '--json',
+        '-o',
+        last,
+        '-',
+      ],
+      { env: { ...process.env, CODEX_HOME: home }, input: prompt },
+    );
+    await rm(path.join(home, 'auth.json'), { force: true });
+    await writeFile(path.join(dir, `${tag}codex-events-${attempt}.jsonl`), res.stdout);
+    await writeFile(path.join(dir, `${tag}codex-stderr-${attempt}.txt`), res.stderr);
+    if (existsSync(path.join(home, 'sessions')))
+      await rename(path.join(home, 'sessions'), path.join(dir, `${tag}codex-sessions-${attempt}`));
+    await rm(home, { recursive: true, force: true });
+    await rm(work, { recursive: true, force: true });
+    const ms = Date.now() - t0;
+    let result;
+    try {
+      const parsed = jsonOut(await readFile(last, 'utf8'));
+      await writeFile(saved, JSON.stringify(parsed, null, 2));
+      const v = await run('node', [cli, 'verify-unit', unit, saved], { cwd: root });
+      verify = { code: v.code, out: v.stdout.trim(), err: v.stderr.trim() };
+      if (v.code === 0) result = parsed.result ?? parsed;
+    } catch (error) {
+      verify = { code: 1, err: String(error) };
+    }
+    await writeFile(
+      path.join(dir, `${tag}run-${attempt}.json`),
+      JSON.stringify({ exit: res.code, ms, model, effort, variant, verify }, null, 2),
+    );
+    if (result) return { result, verify };
+  }
+  return { verify };
+};
 
 const iso = ms => new Date(ms).toISOString();
 const jsonOut = s => {
@@ -211,69 +275,42 @@ for (let k = 1; k <= steps; k++) {
     await writeFile(path.join(dir, 'prompt.txt'), prompt);
   }
 
-  let result;
-  let verify;
-  // Resume: a step that already has a contract-valid result is read back instead of run again.
-  const saved = path.join(dir, 'result.json');
-  if (existsSync(saved) && (await run('node', [cli, 'verify-unit', 'story', saved], { cwd: root })).code === 0) {
-    const parsed = JSON.parse(await readFile(saved, 'utf8'));
-    result = parsed.result ?? parsed;
-  }
-  for (let attempt = 1; attempt <= 2 && !result; attempt++) {
-    const home = await mkdtemp(path.join(os.tmpdir(), 'genpet-chain-'));
-    const work = await mkdtemp(path.join(os.tmpdir(), 'genpet-chain-work-'));
-    await copyFile(path.join(os.homedir(), '.codex/auth.json'), path.join(home, 'auth.json'));
-    const t0 = Date.now();
-    const last = path.join(dir, `last-message-${attempt}.txt`);
-    const res = await run(
-      'codex',
-      [
-        'exec',
-        '--skip-git-repo-check',
-        '-s',
-        'read-only',
-        '-m',
-        model,
-        '-c',
-        `model_reasoning_effort="${effort}"`,
-        '-C',
-        work,
-        '--json',
-        '-o',
-        last,
-        '-',
-      ],
-      { env: { ...process.env, CODEX_HOME: home }, input: prompt },
-    );
-    await rm(path.join(home, 'auth.json'), { force: true });
-    await writeFile(path.join(dir, `codex-events-${attempt}.jsonl`), res.stdout);
-    await writeFile(path.join(dir, `codex-stderr-${attempt}.txt`), res.stderr);
-    if (existsSync(path.join(home, 'sessions')))
-      await rename(path.join(home, 'sessions'), path.join(dir, `codex-sessions-${attempt}`));
-    await rm(home, { recursive: true, force: true });
-    await rm(work, { recursive: true, force: true });
-    const ms = Date.now() - t0;
-    try {
-      const parsed = jsonOut(await readFile(last, 'utf8'));
-      const resultFile = path.join(dir, 'result.json');
-      await writeFile(resultFile, JSON.stringify(parsed, null, 2));
-      const v = await run('node', [cli, 'verify-unit', 'story', resultFile], { cwd: root });
-      verify = { code: v.code, out: v.stdout.trim(), err: v.stderr.trim() };
-      if (v.code === 0) result = parsed.result ?? parsed;
-    } catch (error) {
-      verify = { code: 1, err: String(error) };
-    }
-    await writeFile(
-      path.join(dir, `run-${attempt}.json`),
-      JSON.stringify({ exit: res.code, ms, model, effort, variant, verify }, null, 2),
-    );
-  }
+  const { result, verify } = await codexUnit('story', prompt, dir, '');
   if (!result) {
     log.push({ step: k, at: iso(at), error: verify });
     console.error(`[${key}] step ${k} failed`, verify);
     break;
   }
   const outputs = outputsOf(result);
+  // With GENPET_CHAIN_OUTPUT=1 the output unit also runs, so the user's final message can be read. No image is drawn
+  // in this test, so the planned changes are reported as completed on the desktop and no media can be embedded.
+  let message;
+  if (process.env.GENPET_CHAIN_OUTPUT === '1') {
+    const outputInput = {
+      inputRefs: [`chain/${key}/step-${k}:story`],
+      inputs: {
+        story: result,
+        completed: {
+          appearance: outputs.includes('appearance'),
+          home: outputs.includes('home'),
+          item: outputs.includes('item'),
+          note: english
+            ? 'Test run without images: planned changes count as shown on the desktop; there is no image to embed.'
+            : '测试不画图：计划的变化当作已经显示在桌面上，没有可以嵌入的图片。',
+        },
+        availableMedia: [],
+        name: pet.name ?? null,
+      },
+    };
+    const outputFile = path.join(dir, 'output-input.json');
+    await writeFile(outputFile, JSON.stringify(outputInput, null, 2));
+    const req = await run('node', [cli, 'unit-request', 'output', outputFile], { cwd: root });
+    if (req.code) throw new Error(`output unit-request failed at step ${k}: ${req.stderr}`);
+    await writeFile(path.join(dir, 'output-request.json'), req.stdout);
+    const shown = await codexUnit('output', JSON.parse(req.stdout).prompt, dir, 'output-');
+    message = shown.result ? (shown.result.message ?? null) : undefined;
+    if (!shown.result) console.error(`[${key}] step ${k} output failed`, shown.verify);
+  }
   recent.push({
     id: `chain-${key}-${k}`,
     at,
@@ -299,6 +336,7 @@ for (let k = 1; k <= steps; k++) {
     surprise: input.inputs.surprise ?? null,
     surpriseUse: result.surprise ?? null,
     text: result.text,
+    ...(message !== undefined ? { message } : {}),
   });
   await writeFile(
     path.join(out, 'chain.json'),
