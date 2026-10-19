@@ -502,7 +502,7 @@ test('an exported main-environment record rejects every Pet write and cannot be 
         stage: 'egg',
         description: 'Source-side art',
         file: '/unused',
-        kind: 'artifact',
+        kind: 'prop',
         createdAt: START,
         source: 'Not allowed',
       });

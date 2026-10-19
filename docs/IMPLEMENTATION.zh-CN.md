@@ -1,0 +1,263 @@
+# GenPet 实现
+
+[English](IMPLEMENTATION.md)
+
+本文说明 GenPet 是怎样实现的：工程原则、分层和提示词层、一次故事的完整流程、宿主接口、两个环境、运行时模块、保存的记录，以及怎样扩展和检查。设计思路和产品原则见 [DESIGN.zh-CN.md](DESIGN.zh-CN.md)。
+
+## 工程原则
+
+1. **Agent 判断，运行时记录。** 创作内容和判断都在提示词层。`src/` 负责身份、保存记录、重试和把新形象换到 Pet Avatar 上。Agent 能根据上下文处理的情况，不写代码、固定规则或额外流程。固定机制只有几项：成长的最晚期限、每个故事必须有一张图、幻化的时间限制，以及领养时基因设计用到的来源类型权重和种子选择。
+2. **宿主是架构的一层。** 用户资料、图像生成、定时任务和 Pet Avatar 都由宿主提供。每一项要么由运行时直接调用，要么由 Agent 用宿主自带的工具完成后回报，两种方式走同一套步骤。GenPet 只用宿主 API、app-tools、IPC 和插件运行时，不控制屏幕和鼠标。
+3. **换形象要分四项检查。** 文件已写入、宿主存的图一致、已请求刷新、显示已确认。四项分别保存、分别判断；刷新请求或回读到的选中项不能证明屏幕上显示的是什么。
+4. **看实际产出。** JSON 合法或模型自称通过，既不能证明内容，也不能证明图像。生成拆成输入、结果和检查点都清楚的单元，图像要看实际生成的像素来判断。
+5. **一条规则只写一处。** 规则写在一个文件里，其他文件只链接过去。见[每条规则写在哪里](#每条规则写在哪里)。
+6. **引用方向单一。** 上层引用下层：命令入口 → 故事流程和日常功能 → 宿主适配 → 核心。
+7. **仓库保持小。** marketplace 在固定 30 秒超时内完整克隆仓库，所以生成的图片、PDF 和运行输出不进 git。
+
+## 分层
+
+![三层：宿主、提示词层、运行时。宿主里的 Agent 读取提示词层、执行运行时的命令；运行时的宿主适配通过宿主接口连到 Pet Avatar。](assets/architecture/layers.zh-CN.svg)
+
+| 层 | 位置 | 负责什么 |
+| --- | --- | --- |
+| 宿主 | Codex 桌面端（默认的主环境）、Dots（可切换为主环境） | 提供 Agent 和它用到的能力：用户资料、图像生成、定时任务、Pet Avatar。 |
+| 提示词层 | `plugins/genpet/skills/` | 规定宠物、故事、蛋和 Avatar 必须是什么，以及一次故事怎么生成。具体内容保持开放，由 Agent 在运行时决定。 |
+| 运行时 | `src/` | 身份、保存记录、重试、素材文件，以及把新形象换到 Pet Avatar 上。 |
+
+宿主内部以 Agent 为中心。用户的命令和对话通过对话框到达 Agent，定时任务在电脑开着时每 5 小时触发它检查一次。Agent 读取用户资料，用图像生成画图，并把新形象换到 Pet Avatar 上；Pet Avatar 就是用户看到的宠物。运行时也会通过宿主接口操作 Pet Avatar。
+
+这三层在桌面端和 Dots 两个环境里各有一份，其中一个是主环境，见[两个环境](#两个环境)。
+
+**Pet Avatar** 指宿主里显示这只宠物的那个条目：Codex 里的 Pet，即 `CODEX_HOME/pets/` 下的本地条目和它对应的云端 Pet。云端 Pet 有一个 cloud ID，Codex 自动同步它；在 Dots 里选同一个 cloud ID，看到的是同一只。它的列表、选中项和刷新都归宿主管。宠物记录和图片文件由 GenPet 保存在 `~/.genpet/` 下。
+
+## 提示词层
+
+提示词层在逻辑上就是 skill：一个主 skill、几个子 skill，加上一组参考文档。它们都由宿主里的 Agent 读取和执行。
+
+**主 skill** 负责基本的事：
+
+- 入口：`/genpet` 是总入口，Agent 按用户说的内容判断做哪件事（开始、近况、起名、停止、换宠物、切换桌面宠物、诊断）。另有两个独立模式的命令：`/genpet-chat` 对话，`/genpet-debug` 测试用（记录页、按需出故事、强行成长）。
+- 判断这次请求是对话、故事还是诊断，见[三类请求](#三类请求)。
+- 主流程：读记录和用户资料 → 做决定 → 画图并检查 → 换形象 → 完成 → 讲给用户。
+
+要具体决定某一类事情时，主 skill 才调用对应的子 skill。
+
+| 子 skill | 决定什么 | 什么时候调用 |
+| --- | --- | --- |
+| GeneDesigner | 这只宠物是谁，即它的 soul：领养旅程（用户做选择，最多 5 轮）、基因、性格（含说话习惯）。 | 只在领养时 |
+| StoryDesigner | 发生了什么、怎么讲：故事、成长变化、故事物件（故事里值得看的一样东西，画成一张图）、对话回复；故事完成时更新它的 memory。 | 每次故事和对话 |
+| PetDesigner | 宠物长什么样：蛋、各个阶段、日常样子、幻化，以及每个动作槽位怎样表达。 | 每次换形象 |
+| HomeDesigner | 宠物的家：布局、搬家、家的画面。 | 家有变化时 |
+| ImageReviewer | 实际画出的图是否合格。 | 验收之前 |
+
+四个 Designer 做决定，ImageReviewer 检查结果。ImageReviewer 看的是实际生成的图片文件（原图和宿主里显示的大小），对照产品规则和 Designer 写下的「必须画出什么」，结论是通过或重画。
+
+子 skill 由同一个 Agent 依次扮演。两种调用顺序：
+
+- **领养**：GeneDesigner → PetDesigner → ImageReviewer。
+- **之后的故事**：StoryDesigner → PetDesigner（只在换形象时）→ HomeDesigner（只在家有变化时）→ ImageReviewer（验收之前）。
+
+**参考文档**是主 skill 和子 skill 共用的知识，按负责的内容分开：`principles.md` 是产品原则，`units/` 是每个生成单元的提示词（`units.json` 列出它们的输入和结果），`adoption.md`、`stories.md`（故事、定时、命名）、`art.md` 和 `host.md` 是步骤和各宿主的能力，`units/output.md` 规定用户看到什么。谁用到就引用，每条规则只写一次。
+
+**单元。** 下表按角色给 12 个单元分组。单元提示词都在 `plugins/genpet/skills/genpet/units/`，任务文件说明它们的运行顺序。运行时把每个单元和产品原则一起提供，`unit-request` 和 `verify-unit` 可以单独检查某个单元的输入和结果。
+
+| 角色 | 现在对应的单元 |
+| --- | --- |
+| GeneDesigner | `encounter`、`genes`、`personality`（含说话习惯） |
+| StoryDesigner | `context`、`story`、`evolution`、`story-item`、`chat`、`output`（故事完成时重写 memory） |
+| PetDesigner | `appearance` |
+| HomeDesigner | `home` |
+| ImageReviewer | `ImageReviewer` |
+
+`context` 两边共用：领养时给 GeneDesigner 提供用户特质，之后给 StoryDesigner 提供用户活动。各规则的位置见[每条规则写在哪里](#每条规则写在哪里)。
+
+## 用户资料
+
+读取用户资料是 Agent 在写故事之前做的事。
+
+- 一份宿主参考文档，列出 Agent 在每个宿主上实际能读到的内容和限制。
+- workflow 把读取步骤放在 `context` 单元之前，领养和之后的每次故事都要经过。
+- `context` 单元已有的 `inputRefs` 用来记录每条资料的出处。「读不到」和「没有新内容」分开保存。
+
+哪些资料有用、往回看多久，由 Agent 判断。
+
+## 三类请求
+
+`/genpet` 和明确的 GenPet 请求进入下面三种处理之一，由 Agent 按用户实际问的内容来选：
+
+| 请求 | 什么时候 | 回复的写法 |
+| --- | --- | --- |
+| 对话 | 用户用 `/genpet-chat` 和宠物说话。执行 `chat` 单元，可以保存一条对话摘要。 | 宠物的口吻 |
+| 故事 | 定时、主动事件或明确的命令触发。执行上面的完整流程。 | 宠物的口吻 |
+| 诊断 | 「加载我的宠物」「它没显示」「找不到它」。执行 `diagnose`，按实际查到的问题修复，再检查一次。只处理宿主这一侧，宠物本身保持原样。 | 直接说明 |
+
+## 每条规则写在哪里
+
+| 规则 | 写在哪里 |
+| --- | --- |
+| 宠物、蛋、故事和 Avatar 必须是什么；用户怎样出现在故事里 | `plugins/genpet/skills/genpet/principles.md` |
+| 一个单元的输入、结果、判断要点和检查点 | `plugins/genpet/skills/genpet/units/` 里这个单元的提示词，以及它在 `units/units.json` 里的条目（故事多久来一次、成长节奏见 `units/story.md`、`units/evolution.md`） |
+| 怎样读取用户资料 | `plugins/genpet/skills/genpet/units/context.md` |
+| 步骤的顺序，以及该执行哪条命令 | `plugins/genpet/skills/genpet/adoption.md`、`stories.md`、`art.md` |
+| 宿主能做什么、它的格式和记录格式 | `plugins/genpet/skills/genpet/host.md` |
+| 用户能看到什么 | `plugins/genpet/skills/genpet/units/output.md`；其他回复的写法在 `SKILL.md` |
+| 一条命令什么时候适用，是否需要用户确认 | 对应的 skill，其余内容只链接到上面的文件 |
+| 由代码保证的规则：身份、pending、阶段、经历与期限、绑定、每个故事必须有一张图 | `src/` |
+
+每条规则只写在上表对应的一处，其他文件指向它所在的小节，不再复述；目录约定见 [CONTRIBUTING.md「Where to edit」](../CONTRIBUTING.md#where-to-edit)。
+
+## 一次故事的完整流程
+
+![八个步骤：宿主里的 Agent 按主 skill 的主流程执行，使用宿主提供的能力，每一步标出由主 skill 还是哪个子 skill 负责；右边是运行时的命令，保存每一步。](assets/architecture/story-flow.zh-CN.svg)
+
+图里每一步左上角的蓝色标签是负责这一步的 skill，右上角的灰色标签是这一步的条件：第 5 步在要画新图时才有，第 6 步在换形象时才有。
+
+1. 先解析宿主选中项到 Pet ID；`begin-story` 为稳定触发 ID 打开唯一未完成故事。重试返回同一故事，后续按开始时的 Pet ID 路由。
+2. 在 `context` 单元之前，Agent 按实际可读来源读取资料，保存成功、不可用或失败及出处；用户在对话里留下的话也是 context 的一项。首次领养须先得到明确同意。见[用户资料](#用户资料)。
+3. Agent 按需调用角色并用 `record-step` 保存。领养时 `random-source` 给来源类型，`random-choice` 用种子从开放的设计候选中选一个；故事由 Agent 直接决定；`journey-step` 保存待答场景与真实选择，最多五轮，可中断续接。
+4. `plan-story` 检查并保存计划，只保存一次。重试画图时沿用同一份计划。
+5. 画过的状态直接复用。要画新图时，交给一个图像协调子代理：几个执行者分工并行画出素材，协调子代理收集、汇总成整套，由 ImageReviewer 检查实际的图片文件，再用 `accept-art` 把它复制到这只宠物的素材目录，记在当前计划的请求 ID 下。
+6. 新形象通过[宿主接口](#宿主接口)换到这只宠物自己的 Pet Avatar 上，按 ID 查找。
+7. `finish-story` 原子保存 memory、state、历史和触发 ID，记录本次形象是否实际变化。新形象跟着同一个 cloud ID 云端同步。云端 Pet 的 description 只有固定的一句「你在 xx 年 xx 月 xx 日 xxx 领养了这种宠物」，由 `companion-brief` 从领养记录生成，Agent 写到这个 cloud ID 并回读；用户起名后前面加「它叫 xxx。」，宠物的其他内容不写进去。
+8. `story-output` 返回完成的故事和已保存的图片，output 单元写出最终消息，主 Agent 原样发给用户。只换了状态的检查可以没有消息；之前故事展示过的图不再嵌入。
+
+平常的检查多数是日常变化：换的是这只宠物的形象，画过的直接复用。每个故事都有一张图：场景图、物件图或家的图走第 5 步；复用画过的图时第 5 步直接用已有的；不换形象时跳过第 6 步。没有图的计划不能完成。一次故事能呈现什么见 [principles.md](../plugins/genpet/skills/genpet/principles.md) 和 [story 单元](../plugins/genpet/skills/genpet/units/story.md)。
+
+## 宿主接口
+
+![运行时里，故事流程调用宿主适配；宿主适配实现宿主接口的四个函数。桌面端适配器的每一步由运行时做或交给 Agent；Dots 适配器在 Dots 成为主环境时使用，目标是同一个云端 Pet，每一步同样看宿主允许，分给运行时或 Agent。运行时做的步骤直接到达宿主里的 Pet Avatar，其余步骤由 Agent 用宿主自带的工具做，再用 host-result 回报。下方是换形象的四项检查，finish-story 要求第二项通过。](assets/architecture/host-interface.zh-CN.svg)
+
+两个环境之间在宿主上的所有差别都放在一个接口后面，由运行时的宿主适配实现。故事流程只调用这个接口。
+
+| 函数 | 作用 |
+| --- | --- |
+| `validateArt` | 检查一张图是否符合这个宿主的格式。 |
+| `findAvatar` | 找到这只宠物实际对应的 Pet Avatar，包括宿主把本地条目映射到的云端 ID。 |
+| `setAppearance` | 把新形象换到 Pet Avatar 上：先做运行时能做的步骤，再返回留给 Agent 的步骤。 |
+| `diagnose` | 只读检查：记录、Avatar ID、宿主的 Pet 列表、本地到云端的映射、选中项、刷新通道和定时任务。初始化检查和诊断都用它。 |
+
+**两个环境走同一套步骤，换的是同一个云端 Pet。** `set-appearance` 调用 `setAppearance`。其余步骤作为清单返回给 Agent，Agent 用宿主自带的工具做完，再用 `host-result` 回报。桌面端的本地条目写入和 IPC 刷新请求由运行时自己完成，其余步骤由谁做，见[换形象的分工](#换形象的分工)。Dots 成为主环境时用同一种图集格式，给同一个 cloud ID 换图。
+
+**换的是哪个 Avatar。** 记录里保存这只宠物的本地 Avatar ID，以及最近一次查到的云端 ID。映射归宿主管，所以 `findAvatar` 每次都重新向宿主查。本地的 `custom:` 条目和它迁移后的 `pet_` ID 是同一只 Pet：新图发到云端 ID，刷新的是云端 Pet 的资源，宿主选中的 ID 与两者任一个相同，就算这只 Pet 正在使用。
+
+**四项检查，以及故事什么时候能完成。** 每次换形象分别保存四个结果：
+
+1. 文件已写入：写入或上传本身成功。
+2. 宿主存的图一致：从宿主回读的图与验收通过的图相同。
+3. 已请求刷新：请求已送达。
+4. 显示已确认：只有宿主能提供实际画面时才确认，否则保持未知。
+
+换了形象的故事，第 2 项通过后才能完成。宿主完全连不上时，故事可以带一条明确的说明完成，文件会在宿主下次加载时生效。宿主连得上但存的图不一致时，故事保持未完成，下次检查时重试。四项检查都通过宿主自己的接口完成：宿主 API、app-tools、IPC 和插件运行时。
+
+## 两个环境
+
+![Codex 桌面端和 Dots 各有同一套宿主、skills 和运行时。Codex 桌面端是默认的主环境，它的 Agent 运行 GenPet，把新形象换到云端 Pet 上；Codex 同步云端 Pet，桌面上的 Pet 和 Dots 的形象是同一只。主环境把宠物简介交给 Dots 的 Agent，Dots 原有功能不变，按这只宠物的说话风格回复。主环境可以切换到 Dots，记录跟着走。](assets/architecture/environments.zh-CN.svg)
+
+宿主、skills、运行时这一套在 Codex 桌面端和 Dots 各有一份。同一时间只有一个主环境，写故事和换形象都在主环境里做，默认是 Codex 桌面端。两个环境之间有三种联动：
+
+| 联动 | 做什么 |
+| --- | --- |
+| 1. 同一只宠物靠 cloud ID 同步 | 主环境把新形象换到云端 Pet 上，Codex 同步到两边。Dots 里选同一个 cloud ID 的 Pet。每只宠物各有一个 cloud ID。 |
+| 2. Dots 变成这只宠物 | Dots 用这只宠物的形象，按它的说话风格回复，原有的功能不变。名字、soul、memory 和 state 同步到 Dots 暂未设计，目前云端 Pet 的 `description` 只有领养那一句。 |
+| 3. 切换主环境（待实现） | 用户可以把主环境切换到 Dots。旧环境停止定时检查，记录跟着走，新环境接着写故事。 |
+
+说话风格来自记录里的两部分：拟声词和基本的说话习惯写在 soul 的性格里，对用户说话的亲疏和语气来自 memory。它用在三处：用户和宠物对话、故事里宠物说的话、Dots 的回复。
+
+Dots 的功能照常。蛋的阶段 Dots 和原来一样，只换了形象；幼年在回复的开头或结尾加一个短的拟声词；少年和成年按性格和它与用户现在的相处来说话。说话风格只用在 Dots 对用户说的话里，Dots 替用户产出的代码、文档和消息保持原样。
+
+## 运行时模块
+
+运行时内部分五部分，和图里的运行时一层对应：
+
+- **命令入口**：Agent 执行的每条命令都从这里进，每次返回一个 JSON 结果。
+- **日常功能**：检查周期、命名、对话摘要、状态和简介、近期内容及基因设计的种子选择。
+- **故事流程**：开始 → 单元结果 → 计划 → 图片 → 换形象 → 完成。身份、一次一个 pending、阶段推进、五次经历或最晚期限、每个故事必须有一张图由代码保证。
+- **宿主适配**：desktop 与 cloud 共用云 Pet 格式与同 ID 更新；负责格式检查、定位、更新、回读与诊断。
+- **核心**：保存的数据格式、加锁和原子写入。上面几部分都通过它读写记录。
+
+各部分对应的文件：
+
+| 分组 | 文件 | 做什么 |
+| --- | --- | --- |
+| 命令表 | `cli.ts` | 共用命令加上当前宿主自己的命令；帮助信息自动生成。 |
+| 故事 | `lifecycle.ts` | `begin`、`plan`、`finish`、`cancel`、`reset` 和 `story-output`。 |
+| | `growth.ts` | 成长的最晚期限：下一次故事必须包含哪次阶段推进或幻化结束；幻化不强制进入，结束后一周内不能再进入。 |
+| | `items.ts` | 物件清单：检查计划里的物件变化，故事完成时一起提交；新物件没写图时，用本故事唯一的一张道具图。 |
+| | `art.ts` | `art-request`（要画什么）和 `accept-art`（检查格式，复制到素材目录）。 |
+| | `generation.ts` | `unit-request`、`verify-unit`（只检查字段）和 `record-step`。 |
+| 日常功能 | `schedule.ts` | 检查周期、已保存的定时任务引用、距上次故事的时间。 |
+| | `naming.ts` | 孵化后邀请命名一次；只保存用户自己给的名字。 |
+| | `chat.ts` | 用户对宠物说过的话的简短摘要。 |
+| | `status.ts` | Agent 默认读取的简短摘要。 |
+| 宿主适配 | `hosts/index.ts` | 宿主接口和适配器列表。 |
+| | `hosts/result.ts` | 检查并保存宿主实际做了什么（`host-result`）。 |
+| | `hosts/desktop/` | 桌面端 Pet：`atlas` 格式、每只宠物一个条目的 `publish`、通过 IPC 路由的 `refresh`、切换当前显示本地 Pet 的 `switch`（内置和云端 Pet 用宿主的 `select_pet`）、共用的 `frames` 编解码。 |
+| | `hosts/cloud.ts`、`hosts/identity.ts` | 共用云 Pet 适配、实际映射与同 ID 定位。 |
+| 核心 | `model.ts` | 保存的数据类型和几个小的校验函数。 |
+| | `store.ts` | 无副作用的读取（`peek`）、加锁的 `transaction`、原子写入。 |
+| | `pending.ts`、`appearance.ts` | 无宿主依赖的 pending 读取、请求 ID 和计划素材解析。 |
+| 日常 | `journey.ts`、`variety.ts` | 旅程续接、来源与基因设计的种子选择。 |
+| 图像支持 | `pipeline.ts`、`vendor/hatch-pet/` | Python 运行环境、基准后并行任务、方向镜像、确定性处理、有限返工和最终图门禁。 |
+| 支持 | `config.ts`、`image.ts`、`migration.ts` | 路径和提示词文件；纯 JS 的 PNG/WebP 读取；v1 桌面端记录的显式导入。 |
+| 调试器 | `debugger/` | 可选的本地开发者调试台：查看本机宿主的 GenPet 记录、故事、家和全部形象，预览动作，在桌面显示某版形象；宿主上的其他宠物收在次要列表；不改宠物记录。 |
+
+**引用规则。** `cli` → 故事和日常功能 → 宿主适配 → 核心，只沿这个方向引用。文件保持平铺，分组表示的是引用规则。
+
+## 记录
+
+```
+~/.genpet/<host>/
+  registry.json         激活 ID、绑定与暂停账本
+  pets/<pet>/state.json 宠物、pending、历史引用、素材和任务
+  pets/<pet>/stories/   各故事与单元结果，按提交前缀读取
+  pets/<pet>/assets/    验收通过的素材：形象（atlas）、场景（scene，家是其中一种）、道具（prop）
+  backups/              重置或导入旧记录之前的完整备份
+```
+
+记录保存在主环境；`GENPET_DATA_DIR` 改根目录，宿主子目录为 desktop/cloud。把一只 Pet 的主环境切换到 Dots 待实现；以前版本导出过的记录是只读的。每次修改加锁并原子提交，单元结果已分文件保存。旧记录只读发现，确认后显式导入。各字段见 `plugins/genpet/skills/genpet/host/storage.md`。
+
+v3 的 `pet` 分成身份和三块；故事完成时提交相处记忆与当前状态，命名只改名字。
+
+```
+pet
+  id、name、naming、adoptedAt、revision、Avatar ID   身份，由代码管理
+  soul    { genes, personality, acquisition }        它是谁
+  memory  { text, updatedAt, storyId }               它记得什么
+  state   { stage, description, home, special }      它现在的状态
+```
+
+另有 `items`，记录它给过用户、带回来、留在家里的每样东西：名字、描述、来自哪个故事、图、现在的去向（给了用户、在家里、带在身上、已不在）和家里的位置。物件只增不删，不在了就标成已不在。
+
+| 块 | 内容 | 谁写、什么时候写 |
+| --- | --- | --- |
+| soul | 基因、性格（含拟声词和说话习惯）、领养的来由 | GeneDesigner，领养时写一次，之后保持不变 |
+| memory | 一段短文字：它和用户之间发生过的重要的事，现在怎样和用户相处 | StoryDesigner，故事完成时。有值得记住的真实互动才重写 |
+| state | 阶段、当前状态的描述、家、幻化（字段名 `special`） | StoryDesigner 和 HomeDesigner，每次故事完成时 |
+
+memory 记的是共同经历；对用户的了解优先读宿主记忆。旧版本的记录归入这三块。缺失的 memory 或说话习惯，在用户确认后依据原记录补一次，旧性格原文保留。
+
+每只 GenPet 有独立的目录、素材与绑定。宿主的选中项能读到时，由它决定唯一激活的 Pet；读不到时沿用上次激活的记录，未激活期间的时间冻结。初始化时的环境检查和用户的选择，由主 skill 用宿主自带的工具完成。
+
+## 换形象的分工
+
+桌面端换形象的步骤这样分：
+
+1. 云端 Pet 的图由 Agent 用宿主的 Pets 工具上传和更新（`validate_pet_spritesheet`、`prepare_pet_upload`、`update_pet`）。运行时把这些步骤作为清单返回。
+2. 本地 `custom:` 条目到云端 `pet_` ID 的映射，由运行时从客户端自己的状态文件读取。
+3. 回读时，Agent 用 `get_pet_download_link` 下载宿主存的图，运行时比较它和验收图的像素是否一致。
+
+## 扩展方式
+
+- **改一条产品原则**：改 `principles.md`。只有当某个单元的检查点依赖这条原则时，才去改那个单元的提示词。
+- **新增或修改生成单元**：提示词放在 `units/` 里，同时改 `units/units.json` 里的条目（含 `file`）。`unit-request` 和 `verify-unit` 会自动识别。
+- **新增宿主**：写一个实现宿主接口的适配器，并加上它自己的命令。在 `hosts/index.ts` 里登记，增加 `config/host.json` 和一个插件目录，把包名加到 `scripts/build-plugin.ts`，并把实测到的宿主能力写成它的参考文档。
+- **新增命令**：在 `cli.ts` 的命令表里加一项；只有一个宿主需要时，加到那个适配器的 `commands` 里。逻辑留在功能模块里。
+- **修改 skill**：直接改 `plugins/genpet/skills/`，这是唯一的一份。
+
+## 插件包
+
+`npm run build:plugin` 把 src 打包到 dist，并生成包里的 package.json。`plugins/genpet/` 里其余内容（manifest、skills、调试页面、host 配置、README、安装校验脚本和 vendor 图像流水线）都直接在原处修改。
+
+## 检查
+
+`npm run verify:fast` 检查类型、格式和单元测试。`npm run verify:release` 另外构建、在隔离 Codex home 安装 genpet、核对全部文件哈希，并运行已安装 CLI 和调试器。输出与夹具保留在 output/。实际故事和图像按 tests/agent/README.zh-CN.md 执行和审核，并和 [tests/agent/targets/](../tests/agent/targets/) 里的目标输出（日常故事、领养旅程）对照，目标输出怎样维护见 [CONTRIBUTING](../CONTRIBUTING.md#target-outputs)。

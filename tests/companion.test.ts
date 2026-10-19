@@ -11,7 +11,7 @@ import { beginStory, planStory, finishStory, resetPet } from '../src/lifecycle.j
 import { recordStep, unitRequest, validateUnitResult } from '../src/generation.js';
 import { artRequest, acceptArt } from '../src/art.js';
 import { namingDue, markNameAsked, namePet } from '../src/naming.js';
-import { journeyReady, initialPlan, initialization, image, personality, hostDone } from './fixtures.js';
+import { journeyReady, initialPlan, initialization, image, personality, hostDone, storyImage } from './fixtures.js';
 
 async function isolated(run: (store: Store, root: string) => Promise<void>) {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-companion-'));
@@ -75,12 +75,13 @@ test('new personalities use an open text unit and commit only with successful ad
       contextRefs: ['fixture:synthetic-context'],
       state: initialPlan.state,
     });
+    await storyImage(store, root);
     await finishStory(store, next);
     assert.equal((await store.peek()).pet!.soul.personality, personality);
   }));
 
 test('old records retain their name on read and backfill personality through one completed story', async () =>
-  isolated(async store => {
+  isolated(async (store, root) => {
     await store.transaction(state => {
       state.pet = createPet('Existing name');
       delete state.pet.naming;
@@ -116,6 +117,7 @@ test('old records retain their name on read and backfill personality through one
       personality,
     });
     assert.equal((await store.peek()).pet!.soul.personality, undefined);
+    await storyImage(store, root);
     await finishStory(store, op);
     const after = (await store.peek()).pet!;
     assert.equal(after.id, pet.id);
@@ -186,6 +188,7 @@ test('the completed hatch invites naming once and an unanswered invitation does 
       contextRefs: ['fixture:synthetic-context'],
       state: 'Listening',
     });
+    await storyImage(store, root);
     await finishStory(store, interrupted);
     assert.equal(namingDue(await store.peek()), true);
     assert.equal((await markNameAsked(store, petId)).asked, true);
@@ -197,6 +200,7 @@ test('the completed hatch invites naming once and an unanswered invitation does 
       contextRefs: ['fixture:synthetic-context'],
       state: 'Listening',
     });
+    await storyImage(store, root);
     await finishStory(store, next);
     assert.equal(namingDue(await store.peek()), false);
     assert.equal((await store.peek()).pet!.naming!.status, 'asked');

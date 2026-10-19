@@ -139,7 +139,7 @@
   <rect x="334" y="513" width="150" height="18" rx="9" fill="#D6E2F6" stroke="#9CB3DC"/>
   <text class="pill" x="409" y="525.5" text-anchor="middle" fill="#2F4A7A">PetDesigner · ImageReviewer</text>
   <rect x="531" y="513" width="75" height="18" rx="9" fill="#F3F3F0" stroke="#B7BFAE"/>
-  <text class="pill" x="568.5" y="525.5" text-anchor="middle" fill="#4A5646">with images</text>
+  <text class="pill" x="568.5" y="525.5" text-anchor="middle" fill="#4A5646">when drawing</text>
   <circle cx="316" cy="522" r="11" fill="#4E6B22"/><text class="num" x="316" y="526.3" text-anchor="middle">5</text>
   <rect x="684" y="522" width="280" height="60" rx="8" fill="#FFFFFF" stroke="#D8B978"/>
   <text class="cmd" x="824" y="547" text-anchor="middle">accept-art</text>

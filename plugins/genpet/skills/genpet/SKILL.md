@@ -17,7 +17,6 @@ description: Manage the user's GenPet through /genpet or explicit GenPet request
 | 停止定时检查 | 只停 `status.schedule.reference` 对应的那个任务，再 `schedule-stop`；记录和手动故事保留，开始会恢复。用户明确说了就直接做，完成后用一句话说明。 |
 | 换一只、重新养、再养一只 | 见「环境检查」里的替换与新增。 |
 | 没加载、不显示、列表里找不到、切换宠物 | [host.md](host.md)「Codex 桌面」，先检查，分开说四项实际结果。 |
-| Dots | [host.md](host.md)「同一只 Pet 在 Dots」，先检查宿主实际的能力。 |
 | 定时触发 | [stories.md](stories.md)「定时检查 · 每次运行」。 |
 | 和宠物说话 | 用 /genpet-chat，它是唯一的对话入口。 |
 | 手动来一篇故事、强行成长或幻化、看原始记录 | 这些是调试用途，按 /genpet-debug 处理（`../genpet-debug/SKILL.md`）。 |
@@ -38,7 +37,7 @@ description: Manage the user's GenPet through /genpet or explicit GenPet request
 
 - 会读什么：Codex 已整理好的、可读的用户记忆；最近会话的时间和名称（需要时看用户自己说的话），用来了解用户在做什么；以及和宠物有关的记录。
 - 用来做什么：设计宠物、写故事。
-- 怎么处理：敏感和隐私的内容会过滤；只保存简短的笔记和必要的摘要，不保存会话原文；Pet 的记录和生成的图存在这台电脑上，图和简介会同步到云端的 Pet。
+- 怎么处理：敏感和隐私的内容会过滤；只保存简短的笔记和必要的摘要，不保存会话原文；Pet 的记录和生成的图存在这台电脑上，图会同步到云端的 Pet。
 
 说明与实际的宿主一致。云端作为主环境时，说明它实际的存放位置，不承诺只存本地。不说“什么都没有收集或上传”。
 
@@ -46,7 +45,7 @@ description: Manage the user's GenPet through /genpet or explicit GenPet request
 
 ## 需要时再读
 
-- 步骤：[adoption.md](adoption.md)（领养）、[stories.md](stories.md)（故事、定时、命名）、[art.md](art.md)（图像）、[host.md](host.md)（宿主、Dots、记录）。
+- 步骤：[adoption.md](adoption.md)（领养）、[stories.md](stories.md)（故事、定时、命名）、[art.md](art.md)（图像）、[host.md](host.md)（宿主、记录）。
 - 每个生成单元的提示词在 `units/` 下，由运行时按单元提供；产品原则 [principles.md](principles.md) 随每个单元一起加载。
 - 用户看到的故事消息格式：[units/output.md](units/output.md)。
 

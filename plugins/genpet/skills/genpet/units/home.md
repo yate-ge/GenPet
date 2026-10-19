@@ -19,10 +19,11 @@
 
 ## 结果
 
+- `items`：这次放进家里、挪动或收起的物件及位置（`at-home` 加 `place`），清单看 status 的 `items`。
 - `home`：变化后的完整家描述，含位置、周围、按它的习惯形成的分区、当前摆放、与旧家的联系；无变化为 null。
 - `visual`：`{purpose, form, mustShow, request, references}` 或 null。
 
 ## 检查
 
-- 物件的来源和去向有故事依据，没有隐私事实。
+- 物件的来源和去向有故事依据，没有隐私事实；家里的物件和 `items` 里 `at-home` 的一致，旧物不无故消失。
 - 描述和真实的图一致。

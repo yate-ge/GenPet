@@ -123,7 +123,19 @@ export function normalizeRecord(input: unknown, host: Host, file?: string, impor
     ...(story.hostResult ? { hostResult: hostResult(story.hostResult) } : {}),
     ...(story.steps ? { steps: story.steps.map(normalizeStep) } : {}),
   }));
-  result.art = (record.art ?? []).map((art: any) => ({ ...art, source: art.source ?? 'Preserved legacy artwork' }));
+  // Before 0.11 story images were `story` and non-image files `artifact`; a story that changed the home showed it.
+  const homeStories = new Set<string>();
+  (record.stories ?? []).forEach((story: any, index: number) => {
+    if (story.home !== undefined && story.home !== record.stories[index - 1]?.home) homeStories.add(story.id);
+  });
+  result.art = (record.art ?? []).map((art: any) => {
+    const kind = art.kind === 'story' ? 'scene' : art.kind === 'artifact' ? 'prop' : art.kind;
+    const home =
+      kind === 'scene' &&
+      art.home === undefined &&
+      (record.stories ?? []).some((story: any) => homeStories.has(story.id) && story.mediaIds?.includes(art.id));
+    return { ...art, kind, ...(home ? { home: true } : {}), source: art.source ?? 'Preserved legacy artwork' };
+  });
   if (result.pending) {
     if (result.pending.hostResult) result.pending.hostResult = hostResult(result.pending.hostResult);
     if (result.pending.steps) result.pending.steps = result.pending.steps.map(normalizeStep);

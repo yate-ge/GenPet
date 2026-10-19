@@ -13,7 +13,7 @@ import { dueStory, setSchedule, stopSchedule, timeSense } from '../src/schedule.
 import { artRequest, acceptArt } from '../src/art.js';
 import { bindCloud as bindAvatar } from '../src/hosts/cloud.js';
 import { createPet } from '../src/model.js';
-import { journeyReady, initialPlan, initialization, image, hostDone } from './fixtures.js';
+import { journeyReady, initialPlan, initialization, image, hostDone, storyImage } from './fixtures.js';
 test('identity is persisted once, reads do not age it, and competing triggers cannot create another pet', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-story-'));
   const store = new Store(root);
@@ -64,11 +64,12 @@ test('saved state art is reusable across stories; completion and retries preserv
     });
     assert.equal(artRequest(await store.peek())!.status, 'ready');
     await hostDone(store, next);
+    await storyImage(store, root);
     await finishStory(store, next);
     const s = await store.peek();
     assert.equal(s.pet!.id, identity.id);
     assert.equal(s.pet!.soul.genes, initialPlan.genes);
-    assert.equal(s.art.length, 1);
+    assert.equal(s.art.filter(art => art.kind !== 'scene').length, 1);
     assert.equal(s.stories.length, 2);
     assert.equal(s.pet!.state.appearanceId, art.id);
     await access(art.file);

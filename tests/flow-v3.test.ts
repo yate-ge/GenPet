@@ -6,8 +6,8 @@ import { randomUUID } from 'node:crypto';
 import { Store } from '../src/store.js';
 import { beginStory, finishStory, planStory, storyOutput } from '../src/lifecycle.js';
 import { journeyStep } from '../src/journey.js';
-import { chooseCandidate, chooseSource, sourceFromSeed, recentContent } from '../src/variety.js';
-import { journeyReady, initialPlan, image, hostDone } from './fixtures.js';
+import { chooseCandidate, chooseSource, sourceFromSeed } from '../src/variety.js';
+import { journeyReady, initialPlan, image, hostDone, storyImage } from './fixtures.js';
 import { acceptArt, artRequest } from '../src/art.js';
 import { recordStep } from '../src/generation.js';
 import { growth } from '../src/growth.js';
@@ -161,42 +161,20 @@ test('a saved source/candidate choice resumes exactly and rejects revised candid
   );
 });
 
-test('unreferenced text is rejected and two committed text-only stories force visible content', async () => {
+test('a story without an image cannot complete', async () => {
   const { store, root } = await isolated();
   await adopted(store, root);
-  for (let i = 0; i < 2; i++) {
-    const op = (await beginStory(store, `text-${i}`)).pending!.id;
-    await planStory(store, op, {
-      text: `A source-grounded thought ${i}`,
-      reason: 'Synthetic context',
-      state: 'Calm',
-      contextRefs: ['fixture:shared-event'],
-    });
-    await finishStory(store, op);
-  }
-  const op = (await beginStory(store, 'third-text')).pending!.id;
+  const op = (await beginStory(store, 'no-image')).pending!.id;
   await planStory(store, op, {
-    text: 'Third thought',
-    reason: 'Same context',
+    text: 'A thought with nothing to show.',
+    reason: 'Synthetic context',
     state: 'Calm',
     contextRefs: ['fixture:shared-event'],
   });
-  await assert.rejects(() => finishStory(store, op), /At most two/);
+  await assert.rejects(() => finishStory(store, op), /needs an image/);
   assert.equal((await store.peek()).pending!.id, op);
-});
-
-test('a made-up context reference cannot complete a text-only story', async () => {
-  const { store, root } = await isolated();
-  await adopted(store, root);
-  const op = (await beginStory(store, 'invented-reference')).pending!.id;
-  await planStory(store, op, {
-    text: 'A thought',
-    reason: 'Synthetic attempted reference',
-    state: 'Calm',
-    contextRefs: ['missing:user-fact'],
-  });
-  await assert.rejects(() => finishStory(store, op), /not present in the saved inputs/);
-  assert.equal((await store.peek()).stories.length, 1);
+  await storyImage(store, root);
+  assert.equal((await finishStory(store, op)).mediaIds.length, 1);
 });
 
 test('story-output gives the output its Pet name only after the user names it', async () => {
@@ -212,7 +190,7 @@ test('story-output marks media an earlier story already showed', async () => {
   await adopted(store, root);
   await store.transaction(state => {
     const first = state.stories[0];
-    const art = { ...state.art[0], id: 'home-shown', kind: 'story' as const };
+    const art = { ...state.art[0], id: 'home-shown', kind: 'scene' as const };
     state.art.push(art);
     first.mediaIds = [...first.mediaIds, art.id];
     state.stories.push({ ...first, id: 'reuses-home', triggerId: 'reuses-home', mediaIds: [art.id] });
@@ -240,31 +218,6 @@ test('a story is decided directly; seeded choice is only for the genes design', 
   assert.equal((await store.peek()).pending!.selection, undefined);
 });
 
-test('a saved Pet-only story or its memory ID cannot substitute for a user-related text context', async () => {
-  const { store, root } = await isolated();
-  await adopted(store, root);
-  await store.transaction(state => {
-    const previous = state.stories[0];
-    state.stories.push({
-      ...previous,
-      id: 'pet-only-world',
-      triggerId: 'pet-only-world',
-      text: 'A fictional cloud passed its window without any user-related input.',
-      contextRefs: [],
-    });
-    state.pet!.memory = { text: 'A cloud passed.', storyId: 'pet-only-world', updatedAt: Date.now() };
-  });
-  const op = (await beginStory(store, 'pet-only-reference')).pending!.id;
-  await planStory(store, op, {
-    text: 'Another thought about that cloud.',
-    reason: 'Pet-only reference is a negative fixture.',
-    state: 'Quiet',
-    contextRefs: ['pet-only-world'],
-  });
-  await assert.rejects(() => finishStory(store, op), /not present in the saved inputs/);
-  assert.equal((await store.peek()).pending!.id, op);
-});
-
 test('a final nonempty story item cannot silently finish without its actual image', async () => {
   const { store, root } = await isolated();
   await adopted(store, root);
@@ -288,7 +241,7 @@ test('a final nonempty story item cannot silently finish without its actual imag
   const media = await acceptArt(store, {
     requestId: artRequest(await store.peek())!.id,
     file,
-    kind: 'story',
+    kind: 'scene',
     source: 'Synthetic media completion regression; no semantic acceptance',
   });
   assert.ok((await finishStory(store, op)).mediaIds.includes(media.id));
@@ -312,6 +265,7 @@ test('the latest item decision may explicitly omit its image while a requested h
     contextRefs: ['fixture:shared-event'],
     state: 'Calm',
   });
+  await storyImage(store, root);
   await finishStory(store, op);
   const next = (await beginStory(store, 'required-home-image')).pending!.id;
   await recordStep(store, next, 'home', {
@@ -325,36 +279,4 @@ test('the latest item decision may explicitly omit its image while a requested h
     state: 'Resting',
   });
   await assert.rejects(() => finishStory(store, next), /accept its actual media/);
-});
-
-test('an imported Pet without story history still permits only two consecutive text-only stories', async () => {
-  const { store, root } = await isolated();
-  await adopted(store, root);
-  const source = await store.peek();
-  source.stories = [];
-  const sourceFile = path.join(root, 'imported-existing-pet-without-history.json');
-  await writeFile(sourceFile, JSON.stringify(source, null, 2));
-  const imported = new Store(path.join(root, 'import-destination'), 'cloud');
-  await imported.importRecord(sourceFile, { confirmed: true });
-  for (let i = 0; i < 2; i++) {
-    const op = (await beginStory(imported, `imported-text-${i}`)).pending!.id;
-    await planStory(imported, op, {
-      text: `A thought about the preserved journey ${i}`,
-      reason: 'Synthetic preserved journey input',
-      state: 'Calm',
-      contextRefs: ['fixture:shared-event'],
-    });
-    const story = await finishStory(imported, op);
-    assert.equal(story.appearanceChanged, false);
-    assert.equal(recentContent(await imported.peek()).textOnlyStreak, i + 1);
-  }
-  const op = (await beginStory(imported, 'imported-third-text')).pending!.id;
-  await planStory(imported, op, {
-    text: 'A third consecutive thought',
-    reason: 'Synthetic preserved journey input',
-    state: 'Calm',
-    contextRefs: ['fixture:shared-event'],
-  });
-  await assert.rejects(() => finishStory(imported, op), /At most two/);
-  assert.equal((await imported.peek()).stories.length, 2);
 });

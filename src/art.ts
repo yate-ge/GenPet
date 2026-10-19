@@ -29,6 +29,7 @@ export function artRequest(state: State) {
     appearance: plan.appearance,
     // The Agent chooses identity references and reusable appearances from this pet's accepted art.
     savedArt: state.art.filter(art => art.petId === pet.id),
+    items: state.items ?? [],
     prompt: readPrompt('meta') + '\n' + readPrompt('appearance'),
     contract: hostFor(state.host).artContract,
     target: pet.binding ?? null,
@@ -38,8 +39,7 @@ export function artRequest(state: State) {
 /** Structural checks only; whether the image is right is judged by image review. */
 export async function validateImage(file: string, kind: ArtKind) {
   const info = await stat(file);
-  if (!info.isFile() || info.size > 64 * 1024 * 1024) throw new Error('Artifact must be a regular file below 64 MiB');
-  if (kind === 'artifact') return { format: 'artifact', width: 0, height: 0, hasAlpha: false };
+  if (!info.isFile() || info.size > 64 * 1024 * 1024) throw new Error('Artwork must be a regular file below 64 MiB');
   const meta = await readImageInfo(file);
   if ((kind === 'portrait' || kind === 'atlas') && !meta.hasAlpha)
     throw new Error('Pet images must have an alpha channel');
@@ -52,13 +52,14 @@ export async function validateImage(file: string, kind: ArtKind) {
 /** `accept-art`: copy a reviewed file into this pet's assets under the current request. Idempotent. */
 export async function acceptArt(
   store: Store,
-  input: { requestId: string; file: string; kind: ArtKind; source: string; description?: string },
+  input: { requestId: string; file: string; kind: ArtKind; source: string; description?: string; home?: boolean },
 ) {
   if (typeof input.requestId !== 'string' || !input.requestId.trim())
     throw new Error('accept-art REQUEST_ID must be a non-empty string from art-request.id');
   if (typeof input.file !== 'string' || !path.isAbsolute(input.file))
-    throw new Error('Artifact file must be an absolute local path');
-  if (!artKinds.includes(input.kind)) throw new Error('Unknown artifact kind');
+    throw new Error('Artwork file must be an absolute local path');
+  if (!artKinds.includes(input.kind)) throw new Error(`Unknown art kind; use ${artKinds.join(', ')}`);
+  if (input.home && input.kind !== 'scene') throw new Error('Only a scene can show the home');
   if (!input.source?.trim()) throw new Error('Record generation and validation source');
   await validateImage(input.file, input.kind);
   const bytes = await readFile(input.file);
@@ -70,7 +71,7 @@ export async function acceptArt(
     const pet = state.pet!;
     const plan = state.pending!.plan!;
     const id = `art-${createHash('sha256')
-      .update(pet.id + input.requestId + input.kind)
+      .update(pet.id + input.requestId + input.kind + (input.home ? 'home' : ''))
       .update(bytes)
       .digest('hex')
       .slice(0, 24)}`;
@@ -99,6 +100,7 @@ export async function acceptArt(
       kind: input.kind,
       createdAt: Date.now(),
       source: input.source,
+      ...(input.home ? { home: true } : {}),
     };
     state.art.push(record);
     return record;

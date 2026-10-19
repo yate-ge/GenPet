@@ -463,6 +463,7 @@ dd {
 }
 .kind-appearance,
 .kind-home,
+.kind-scene,
 .kind-item {
   background: var(--accent-soft);
   color: var(--accent);
@@ -783,4 +784,11 @@ table.list th {
   #env {
     display: none;
   }
+}
+.items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
 }

@@ -26,7 +26,7 @@ import { Store } from './store.js';
 import { journeyStep } from './journey.js';
 import { chooseCandidate, chooseSource, recentContent } from './variety.js';
 import { pipelinePrepare, pipelineProcess, pipelineRuntime } from './pipeline.js';
-import { cloudBriefForPet } from './status.js';
+import { adoptionLine } from './status.js';
 
 /** JSON inputs are passed as absolute file paths, never inline. */
 async function jsonFile(file: string) {
@@ -91,36 +91,26 @@ const shared: Record<string, Command> = {
   'set-appearance': { usage: 'set-appearance', run: (_, store) => hostFor(store.host).setAppearance(store) },
   diagnose: { usage: 'diagnose', run: (_, store) => hostFor(store.host).diagnose(store) },
   'companion-brief': {
-    usage: 'companion-brief [BRIEF_DRAFT_JSON]',
-    run: async ([file], store) => {
+    usage: 'companion-brief',
+    run: async (_, store) => {
       const state = await store.peek();
       if (!state.pet) throw new Error('No Pet');
       const target = await hostFor(store.host).findAvatar(state);
-      const brief = cloudBriefForPet(state.pet, file ? await jsonFile(file) : undefined);
+      const description = adoptionLine(state.pet);
       return {
-        ...brief,
+        petId: state.pet.id,
         cloudId: target.cloudId,
-        agentSteps: brief.needsSummary
+        description,
+        agentSteps: target.cloudId
           ? [
+              { tool: 'update_pet', arguments: { pet_id: target.cloudId, updates: { description } } },
               {
-                command: 'companion-brief ABSOLUTE_DRAFT_JSON',
+                tool: 'list_pets',
                 check:
-                  'Summarize sourceBrief into at most 500 characters, preserving the actual name, soul and speaking habits, shared memory and current stage/state. Save {petId, revision, description}; review the summary against the source, then rerun this command. Do not truncate fields or invent facts.',
+                  'Read the exact Pet ID back and compare its description with this text before claiming synchronization.',
               },
             ]
-          : target.cloudId
-            ? [
-                {
-                  tool: 'update_pet',
-                  arguments: { pet_id: target.cloudId, updates: { description: brief.description } },
-                },
-                {
-                  tool: 'list_pets',
-                  check:
-                    'Read the exact Pet ID back and compare its description with this generated brief before claiming synchronization.',
-                },
-              ]
-            : [],
+          : [],
       };
     },
   },
@@ -134,14 +124,22 @@ const shared: Record<string, Command> = {
     run: async ([run, file]) => pipelineProcess(run, file ? await jsonFile(file) : {}),
   },
   'accept-art': {
-    usage: 'accept-art REQUEST_ID FILE portrait|atlas|story|artifact SOURCE [DESCRIPTION]',
+    usage: 'accept-art REQUEST_ID FILE portrait|atlas|scene|home|prop SOURCE [DESCRIPTION]',
     run: (args, store) => {
       if (args.length < 4 || args.length > 5)
         throw new Error(
-          'Usage: accept-art REQUEST_ID FILE portrait|atlas|story|artifact SOURCE [DESCRIPTION]; REQUEST_ID is art-request.id',
+          'Usage: accept-art REQUEST_ID FILE portrait|atlas|scene|home|prop SOURCE [DESCRIPTION]; REQUEST_ID is art-request.id',
         );
       const [requestId, file, kind, source, description] = args;
-      return acceptArt(store, { requestId, file, kind: kind as ArtKind, source, description });
+      // `home` is a scene that shows the home.
+      return acceptArt(store, {
+        requestId,
+        file,
+        kind: (kind === 'home' ? 'scene' : kind) as ArtKind,
+        source,
+        description,
+        ...(kind === 'home' ? { home: true } : {}),
+      });
     },
   },
   'host-result': {

@@ -4,23 +4,23 @@ Notable changes to the GenPet plugin. Versions follow [semantic versioning](http
 
 ## Unreleased
 
+- The Pet keeps a list of everything it gave the user, brought back or left at home: which story it came from, its image, and where it is now (with the user, at home, carried, gone). Stories write item changes in the plan; `status` shows the full list and every look of the Pet, and the record page has an item tab.
+- Story images are now `scene` (the Pet in a place, or the place alone; `home` marks the home), `prop` (a thing the story is about) and `atlas` (the Pet's look). They replace `story` and `artifact`, which was never counted as an image. Existing records read the old names as `scene` and `prop`, and a scene from a story that changed the home reads as the home. `accept-art` takes `portrait|atlas|scene|home|prop`.
+
+- Every story has one image: a scene of the Pet doing something, a change of form (everyday look, growth or transformation), or an item it brings or gives. A story without an image cannot complete; the old rule allowing up to two text-only stories in a row is gone.
+- The design document is rewritten around the idea (a virtual pet that grows with the user), the story principles and the three kinds of image; the engineering principles and the framework moved to the implementation document.
+
 ## 0.10.16 — 2026-10-18
 
 - Commands reduced to three. `/genpet` handles everything from what the user asks: start or resume, status, naming, pausing or resuming the scheduled checks, replacing the Pet or adding another, switching the desktop Pet and diagnosis. `/genpet-chat` is unchanged. `/genpet-debug` replaces `/genpet-story`, `/genpet-grow` and `/genpet-debugger`: open the record page, request a story, or force a growth step or transformation. `/genpet-start`, `/genpet-stop`, `/genpet-reset` and `/genpet-switch` are removed; existing Pets, records and schedules are unchanged.
-- The skill prompts are reorganized: one short `principles.md` is served with every unit, each unit prompt carries its own rules, and the procedures are in four task files. The old reference-only relationship notes became part of the personality unit. Development and test notes were removed from the shipped files.
+- The skill prompts are reorganized: one short `principles.md` is served with every unit, each unit prompt carries its own rules, and the procedures are in four task files. The old reference-only relationship notes became part of the personality unit.
 - Stories keep company with a similar thing in the Pet's own world, shown mostly by its look. The narration says only what it did, and the user's own thing is named only in what it says.
 - Release checks: the plugin directory is checked against a list of shipped entries, and a unit test checks that every unit prompt loads and every link in the skills resolves.
-- The repository documents are the README, CONTRIBUTING and `docs/DESIGN.md`. The design document merges the architecture and research pages and adds the design idea and principles; agent install steps moved into the README and the release process into CONTRIBUTING. AGENTS.md now points development agents to the design document.
 
 ## 0.10.15 — 2026-10-18
 
 - Frame extraction no longer treats background specks as missing pose anchors when sprite components are joined.
 - Jump registration rejects abnormally large intermediate images before allocating them, while preserving ordinary overflow and shared-atlas fitting.
-
-- The repository keeps only user and contributor documentation. Development plans, content examples, research notes and run records moved out of `docs/`.
-- Test cases moved to `tests/agent/CASES.zh-CN.md`. Test output goes under the ignored `output/` directory.
-- Added this changelog, a security policy and `docs/RELEASING.md`.
-- The plugin README describes the plugin for users instead of its development status.
 
 ## 0.10.14 — 2026-10-17
 
@@ -43,7 +43,6 @@ Notable changes to the GenPet plugin. Versions follow [semantic versioning](http
 
 - The debugger lists this machine's Pets, marks GenPets, can switch the host selection and was redesigned as a two-pane console.
 - The plugin has an icon. The user connection is expressed in the Pet's reaction.
-- Test procedures and test-derived examples were moved out of runtime prompts.
 
 ## 0.10.1 – 0.10.4 — 2026-10-13 to 2026-10-15
 

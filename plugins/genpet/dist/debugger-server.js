@@ -2412,7 +2412,15 @@ function normalizeRecord(input, host, file, importing = false) {
     ...story.hostResult ? { hostResult: hostResult(story.hostResult) } : {},
     ...story.steps ? { steps: story.steps.map(normalizeStep) } : {}
   }));
-  result.art = (record2.art ?? []).map((art) => ({ ...art, source: art.source ?? "Preserved legacy artwork" }));
+  const homeStories = /* @__PURE__ */ new Set();
+  (record2.stories ?? []).forEach((story, index) => {
+    if (story.home !== void 0 && story.home !== record2.stories[index - 1]?.home) homeStories.add(story.id);
+  });
+  result.art = (record2.art ?? []).map((art) => {
+    const kind = art.kind === "story" ? "scene" : art.kind === "artifact" ? "prop" : art.kind;
+    const home = kind === "scene" && art.home === void 0 && (record2.stories ?? []).some((story) => homeStories.has(story.id) && story.mediaIds?.includes(art.id));
+    return { ...art, kind, ...home ? { home: true } : {}, source: art.source ?? "Preserved legacy artwork" };
+  });
   if (result.pending) {
     if (result.pending.hostResult) result.pending.hostResult = hostResult(result.pending.hostResult);
     if (result.pending.steps) result.pending.steps = result.pending.steps.map(normalizeStep);
@@ -2947,6 +2955,7 @@ var Store = class _Store {
           "pet",
           "stories",
           "art",
+          "items",
           "pending",
           "chats",
           "growthClock",
@@ -3078,13 +3087,12 @@ function requestId(state) {
 // src/variety.ts
 function storyOutputs(story, previous, state) {
   const result = [];
-  const appearanceChanged = typeof story.appearanceChanged === "boolean" ? story.appearanceChanged : previous ? story.appearanceId !== previous.appearanceId : state?.pet?.soul.acquisition?.storyId === story.id;
+  const appearanceChanged = typeof story.appearanceChanged === "boolean" ? story.appearanceChanged : previous ? story.appearanceId !== previous.appearanceId : state.pet?.soul.acquisition?.storyId === story.id;
   if (story.appearanceId && appearanceChanged) result.push("appearance");
-  if (story.mediaIds.some((id) => !state || state.art.some((art) => art.id === id && art.kind !== "artifact"))) {
-    if (story.home !== void 0 && story.home !== previous?.home) result.push("home");
-    else result.push("item");
-  }
-  return result;
+  for (const art of state.art.filter((art2) => story.mediaIds.includes(art2.id)))
+    if (art.kind === "prop") result.push("item");
+    else if (art.kind === "scene") result.push(art.home ? "home" : "scene");
+  return [...new Set(result)];
 }
 
 // src/hosts/desktop/atlas.ts
@@ -3144,23 +3152,12 @@ function desiredAppearance(state) {
 }
 
 // src/status.ts
-function briefForPet(pet) {
-  return JSON.stringify({
-    id: pet.id,
-    name: pet.name,
-    soul: {
-      genes: pet.soul.genes,
-      ...pet.soul.personality ? { personality: pet.soul.personality } : {},
-      ...pet.soul.acquisition ? { acquisition: { place: pet.soul.acquisition.place, connection: pet.soul.acquisition.connection } } : {}
-    },
-    memory: pet.memory.text,
-    state: {
-      stage: pet.state.stage,
-      description: pet.state.description,
-      ...pet.state.home ? { home: pet.state.home } : {},
-      ...pet.state.special && pet.state.special.endedAt === void 0 ? { special: pet.state.special.description } : {}
-    }
-  });
+function adoptionLine(pet) {
+  const at = new Date(pet.adoptedAt);
+  const date = `${at.getFullYear()}\u5E74${at.getMonth() + 1}\u6708${at.getDate()}\u65E5`;
+  const place = pet.soul.acquisition?.place.trim();
+  const named = pet.naming?.status === "named" ? `\u5B83\u53EB${pet.name}\u3002` : "";
+  return `${named}\u4F60\u5728${date}${place ? ` ${place}` : ""}\u9886\u517B\u4E86\u8FD9\u79CD\u5BA0\u7269`;
 }
 
 // src/hosts/art.ts
@@ -5290,7 +5287,7 @@ async function exportNative(state, destination) {
     id: path8.basename(destination),
     genpetId: state.pet.id,
     displayName: desktopLabel(state.pet.id),
-    description: briefForPet(state.pet),
+    description: adoptionLine(state.pet),
     spriteVersionNumber: 2,
     spritesheetPath
   };
@@ -5849,7 +5846,7 @@ async function startServer(port = Number(process.env.GENPET_PORT || 47831), root
       }
       if (req.method === "GET" && url.pathname.startsWith("/art/")) {
         const state = await target(url).peek(), record2 = state.art.find((art) => art.id === url.pathname.slice(5));
-        if (!record2 || record2.kind === "artifact") return json({ error: "Image not found" }, 404);
+        if (!record2) return json({ error: "Image not found" }, 404);
         res.writeHead(200, {
           "Content-Type": record2.file.endsWith(".webp") ? "image/webp" : "image/png",
           "Cache-Control": "no-store"

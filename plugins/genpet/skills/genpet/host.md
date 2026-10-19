@@ -1,6 +1,6 @@
-# 宿主、Dots 与记录
+# 宿主与记录
 
-宿主接口、同一只 Pet 的云图更新、Dots，以及记录和计划的格式。实际命令与接口由运行时提供，按唯一的 Pet ID 和绑定更新。全程不使用 Computer Use。
+宿主接口、同一只 Pet 的云图更新和云端描述，以及记录和计划的格式。实际命令与接口由运行时提供，按唯一的 Pet ID 和绑定更新。全程不使用 Computer Use。
 
 ## Codex 桌面：切换与诊断
 
@@ -23,33 +23,9 @@
 4. 回读云端存的真实 artwork，保存实际下载的文件，`host-result OPERATION_ID RESULT_FILE` 核对它与已接受的图。结果文件含 petId、operationId、appearanceId、实际 avatarId/cloudId、updated、storedArtworkVerified、active、refreshRequested、displayStatus、readbackFile、observed。readbackFile 是与上传源分开的实际下载路径；storedArtworkVerified 的最终值与图像哈希由 runtime 核验。`updated`、选择回读和刷新请求都不能证明存储的图相同或实际显示。
 5. 回读一致后才 `finish-story`（由完成回读的协调者紧接着执行）。尚未上传的保持 pending；上传成功但刷新不可用，记录这个事实，显示保持 unknown，不承诺未上传的图下次加载自动生效。
 
-## 同一只 Pet 在 Dots
+## 云端描述
 
-Dots 是共享 cloud ID 的第二个环境，使用同一份已接受的云图和这只 Pet 的简介。旧的 dots 记录不自动读取。
-
-**先检查实际能力。** 通过当前宿主的工具检查已有的 Pet ID、description 的可读写、更新 API、资源刷新、选中和显示状态，以及长期指令、记忆或插件的真实加载方式，保存调用和回读。接口不存在或显示无法确认就记录未知。不凭说明或本地协议宣称 Dots 已运行。
-
-**同步简介。** 桌面完成故事后，代码从名字和 soul、memory、state 摘出短简介。
-
-1. 先试用宿主 API 给同一个 cloud Pet 更新 description，回读文字和长度，再在新的 Dots 会话里核验能读到最新版本。
-2. description 不同步时，用宿主已支持的共享位置，或连到桌面读取实际目录；选有可读、可回读证据的途径，不复制成另一只 Pet。
-3. Pets connector 的 description 上限是 500 字符。`companion-brief` 给出完整的 sourceBrief 和当前的 Pet ID/revision。源码摘出的文字太长时，不截断也不直接上传：Agent 根据原记录写简短摘要，含名字、soul/说话习惯、共同 memory 和当前 state，保存 `{petId, revision, description}` 到文件，经源文核对后 `companion-brief ABS_DRAFT_JSON` 检查身份、版本和长度，再用返回的同一个 cloud ID 同步并回读。旧 revision 的摘要不能继续发送。
-4. 用户在 Dots 选择这一个 cloud ID 后保留它，桌面换图仍更新原 ID。读回选择不等于看到最新图；图的回读、刷新和实际显示分开记录。
-
-**持续的说话风格。** 把确认能持续加载的简介绑定到 Dots 的长期指令、记忆或已支持的插件机制，引用具体的 Pet/cloud ID，说明只作用于对用户说的话。没有持久加载的机制时，不能把一次对话里的设定说成永久生效。
-
-- 蛋阶段：Dots 原来的语气不变。
-- 幼年：回复的开头或结尾加一个自己的短拟声词。
-- 少年和成年：语气按 soul 的性格、memory 的相处和 state 变化。
-- 工作内容完整准确。代码、文档、提交说明和替用户发出的消息保持原有的专业表达，不带宠物语气。
-
-安装先走 Dots 真实支持的途径。插件目录只读或市场搜不到时，用已验证的简介和长期指令，不声称插件安装成功。一次设置后是否自动生效，要在新会话里确认之后才能说。
-
-**主环境。** 默认由桌面写故事，Dots 消费已完成的内容。目前不支持把一只 Pet 的完整记录从一端移交到另一端，没有导出或导入命令；用户要求切换主环境时如实说明，不手工搬运记录，也不在两边同时写故事。
-
-Dots 当主环境时，用 `--host cloud --pet PET_ID set-appearance` 的请求清单，给已有的 `pet_` ID 更新实际接受的 atlas；绑定缺失时确认同一只 Pet 的云 ID 再 `bind-cloud`。目标 active 时请求即时资源刷新，读不到 active 时尝试当前宿主实际支持的刷新，并保留未知；没有接口不能编造成功。保存真实的 readbackFile 后 `host-result OPERATION_ID RESULT_FILE`，匹配后完成。失败保留 pending；可由桌面代为上传同一个目标图，但上传发生之前，不说自动生效。不新建第二个云 Pet。
-
-**两边的内容与资料。** 完成的故事以 Pet ID、story ID、revision 消费；Dots 读取最新简介和最近完成的故事，同一个故事不主动重复转述。Dots 实际记录的用户活动，作为带来源的 context 项，过滤敏感内容，愿望不改成已完成，不从它的回复反推用户事实。主动消息只在宿主与用户已授权时使用已有的主动机制，语气按当前阶段和 memory；不另建 GenPet 故事任务，也不自动给他人发送消息。主环境只写一次，另一端只展示已完成的故事和简介。
+云 Pet 的 description 只写一句：`你在YYYY年M月D日 地点领养了这种宠物`，用户起过名字后前面加 `它叫名字。`。由 `companion-brief` 从记录生成，不含 soul、memory 和 state。云端描述与它不同时，用返回的 `update_pet` 步骤写到同一个 cloud ID 并回读；只有领养完成和起名、改名后会变，故事不改它。
 
 ## 记录
 
@@ -86,14 +62,16 @@ state  { stage, description, appearanceId, storyId, updatedAt, home, special }
   "memory": "确有值得记的事才填写：完整简短重写",
   "home": "孵化或变化时：完整家的描述",
   "appearance": {"description": "故事决定的形象", "reuseArtId": "已有合适图时才填"},
-  "mediaIds": ["本故事实际采用的已接受媒体ID"]
+  "mediaIds": ["本故事实际采用的已接受媒体ID"],
+  "items": [{"name": "新东西的名字", "description": "它是什么", "status": "with-user|at-home|carried|gone"}]
 }
 ```
 
 - 领养之后的计划不带 genes/place/connection/personality，不重写 soul；home 和 memory 省略时保持原样。
 - `special` 记录幻化：给出描述表示进入或延续，null 表示结束，未改变就省略。进入时距上次结束不足一周会被拒绝（强行成长除外）。
+- `items` 是这次物件的变化。不写 `id` 表示新东西（要有 `name`、`description`）；写已有物件的 `id` 表示它的去向变了。`status`：`with-user` 给了用户，`at-home` 留在家里（可写 `place`，家必须已存在），`carried` 带在身上，`gone` 已不在。新物件没写 `artId` 时，本故事只有一张 `prop` 图且只有这一件新物件，就用这张图。完整清单在 `status` 的 `items`，所有形象在 `looks`。
 - 阶段一次最多前进一格；成长、幻化的进入和结束都要有有效的形象。
-- contextRefs 引用已保存的 context 或用户资料；纯文字需要真实的、与用户相关的引用。
+- contextRefs 引用已保存的 context 或用户资料；写清这个故事回应的是哪条真实的用户线索。
 
 **导入、新增、替换与清理。**
 

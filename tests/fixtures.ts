@@ -5,6 +5,7 @@ import { desiredAppearance } from '../src/appearance.js';
 import { actions } from '../src/hosts/desktop/atlas.js';
 import { bindCloud } from '../src/hosts/cloud.js';
 import { recordHostResult } from '../src/hosts/result.js';
+import { acceptArt, artRequest } from '../src/art.js';
 import { beginStory, planStory } from '../src/lifecycle.js';
 import type { Store } from '../src/store.js';
 import { journeyStep } from '../src/journey.js';
@@ -75,5 +76,15 @@ export async function hostDone(store: Store, op: string) {
     active: false,
     refreshRequested: false,
     displayStatus: 'unconfirmed',
+  });
+}
+export async function storyImage(store: Store, dir: string) {
+  const file = path.join(dir, `story-${Math.random().toString(36).slice(2)}.png`);
+  await image(file);
+  return acceptArt(store, {
+    requestId: artRequest(await store.peek())!.id,
+    file,
+    kind: 'scene',
+    source: 'Synthetic story image; no visual acceptance',
   });
 }

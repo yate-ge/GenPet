@@ -8,7 +8,7 @@ import { installNative } from '../src/hosts/desktop/publish.js';
 import { bindCloud, setCloudAppearance } from '../src/hosts/cloud.js';
 import { recordHostResult } from '../src/hosts/result.js';
 import { finishStory, beginStory, planStory } from '../src/lifecycle.js';
-import { initialization, image } from './fixtures.js';
+import { initialization, image, storyImage } from './fixtures.js';
 import { hostTestDirectory, noSelection } from './host-fixtures.js';
 
 test('shared cloud Pet hands off the exact ID, verifies host readback, and reuses accepted artwork', async () => {
@@ -65,8 +65,9 @@ test('shared cloud Pet hands off the exact ID, verifies host readback, and reuse
     appearance: { description: 'Existing appearance', reuseArtId: art.id },
   });
   await update(next);
+  await storyImage(store, root);
   await finishStory(store, next);
-  assert.equal((await store.peek()).art.length, 1);
+  assert.equal((await store.peek()).art.filter(art => art.kind !== 'scene').length, 1);
   const third = (await beginStory(store, 'cloud:another')).pending!.id;
   await planStory(store, third, {
     text: 'Another story',

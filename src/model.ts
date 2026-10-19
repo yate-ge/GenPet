@@ -45,9 +45,12 @@ export interface Pet {
   binding?: Binding;
 }
 
-/** avatar is readable historical artwork; both current hosts use the shared atlas format. */
-export type ArtKind = 'portrait' | 'atlas' | 'avatar' | 'story' | 'artifact';
-export const artKinds: ArtKind[] = ['portrait', 'atlas', 'story', 'artifact'];
+/**
+ * The three kinds of story image map to: atlas (the pet's look), scene (the pet in a place, or the place alone;
+ * the home is a scene with `home` set) and prop (a thing the story is about). avatar is readable historical artwork.
+ */
+export type ArtKind = 'portrait' | 'atlas' | 'avatar' | 'scene' | 'prop';
+export const artKinds: ArtKind[] = ['portrait', 'atlas', 'scene', 'prop'];
 export interface ArtRecord {
   id: string;
   petId: string;
@@ -58,6 +61,35 @@ export interface ArtRecord {
   kind: ArtKind;
   createdAt: number;
   source: string;
+  /** A scene that shows the pet's home. */
+  home?: boolean;
+}
+
+/** Where a thing the pet gave, brought or kept is now. History stays in the story that first showed it. */
+export type ItemStatus = 'with-user' | 'at-home' | 'carried' | 'gone';
+export const itemStatuses: ItemStatus[] = ['with-user', 'at-home', 'carried', 'gone'];
+export interface Item {
+  id: string;
+  name: string;
+  description: string;
+  status: ItemStatus;
+  /** Where in the home it sits, for `at-home`. */
+  place?: string;
+  /** The story that first brought it. */
+  storyId: string;
+  /** Its image: a prop, or a scene it appears in. */
+  artId?: string;
+  updatedAt: number;
+  updatedStoryId: string;
+}
+/** One change to the item list in a story's plan: no `id` adds an item; an `id` moves or edits an existing one. */
+export interface ItemChange {
+  id?: string;
+  name?: string;
+  description?: string;
+  status: ItemStatus;
+  place?: string;
+  artId?: string;
 }
 
 /** The story comes first; optional memory rewrites commit with the resulting state. */
@@ -77,6 +109,8 @@ export interface StoryPlan {
   special?: string | null;
   appearance?: { description: string; reuseArtId?: string };
   mediaIds?: string[];
+  /** Item changes with ids assigned, so a retried plan is identical. */
+  items?: ItemChange[];
 }
 export interface HostResult {
   petId: string;
@@ -119,6 +153,8 @@ export interface Story {
   memory?: string;
   home?: string;
   special?: string | null;
+  /** Ids of the items this story added or moved. */
+  itemIds?: string[];
   appearanceId?: string;
   /** Actual change committed by this story; carrying an existing image is not a visible update. */
   appearanceChanged?: boolean;
@@ -199,6 +235,8 @@ export interface State {
   pet: Pet | null;
   stories: Story[];
   art: ArtRecord[];
+  /** Everything the pet gave, brought or kept, with where it is now. */
+  items?: Item[];
   pending: Pending | null;
   chats?: Chat[];
   growthClock?: GrowthClock;

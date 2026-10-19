@@ -227,11 +227,6 @@ for (let k = 1; k <= steps; k++) {
       ? { status: 'failed', error: 'session_index.jsonl could not be read', sources: [] }
       : { status: 'success', sources: ['session_index.jsonl'] },
   };
-  let textOnlyStreak = 0;
-  for (const item of [...recent].reverse()) {
-    if (item.outputs.length) break;
-    textOnlyStreak++;
-  }
   const input = {
     inputRefs: [
       `chain/${key}/step-${k}:context`,
@@ -256,8 +251,6 @@ for (let k = 1; k <= steps; k++) {
       },
       recentContent: {
         items: recent.slice(-10),
-        textOnlyStreak,
-        visualRequired: textOnlyStreak >= 2,
         memory: pet.memory,
       },
       ...(variant === 'dice' ? { surprise: roll(k) } : {}),

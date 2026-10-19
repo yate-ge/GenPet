@@ -16,8 +16,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "GenPet",
-    "shortDescription": "A story-driven pixel companion.",
-    "longDescription": "Meaningful adoption, open genes, Agent-led evolution and native Pet updates under one persistent identity.",
+    "shortDescription": "Adopt your one-of-a-kind interactive ChatGPT pet!",
+    "longDescription": "An interactive pet that grows up, for the ChatGPT (Codex) desktop client. Based on your background information, it comes to you through a short adventure, and like a real pet it watches you, keeps you company, grows and evolves, changes how it looks, decorates its own home, goes out on trips, and brings you small gifts. Built on ChatGPT's own pet system: it shows on your desktop, stays in sync across devices through ChatGPT's pet cloud sync, and can be the face of dots.",
     "developerName": "GenPet contributors",
     "category": "Productivity",
     "capabilities": [

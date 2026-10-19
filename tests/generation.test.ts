@@ -10,7 +10,7 @@ import { createPet } from '../src/model.js';
 import { requestId } from '../src/appearance.js';
 import { beginStory, planStory, finishStory } from '../src/lifecycle.js';
 import { unitRequest, validateUnitResult, recordStep } from '../src/generation.js';
-import { initialPlan, journeyReady } from './fixtures.js';
+import { initialPlan, journeyReady, storyImage } from './fixtures.js';
 
 const context = {
   inputRefs: ['fixture:sparse'],
@@ -97,7 +97,7 @@ test('contract checks allow open design and extra fields while rejecting missing
     { appearance: null, visuals: [] },
   );
 });
-test('home and carrier units: a text-only story and an unchanged home are valid', () => {
+test('home and carrier units: no item and an unchanged home are valid', () => {
   assert.deepEqual(
     validateUnitResult('story-item', {
       inputRefs: [],
@@ -164,6 +164,7 @@ test('completed stories keep their unit artifacts and accept an internal output 
       contextRefs: ['fixture:synthetic-context'],
       state: 'Listening',
     });
+    await storyImage(store, root);
     const first = await recordStep(store, operation, 'context', {
         ...context,
         inputRefs: ['fixture:synthetic-context'],

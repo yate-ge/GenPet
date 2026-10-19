@@ -43,7 +43,7 @@ async function action(body) {
 }
 
 const STAGES = { egg: '蛋', hatchling: '幼年', juvenile: '少年', adult: '成年' };
-const KINDS = { all: '全部', grow: '成长', appearance: '日常', home: '家', item: '物件', text: '纯文字' };
+const KINDS = { all: '全部', grow: '成长', appearance: '日常', home: '家', scene: '场景', item: '物件', text: '纯文字' };
 const time = ms => (ms ? new Date(ms).toLocaleString() : '—');
 const stageBadge = stage => h(`span.badge.stage-${stage}`, STAGES[stage] ?? stage ?? '未知');
 const query = () => `?host=${encodeURIComponent(current.host)}&pet=${encodeURIComponent(current.id)}`;
@@ -167,6 +167,7 @@ function renderContent() {
     stories: [`故事 ${state.stories.length}`, storyTimeline],
     looks: [`形象 ${atlases.length}`, gallery],
     homes: [`家 ${homes.length}`, homeTimeline],
+    items: [`物件 ${(state.items ?? []).length}`, itemList],
     progress: ['进行中', progress],
     raw: ['原始数据', raw],
   };
@@ -296,7 +297,7 @@ function overview(state, homes) {
 }
 
 function images(state, ids) {
-  const pictures = state.art.filter(art => ids.includes(art.id) && art.kind !== 'artifact' && art.kind !== 'atlas');
+  const pictures = state.art.filter(art => ids.includes(art.id) && art.kind !== 'atlas');
   if (!pictures.length) return null;
   return h(
     'div.pictures',
@@ -307,6 +308,34 @@ function images(state, ids) {
         h('figcaption.muted', art.kind),
       ),
     ),
+  );
+}
+const ITEM_STATUS = { 'at-home': '在家里', carried: '带在身上', 'with-user': '给了用户', gone: '已不在' };
+/** Everything it gave, brought or kept, grouped by where it is now. */
+function itemList(state) {
+  const items = state.items ?? [];
+  if (!items.length) return card('物件', h('p.muted', '还没有物件。'));
+  return h(
+    'div',
+    Object.entries(ITEM_STATUS).map(([status, label]) => {
+      const group = items.filter(item => item.status === status);
+      if (!group.length) return null;
+      return card(
+        `${label} ${group.length}`,
+        h(
+          'ul.items',
+          group.map(item =>
+            h(
+              'li',
+              item.artId ? images(state, [item.artId]) : null,
+              h('p.value', item.name, item.place ? ` · ${item.place}` : ''),
+              h('p', item.description),
+              h('p.muted', `最早出现在 ${time(state.stories.find(story => story.id === item.storyId)?.at)}`),
+            ),
+          ),
+        ),
+      );
+    }),
   );
 }
 function storyTimeline(state) {

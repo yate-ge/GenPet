@@ -8,7 +8,7 @@ import { Store } from '../src/store.js';
 import { artRequest, acceptArt, validateImage } from '../src/art.js';
 import { exportNative, installNative } from '../src/hosts/desktop/publish.js';
 import { finishStory, beginStory, planStory } from '../src/lifecycle.js';
-import { initialization, image } from './fixtures.js';
+import { initialization, image, storyImage } from './fixtures.js';
 test('native atlas validation rejects wrong layout, blank cells and occupied unused cells', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'genpet-validate-'));
   try {
@@ -20,7 +20,7 @@ test('native atlas validation rejects wrong layout, blank cells and occupied unu
     await image(file);
     await assert.rejects(() => validateImage(file, 'atlas'), /Atlas must/);
     await writeFile(file, Buffer.from('not an image'));
-    await assert.rejects(() => validateImage(file, 'story'));
+    await assert.rejects(() => validateImage(file, 'scene'));
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -129,6 +129,7 @@ test('active and inactive updates retain target ID and never change selection; a
     });
     assert.equal(inactive.active, false);
     assert.equal(inactive.avatarId, result.avatarId);
+    await storyImage(store, root);
     await finishStory(store, next);
     assert.deepEqual(await readdir(path.join(root, 'codex', 'pets')), [petId]);
   } finally {

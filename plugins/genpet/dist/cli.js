@@ -2240,42 +2240,21 @@ import path7 from "node:path";
 
 // src/status.ts
 var RECENT = { stories: 5, art: 30, chats: 10 };
-function briefForPet(pet) {
-  return JSON.stringify({
-    id: pet.id,
-    name: pet.name,
-    soul: {
-      genes: pet.soul.genes,
-      ...pet.soul.personality ? { personality: pet.soul.personality } : {},
-      ...pet.soul.acquisition ? { acquisition: { place: pet.soul.acquisition.place, connection: pet.soul.acquisition.connection } } : {}
-    },
-    memory: pet.memory.text,
-    state: {
-      stage: pet.state.stage,
-      description: pet.state.description,
-      ...pet.state.home ? { home: pet.state.home } : {},
-      ...pet.state.special && pet.state.special.endedAt === void 0 ? { special: pet.state.special.description } : {}
-    }
-  });
+function adoptionLine(pet) {
+  const at = new Date(pet.adoptedAt);
+  const date = `${at.getFullYear()}\u5E74${at.getMonth() + 1}\u6708${at.getDate()}\u65E5`;
+  const place = pet.soul.acquisition?.place.trim();
+  const named = pet.naming?.status === "named" ? `\u5B83\u53EB${pet.name}\u3002` : "";
+  return `${named}\u4F60\u5728${date}${place ? ` ${place}` : ""}\u9886\u517B\u4E86\u8FD9\u79CD\u5BA0\u7269`;
 }
-function cloudBriefForPet(pet, draft) {
-  const source = briefForPet(pet);
-  if (draft !== void 0) {
-    if (!draft || draft.petId !== pet.id || draft.revision !== pet.revision)
-      throw new Error("Brief draft must match the current Pet ID and revision");
-    if (typeof draft.description !== "string" || !draft.description.trim() || [...draft.description].length > 500)
-      throw new Error("Cloud Pet description must contain at most 500 characters");
-  }
-  const description = draft?.description ?? ([...source].length <= 500 ? source : null);
-  return {
-    petId: pet.id,
-    revision: pet.revision,
-    sourceBrief: JSON.parse(source),
-    description,
-    maxDescriptionLength: 500,
-    needsSummary: description === null
-  };
-}
+var artLine = ({ id, stage, kind, description, file, home }) => ({
+  id,
+  stage,
+  kind,
+  description,
+  file,
+  ...home ? { home } : {}
+});
 function statusView(state) {
   const chats = state.chats ?? [];
   const pending = state.pending ? (({ steps, ...record2 }) => record2)(state.pending) : null;
@@ -2291,7 +2270,11 @@ function statusView(state) {
     storyCount: state.stories.length,
     stories: state.stories.slice(-RECENT.stories).map(({ steps, hostResult: hostResult2, ...story }) => story),
     artCount: state.art.length,
-    art: state.art.slice(-RECENT.art).map(({ id, stage, kind, description, file }) => ({ id, stage, kind, description, file })),
+    /** Every look of the pet, so an old one can be worn again. */
+    looks: state.art.filter((art) => art.kind === "atlas").map(artLine),
+    /** Everything it gave, brought or kept, with where it is now. */
+    items: state.items ?? [],
+    art: state.art.filter((art) => art.kind !== "atlas").slice(-RECENT.art).map(artLine),
     chatCount: chats.length,
     chats: chats.slice(-RECENT.chats).map(({ at, text: text2 }) => ({ at, text: text2 }))
   };
@@ -4228,7 +4211,8 @@ import path6 from "node:path";
 // src/model.ts
 import { randomUUID as randomUUID2 } from "node:crypto";
 var stages = ["egg", "hatchling", "juvenile", "adult"];
-var artKinds = ["portrait", "atlas", "story", "artifact"];
+var artKinds = ["portrait", "atlas", "scene", "prop"];
+var itemStatuses = ["with-user", "at-home", "carried", "gone"];
 var fresh = (host2) => ({ version: 3, host: host2, pet: null, stories: [], art: [], pending: null });
 function createPet(name2, now = Date.now()) {
   return {
@@ -4547,7 +4531,7 @@ async function exportNative(state, destination) {
     id: path7.basename(destination),
     genpetId: state.pet.id,
     displayName: desktopLabel(state.pet.id),
-    description: briefForPet(state.pet),
+    description: adoptionLine(state.pet),
     spriteVersionNumber: 2,
     spritesheetPath
   };
@@ -4917,6 +4901,7 @@ function artRequest(state) {
     appearance: plan.appearance,
     // The Agent chooses identity references and reusable appearances from this pet's accepted art.
     savedArt: state.art.filter((art) => art.petId === pet.id),
+    items: state.items ?? [],
     prompt: readPrompt("meta") + "\n" + readPrompt("appearance"),
     contract: hostFor(state.host).artContract,
     target: pet.binding ?? null
@@ -4924,8 +4909,7 @@ function artRequest(state) {
 }
 async function validateImage(file, kind) {
   const info = await stat3(file);
-  if (!info.isFile() || info.size > 64 * 1024 * 1024) throw new Error("Artifact must be a regular file below 64 MiB");
-  if (kind === "artifact") return { format: "artifact", width: 0, height: 0, hasAlpha: false };
+  if (!info.isFile() || info.size > 64 * 1024 * 1024) throw new Error("Artwork must be a regular file below 64 MiB");
   const meta = await readImageInfo(file);
   if ((kind === "portrait" || kind === "atlas") && !meta.hasAlpha)
     throw new Error("Pet images must have an alpha channel");
@@ -4938,8 +4922,9 @@ async function acceptArt(store2, input) {
   if (typeof input.requestId !== "string" || !input.requestId.trim())
     throw new Error("accept-art REQUEST_ID must be a non-empty string from art-request.id");
   if (typeof input.file !== "string" || !path10.isAbsolute(input.file))
-    throw new Error("Artifact file must be an absolute local path");
-  if (!artKinds.includes(input.kind)) throw new Error("Unknown artifact kind");
+    throw new Error("Artwork file must be an absolute local path");
+  if (!artKinds.includes(input.kind)) throw new Error(`Unknown art kind; use ${artKinds.join(", ")}`);
+  if (input.home && input.kind !== "scene") throw new Error("Only a scene can show the home");
   if (!input.source?.trim()) throw new Error("Record generation and validation source");
   await validateImage(input.file, input.kind);
   const bytes = await readFile9(input.file);
@@ -4950,7 +4935,7 @@ async function acceptArt(store2, input) {
       throw new Error("Artwork uses the other host format");
     const pet = state.pet;
     const plan = state.pending.plan;
-    const id = `art-${createHash5("sha256").update(pet.id + input.requestId + input.kind).update(bytes).digest("hex").slice(0, 24)}`;
+    const id = `art-${createHash5("sha256").update(pet.id + input.requestId + input.kind + (input.home ? "home" : "")).update(bytes).digest("hex").slice(0, 24)}`;
     const previous = state.art.find((art) => art.id === id);
     if (previous) {
       await stat3(previous.file);
@@ -4975,7 +4960,8 @@ async function acceptArt(store2, input) {
       file,
       kind: input.kind,
       createdAt: Date.now(),
-      source: input.source
+      source: input.source,
+      ...input.home ? { home: true } : {}
     };
     state.art.push(record2);
     return record2;
@@ -5210,7 +5196,15 @@ function normalizeRecord(input, host2, file, importing = false) {
     ...story.hostResult ? { hostResult: hostResult(story.hostResult) } : {},
     ...story.steps ? { steps: story.steps.map(normalizeStep) } : {}
   }));
-  result.art = (record2.art ?? []).map((art) => ({ ...art, source: art.source ?? "Preserved legacy artwork" }));
+  const homeStories = /* @__PURE__ */ new Set();
+  (record2.stories ?? []).forEach((story, index) => {
+    if (story.home !== void 0 && story.home !== record2.stories[index - 1]?.home) homeStories.add(story.id);
+  });
+  result.art = (record2.art ?? []).map((art) => {
+    const kind = art.kind === "story" ? "scene" : art.kind === "artifact" ? "prop" : art.kind;
+    const home = kind === "scene" && art.home === void 0 && (record2.stories ?? []).some((story) => homeStories.has(story.id) && story.mediaIds?.includes(art.id));
+    return { ...art, kind, ...home ? { home: true } : {}, source: art.source ?? "Preserved legacy artwork" };
+  });
   if (result.pending) {
     if (result.pending.hostResult) result.pending.hostResult = hostResult(result.pending.hostResult);
     if (result.pending.steps) result.pending.steps = result.pending.steps.map(normalizeStep);
@@ -5791,6 +5785,7 @@ var Store = class _Store {
           "pet",
           "stories",
           "art",
+          "items",
           "pending",
           "chats",
           "growthClock",
@@ -6052,6 +6047,76 @@ import { randomUUID as randomUUID10 } from "node:crypto";
 import { access as access2 } from "node:fs/promises";
 import path15 from "node:path";
 
+// src/items.ts
+var object3 = (value) => !!value && typeof value === "object" && !Array.isArray(value);
+var newItemId = (pendingId, index) => `item-${pendingId}-${index}`;
+function planItems(state, pendingId, input, hasHome) {
+  if (!Array.isArray(input)) throw new Error("items must be an array");
+  const known = new Map((state.items ?? []).map((item) => [item.id, item]));
+  const seen = /* @__PURE__ */ new Set();
+  return input.map((raw, index) => {
+    if (!object3(raw)) throw new Error("Each item change must be an object");
+    if (!itemStatuses.includes(raw.status)) throw new Error(`Item status must be ${itemStatuses.join(", ")}`);
+    const change = { status: raw.status };
+    const fresh2 = raw.id === void 0 || raw.id === newItemId(pendingId, index);
+    if (fresh2) {
+      change.id = newItemId(pendingId, index);
+      change.name = text(raw.name, "item name");
+      change.description = text(raw.description, "item description");
+    } else {
+      change.id = identifier(raw.id, "item id");
+      if (!known.has(change.id)) throw new Error(`Unknown item ${change.id}; leave out the id to add a new one`);
+      if (raw.name !== void 0) change.name = text(raw.name, "item name");
+      if (raw.description !== void 0) change.description = text(raw.description, "item description");
+    }
+    if (seen.has(change.id)) throw new Error(`Item ${change.id} appears twice in one plan`);
+    seen.add(change.id);
+    if (raw.place !== void 0) change.place = text(raw.place, "item place");
+    if (change.place && change.status !== "at-home") throw new Error("Only an item at home has a place");
+    if (change.status === "at-home" && !hasHome) throw new Error("An item can be at home only after the home exists");
+    if (raw.artId !== void 0) {
+      change.artId = identifier(raw.artId, "item artId");
+      const art = state.art.find((art2) => art2.id === change.artId && art2.petId === state.pet.id);
+      if (!art || art.kind !== "prop" && art.kind !== "scene")
+        throw new Error("An item image must be this pet\u2019s prop or scene");
+    }
+    return change;
+  });
+}
+function commitItems(state, story, changes, storyMedia) {
+  const items = state.items ??= [];
+  const props = storyMedia.filter((art) => art.kind === "prop");
+  const fresh2 = changes.filter((change) => !items.some((item) => item.id === change.id));
+  for (const change of changes) {
+    const existing = items.find((item) => item.id === change.id);
+    const artId = change.artId ?? (props.length === 1 && fresh2.length === 1 && !existing ? props[0].id : void 0);
+    if (existing) {
+      if (change.name) existing.name = change.name;
+      if (change.description) existing.description = change.description;
+      if (artId) existing.artId = artId;
+      existing.status = change.status;
+      if (change.status === "at-home" && change.place) existing.place = change.place;
+      else if (change.status !== "at-home") delete existing.place;
+      existing.updatedAt = story.at;
+      existing.updatedStoryId = story.id;
+    } else {
+      const item = {
+        id: change.id,
+        name: change.name,
+        description: change.description,
+        status: change.status,
+        ...change.place ? { place: change.place } : {},
+        storyId: story.id,
+        ...artId ? { artId } : {},
+        updatedAt: story.at,
+        updatedStoryId: story.id
+      };
+      items.push(item);
+    }
+  }
+  if (changes.length) story.itemIds = changes.map((change) => change.id);
+}
+
 // src/naming.ts
 function namingDue(state) {
   return !state.pending && !!state.pet && state.pet.state.stage !== "egg" && state.pet.naming?.status === "unasked";
@@ -6167,87 +6232,6 @@ async function stopSchedule(store2) {
   });
 }
 
-// src/variety.ts
-import { createHash as createHash8, randomBytes } from "node:crypto";
-var SOURCE_WEIGHTS = { natural: 70, object: 20, imagined: 10 };
-function seededValue(seed, purpose) {
-  return createHash8("sha256").update(`${seed}\0${purpose}`).digest().readUInt32BE(0) / 4294967296;
-}
-function sourceFromSeed(seed) {
-  const value = seededValue(seed, "source") * 100;
-  return value < SOURCE_WEIGHTS.natural ? "natural" : value < SOURCE_WEIGHTS.natural + SOURCE_WEIGHTS.object ? "object" : "imagined";
-}
-function storyOutputs(story, previous, state) {
-  const result = [];
-  const appearanceChanged = typeof story.appearanceChanged === "boolean" ? story.appearanceChanged : previous ? story.appearanceId !== previous.appearanceId : state?.pet?.soul.acquisition?.storyId === story.id;
-  if (story.appearanceId && appearanceChanged) result.push("appearance");
-  if (story.mediaIds.some((id) => !state || state.art.some((art) => art.id === id && art.kind !== "artifact"))) {
-    if (story.home !== void 0 && story.home !== previous?.home) result.push("home");
-    else result.push("item");
-  }
-  return result;
-}
-function recentContent(state, count = 10) {
-  const items = state.stories.slice(-Math.max(1, count)).map((story, index, stories) => ({
-    id: story.id,
-    at: story.at,
-    outputs: storyOutputs(story, index ? stories[index - 1] : state.stories[state.stories.indexOf(story) - 1], state),
-    stage: story.stage,
-    special: story.special,
-    text: story.text,
-    reason: story.reason
-  }));
-  let textOnlyStreak = 0;
-  for (const item of [...items].reverse()) {
-    if (item.outputs.length) break;
-    textOnlyStreak++;
-  }
-  return { items, textOnlyStreak, visualRequired: textOnlyStreak >= 2, memory: state.pet?.memory ?? null };
-}
-async function chooseSource(store2, operationId, seed) {
-  return store2.transaction((state) => {
-    const pending = pendingFor(state, operationId);
-    if (pending.sourceChoice) {
-      if (seed && seed !== pending.sourceChoice.seed) throw new Error("The source seed is already saved");
-      return pending.sourceChoice;
-    }
-    const value = seed ? text(seed, "seed") : randomBytes(16).toString("hex");
-    return pending.sourceChoice = { seed: value, sourceType: sourceFromSeed(value) };
-  });
-}
-async function chooseCandidate(store2, operationId, input, seed) {
-  if (input.purpose !== "genes") throw new Error("Choice purpose must be genes; a story is decided directly");
-  if (!Array.isArray(input.candidates) || input.candidates.length < 2)
-    throw new Error("Provide at least two grounded candidates");
-  const candidates = input.candidates.map((candidate) => ({
-    id: identifier(candidate.id, "candidateId"),
-    description: text(candidate.description, "candidate description"),
-    contextRefs: candidate.contextRefs.map((ref) => text(ref, "context reference"))
-  }));
-  if (new Set(candidates.map((candidate) => candidate.id)).size !== candidates.length)
-    throw new Error("Candidate IDs must be unique");
-  const hash2 = createHash8("sha256").update(JSON.stringify(candidates)).digest("hex");
-  return store2.transaction((state) => {
-    const pending = pendingFor(state, operationId);
-    if (pending.selection) {
-      if (pending.selection.candidateHash !== hash2 || pending.selection.purpose !== input.purpose || seed && seed !== pending.selection.seed)
-        throw new Error("The selected candidates and seed are already saved; resume them");
-      return { ...pending.selection, candidates: pending.candidates };
-    }
-    const value = seed ?? pending.sourceChoice?.seed ?? randomBytes(16).toString("hex");
-    const index = Math.floor(seededValue(value, input.purpose) * candidates.length);
-    pending.candidates = candidates;
-    pending.selection = {
-      seed: value,
-      purpose: input.purpose,
-      candidateId: candidates[index].id,
-      candidateHash: hash2,
-      ...pending.sourceChoice ? { sourceType: pending.sourceChoice.sourceType } : {}
-    };
-    return { ...pending.selection, candidates };
-  });
-}
-
 // src/lifecycle.ts
 function startPending(pet, triggerId, mode) {
   return {
@@ -6354,6 +6338,8 @@ function validatePlan(state, input) {
   if (required === "end-special" && plan.special !== null)
     throw new Error("The special form is due to end in this story");
   if (plan.appearance?.reuseArtId) appearanceFor(state, plan.stage, plan.appearance.reuseArtId);
+  if (input.items !== void 0)
+    plan.items = planItems(state, state.pending.id, input.items, !!(plan.home ?? pet.state.home));
   if (input.mediaIds !== void 0) {
     if (!Array.isArray(input.mediaIds)) throw new Error("mediaIds must be an array");
     plan.mediaIds = input.mediaIds.map((id) => identifier(id, "mediaId"));
@@ -6399,41 +6385,21 @@ async function finishStory(store2, id) {
     }
     const current = requestId(state);
     const storyMedia = state.art.filter(
-      (art) => art.requestId === current && (art.kind === "story" || art.kind === "artifact")
+      (art) => art.requestId === current && (art.kind === "scene" || art.kind === "prop")
     );
     const mediaIds = [.../* @__PURE__ */ new Set([...plan.mediaIds ?? [], ...storyMedia.map((art) => art.id)])];
     for (const mediaId of mediaIds)
       await access2(state.art.find((art) => art.id === mediaId && art.petId === pet.id).file);
     const appearanceChanged = !!plan.appearance && appearance?.id !== pet.state.appearanceId;
     const hasVisibleMedia = mediaIds.some(
-      (mediaId) => state.art.some((art) => art.id === mediaId && art.kind !== "artifact")
+      (mediaId) => state.art.some((art) => art.id === mediaId && (art.kind === "scene" || art.kind === "prop"))
     );
     const item = pending.steps?.findLast((step) => step.unit === "story-item");
     const home = pending.steps?.findLast((step) => step.unit === "home");
     if ((item?.result.item || home?.result.visual) && !hasVisibleMedia)
       throw new Error("The final story item or home requests an image; accept its actual media before completing");
-    if (pending.mode === "story" && !appearanceChanged && !hasVisibleMedia) {
-      if (!plan.contextRefs?.length) throw new Error("A text-only story needs a user-related context reference");
-      const sources = /* @__PURE__ */ new Set();
-      for (const owner of [...state.stories, pending])
-        for (const step of owner.steps ?? []) {
-          if (step.unit !== "context") continue;
-          const facts = Array.isArray(step.result.facts) ? step.result.facts : [];
-          if (facts.length) for (const ref of step.inputRefs) sources.add(ref);
-          for (const fact of facts) {
-            if (fact && typeof fact === "object" && typeof fact.id === "string")
-              sources.add(fact.id);
-          }
-        }
-      for (const round of pet.soul.acquisition?.journey?.rounds ?? [])
-        for (const ref of round.inputRefs) sources.add(ref);
-      for (const chat of state.chats ?? []) sources.add(chat.id);
-      for (const story2 of state.stories) if (story2.contextRefs?.some((ref) => sources.has(ref))) sources.add(story2.id);
-      if (plan.contextRefs.some((ref) => !sources.has(ref)))
-        throw new Error("The context reference is not present in the saved inputs or shared history");
-      if (recentContent(state).visualRequired)
-        throw new Error("At most two text-only stories in a row; produce a visible result");
-    }
+    if (pending.mode === "story" && !appearanceChanged && !hasVisibleMedia)
+      throw new Error("A story needs an image: a new appearance, a scene, an item or the home");
     const story = {
       id,
       triggerId: pending.triggerId,
@@ -6502,6 +6468,7 @@ async function finishStory(store2, id) {
         story.at,
         pending.mode !== "initialization" && previousStage === story.stage
       );
+    if (plan.items?.length) commitItems(state, story, plan.items, storyMedia);
     state.stories.push(story);
     state.pending = null;
     return story;
@@ -6600,6 +6567,81 @@ async function journeyStep(store2, operationId, input) {
     delete journey.awaiting;
     if (input.complete || journey.rounds.length === 5) journey.completed = true;
     return journey;
+  });
+}
+
+// src/variety.ts
+import { createHash as createHash8, randomBytes } from "node:crypto";
+var SOURCE_WEIGHTS = { natural: 70, object: 20, imagined: 10 };
+function seededValue(seed, purpose) {
+  return createHash8("sha256").update(`${seed}\0${purpose}`).digest().readUInt32BE(0) / 4294967296;
+}
+function sourceFromSeed(seed) {
+  const value = seededValue(seed, "source") * 100;
+  return value < SOURCE_WEIGHTS.natural ? "natural" : value < SOURCE_WEIGHTS.natural + SOURCE_WEIGHTS.object ? "object" : "imagined";
+}
+function storyOutputs(story, previous, state) {
+  const result = [];
+  const appearanceChanged = typeof story.appearanceChanged === "boolean" ? story.appearanceChanged : previous ? story.appearanceId !== previous.appearanceId : state.pet?.soul.acquisition?.storyId === story.id;
+  if (story.appearanceId && appearanceChanged) result.push("appearance");
+  for (const art of state.art.filter((art2) => story.mediaIds.includes(art2.id)))
+    if (art.kind === "prop") result.push("item");
+    else if (art.kind === "scene") result.push(art.home ? "home" : "scene");
+  return [...new Set(result)];
+}
+function recentContent(state, count = 10) {
+  const items = state.stories.slice(-Math.max(1, count)).map((story, index, stories) => ({
+    id: story.id,
+    at: story.at,
+    outputs: storyOutputs(story, index ? stories[index - 1] : state.stories[state.stories.indexOf(story) - 1], state),
+    stage: story.stage,
+    special: story.special,
+    text: story.text,
+    reason: story.reason
+  }));
+  return { items, memory: state.pet?.memory ?? null };
+}
+async function chooseSource(store2, operationId, seed) {
+  return store2.transaction((state) => {
+    const pending = pendingFor(state, operationId);
+    if (pending.sourceChoice) {
+      if (seed && seed !== pending.sourceChoice.seed) throw new Error("The source seed is already saved");
+      return pending.sourceChoice;
+    }
+    const value = seed ? text(seed, "seed") : randomBytes(16).toString("hex");
+    return pending.sourceChoice = { seed: value, sourceType: sourceFromSeed(value) };
+  });
+}
+async function chooseCandidate(store2, operationId, input, seed) {
+  if (input.purpose !== "genes") throw new Error("Choice purpose must be genes; a story is decided directly");
+  if (!Array.isArray(input.candidates) || input.candidates.length < 2)
+    throw new Error("Provide at least two grounded candidates");
+  const candidates = input.candidates.map((candidate) => ({
+    id: identifier(candidate.id, "candidateId"),
+    description: text(candidate.description, "candidate description"),
+    contextRefs: candidate.contextRefs.map((ref) => text(ref, "context reference"))
+  }));
+  if (new Set(candidates.map((candidate) => candidate.id)).size !== candidates.length)
+    throw new Error("Candidate IDs must be unique");
+  const hash2 = createHash8("sha256").update(JSON.stringify(candidates)).digest("hex");
+  return store2.transaction((state) => {
+    const pending = pendingFor(state, operationId);
+    if (pending.selection) {
+      if (pending.selection.candidateHash !== hash2 || pending.selection.purpose !== input.purpose || seed && seed !== pending.selection.seed)
+        throw new Error("The selected candidates and seed are already saved; resume them");
+      return { ...pending.selection, candidates: pending.candidates };
+    }
+    const value = seed ?? pending.sourceChoice?.seed ?? randomBytes(16).toString("hex");
+    const index = Math.floor(seededValue(value, input.purpose) * candidates.length);
+    pending.candidates = candidates;
+    pending.selection = {
+      seed: value,
+      purpose: input.purpose,
+      candidateId: candidates[index].id,
+      candidateHash: hash2,
+      ...pending.sourceChoice ? { sourceType: pending.sourceChoice.sourceType } : {}
+    };
+    return { ...pending.selection, candidates };
   });
 }
 
@@ -6802,28 +6844,21 @@ var shared = {
   "set-appearance": { usage: "set-appearance", run: (_, store2) => hostFor(store2.host).setAppearance(store2) },
   diagnose: { usage: "diagnose", run: (_, store2) => hostFor(store2.host).diagnose(store2) },
   "companion-brief": {
-    usage: "companion-brief [BRIEF_DRAFT_JSON]",
-    run: async ([file], store2) => {
+    usage: "companion-brief",
+    run: async (_, store2) => {
       const state = await store2.peek();
       if (!state.pet) throw new Error("No Pet");
       const target2 = await hostFor(store2.host).findAvatar(state);
-      const brief = cloudBriefForPet(state.pet, file ? await jsonFile(file) : void 0);
+      const description = adoptionLine(state.pet);
       return {
-        ...brief,
+        petId: state.pet.id,
         cloudId: target2.cloudId,
-        agentSteps: brief.needsSummary ? [
-          {
-            command: "companion-brief ABSOLUTE_DRAFT_JSON",
-            check: "Summarize sourceBrief into at most 500 characters, preserving the actual name, soul and speaking habits, shared memory and current stage/state. Save {petId, revision, description}; review the summary against the source, then rerun this command. Do not truncate fields or invent facts."
-          }
-        ] : target2.cloudId ? [
-          {
-            tool: "update_pet",
-            arguments: { pet_id: target2.cloudId, updates: { description: brief.description } }
-          },
+        description,
+        agentSteps: target2.cloudId ? [
+          { tool: "update_pet", arguments: { pet_id: target2.cloudId, updates: { description } } },
           {
             tool: "list_pets",
-            check: "Read the exact Pet ID back and compare its description with this generated brief before claiming synchronization."
+            check: "Read the exact Pet ID back and compare its description with this text before claiming synchronization."
           }
         ] : []
       };
@@ -6839,14 +6874,21 @@ var shared = {
     run: async ([run, file]) => pipelineProcess(run, file ? await jsonFile(file) : {})
   },
   "accept-art": {
-    usage: "accept-art REQUEST_ID FILE portrait|atlas|story|artifact SOURCE [DESCRIPTION]",
+    usage: "accept-art REQUEST_ID FILE portrait|atlas|scene|home|prop SOURCE [DESCRIPTION]",
     run: (args2, store2) => {
       if (args2.length < 4 || args2.length > 5)
         throw new Error(
-          "Usage: accept-art REQUEST_ID FILE portrait|atlas|story|artifact SOURCE [DESCRIPTION]; REQUEST_ID is art-request.id"
+          "Usage: accept-art REQUEST_ID FILE portrait|atlas|scene|home|prop SOURCE [DESCRIPTION]; REQUEST_ID is art-request.id"
         );
       const [requestId2, file, kind, source, description] = args2;
-      return acceptArt(store2, { requestId: requestId2, file, kind, source, description });
+      return acceptArt(store2, {
+        requestId: requestId2,
+        file,
+        kind: kind === "home" ? "scene" : kind,
+        source,
+        description,
+        ...kind === "home" ? { home: true } : {}
+      });
     }
   },
   "host-result": {

@@ -1,6 +1,6 @@
 # Contributing to GenPet
 
-Thanks for helping. Read [the design document](docs/DESIGN.md) first: it explains the design idea, the principles every change follows and how the pieces fit. The product principles the plugin runs on are in [plugins/genpet/skills/genpet/principles.md](plugins/genpet/skills/genpet/principles.md).
+Thanks for helping. Read [the design document](docs/DESIGN.md) first: it explains the design idea, the stories and the principles; [the implementation document](docs/IMPLEMENTATION.md) explains the engineering principles, how the pieces fit and how they are built. The product principles the plugin runs on are in [plugins/genpet/skills/genpet/principles.md](plugins/genpet/skills/genpet/principles.md).
 
 ## Setup
 
@@ -19,24 +19,24 @@ npm run verify:fast
 - Everything the Agent reads at runtime lives in `plugins/genpet/skills/genpet/`. `principles.md` is the only source of product principles and is loaded with every unit. `units/` holds one prompt per generation unit plus `units.json` (inputs, results and the prompt `file`; the runtime serves a unit as principles plus its own prompt). The procedures sit in four task files: `adoption.md`, `stories.md` (stories, scheduling, naming), `art.md` (image generation and review flow) and `host.md` (desktop, Dots, records). `SKILL.md` routes by the user's intent and holds the data notice and the wording rules for non-story replies.
 - Write each rule once, in the file that owns it, and point to its section elsewhere (for example `principles.md「一、宠物和用户」`) instead of restating it. A unit says what it produces, how to decide, and its checks; a task file says the order of steps and which command runs.
 - A new unit is a prompt in `units/` with an entry, including `file`, in `units/units.json`. When a unit's inputs or results change, change its prompt and `units.json` together. The user-facing slash commands are `genpet`, `genpet-chat` and `genpet-debug`; add a new one only for a distinct mode. Fold a new request into `/genpet` as an intent in its router instead.
-- Nothing from development or testing goes into the plugin: no test cases or scenarios, test results, dated findings, status notes, "unverified" or "shelved" remarks, or lists of removed names. Examples in prompts must not repeat a scenario from `tests/agent/`. Those belong in `tests/agent/` or the maintainer's notes. `tests/skills.test.ts` (part of `verify:fast`) checks that every unit prompt loads, the links in the skills resolve and no test or tooling path appears; the examples themselves are checked by review.
+- Nothing from development or testing goes into the plugin: no test cases or scenarios, test results, dated findings, status notes, "unverified" or "shelved" remarks, or lists of removed names. Examples in prompts must not repeat a scenario from `tests/agent/`. Those belong in `tests/agent/`. `tests/skills.test.ts` (part of `verify:fast`) checks that every unit prompt loads, the links in the skills resolve and no test or tooling path appears; the examples themselves are checked by review.
 - When moving or renaming a runtime file, update every link to it and check that all relative links in `plugins/genpet/skills/` resolve.
-- Keep code and prompts small. The Agent chooses sources, context range, design, relationship and story content; code handles identity, persistence, host binding and the few agreed fixed mechanisms listed in [the design principles](docs/DESIGN.md#engineering). Do not add activity taxonomies, personality presets, face templates or configuration for judgments the Agent can make.
-- The repository documents are the README, this guide and [the design document](docs/DESIGN.md). Update them when the design changes; delete what is outdated (git history keeps it) and fix every link to it. Plans, discussions and run records do not go in the repository.
+- Keep code and prompts small. The Agent chooses sources, context range, design, relationship and story content; code handles identity, persistence, host binding and the few fixed mechanisms listed in [the engineering principles](docs/IMPLEMENTATION.md#engineering-principles). Do not add activity taxonomies, personality presets, face templates or configuration for judgments the Agent can make.
+- The repository documents are the README, this guide, [the design document](docs/DESIGN.md) and [the implementation document](docs/IMPLEMENTATION.md). Update them when the design changes; delete what is outdated (git history keeps it) and fix every link to it. Plans and run records do not go in the repository.
 
 ## Records and hosts
 
 - Records are version 3, one per Pet ID, with `soul`, `memory` and `state`. Keep immutable identity, existing source history and cloud IDs. Old saved field names stay readable.
 - A story keeps the Pet ID resolved when it started.
-- Host display, readback, refresh and selection are separate facts; a selection or refresh request does not prove what is displayed. No Pet path depends on Computer Use.
+- Host display, readback, refresh and selection are separate results; a selection or refresh request does not prove what is displayed. No Pet path depends on Computer Use.
 - Before a desktop appearance update, check the host's local-to-cloud mapping when available. A mapped `custom:` entry and its `pet_` ID are the same Pet: update the actual cloud ID and refresh the cloud Pet resources while keeping the selection, then verify the stored artwork against the accepted image.
-- Dots uses the same cloud Pet, accepted atlas and record brief through the host's own tools. There is one `genpet` package and one marketplace entry.
+- Dots uses the same cloud Pet, accepted atlas through the host's own tools. There is one `genpet` package and one marketplace entry.
 
 ## Testing with a real Agent
 
-Content and image checks follow the unit contracts in [units/units.json](plugins/genpet/skills/genpet/units/units.json) and the Agent acceptance suite: the cases are in [tests/agent/CASES.zh-CN.md](tests/agent/CASES.zh-CN.md) and the procedure in [tests/agent/README.zh-CN.md](tests/agent/README.zh-CN.md). Test procedures and cases belong in `tests/agent/`, never in runtime files.
+Content and image checks follow the inputs and results in [units/units.json](plugins/genpet/skills/genpet/units/units.json) and the Agent acceptance suite: the cases are in [tests/agent/CASES.zh-CN.md](tests/agent/CASES.zh-CN.md) and the procedure in [tests/agent/README.zh-CN.md](tests/agent/README.zh-CN.md). Test procedures and cases belong in `tests/agent/`, never in runtime files.
 
-- A valid JSON result or a model's own pass claim is not semantic evidence. Keep the actual upstream results, look at the generated pixels and get an independent review. Keep out-of-bound candidates as negative examples.
+- A valid JSON result or a model saying it passed does not show the content is right. Keep the actual upstream results, look at the generated pixels and get an independent review. Keep out-of-bound candidates as negative examples.
 - Use an isolated `CODEX_HOME` and a dedicated test Pet. Tests and upgrades must not adopt, age, reset or regenerate anyone's real Pet. Isolated tests cannot prove live display.
 - Write test output under `output/`, which git ignores. Do not commit images, PDFs, logs or run output.
 

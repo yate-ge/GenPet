@@ -27,20 +27,20 @@ export function sourceFromSeed(seed: string): SourceType {
       : 'imagined';
 }
 
-export function storyOutputs(story: Story, previous?: Story, state?: State): string[] {
+/** What a story showed: a new look, the home, another scene, or a prop. */
+export function storyOutputs(story: Story, previous: Story | undefined, state: State): string[] {
   const result: string[] = [];
   const appearanceChanged =
     typeof story.appearanceChanged === 'boolean'
       ? story.appearanceChanged
       : previous
         ? story.appearanceId !== previous.appearanceId
-        : state?.pet?.soul.acquisition?.storyId === story.id;
+        : state.pet?.soul.acquisition?.storyId === story.id;
   if (story.appearanceId && appearanceChanged) result.push('appearance');
-  if (story.mediaIds.some(id => !state || state.art.some(art => art.id === id && art.kind !== 'artifact'))) {
-    if (story.home !== undefined && story.home !== previous?.home) result.push('home');
-    else result.push('item');
-  }
-  return result;
+  for (const art of state.art.filter(art => story.mediaIds.includes(art.id)))
+    if (art.kind === 'prop') result.push('item');
+    else if (art.kind === 'scene') result.push(art.home ? 'home' : 'scene');
+  return [...new Set(result)];
 }
 
 export function recentContent(state: State, count = 10) {
@@ -53,12 +53,7 @@ export function recentContent(state: State, count = 10) {
     text: story.text,
     reason: story.reason,
   }));
-  let textOnlyStreak = 0;
-  for (const item of [...items].reverse()) {
-    if (item.outputs.length) break;
-    textOnlyStreak++;
-  }
-  return { items, textOnlyStreak, visualRequired: textOnlyStreak >= 2, memory: state.pet?.memory ?? null };
+  return { items, memory: state.pet?.memory ?? null };
 }
 
 export async function chooseSource(store: Store, operationId: string, seed?: string) {

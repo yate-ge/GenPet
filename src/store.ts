@@ -566,6 +566,7 @@ export class Store {
           'pet',
           'stories',
           'art',
+          'items',
           'pending',
           'chats',
           'growthClock',

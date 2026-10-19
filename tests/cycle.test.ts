@@ -10,7 +10,7 @@ import { artRequest, acceptArt } from '../src/art.js';
 import { growth } from '../src/growth.js';
 import { dueStory } from '../src/schedule.js';
 import { recordHostResult } from '../src/hosts/result.js';
-import { journeyReady, initialPlan, image, hostDone } from './fixtures.js';
+import { journeyReady, initialPlan, image, hostDone, storyImage } from './fixtures.js';
 import type { StoryPlan } from '../src/model.js';
 
 const HOUR = 3600000,
@@ -57,6 +57,7 @@ test('a committed cycle preserves identity through host retry, saved-art recover
         }
         await hostDone(store, op);
       }
+      if (!plan.appearance) await storyImage(store, root);
       const completed = await finishStory(store, op);
       assert.equal((await finishStory(store, op)).id, completed.id);
       assert.equal((await beginStory(store, trigger)).status, 'completed');
@@ -154,7 +155,7 @@ test('a committed cycle preserves identity through host retry, saved-art recover
     assert.equal(final.pet!.state.home, home);
     assert.equal(final.pet!.revision, 8);
     assert.equal(final.stories.length, 8);
-    assert.equal(final.art.length, 6); // Recovery reuses adult artwork; special-update keeps it.
+    assert.equal(final.art.filter(art => art.kind !== 'scene').length, 6); // Recovery reuses adult artwork; special-update keeps it.
     assert.equal(
       final.stories.every(story => story.petId === identity.id),
       true,

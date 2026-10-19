@@ -6,7 +6,7 @@ import { desiredAppearance } from '../../appearance.js';
 import { codexHome } from '../../config.js';
 import type { State } from '../../model.js';
 import { pendingFor } from '../../pending.js';
-import { briefForPet } from '../../status.js';
+import { adoptionLine } from '../../status.js';
 import type { Store } from '../../store.js';
 import { validateArt } from '../art.js';
 import { verifyStoredArtwork } from '../artwork.js';
@@ -66,7 +66,7 @@ export async function exportNative(state: State, destination: string) {
     id: path.basename(destination),
     genpetId: state.pet.id,
     displayName: desktopLabel(state.pet.id),
-    description: briefForPet(state.pet),
+    description: adoptionLine(state.pet),
     spriteVersionNumber: 2,
     spritesheetPath,
   };

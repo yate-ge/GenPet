@@ -23,10 +23,10 @@
 2. **读资料。** 按 `units/context.md` 实际读取并运行 context，包括观察用户此刻在做什么。重试沿用已保存的步骤结果。
 3. **写故事。** 运行 `units/story.md`，recentContent 用来避开最近的重复。
 4. **状态与成长。** 运行 `units/evolution.md`；已有的 soul 原样读取。需要形象时运行 `units/appearance.md`，需要家的变化时运行 `units/home.md`，有物件时运行 `units/story-item.md`。每个结果用 record-step 保存并交给下游；memory 值得记才重写。
-5. **计划。** 把结果合成 StoryPlan（字段见 `host.md`「StoryPlan」），reason/contextRefs 写清采用的真实依据。`plan-story OPERATION_ID PLAN_FILE` 保存后保持不变。纯文字是否成立由实际的计划和素材确定；每次正常检查都有内容，不因“没有新事实”取消。
-6. **图。** `art-request` 返回请求 `.id`、`.savedArt` 和宿主格式 `.contract`。复用指定的 reuseArtId；新素材按 `art.md` 生成和审核。`accept-art REQUEST_ID ABSOLUTE_FILE KIND SOURCE [DESCRIPTION]` 接受（KIND 是 portrait、atlas、story 或 artifact；source 写实际的生成和来源记录）。
+5. **计划。** 把结果合成 StoryPlan（字段见 `host.md`「StoryPlan」），reason/contextRefs 写清采用的真实依据。`plan-story OPERATION_ID PLAN_FILE` 保存后保持不变。每个故事必须有一张图（新形象、场景、物件或家），没有图的计划不能完成。给用户、带回来或留在家里的东西写进计划的 `items`，之后移动或收起它也写在这里；每次正常检查都有内容，不因“没有新事实”取消。
+6. **图。** `art-request` 返回请求 `.id`、`.savedArt` 和宿主格式 `.contract`。复用指定的 reuseArtId；新素材按 `art.md` 生成和审核。`accept-art REQUEST_ID ABSOLUTE_FILE KIND SOURCE [DESCRIPTION]` 接受（KIND 是 portrait、atlas、scene、home 或 prop：场景图用 scene，家的画面用 home（它是 scene 的一种），道具叙事的物件图用 prop；source 写实际的生成和来源记录）。
 7. **更新宿主。** 形象变化时，按 `host.md` 更新同一个绑定的 cloud ID；上传、刷新和回读分别记录。未上传的云图保留 pending，不说“下次加载会自动生效”；已回读一致但刷新不可用，记录这个事实，实际显示仍为未知。无形象变化不需要上传。
-8. **完成。** `finish-story OPERATION_ID` 原子提交 memory、state、历史和完成 trigger。有形象变化时，由完成回读的图像协调者紧接着执行这一步和简介更新，不先回报主 Agent。取 `companion-brief`，按当前 revision 和真实 cloud ID 更新简介并回读（长度限制见 `host.md`「Dots」）。简介同步失败时保留证据，重试最新简介，不重新完成故事或改写经历。
+8. **完成。** `finish-story OPERATION_ID` 原子提交 memory、state、历史和完成 trigger。有形象变化时，由完成回读的图像协调者紧接着执行这一步，不先回报主 Agent。云端描述见 `host.md`「云端描述」，它只记领养那一句，故事不改它。
 9. **表达。** 取 `story-output STORY_ID`，运行 output，用 record-step 保存，把其中的 message 原样发给用户。孵化时处理一次命名邀请（见下面「命名」）。
 
 ## 定时检查
@@ -68,8 +68,8 @@
 2. 问题实际送出之后才 `name-asked PET_ID --pet PET_ID`；没送出就不记为已问。保存提问时的 Pet ID。
 3. 用户的回答由 /genpet 接住：`name-pet QUESTION_PET_ID USER_NAME --pet QUESTION_PET_ID`，用提问时的 ID。若那只已被替换，说明问题指向的是原来的 Pet，不把答复套给新的 Pet。
 4. 用户暂时不取名或没有回复，故事继续，之后不催问。之后明确说「改名叫 X」就直接保存；没给名字只问一句。有未完成的故事时，先完成或按原指示解决，不为命名再开故事。同名重试幂等。
-5. 保存名字后取 `companion-brief`，给同一个真实 cloud ID 同步最新简介并回读；不按名字查找或新建云 Pet。同步暂时失败时，保留已保存的名字和失败证据，下次同步最新简介。
-6. 旧记录原有的名字保留，不因升级重新邀请。宠物列表条目可继续用运行时的唯一标签 `genpet-xxxxxx`；名字用于故事、对话和简介，不用来定位云 Pet。
+5. 保存名字后取 `companion-brief`，给同一个真实 cloud ID 更新描述并回读（见 `host.md`「云端描述」）；不按名字查找或新建云 Pet。同步暂时失败时，保留已保存的名字和失败证据，下次再同步。
+6. 旧记录原有的名字保留，不因升级重新邀请。宠物列表条目可继续用运行时的唯一标签 `genpet-xxxxxx`；名字用于故事、对话和云端描述，不用来定位云 Pet。
 
 ## 宠物对话
 

@@ -101,7 +101,7 @@ export async function startServer(port = Number(process.env.GENPET_PORT || 47831
       if (req.method === 'GET' && url.pathname.startsWith('/art/')) {
         const state = await target(url).peek(),
           record = state.art.find(art => art.id === url.pathname.slice(5));
-        if (!record || record.kind === 'artifact') return json({ error: 'Image not found' }, 404);
+        if (!record) return json({ error: 'Image not found' }, 404);
         res.writeHead(200, {
           'Content-Type': record.file.endsWith('.webp') ? 'image/webp' : 'image/png',
           'Cache-Control': 'no-store',

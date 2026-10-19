@@ -8,13 +8,13 @@ import path from 'node:path';
 import { appearanceFor, desiredAppearance, requestId } from './appearance.js';
 import { readPrompt } from './config.js';
 import { growth, commitExperience, stageAdvance, ensureGrowthClock, pausedTime } from './growth.js';
+import { commitItems, planItems } from './items.js';
 import { findLegacyRecord } from './migration.js';
 import { createPet, fresh, identifier, stages, text, validateStage } from './model.js';
 import type { HostResult, Pending, Pet, State, Story, StoryPlan } from './model.js';
 import { namingDue } from './naming.js';
 import { timeSense } from './schedule.js';
 import { atomicJson, type Store } from './store.js';
-import { recentContent } from './variety.js';
 import { pendingFor } from './pending.js';
 import { hostFor } from './hosts/index.js';
 
@@ -136,6 +136,9 @@ function validatePlan(state: State, input: StoryPlan): StoryPlan {
     throw new Error('The special form is due to end in this story');
   if (plan.appearance?.reuseArtId) appearanceFor(state, plan.stage!, plan.appearance.reuseArtId);
 
+  if (input.items !== undefined)
+    plan.items = planItems(state, state.pending!.id, input.items, !!(plan.home ?? pet.state.home));
+
   if (input.mediaIds !== undefined) {
     if (!Array.isArray(input.mediaIds)) throw new Error('mediaIds must be an array');
     plan.mediaIds = input.mediaIds.map(id => identifier(id, 'mediaId'));
@@ -187,42 +190,21 @@ export async function finishStory(store: Store, id: string) {
     }
     const current = requestId(state);
     const storyMedia = state.art.filter(
-      art => art.requestId === current && (art.kind === 'story' || art.kind === 'artifact'),
+      art => art.requestId === current && (art.kind === 'scene' || art.kind === 'prop'),
     );
     const mediaIds = [...new Set([...(plan.mediaIds ?? []), ...storyMedia.map(art => art.id)])];
     for (const mediaId of mediaIds)
       await access(state.art.find(art => art.id === mediaId && art.petId === pet.id)!.file);
     const appearanceChanged = !!plan.appearance && appearance?.id !== pet.state.appearanceId;
     const hasVisibleMedia = mediaIds.some(mediaId =>
-      state.art.some(art => art.id === mediaId && art.kind !== 'artifact'),
+      state.art.some(art => art.id === mediaId && (art.kind === 'scene' || art.kind === 'prop')),
     );
     const item = pending.steps?.findLast(step => step.unit === 'story-item');
     const home = pending.steps?.findLast(step => step.unit === 'home');
     if ((item?.result.item || home?.result.visual) && !hasVisibleMedia)
       throw new Error('The final story item or home requests an image; accept its actual media before completing');
-    if (pending.mode === 'story' && !appearanceChanged && !hasVisibleMedia) {
-      if (!plan.contextRefs?.length) throw new Error('A text-only story needs a user-related context reference');
-      const sources = new Set<string>();
-      for (const owner of [...state.stories, pending])
-        for (const step of owner.steps ?? []) {
-          if (step.unit !== 'context') continue;
-          const facts = Array.isArray(step.result.facts) ? step.result.facts : [];
-          if (facts.length) for (const ref of step.inputRefs) sources.add(ref);
-          for (const fact of facts) {
-            if (fact && typeof fact === 'object' && typeof (fact as Record<string, unknown>).id === 'string')
-              sources.add((fact as { id: string }).id);
-          }
-        }
-      for (const round of pet.soul.acquisition?.journey?.rounds ?? [])
-        for (const ref of round.inputRefs) sources.add(ref);
-      for (const chat of state.chats ?? []) sources.add(chat.id);
-      // A Pet-world story ID alone is not a user fact. Only carry forward a grounded reference.
-      for (const story of state.stories) if (story.contextRefs?.some(ref => sources.has(ref))) sources.add(story.id);
-      if (plan.contextRefs.some(ref => !sources.has(ref)))
-        throw new Error('The context reference is not present in the saved inputs or shared history');
-      if (recentContent(state).visualRequired)
-        throw new Error('At most two text-only stories in a row; produce a visible result');
-    }
+    if (pending.mode === 'story' && !appearanceChanged && !hasVisibleMedia)
+      throw new Error('A story needs an image: a new appearance, a scene, an item or the home');
 
     const story: Story = {
       id,
@@ -298,6 +280,7 @@ export async function finishStory(store: Store, id: string) {
         story.at,
         pending.mode !== 'initialization' && previousStage === story.stage,
       );
+    if (plan.items?.length) commitItems(state, story, plan.items, storyMedia);
     state.stories.push(story);
     state.pending = null;
     return story;
